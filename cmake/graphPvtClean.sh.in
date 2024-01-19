@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+dotFile=@CMAKE_PROJECT_NAME@.dot
+# delete all lines with 'dotted' as they are Private
+sed -i '/dotted/d' ${dotFile}
+# determine number of nodes
+num_nodes=`tac ${dotFile} | grep -m1 label | cut -d[ -f1 | xargs | cut -de -f2`
+for (( i=0; i<=${num_nodes}; i++ )); do
+  # external libraries have "::" in their label
+  if grep node$i\" ${dotFile} | grep label | grep -q "::"; then
+    # if nothing depends on this external library, delete it
+    if ! grep -qe "-> \"node$i\"" ${dotFile}; then
+      sed -i "/node$i\"/d" ${dotFile}
+    else
+      # color red for remaining external::libraries
+      sed -i "s/node$i\" \[ label/node$i\" \[ color = red, label/" ${dotFile}
+    fi
+  fi
+done
+for (( i=1; i<=${num_nodes}; i++ )); do
+  # if the node is only in the dot file once, delete it
+  if [[ $(grep node$i\" ${dotFile} | wc -l) = 1 ]]; then
+    sed -i "/node$i\"/d" ${dotFile}
+  fi
+done
