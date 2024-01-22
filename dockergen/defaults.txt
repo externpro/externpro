@@ -1,0 +1,5 @@
+set(CRTOOL_REV "23.02")
+# https://www.ubuntuupdates.org/package/google_chrome/stable/main/base/google-chrome-stable (drop -1 at end)
+set(laterChrome_VER 116.0.5845.110)
+# https://ftp.mozilla.org/pub/firefox/releases/ (esr releases only)
+set(laterFirefox_VER 115.1.0)
