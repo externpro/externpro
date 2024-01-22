@@ -2,7 +2,7 @@
 cd "$( dirname "$0" )"
 for img in centos7-run rocky85-pro rocky85-bld rocky85-dev
 do
-  dfile=../.devcontainer/${img}.dockerfile
+  dfile=../${img}.dockerfile
   awk -v r="${img}" '{gsub(/%BP_REPO%/,r)} 1' bit.head.dockerfile > ${dfile}
   if [[ ${img} == *"-bld"* ]]; then
     cat bit.offline.dockerfile >> ${dfile}
