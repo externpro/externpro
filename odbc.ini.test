@@ -1,0 +1,68 @@
+[mock_midb_dsn]
+Description=mock midb database
+Trace=Off
+TraceFile=stderr
+Driver=MySQL ODBC 8.1 ANSI Driver
+SERVER=mysqlpro
+DATABASE=mock_midb
+PORT=3306
+USER=vantage
+PASSWORD=TestDB4me!
+
+[mock_users_dsn]
+Description=mock users database
+Trace=Off
+TraceFile=stderr
+Driver=MySQL ODBC 8.1 ANSI Driver
+SERVER=mysqlpro
+DATABASE=mock_users
+PORT=3306
+USER=vantage
+PASSWORD=TestDB4me!
+
+[mock_events_dsn]
+Description=mock events database
+Trace=Off
+TraceFile=stderr
+Driver=MySQL ODBC 8.1 ANSI Driver
+SERVER=mysqlpro
+DATABASE=mock_events
+PORT=3306
+USER=vantage
+PASSWORD=TestDB4me!
+
+[midb_dsn]
+Description=midb database
+Trace=Off
+TraceFile=stderr
+Driver=MySQL ODBC 8.1 ANSI Driver
+SERVER=mysqlpro
+DATABASE=midb
+PORT=3306
+USER=vantage
+PASSWORD=TestDB4me!
+SSLMODE=DISABLED
+
+[users_dsn]
+Description=users database
+Trace=Off
+TraceFile=stderr
+Driver=MySQL ODBC 8.1 ANSI Driver
+SERVER=mysqlpro
+DATABASE=users
+PORT=3306
+USER=vantage
+PASSWORD=TestDB4me!
+SSLMODE=DISABLED
+
+[eventsdb_dsn]
+Description=events database
+Trace=Off
+TraceFile=stderr
+Driver=MySQL ODBC 8.1 ANSI Driver
+SERVER=mysqlpro
+DATABASE=eventsdb
+PORT=3306
+USER=vantage
+PASSWORD=TestDB4me!
+SSLMODE=DISABLED

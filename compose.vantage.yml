@@ -1,0 +1,111 @@
+version: '3.8'
+x-all: &all-alias
+  environment:
+    - DISPLAY=${DISPLAY_ENV}
+    - XAUTHORITY=${XAUTH_ENV}
+  user: ${USER}
+  stdin_open: true
+  tty: true
+  working_dir: /bpvol/${COMPOSE_PROJECT_NAME}
+x-bld: &bld-alias
+  cap_add:
+    - SYS_PTRACE
+  volumes:
+    - .:/bpvol/${COMPOSE_PROJECT_NAME}
+    - ..:/bpvol/workspace
+    - /tmp/.X11-unix:/tmp/.X11-unix
+    - ~/.ssh:/home/${USER}/.ssh
+    - ~/.gitconfig:/home/${USER}/.gitconfig
+x-run: &run-alias
+  depends_on:
+    db:
+      condition: service_healthy
+  links:
+    - db
+  networks:
+    - bpnet
+  shm_size: 4gb
+  volumes:
+    - .:/bpvol/${COMPOSE_PROJECT_NAME}
+    - ..:/bpvol/workspace
+    - /tmp/.X11-unix:/tmp/.X11-unix
+x-all-build-args: &all-build-args-alias
+  BPROTAG: ${BPROTAG}
+  USERNAME: ${USER}
+  USERID: ${USERID}
+  GROUPID: ${GROUPID}
+  DOCKGID: ${DOCKGID}
+  TZ: ${TZ}
+x-bld-build-args: &bld-build-args-alias
+  WEBPRO: ${WEBPRO}
+  INTERNPRO: ${INTERNPRO}
+  PLUGINSDK: ${PLUGINSDK}
+  CRTOOL: ${CRTOOL}
+  LATER_CHROME: ${LATER_CHROME}
+  LATER_FIREFOX: ${LATER_FIREFOX}
+services:
+  bld:
+    <<: [*all-alias, *bld-alias]
+    build:
+      context: .devcontainer
+      dockerfile: rocky85-bld.dockerfile
+      network: host
+      args:
+        <<: [*all-build-args-alias, *bld-build-args-alias]
+        ADDSRC1: ${ADDSRC1}
+        ADDSRC2: ${ADDSRC2}
+    hostname: ${HNAME}
+    network_mode: host
+    profiles:
+      - pbld
+  run:
+    <<: [*all-alias, *run-alias]
+    build:
+      context: .devcontainer
+      dockerfile: centos7-run.dockerfile
+      network: host
+      args:
+        <<: *all-build-args-alias
+    container_name: vantagerun
+    hostname: vantage-run
+    ports:
+      - 8443:8443
+    profiles:
+      - prun
+  dev:
+    <<: [*all-alias, *run-alias, *bld-alias]
+    build:
+      context: .devcontainer
+      dockerfile: rocky85-dev.dockerfile
+      network: host
+      args:
+        <<: [*all-build-args-alias, *bld-build-args-alias]
+    container_name: vantagedev
+    hostname: vantage-dev
+    ports:
+      - 7443:8443
+    profiles:
+      - pdev
+  db:
+    image: ghcr.io/smanders/mysql-server:8.0.21
+    command:
+      - --innodb-buffer-pool-size=2G
+      - --innodb-flush-log-at-trx-commit=2
+      - --disable-log-bin
+      - --sql-mode=STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION
+    container_name: mysqlpro
+    environment:
+      - MYSQL_ROOT_PASSWORD=mysqlroot
+    networks:
+      - bpnet
+    profiles:
+      - pdev
+      - prun
+    restart: always
+    volumes:
+      - ./.devcontainer/dbinit:/docker-entrypoint-initdb.d
+networks:
+  bpnet:
+    driver: bridge
+    driver_opts:
+      com.docker.network.driver.mtu: "9000"
