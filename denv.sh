@@ -4,12 +4,10 @@ pushd .. > /dev/null
 source ./.devcontainer/funcs.sh
 BPROTAG="$(findVer 'set(buildpro_REV' */toplevel.cmake */*/toplevel.cmake CMakeLists.txt)"
 if [ -z ${BPROTAG} ]; then
-  pushd .devcontainer > /dev/null
-  BPROTAG=`git describe --tags | sed 's/^v//'`
+  BPROTAG=`git describe --tags`
   if [ -n "$(git status --porcelain --untracked=no)" ] || [[ ${BPROTAG} == *"-g"* ]]; then
     BPROTAG=latest
   fi
-  popd > /dev/null
 fi
 dkr="$(findVer 'FROM' .devcontainer/rocky85-bld.dockerfile .devcontainer/rocky85-pro.dockerfile)"
 dkr=$(eval echo ${dkr}) # ghcr.io/smanders/buildpro/rocky85-[bld|pro]:TAG, where TAG=${BPROTAG}
