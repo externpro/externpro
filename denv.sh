@@ -2,7 +2,7 @@
 cd "$( dirname "$0" )"
 pushd .. > /dev/null
 source ./.devcontainer/funcs.sh
-BPROTAG="$(findVer 'set(buildpro_REV' */toplevel.cmake */*/toplevel.cmake CMakeLists.txt .devcontainer/buildpro.cmake)"
+BPROTAG="$(findVer 'set(buildpro_REV' */toplevel.cmake */*/toplevel.cmake CMakeLists.txt)"
 if [ -z ${BPROTAG} ]; then
   pushd .devcontainer > /dev/null
   BPROTAG=`git describe --tags | sed 's/^v//'`
