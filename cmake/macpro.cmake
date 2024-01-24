@@ -22,13 +22,7 @@ macro(proInit) # NOTE: called by top-level CMakeLists.txt
   if(NOT EXISTS ${DWNLD_DIR})
     execute_process(COMMAND ${CMAKE_COMMAND} -E make_directory ${DWNLD_DIR})
   endif()
-  if(${CMAKE_PROJECT_NAME} STREQUAL externpro)
-    set(MODULES_DIR ${CMAKE_SOURCE_DIR}/modules)
-  elseif(DEFINED externpro_DIR)
-    set(MODULES_DIR ${externpro_DIR}/share/cmake)
-  else()
-    message(FATAL_ERROR "unable to set MODULES_DIR")
-  endif()
+  set(MODULES_DIR ${CMAKE_SOURCE_DIR}/.devcontainer/cmake)
   set_property(DIRECTORY PROPERTY "EP_BASE" ${CMAKE_BINARY_DIR}/xpbase) # ExternalProject
   set(NULL_DIR ${CMAKE_BINARY_DIR}/xpbase/tmp/nulldir)
   # the following *_folder for TARGET PROPERTY FOLDER (MSVC organization)
@@ -309,7 +303,7 @@ macro(proSetStageDir) # NOTE: called by cmake-generated xpbase/pro/build.cmake f
   if(DEFINED XP_INSTALL_INFO)
     set(XP_INSTALL_INFO "\".\\n ${XP_INSTALL_INFO}\\n\"")
   endif()
-  # copy modules to stage
+  # configure_file to STAGE_DIR, set CMAKE_DIR
   configure_file(${MODULES_DIR}/Findscript.cmake.in
     ${STAGE_DIR}/share/cmake/Find${CMAKE_PROJECT_NAME}.cmake
     @ONLY NEWLINE_STYLE LF
@@ -319,12 +313,8 @@ macro(proSetStageDir) # NOTE: called by cmake-generated xpbase/pro/build.cmake f
       ${STAGE_DIR}/share/cmake/xpopts.cmake
       @ONLY NEWLINE_STYLE LF
       )
-    execute_process(COMMAND ${CMAKE_COMMAND} -Dsrc:STRING=${MODULES_DIR}/*.cmake
-      -Ddst:PATH=${STAGE_DIR}/share/cmake -P ${MODULES_DIR}/cmscopyfiles.cmake
-      )
-    execute_process(COMMAND ${CMAKE_COMMAND} -Dsrc:STRING=${MODULES_DIR}/*.in
-      -Ddst:PATH=${STAGE_DIR}/share/cmake -P ${MODULES_DIR}/cmscopyfiles.cmake
-      )
-    set(MODULES_DIR ${STAGE_DIR}/share/cmake) # use the out-of-source modules now
+    set(CMAKE_DIR ${STAGE_DIR}/share/cmake)
+  elseif(DEFINED externpro_DIR)
+    set(CMAKE_DIR ${externpro_DIR}/share/cmake)
   endif()
 endmacro()
