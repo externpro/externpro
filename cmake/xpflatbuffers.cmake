@@ -24,7 +24,9 @@ function(xpFlatBuffersBuild)
       set(scope PRIVATE)
     endif()
     add_dependencies(${P_TARGET} ${P_CUSTOM_TARGET_NAME})
+    # cmakeify off
     target_include_directories(${P_TARGET} ${scope} ${P_GENERATED_INCLUDES_DIR})
+    # cmakeify on
   endif()
 endfunction()
 

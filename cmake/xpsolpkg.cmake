@@ -5,11 +5,13 @@
 #  pkg = package
 # cmake functions to aid in building Solaris 10 pkg installers
 # (which are not supported natively by CPack)
+# cmakeify off
 
 if(NOT ${CMAKE_SYSTEM_NAME} STREQUAL SunOS)
   return() # xpsolpkg.cmake is Solaris (aka SunOS) only.
 endif()
 
+# cmakeify on
 get_filename_component(cmakePath ${CMAKE_COMMAND} DIRECTORY)
 find_program(XPKG_CPACK cpack ${cmakePath})
 find_program(XPKG_PKGPROTO pkgproto)
@@ -117,7 +119,9 @@ macro(xpkgCommands)
     )
   list(APPEND pkgmkCmds pkgmk${COMP}Cmd)
 endmacro()
+# cmakeify off
 
+# cmakeify on
 if(CPACK_OUTPUT_FILE_PREFIX)
   set(outDir ${CPACK_OUTPUT_FILE_PREFIX})
 else()

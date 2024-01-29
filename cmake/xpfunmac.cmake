@@ -6,12 +6,14 @@
 #  mac = macros
 # functions and macros should begin with xp or ip prefix
 # functions create a local scope for variables, macros use the global scope
+# cmakeify off
 
 set(xpThisDir ${CMAKE_CURRENT_LIST_DIR})
 include(CheckCCompilerFlag)
 include(CheckCXXCompilerFlag)
 include(CMakeDependentOption)
 
+# cmakeify on
 macro(xpProOption prj)
   string(TOUPPER "${prj}" PRJ)
   cmake_dependent_option(XP_PRO_${PRJ} "include ${prj}" OFF "NOT XP_DEFAULT" OFF)
@@ -569,11 +571,13 @@ function(ipMarkdownLink var _ret)
   list(GET var 2 title)
   set(${_ret} "[${text}](${url} '${title}')" PARENT_SCOPE)
 endfunction()
+# cmakeify off
 
 set(g_README ${CMAKE_BINARY_DIR}/xpbase/pro/README.md)
 set(g_READMEsub ${CMAKE_BINARY_DIR}/xpbase/pro/README.sub.md)
 set(g_READMEdep ${CMAKE_BINARY_DIR}/xpbase/pro/deps.dot)
 
+# cmakeify on
 function(xpMarkdownReadmeInit)
   file(WRITE ${g_README}
     "# projects\n\n"
@@ -1413,7 +1417,9 @@ function(xpTargetExtern tgt)
     if(XP_CMAKE_VERBOSE)
       message(STATUS "${tgt} incs: SYSTEM ${_pubinc} ${_pvtinc}")
     endif()
+    # cmakeify off
     target_include_directories(${tgt} SYSTEM ${_pubinc} ${_pvtinc})
+    # cmakeify on
   endif()
   if(_pubdef OR _pvtdef)
     if(XP_CMAKE_VERBOSE)
