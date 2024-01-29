@@ -1205,7 +1205,8 @@ macro(xpSourceListAppend)
           endif()
         endforeach()
         foreach(boolOpt EXECUTABLES STATIC_LIBS SHARED_LIBS MODULE_LIBS INTERFACE_LIBS OBJECT_LIBS UNKNOWN_LIBS
-                        EXTERNAL_LIBS CUSTOM_TARGETS GENERATE_PER_TARGET GENERATE_DEPENDERS)
+                        EXTERNAL_LIBS CUSTOM_TARGETS GENERATE_PER_TARGET GENERATE_DEPENDERS
+            )
           if(DEFINED GRAPHVIZ_${boolOpt})
             set(opts "${opts}set(GRAPHVIZ_${boolOpt} ${GRAPHVIZ_${boolOpt}})\n")
           endif()
@@ -1773,7 +1774,8 @@ function(xpPostBuildCopyDllLib theTarget toPath)
   endif()
   if(NOT EXISTS ${dest})
     add_custom_command(TARGET ${theTarget} POST_BUILD
-      COMMAND ${CMAKE_COMMAND} -E make_directory ${dest})
+      COMMAND ${CMAKE_COMMAND} -E make_directory ${dest}
+      )
   endif()
   add_custom_command(TARGET ${theTarget} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
@@ -1989,7 +1991,8 @@ function(xpAddCoverage)
     xpGetPkgVar(Node EXE)
     set(JS_SERVER_COVERAGE_FLAGS ${NODE_EXE} node_modules/nyc/bin/nyc.js --include @SRC_DIR@
       --report-dir ${CMAKE_BINARY_DIR}/coveragejs/@BUILD_TARGET@
-      --temp-dir ${CMAKE_BINARY_DIR}/coveragejs/@BUILD_TARGET@/.nyc_output)
+      --temp-dir ${CMAKE_BINARY_DIR}/coveragejs/@BUILD_TARGET@/.nyc_output
+      )
     set(JS_SERVER_COVERAGE_FLAGS ${JS_SERVER_COVERAGE_FLAGS} PARENT_SCOPE)
     set(JS_CLIENT_COVERAGE_FLAGS --code-coverage)
     set(JS_CLIENT_COVERAGE_FLAGS ${JS_CLIENT_COVERAGE_FLAGS} PARENT_SCOPE)
@@ -2142,7 +2145,8 @@ function(xpToggleDebugInfo)
     set(releaseLinker "/INCREMENTAL:NO")
     set(reldebLinker "/debug /INCREMENTAL")
   elseif(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX OR
-         ${CMAKE_C_COMPILER_ID} MATCHES "Clang" OR ${CMAKE_CXX_COMPILER_ID} MATCHES "Clang")
+         ${CMAKE_C_COMPILER_ID} MATCHES "Clang" OR ${CMAKE_CXX_COMPILER_ID} MATCHES "Clang"
+      )
     set(releaseCompiler "-O3")
     set(reldebCompiler "-O2 -g")
   else()

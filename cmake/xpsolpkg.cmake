@@ -156,5 +156,5 @@ add_custom_command(OUTPUT ${outDir}/${CPACK_PACKAGE_FILE_NAME}.pkg
     ${outDir}/${CPACK_PACKAGE_FILE_NAME}.pkg # device onto which translated pkg written
     ${pkgList} # one or more package abbreviations
     DEPENDS ${pkgmkCmds}
-    )
+  )
 add_custom_target(pkg DEPENDS ${outDir}/${CPACK_PACKAGE_FILE_NAME}.pkg)
