@@ -1052,7 +1052,6 @@ macro(xpSourceListAppend)
     ${_dir}/.crtoolrc
     ${_dir}/.eslintrc.json
     ${_dir}/.prettierrc
-    ${_dir}/docker-compose.*
     ${_dir}/package.json
     ${_dir}/README.md
     ${_dir}/tsconfig.json
@@ -1060,6 +1059,17 @@ macro(xpSourceListAppend)
     )
   if(miscFiles)
     list(APPEND masterSrcList ${miscFiles})
+    file(GLOB composeFiles ${_dir}/docker-compose.*)
+    if(composeFiles)
+      foreach(f ${composeFiles})
+        if(NOT EXISTS ${f}) # remove what dne
+          list(REMOVE_ITEM composeFiles ${f})
+        endif()
+      endforeach()
+      if(composeFiles)
+        list(APPEND masterSrcList ${composeFiles})
+      endif()
+    endif()
     file(RELATIVE_PATH relPath ${CMAKE_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
     string(REPLACE "/" "" custTgt .CMake${relPath})
     if(NOT TARGET ${custTgt})
@@ -1078,7 +1088,7 @@ macro(xpSourceListAppend)
         source_group(".github" FILES ${githubFiles})
         list(APPEND masterSrcList ${githubFiles})
       endif()
-      add_custom_target(${custTgt} SOURCES ${miscFiles} ${crFiles} ${dcFiles} ${githubFiles})
+      add_custom_target(${custTgt} SOURCES ${miscFiles} ${composeFiles} ${crFiles} ${dcFiles} ${githubFiles})
       set_property(TARGET ${custTgt} PROPERTY FOLDER ${folder})
     endif()
   endif()
