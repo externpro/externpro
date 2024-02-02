@@ -1,7 +1,7 @@
 ARG BPROTAG
-FROM ghcr.io/smanders/buildpro/centos7-run:${BPROTAG}
+FROM ghcr.io/externpro/buildpro/centos7-run:${BPROTAG}
 LABEL maintainer="smanders"
-LABEL org.opencontainers.image.source https://github.com/smanders/buildpro
+LABEL org.opencontainers.image.source https://github.com/externpro/buildpro
 SHELL ["/bin/bash", "-c"]
 USER 0
 # timezone

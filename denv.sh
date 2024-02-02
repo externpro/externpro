@@ -10,7 +10,7 @@ if [ -z ${BPROTAG} ]; then
   fi
 fi
 dkr="$(findVer 'FROM' .devcontainer/rocky85-bld.dockerfile .devcontainer/rocky85-pro.dockerfile)"
-dkr=$(eval echo ${dkr}) # ghcr.io/smanders/buildpro/rocky85-[bld|pro]:TAG, where TAG=${BPROTAG}
+dkr=$(eval echo ${dkr}) # ghcr.io/externpro/buildpro/rocky85-[bld|pro]:TAG, where TAG=${BPROTAG}
 hst=$(echo "${dkr}" | cut -d/ -f1) # ghcr.io
 rel=$(echo "${dkr}" | cut -d- -f2) # bld:TAG
 rel=${rel//:} # parameter expansion substitution
