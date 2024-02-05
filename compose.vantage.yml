@@ -87,7 +87,7 @@ services:
     profiles:
       - pdev
   db:
-    image: ghcr.io/smanders/mysql-server:8.0.21
+    image: ghcr.io/externpro/mysql-server:8.0.21
     command:
       - --innodb-buffer-pool-size=2G
       - --innodb-flush-log-at-trx-commit=2
