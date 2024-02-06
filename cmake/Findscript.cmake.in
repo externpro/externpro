@@ -9,9 +9,9 @@ function(getCompilerPrefix _ret)
   if(MSVC)
     set(prefix vc${MSVC_TOOLSET_VERSION})
   elseif(CMAKE_COMPILER_IS_GNUCXX)
-    exec_program(${CMAKE_CXX_COMPILER}
-      ARGS ${CMAKE_CXX_COMPILER_ARG1} -dumpfullversion -dumpversion
+    execute_process(COMMAND ${CMAKE_CXX_COMPILER} ${CMAKE_CXX_COMPILER_ARG1} -dumpfullversion -dumpversion
       OUTPUT_VARIABLE GCC_VERSION
+      OUTPUT_STRIP_TRAILING_WHITESPACE
       )
     if(X_GCC_TWO_VER)
       set(digits "\\1\\2")
@@ -24,9 +24,9 @@ function(getCompilerPrefix _ret)
       )
   elseif(${CMAKE_CXX_COMPILER_ID} MATCHES "Clang") # LLVM/Apple Clang (clang.llvm.org)
     if(${CMAKE_SYSTEM_NAME} STREQUAL Darwin)
-      exec_program(${CMAKE_CXX_COMPILER}
-        ARGS ${CMAKE_CXX_COMPILER_ARG1} -dumpversion
+      execute_process(COMMAND ${CMAKE_CXX_COMPILER} ${CMAKE_CXX_COMPILER_ARG1} -dumpversion
         OUTPUT_VARIABLE CLANG_VERSION
+        OUTPUT_STRIP_TRAILING_WHITESPACE
         )
       string(REGEX REPLACE "([0-9]+)\\.([0-9]+)(\\.[0-9]+)?"
         "clang-darwin\\1\\2" # match boost naming
