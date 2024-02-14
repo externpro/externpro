@@ -1,0 +1,214 @@
+{
+  "version": 8,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 28
+  },
+  "configurePresets": [
+    {
+      "name": "windows",
+      "hidden": true,
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "linux",
+      "hidden": true,
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
+      "name": "config-base",
+      "hidden": true,
+      "binaryDir": "${sourceDir}/_bld-${presetName}",
+      "cacheVariables": {
+        "CMAKE_INSTALL_INCLUDEDIR": "include",
+        "CMAKE_INSTALL_LIBDIR": "lib",
+        "XP_INSTALL_CMAKEDIR": "share/cmake"
+      }
+    },
+    {
+      "name": "msvc",
+      "displayName": "config MSVC 2019",
+      "inherits": ["config-base", "windows"],
+      "generator": "Visual Studio 16 2019",
+      "architecture": "x64"
+    },
+    {
+      "name": "debug",
+      "displayName": "config Linux Debug",
+      "inherits": ["config-base", "linux"],
+      "generator": "Unix Makefiles",
+      "description": "Sets debug build type",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    },
+    {
+      "name": "release",
+      "displayName": "config Linux Release",
+      "inherits": ["config-base", "linux"],
+      "generator": "Unix Makefiles",
+      "description": "Sets release build type",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "windows",
+      "hidden": true,
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "linux",
+      "hidden": true,
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
+      "name": "build-base",
+      "hidden": true,
+      "jobs": 8
+    },
+    {
+      "name": "msvc-debug",
+      "displayName": "build MSVC Debug",
+      "inherits": ["build-base", "windows"],
+      "configurePreset": "msvc",
+      "configuration": "Debug"
+    },
+    {
+      "name": "msvc-release",
+      "displayName": "build MSVC Release",
+      "inherits": ["build-base", "windows"],
+      "configurePreset": "msvc",
+      "configuration": "Release"
+    },
+    {
+      "name": "debug",
+      "displayName": "build Linux Debug",
+      "inherits": ["build-base", "linux"],
+      "configurePreset": "debug"
+    },
+    {
+      "name": "release",
+      "displayName": "build Linux Release",
+      "inherits": ["build-base", "linux"],
+      "configurePreset": "release"
+    }
+  ],
+  "packagePresets": [
+    {
+      "name": "windows",
+      "hidden": true,
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "linux",
+      "hidden": true,
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
+      "name": "msvc",
+      "displayName": "package MSVC",
+      "inherits": "windows",
+      "configurePreset": "msvc",
+      "configurations": ["Debug", "Release"]
+    },
+    {
+      "name": "debug",
+      "displayName": "package Linux Debug",
+      "inherits": "linux",
+      "configurePreset": "debug"
+    },
+    {
+      "name": "release",
+      "displayName": "package Linux Release",
+      "inherits": "linux",
+      "configurePreset": "release"
+    }
+  ],
+  "workflowPresets": [
+    {
+      "name": "msvc",
+      "displayName": "workflow MSVC",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "msvc"
+        },
+        {
+          "type": "build",
+          "name": "msvc-debug"
+        },
+        {
+          "type": "build",
+          "name": "msvc-release"
+        },
+        {
+          "type": "package",
+          "name": "msvc"
+        }
+      ]
+    },
+    {
+      "name": "debug",
+      "displayName": "workflow Linux Debug",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "debug"
+        },
+        {
+          "type": "build",
+          "name": "debug"
+        },
+        {
+          "type": "package",
+          "name": "debug"
+        }
+      ]
+    },
+    {
+      "name": "release",
+      "displayName": "workflow Linux Release",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "release"
+        },
+        {
+          "type": "build",
+          "name": "release"
+        },
+        {
+          "type": "package",
+          "name": "release"
+        }
+      ]
+    }
+  ]
+}
