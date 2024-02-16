@@ -41,24 +41,10 @@
       "architecture": "x64"
     },
     {
-      "name": "debug",
-      "displayName": "config Linux Debug",
+      "name": "ninja",
+      "displayName": "config Ninja Linux",
       "inherits": ["config-base", "linux"],
-      "generator": "Unix Makefiles",
-      "description": "Sets debug build type",
-      "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Debug"
-      }
-    },
-    {
-      "name": "release",
-      "displayName": "config Linux Release",
-      "inherits": ["config-base", "linux"],
-      "generator": "Unix Makefiles",
-      "description": "Sets release build type",
-      "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Release"
-      }
+      "generator": "Ninja Multi-Config"
     }
   ],
   "buildPresets": [
@@ -100,16 +86,18 @@
       "configuration": "Release"
     },
     {
-      "name": "debug",
-      "displayName": "build Linux Debug",
+      "name": "ninja-debug",
+      "displayName": "build Ninja Debug Linux",
       "inherits": ["build-base", "linux"],
-      "configurePreset": "debug"
+      "configurePreset": "ninja",
+      "configuration": "Debug"
     },
     {
-      "name": "release",
-      "displayName": "build Linux Release",
+      "name": "ninja-release",
+      "displayName": "build Ninja Release Linux",
       "inherits": ["build-base", "linux"],
-      "configurePreset": "release"
+      "configurePreset": "ninja",
+      "configuration": "Release"
     }
   ],
   "packagePresets": [
@@ -139,16 +127,11 @@
       "configurations": ["Debug", "Release"]
     },
     {
-      "name": "debug",
-      "displayName": "package Linux Debug",
+      "name": "ninja",
+      "displayName": "package Ninja Linux",
       "inherits": "linux",
-      "configurePreset": "debug"
-    },
-    {
-      "name": "release",
-      "displayName": "package Linux Release",
-      "inherits": "linux",
-      "configurePreset": "release"
+      "configurePreset": "ninja",
+      "configurations": ["Debug", "Release"]
     }
   ],
   "workflowPresets": [
@@ -175,38 +158,24 @@
       ]
     },
     {
-      "name": "debug",
-      "displayName": "workflow Linux Debug",
+      "name": "ninja",
+      "displayName": "workflow Ninja Linux",
       "steps": [
         {
           "type": "configure",
-          "name": "debug"
+          "name": "ninja"
         },
         {
           "type": "build",
-          "name": "debug"
-        },
-        {
-          "type": "package",
-          "name": "debug"
-        }
-      ]
-    },
-    {
-      "name": "release",
-      "displayName": "workflow Linux Release",
-      "steps": [
-        {
-          "type": "configure",
-          "name": "release"
+          "name": "ninja-debug"
         },
         {
           "type": "build",
-          "name": "release"
+          "name": "ninja-release"
         },
         {
           "type": "package",
-          "name": "release"
+          "name": "ninja"
         }
       ]
     }
