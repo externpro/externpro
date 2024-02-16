@@ -1795,6 +1795,26 @@ function(xpPostBuildCopyDllLib theTarget toPath)
     )
 endfunction()
 
+macro(xpPackageDevel)
+  set(CMAKE_INSTALL_DEFAULT_COMPONENT_NAME devel)
+  set(CPACK_ARCHIVE_COMPONENT_INSTALL ON)
+  set(CPACK_COMPONENTS_ALL devel)
+  set(gitDescribe ${CMAKE_PROJECT_VERSION})
+  if(EXISTS ${CMAKE_SOURCE_DIR}/.git)
+    execute_process(COMMAND git describe --tags
+      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+      OUTPUT_VARIABLE gitDescribe
+      OUTPUT_STRIP_TRAILING_WHITESPACE
+      ERROR_VARIABLE gitErr
+      )
+  endif()
+  set(CPACK_PACKAGE_VERSION ${gitDescribe})
+  set(CPACK_COMPONENT_INCLUDE_TOPLEVEL_DIRECTORY ON)
+  unset(CPACK_PACKAGING_INSTALL_PREFIX)
+  set(CPACK_GENERATOR TXZ)
+  include(CPack)
+endmacro()
+
 function(xpProjectInstall)
   set(options DISABLE_MD5_WARNING)
   set(reqArgs TARGET COMPONENT)
