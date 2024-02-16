@@ -23,10 +23,6 @@ if(CMAKE_CONFIGURATION_TYPES)
   set(CMAKE_CONFIGURATION_TYPES "${CMAKE_CONFIGURATION_TYPES}" CACHE STRING
     "Set the configurations to what we need" FORCE
     )
-  # NOTE: It appears that there is a cmake bug - the configuration settings
-  # only take effect by running cmake twice ('cmake ..' then 'cmake .')
-  # http://www.cmake.org/pipermail/cmake/2008-April/020993.html
-  # http://public.kitware.com/Bug/view.php?id=5811
 endif(CMAKE_CONFIGURATION_TYPES)
 xpStringTrim(CMAKE_CXX_FLAGS)
 xpStringTrim(CMAKE_C_FLAGS)
