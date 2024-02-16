@@ -6,7 +6,7 @@
   },
   "configurePresets": [
     {
-      "name": "windows",
+      "name": "isWindows",
       "hidden": true,
       "condition": {
         "type": "equals",
@@ -15,7 +15,7 @@
       }
     },
     {
-      "name": "linux",
+      "name": "isLinux",
       "hidden": true,
       "condition": {
         "type": "equals",
@@ -36,20 +36,20 @@
     {
       "name": "msvc",
       "displayName": "config MSVC-2019 Windows",
-      "inherits": ["config-base", "windows"],
+      "inherits": ["config-base", "isWindows"],
       "generator": "Visual Studio 16 2019",
       "architecture": "x64"
     },
     {
       "name": "ninja",
       "displayName": "config Ninja Linux",
-      "inherits": ["config-base", "linux"],
+      "inherits": ["config-base", "isLinux"],
       "generator": "Ninja Multi-Config"
     }
   ],
   "buildPresets": [
     {
-      "name": "windows",
+      "name": "isWindows",
       "hidden": true,
       "condition": {
         "type": "equals",
@@ -58,7 +58,7 @@
       }
     },
     {
-      "name": "linux",
+      "name": "isLinux",
       "hidden": true,
       "condition": {
         "type": "equals",
@@ -74,35 +74,35 @@
     {
       "name": "msvc-debug",
       "displayName": "build MSVC Debug Windows",
-      "inherits": ["build-base", "windows"],
+      "inherits": ["build-base", "isWindows"],
       "configurePreset": "msvc",
       "configuration": "Debug"
     },
     {
       "name": "msvc-release",
       "displayName": "build MSVC Release Windows",
-      "inherits": ["build-base", "windows"],
+      "inherits": ["build-base", "isWindows"],
       "configurePreset": "msvc",
       "configuration": "Release"
     },
     {
       "name": "ninja-debug",
       "displayName": "build Ninja Debug Linux",
-      "inherits": ["build-base", "linux"],
+      "inherits": ["build-base", "isLinux"],
       "configurePreset": "ninja",
       "configuration": "Debug"
     },
     {
       "name": "ninja-release",
       "displayName": "build Ninja Release Linux",
-      "inherits": ["build-base", "linux"],
+      "inherits": ["build-base", "isLinux"],
       "configurePreset": "ninja",
       "configuration": "Release"
     }
   ],
   "packagePresets": [
     {
-      "name": "windows",
+      "name": "isWindows",
       "hidden": true,
       "condition": {
         "type": "equals",
@@ -111,7 +111,7 @@
       }
     },
     {
-      "name": "linux",
+      "name": "isLinux",
       "hidden": true,
       "condition": {
         "type": "equals",
@@ -122,14 +122,14 @@
     {
       "name": "msvc",
       "displayName": "package MSVC Windows",
-      "inherits": "windows",
+      "inherits": "isWindows",
       "configurePreset": "msvc",
       "configurations": ["Debug", "Release"]
     },
     {
       "name": "ninja",
       "displayName": "package Ninja Linux",
-      "inherits": "linux",
+      "inherits": "isLinux",
       "configurePreset": "ninja",
       "configurations": ["Debug", "Release"]
     }
