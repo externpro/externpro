@@ -35,7 +35,7 @@
     },
     {
       "name": "msvc",
-      "displayName": "config MSVC 2019",
+      "displayName": "config MSVC-2019 Windows",
       "inherits": ["config-base", "windows"],
       "generator": "Visual Studio 16 2019",
       "architecture": "x64"
@@ -87,14 +87,14 @@
     },
     {
       "name": "msvc-debug",
-      "displayName": "build MSVC Debug",
+      "displayName": "build MSVC Debug Windows",
       "inherits": ["build-base", "windows"],
       "configurePreset": "msvc",
       "configuration": "Debug"
     },
     {
       "name": "msvc-release",
-      "displayName": "build MSVC Release",
+      "displayName": "build MSVC Release Windows",
       "inherits": ["build-base", "windows"],
       "configurePreset": "msvc",
       "configuration": "Release"
@@ -133,7 +133,7 @@
     },
     {
       "name": "msvc",
-      "displayName": "package MSVC",
+      "displayName": "package MSVC Windows",
       "inherits": "windows",
       "configurePreset": "msvc",
       "configurations": ["Debug", "Release"]
@@ -154,7 +154,7 @@
   "workflowPresets": [
     {
       "name": "msvc",
-      "displayName": "workflow MSVC",
+      "displayName": "workflow MSVC Windows",
       "steps": [
         {
           "type": "configure",
