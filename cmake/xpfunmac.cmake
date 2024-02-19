@@ -1052,6 +1052,7 @@ macro(xpSourceListAppend)
     ${_dir}/.crtoolrc
     ${_dir}/.eslintrc.json
     ${_dir}/.prettierrc
+    ${_dir}/CMakePresets*.json
     ${_dir}/package.json
     ${_dir}/README.md
     ${_dir}/tsconfig.json
