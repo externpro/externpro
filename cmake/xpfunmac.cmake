@@ -1797,6 +1797,9 @@ function(xpPostBuildCopyDllLib theTarget toPath)
 endfunction()
 
 macro(xpPackageDevel)
+  set(oneValueArgs TARGETS_FILE)
+  set(multiValueArgs LIBRARIES)
+  cmake_parse_arguments(P "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
   set(CMAKE_INSTALL_DEFAULT_COMPONENT_NAME devel)
   set(CPACK_ARCHIVE_COMPONENT_INSTALL ON)
   set(CPACK_COMPONENTS_ALL devel)
@@ -1814,6 +1817,21 @@ macro(xpPackageDevel)
   unset(CPACK_PACKAGING_INSTALL_PREFIX)
   set(CPACK_GENERATOR TXZ)
   include(CPack)
+  string(TOUPPER ${CMAKE_PROJECT_NAME} PRJ)
+  string(TOLOWER ${CMAKE_PROJECT_NAME} NAME)
+  set(VER ${gitDescribe})
+  set(TARGETS_FILE ${P_TARGETS_FILE}.cmake)
+  if(DEFINED P_LIBRARIES)
+    list(JOIN P_LIBRARIES " " libs) # list to string with spaces
+    string(JOIN "\n" USE_VARS
+      "set(${PRJ}_LIBRARIES ${libs})"
+      "list(APPEND reqVars ${PRJ}_LIBRARIES)"
+      ""
+      )
+  endif()
+  set(xpuseFile ${CMAKE_CURRENT_BINARY_DIR}/xpuse-${NAME}-config.cmake)
+  configure_file(${xpThisDir}/usexp.cmake.in ${xpuseFile} @ONLY NEWLINE_STYLE LF)
+  install(FILES ${xpuseFile} DESTINATION ${XP_INSTALL_CMAKEDIR})
 endmacro()
 
 function(xpProjectInstall)
