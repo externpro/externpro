@@ -1,0 +1,78 @@
+{
+  "version": 8,
+  "include": ["../../../CMakePresetsBase.json"],
+  "configurePresets": [
+    {
+      "name": "isWindows",
+      "hidden": true,
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "Windows",
+      "displayName": "config Windows VS2019",
+      "inherits": ["config-base", "isWindows"],
+      "generator": "Visual Studio 16 2019",
+      "architecture": "x64"
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "isWindows",
+      "hidden": true,
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "WindowsRelease",
+      "displayName": "build Windows Release",
+      "inherits": ["isWindows"],
+      "configurePreset": "Windows",
+      "configuration": "Release"
+    }
+  ],
+  "packagePresets": [
+    {
+      "name": "isWindows",
+      "hidden": true,
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "Windows",
+      "displayName": "package Windows",
+      "inherits": ["isWindows"],
+      "configurePreset": "Windows",
+      "configurations": ["Release"]
+    }
+  ],
+  "workflowPresets": [
+    {
+      "name": "Windows",
+      "displayName": "workflow Windows",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "Windows"
+        },
+        {
+          "type": "build",
+          "name": "WindowsRelease"
+        },
+        {
+          "type": "package",
+          "name": "Windows"
+        }
+      ]
+    }
+  ]
+}
