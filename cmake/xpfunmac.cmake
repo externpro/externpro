@@ -1797,8 +1797,8 @@ function(xpPostBuildCopyDllLib theTarget toPath)
 endfunction()
 
 macro(xpPackageDevel)
-  set(oneValueArgs TARGETS_FILE)
-  set(multiValueArgs LIBRARIES)
+  set(oneValueArgs EXE EXE_PATH TARGETS_FILE)
+  set(multiValueArgs DEPS LIBRARIES)
   cmake_parse_arguments(P "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
   set(CMAKE_INSTALL_DEFAULT_COMPONENT_NAME devel)
   set(CPACK_ARCHIVE_COMPONENT_INSTALL ON)
@@ -1820,14 +1820,36 @@ macro(xpPackageDevel)
   string(TOUPPER ${CMAKE_PROJECT_NAME} PRJ)
   string(TOLOWER ${CMAKE_PROJECT_NAME} NAME)
   set(VER ${gitDescribe})
+  if(DEFINED P_DEPS)
+    list(JOIN P_DEPS " " deps) # list to string with spaces
+    set(FIND_DEPS "xpFindPkg(PKGS ${deps}) # dependencies\n")
+  endif()
   if(DEFINED P_TARGETS_FILE)
     set(TARGETS_FILE "include(\${CMAKE_CURRENT_LIST_DIR}/${P_TARGETS_FILE}.cmake)\n")
   endif()
   if(DEFINED P_LIBRARIES)
     list(JOIN P_LIBRARIES " " libs) # list to string with spaces
-    string(JOIN "\n" USE_VARS
+    string(JOIN "\n" LIBS
       "set(${PRJ}_LIBRARIES ${libs})"
       "list(APPEND reqVars ${PRJ}_LIBRARIES)"
+      ""
+      )
+  endif()
+  if(DEFINED P_EXE)
+    if(DEFINED P_EXE_PATH)
+      message(FATAL_ERROR "xpPackageDevel: can only define EXE or EXE_PATH, not both")
+    endif()
+    string(JOIN "\n" EXE
+      "set(${PRJ}_EXE ${P_EXE})"
+      "list(APPEND reqVars ${PRJ}_EXE)"
+      ""
+      )
+  elseif(DEFINED P_EXE_PATH)
+    string(JOIN "\n" EXE
+      "get_filename_component(PKG_ROOTDIR \${CMAKE_CURRENT_LIST_DIR}/../.. ABSOLUTE)"
+      "get_filename_component(PKG_ROOTDIR \${PKG_ROOTDIR} ABSOLUTE) # remove relative parts"
+      "set(${PRJ}_EXE \${PKG_ROOTDIR}/${P_EXE_PATH}${CMAKE_EXECUTABLE_SUFFIX})"
+      "list(APPEND reqVars ${PRJ}_EXE)"
       ""
       )
   endif()
