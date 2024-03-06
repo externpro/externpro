@@ -1310,7 +1310,9 @@ function(xpCheckInstall cmakeProjectName)
 endfunction()
 
 macro(ipFindPkg)
-  include(CPack) # CPACK_SYSTEM_NAME
+  if(NOT CPack_CMake_INCLUDED EQUAL 1)
+    include(CPack) # CPACK_SYSTEM_NAME
+  endif()
   set(options XP_MODULE)
   set(oneValueArgs PKG DIST_DIR REPO TAG MD5_${CPACK_SYSTEM_NAME} URL_${CPACK_SYSTEM_NAME})
   cmake_parse_arguments(P "${options}" "${oneValueArgs}" "" ${ARGN})
