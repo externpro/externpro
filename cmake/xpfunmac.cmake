@@ -58,6 +58,41 @@ function(xpGetArgValue)
   endif()
 endfunction()
 
+function(ipCloneRepoCmakeTime)
+  set(oneValueArgs NAME GIT_ORIGIN GIT_UPSTREAM GIT_TRACKING_BRANCH GIT_TAG GIT_REF PATCH)
+  cmake_parse_arguments(P "" "${oneValueArgs}" "" ${ARGN})
+  string(TOLOWER ${P_NAME} prj)
+  set(fcName xp_repo_${prj})
+  if(DEFINED P_GIT_ORIGIN AND NOT TARGET ${fcName})
+    if(DEFINED P_PATCH AND DEFINED P_GIT_REF)
+      set(patchCmd ${GIT_EXECUTABLE} diff --ignore-submodules ${P_GIT_REF} -- > ${P_PATCH})
+    else()
+      set(patchCmd ${CMAKE_COMMAND} -E echo "no patch for ${prj}")
+    endif()
+    if(DEFINED P_GIT_UPSTREAM)
+      if(DEFINED P_GIT_TRACKING_BRANCH)
+        set(tb ${P_GIT_TRACKING_BRANCH})
+      else()
+        set(tb master)
+      endif()
+      set(gitUpstream && ${GIT_EXECUTABLE} branch --set-upstream-to=upstream/${tb} ${tb})
+      # git remote add upstream ${P_GIT_UPSTREAM}
+      set(gitRemote GIT_CONFIG remote.upstream.url=${P_GIT_UPSTREAM}
+        remote.upstream.fetch=+refs/heads/*:refs/remotes/upstream/*
+	)
+    endif()
+    FetchContent_Declare(${fcName}
+      GIT_REPOSITORY ${P_GIT_ORIGIN} GIT_TAG ${P_GIT_TAG} ${gitRemote}
+      GIT_PROGRESS TRUE
+      #DOWNLOAD_COMMAND # tricky: must not be defined for git clone to happen
+      UPDATE_COMMAND ${GIT_EXECUTABLE} fetch --all ${gitUpstream}
+      PATCH_COMMAND ${patchCmd}
+      SOURCE_SUBDIR foo # point to a directory that dne, avoid top-level CMakeLists.txt
+      )
+    FetchContent_MakeAvailable(${fcName})
+  endif()
+endfunction()
+
 function(ipCloneRepo)
   set(oneValueArgs NAME GIT_ORIGIN GIT_UPSTREAM GIT_TRACKING_BRANCH GIT_TAG GIT_REF PATCH)
   cmake_parse_arguments(P "" "${oneValueArgs}" "" ${ARGN})
@@ -105,18 +140,27 @@ function(ipCloneRepo)
 endfunction()
 
 function(xpCloneProject)
+  set(options CMAKE_TIME)
   set(oneValueArgs NAME SUPERPRO)
   set(multiValueArgs SUBPRO)
-  cmake_parse_arguments(R "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+  cmake_parse_arguments(R "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
   if(DEFINED R_SUPERPRO)
     return() # we'll clone subprojects as part of their superproject
   endif()
   string(TOUPPER ${R_NAME} PRJ)
   if(XP_DEFAULT OR XP_PRO_${PRJ})
-    ipCloneRepo(${ARGN})
+    if(R_CMAKE_TIME)
+      ipCloneRepoCmakeTime(${ARGN})
+    else()
+      ipCloneRepo(${ARGN})
+    endif()
     foreach(sub ${R_SUBPRO})
       string(TOUPPER ${sub} SUB)
-      ipCloneRepo(${PRO_${SUB}})
+      if(R_CMAKE_TIME)
+        ipCloneRepoCmakeTime(${PRO_${SUB}})
+      else()
+        ipCloneRepo(${PRO_${SUB}})
+      endif()
     endforeach()
   endif()
 endfunction()
