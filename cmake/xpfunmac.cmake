@@ -81,6 +81,7 @@ function(ipCloneRepoCmakeTime)
         remote.upstream.fetch=+refs/heads/*:refs/remotes/upstream/*
 	)
     endif()
+    include(FetchContent)
     FetchContent_Declare(${fcName}
       GIT_REPOSITORY ${P_GIT_ORIGIN} GIT_TAG ${P_GIT_TAG} ${gitRemote}
       GIT_PROGRESS TRUE
@@ -2395,6 +2396,7 @@ function(xpSetPostfix)
 endfunction()
 
 macro(xpCommonFlags)
+  include(${xpThisDir}/pros.cmake) # xp_<project> lists
   if(NOT DEFINED CMAKE_C_COMPILER_ID)
     set(CMAKE_C_COMPILER_ID NOTDEFINED)
   endif()

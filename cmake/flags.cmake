@@ -1,6 +1,5 @@
 # set preprocessor, compiler, linker flags
 include(${CMAKE_CURRENT_LIST_DIR}/xpfunmac.cmake) # xp* functions, macros
-include(${CMAKE_CURRENT_LIST_DIR}/pros.cmake) # xp_<project> lists
 # trim flags that we've inherited
 xpStringTrim(CMAKE_CXX_FLAGS)
 xpStringTrim(CMAKE_C_FLAGS)
