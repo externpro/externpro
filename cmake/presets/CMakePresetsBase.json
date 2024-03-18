@@ -1,0 +1,10 @@
+{
+  "version": 8,
+  "configurePresets": [
+    {
+      "name": "config-base",
+      "hidden": true,
+      "binaryDir": "${sourceDir}/_bld-${presetName}"
+    }
+  ]
+}
