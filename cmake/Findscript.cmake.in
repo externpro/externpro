@@ -1,66 +1,13 @@
-# - Find an @CMAKE_PROJECT_NAME@ installation.
+# - Find @CMAKE_PROJECT_NAME@ installation
 # @CMAKE_PROJECT_NAME@_DIR
-################################################################################
-# should match xpGetCompilerPrefix in externpro's xpfunmac.cmake
-# NOTE: wanted to use externpro version, but chicken-egg problem
-function(getCompilerPrefix _ret)
-  set(options GCC_TWO_VER)
-  cmake_parse_arguments(X "${options}" "" "" ${ARGN})
-  if(MSVC)
-    set(prefix vc${MSVC_TOOLSET_VERSION})
-  elseif(CMAKE_COMPILER_IS_GNUCXX)
-    execute_process(COMMAND ${CMAKE_CXX_COMPILER} ${CMAKE_CXX_COMPILER_ARG1} -dumpfullversion -dumpversion
-      OUTPUT_VARIABLE GCC_VERSION
-      OUTPUT_STRIP_TRAILING_WHITESPACE
-      )
-    if(X_GCC_TWO_VER)
-      set(digits "\\1\\2")
-    else()
-      set(digits "\\1\\2\\3")
-    endif()
-    string(REGEX REPLACE "([0-9]+)\\.([0-9]+)\\.([0-9]+)?"
-      "gcc${digits}"
-      prefix ${GCC_VERSION}
-      )
-  elseif(${CMAKE_CXX_COMPILER_ID} MATCHES "Clang") # LLVM/Apple Clang (clang.llvm.org)
-    if(${CMAKE_SYSTEM_NAME} STREQUAL Darwin)
-      execute_process(COMMAND ${CMAKE_CXX_COMPILER} ${CMAKE_CXX_COMPILER_ARG1} -dumpversion
-        OUTPUT_VARIABLE CLANG_VERSION
-        OUTPUT_STRIP_TRAILING_WHITESPACE
-        )
-      string(REGEX REPLACE "([0-9]+)\\.([0-9]+)(\\.[0-9]+)?"
-        "clang-darwin\\1\\2" # match boost naming
-        prefix ${CLANG_VERSION}
-        )
-    else()
-      string(REGEX REPLACE "([0-9]+)\\.([0-9]+)(\\.[0-9]+)?"
-        "clang\\1\\2" # match boost naming
-        prefix ${CMAKE_CXX_COMPILER_VERSION}
-        )
-    endif()
-  else()
-    message(SEND_ERROR "Find@CMAKE_PROJECT_NAME@.cmake: compiler support lacking: ${CMAKE_CXX_COMPILER_ID}")
-  endif()
-  set(${_ret} ${prefix} PARENT_SCOPE)
-endfunction()
-function(getNumBits _ret)
-  if(CMAKE_SIZEOF_VOID_P EQUAL 8)
-    set(numBits 64)
-  elseif(CMAKE_SIZEOF_VOID_P EQUAL 4)
-    set(numBits 32)
-  else()
-    message(FATAL_ERROR "numBits not 64 or 32")
-  endif()
-  set(${_ret} ${numBits} PARENT_SCOPE)
-endfunction()
 ################################################################################
 # TRICKY: clear cached variables each time we cmake so we can change
 # @CMAKE_PROJECT_NAME@_REV and reuse the same build directory
 unset(@CMAKE_PROJECT_NAME@_DIR CACHE)
 ################################################################################
-# find the path to the @CMAKE_PROJECT_NAME@ directory
-getCompilerPrefix(COMPILER)
-getNumBits(BITS)
+include(xpfunmac)
+xpGetCompilerPrefix(COMPILER)
+xpGetNumBits(BITS)
 # projects using @CMAKE_PROJECT_NAME@: set(@CMAKE_PROJECT_NAME@_REV `git describe --tags`)
 set(@CMAKE_PROJECT_NAME@_SIG ${@CMAKE_PROJECT_NAME@_REV}-${COMPILER}-${BITS})
 # TRICKY: match what is done in cmake's Modules/CPack.cmake, setting CPACK_SYSTEM_NAME
@@ -72,7 +19,7 @@ endif()
 set(XP_DEV_BUILD_NAME "@CMAKE_PROJECT_NAME@_${@CMAKE_PROJECT_NAME@_SIG}")
 set(XP_INSTALLED_NAME "@CMAKE_PROJECT_NAME@-${@CMAKE_PROJECT_NAME@_SIG}-${XP_SYSTEM_NAME}")
 # NOTE: environment variable setting examples:
-# set(ENV{@CMAKE_PROJECT_NAME@_BUILD_DIR} ~/src/@CMAKE_PROJECT_NAME@/_bld)
+# set(ENV{@CMAKE_PROJECT_NAME@_BUILD_DIR} /bpvol/src/pros/@CMAKE_PROJECT_NAME@/_bld)
 # set(ENV{extern_DIR} ~/extern)
 find_path(@CMAKE_PROJECT_NAME@_DIR
   NAMES
