@@ -776,10 +776,6 @@ function(xpGetCompilerPrefix _ret)
   if(MSVC)
     set(prefix vc${MSVC_TOOLSET_VERSION})
   elseif(CMAKE_COMPILER_IS_GNUCXX)
-    execute_process(COMMAND ${CMAKE_CXX_COMPILER} ${CMAKE_CXX_COMPILER_ARG1} -dumpfullversion -dumpversion
-      OUTPUT_VARIABLE GCC_VERSION
-      OUTPUT_STRIP_TRAILING_WHITESPACE
-      )
     if(X_GCC_TWO_VER)
       set(digits "\\1\\2")
     else()
@@ -787,7 +783,7 @@ function(xpGetCompilerPrefix _ret)
     endif()
     string(REGEX REPLACE "([0-9]+)\\.([0-9]+)\\.([0-9]+)?"
       "gcc${digits}"
-      prefix ${GCC_VERSION}
+      prefix ${CMAKE_CXX_COMPILER_VERSION}
       )
   elseif(${CMAKE_CXX_COMPILER_ID} MATCHES "Clang") # LLVM/Apple Clang (clang.llvm.org)
     if(${CMAKE_SYSTEM_NAME} STREQUAL Darwin)
