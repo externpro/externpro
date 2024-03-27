@@ -1,5 +1,3 @@
-set(xp github.com/externpro)
-set(ip isrhub.usurf.usu.edu/internpro)
 set(xp_activemqcpp XP_MODULE)
 set(xp_apr XP_MODULE)
 set(xp_azmq XP_MODULE)
@@ -30,7 +28,7 @@ set(xp_node-addon-api XP_MODULE)
 set(xp_node XP_MODULE)
 set(xp_openh264 XP_MODULE)
 set(xp_openssl XP_MODULE)
-set(xp_patch REPO ${xp}/xppatch TAG v2.7
+set(xp_patch REPO github.com/externpro/xppatch TAG v2.7
   SHA256_Linux b72b6b36acd65f6dc66e988a2edbbf483377c69d9fdf1f2537f3ec474f345196
   SHA256_win64 0e7852bd14863f7e1f5ac29a29dba83d75d92963e2f4c4bb7628397a2bf96e63
   )
@@ -46,17 +44,17 @@ set(xp_wxwidgets XP_MODULE)
 set(xp_wxx XP_MODULE)
 set(xp_zlib XP_MODULE)
 set(xp_zmqpp XP_MODULE)
-set(xp_criticalio REPO ${ip}/CriticalIO TAG v2.0.02.1
+set(xp_criticalio REPO isrhub.usurf.usu.edu/internpro/CriticalIO TAG v2.0.02.1
   SHA256_Linux 28849c86f3121d45d7cfff230cf2316e9c7fa73ff9d696a51cf710dfb1356153
   SHA256_win64 4a55a1743e9d330377e20615d06ab56a9a4b86d054b4c56e4a19476f66b05833
   )
 set(xp_dde_lib XP_MODULE)
-set(xp_fftw REPO ${ip}/xpfftw TAG v3.3.8
+set(xp_fftw REPO isrhub.usurf.usu.edu/internpro/xpfftw TAG v3.3.8
   SHA256_Linux 5a11f07c1506bfba3d7ac48fa09ef52f527b719e17624b6bdff95d9df99e78b2
   SHA256_win64 fa55d30988499cee66c0af29cf1bc272fee2b45b130b5b529fa397986925af73
   )
 set(xp_gsoapcom XP_MODULE)
-set(xp_kakadu REPO ${ip}/kakadu TAG v6.1.1.0
+set(xp_kakadu REPO isrhub.usurf.usu.edu/internpro/kakadu TAG v6.1.1.0
   SHA256_Linux 491323e88514eb27b46e2cebcbfbb637a8ce58c2242fb434eb5951a429f5d0dd
   SHA256_win64 2a3a791616c2fe745279d08d209fbabd63bd5eb661127160671f0ccdd75124a8
   )
