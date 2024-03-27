@@ -46,7 +46,10 @@ set(xp_wxwidgets XP_MODULE)
 set(xp_wxx XP_MODULE)
 set(xp_zlib XP_MODULE)
 set(xp_zmqpp XP_MODULE)
-set(xp_criticalio XP_MODULE)
+set(xp_criticalio REPO ${ip}/CriticalIO TAG v2.0.02.1
+  SHA256_Linux 28849c86f3121d45d7cfff230cf2316e9c7fa73ff9d696a51cf710dfb1356153
+  SHA256_win64 4a55a1743e9d330377e20615d06ab56a9a4b86d054b4c56e4a19476f66b05833
+  )
 set(xp_dde_lib XP_MODULE)
 set(xp_fftw REPO ${ip}/xpfftw TAG v3.3.8
   SHA256_Linux 5a11f07c1506bfba3d7ac48fa09ef52f527b719e17624b6bdff95d9df99e78b2
