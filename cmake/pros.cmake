@@ -53,7 +53,10 @@ set(xp_fftw REPO isrhub.usurf.usu.edu/internpro/xpfftw TAG v3.3.8
   SHA256_Linux 5a11f07c1506bfba3d7ac48fa09ef52f527b719e17624b6bdff95d9df99e78b2
   SHA256_win64 fa55d30988499cee66c0af29cf1bc272fee2b45b130b5b529fa397986925af73
   )
-set(xp_gsoapcom XP_MODULE)
+set(xp_gsoap REPO isrhub.usurf.usu.edu/internpro/gsoap TAG v2.8.97.1
+  SHA256_Linux 67022a5a489989ed5efc4a640d5f41e6aabad7bf1e23d7745a65b98ec9727ca3
+  SHA256_win64 3edf169315ea781dbe8234851a1306a23824f9fe3cf810c05c010f4d76513502
+  )
 set(xp_kakadu REPO isrhub.usurf.usu.edu/internpro/kakadu TAG v6.1.1.0
   SHA256_Linux 491323e88514eb27b46e2cebcbfbb637a8ce58c2242fb434eb5951a429f5d0dd
   SHA256_win64 2a3a791616c2fe745279d08d209fbabd63bd5eb661127160671f0ccdd75124a8
