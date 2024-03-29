@@ -100,14 +100,6 @@ fi
 env="${env}\nWEBPRO=${WEBPRO}"
 [[ -n ${WEBPRO_DL} ]] && cr8="${cr8}\n${WEBPRO_DL}"
 ##############################
-iproVer="$(findVer 'set(internpro_REV' CMakeLists.txt */toplevel.cmake */*/toplevel.cmake */defaults.txt)"
-if [[ -n "${iproVer}" ]] && ${doisrhub}; then
-  INTERNPRO_DL="wget ${urlPfx}/internpro/internpro/releases/download/${iproVer}/internpro-${iproVer}-${GCC_VER}-64-$(uname -s).tar.xz"
-  INTERNPRO="${INTERNPRO_DL} -qO- | tar --no-same-owner -xJ -C ${EXTERN_DIR}"
-fi
-env="${env}\nINTERNPRO=${INTERNPRO}"
-[[ -n ${INTERNPRO_DL} ]] && cr8="${cr8}\n${INTERNPRO_DL}"
-##############################
 psdkVer="$(findVer 'PluginSDK_REV' CMakeLists.txt */defaults.txt)"
 if [[ ${psdkVer} == "v3.0.3.0" ]]; then
   pfx=Vantage
