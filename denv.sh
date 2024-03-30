@@ -100,19 +100,6 @@ fi
 env="${env}\nWEBPRO=${WEBPRO}"
 [[ -n ${WEBPRO_DL} ]] && cr8="${cr8}\n${WEBPRO_DL}"
 ##############################
-psdkVer="$(findVer 'PluginSDK_REV' CMakeLists.txt */defaults.txt)"
-if [[ ${psdkVer} == "v3.0.3.0" ]]; then
-  pfx=Vantage
-else
-  pfx=SDL
-fi
-if [[ -n "${psdkVer}" ]] && ${doisrhub}; then
-  PLUGINSDK_DL="wget ${urlPfx}/PluginFramework/SDKSuper/releases/download/${psdkVer}/${pfx}PluginSDK-${psdkVer}-${GCC_VER}-64-$(uname -s).tar.xz"
-  PLUGINSDK="${PLUGINSDK_DL} -qO- | tar --no-same-owner -xJ -C ${EXTERN_DIR}"
-fi
-env="${env}\nPLUGINSDK=${PLUGINSDK}"
-[[ -n ${PLUGINSDK_DL} ]] && cr8="${cr8}\n${PLUGINSDK_DL}"
-##############################
 if [ -f .crtoolrc ]; then
   crtv=`grep version .crtoolrc`
 elif [ -f private/defaults.txt ]; then

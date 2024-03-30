@@ -27,7 +27,6 @@ x-all-build-args: &all-build-args-alias
   TZ: ${TZ}
 x-bld-build-args: &bld-build-args-alias
   WEBPRO: ${WEBPRO}
-  PLUGINSDK: ${PLUGINSDK}
   CRTOOL: ${CRTOOL}
 services:
   bld:

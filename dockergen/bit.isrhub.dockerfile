@@ -2,9 +2,6 @@
 ARG CRTOOL
 RUN eval "${CRTOOL}"
 ENV PATH=$PATH:${EXTERN_DIR}/CRTool
-# PluginSDK
-ARG PLUGINSDK
-RUN eval "${PLUGINSDK}"
 # webpro
 ARG WEBPRO
 RUN eval "${WEBPRO}"
