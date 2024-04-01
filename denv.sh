@@ -79,7 +79,7 @@ fi
 EXTERN_DIR=/opt/extern
 GCC_VER=gcc921
 ##############################
-wproVer="$(findVer 'set(webpro_REV' CMakeLists.txt */CMakeLists.txt */toplevel.cmake */*/toplevel.cmake */defaults.txt)"
+wproVer="$(findVer 'set(webpro_REV' CMakeLists.txt */CMakeLists.txt */toplevel.cmake */*/toplevel.cmake)"
 [[ "${wproVer}" == "NONE" ]] && wproVer=""
 if [[ -n "${wproVer}" ]]; then
   wproBase=webpro-${wproVer}-${GCC_VER}-64-$(uname -s)
@@ -103,8 +103,6 @@ env="${env}\nWEBPRO=${WEBPRO}"
 ##############################
 if [ -f .crtoolrc ]; then
   crtv=`grep version .crtoolrc`
-elif [ -f private/defaults.txt ]; then
-  crtv=`grep CRTOOL_REV private/defaults.txt`
 fi
 crToolVer=`echo ${crtv} | awk '{$1=$1};1' | cut -d " " -f2 | cut -d "\"" -f2`
 crWrapVer=20.07.1
