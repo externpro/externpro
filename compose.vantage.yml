@@ -38,8 +38,6 @@ x-all-build-args: &all-build-args-alias
 x-bld-build-args: &bld-build-args-alias
   WEBPRO: ${WEBPRO}
   CRTOOL: ${CRTOOL}
-  LATER_CHROME: ${LATER_CHROME}
-  LATER_FIREFOX: ${LATER_FIREFOX}
 services:
   bld:
     <<: [*all-alias, *bld-alias]

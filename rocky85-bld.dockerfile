@@ -7,11 +7,6 @@ USER 0
 # build docker image offline support
 ARG ADDSRC1 ADDSRC2
 ADD ${ADDSRC1} ${ADDSRC2} ${EXTERN_DIR}/
-# later browsers
-ARG LATER_CHROME
-RUN eval "${LATER_CHROME}"
-ARG LATER_FIREFOX
-RUN eval "${LATER_FIREFOX}"
 # CRTool
 ARG CRTOOL
 RUN eval "${CRTOOL}"

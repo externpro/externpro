@@ -126,28 +126,6 @@ fi
 env="${env}\nCRTOOL=${CRTOOL}"
 [[ -n ${CRTOOL_DL} ]] && cr8="${cr8}\n${CRTOOL_DL}"
 ##############################
-CHR_VER="$(findVer 'set(laterChrome_VER' SWATFramework/CMakeLists.txt CMakeLists.txt */defaults.txt)"
-if [[ -n "${CHR_VER}" ]] && command -v host >/dev/null && host dl.google.com | grep "has address" >/dev/null; then
-  # TRICKY: installing with yum or rpm fails because of conflicts with minimum chrome
-  # so extract from rpm using rpm2cpio and only keep the ./opt/google directory
-  LATER_CHROME="echo 'repo_add_once=false' > /etc/default/google-chrome \
-    && mkdir -p /opt/browsers-later/extract \
-    && cd /opt/browsers-later/extract \
-    && rpm2cpio https://dl.google.com/linux/chrome/rpm/stable/$(uname -m)/google-chrome-stable-${CHR_VER}-1.$(uname -m).rpm | cpio -idmv \
-    && cd .. \
-    && mv extract/opt/google . \
-    && rm -rf extract/"
-fi
-env="${env}\nLATER_CHROME=${LATER_CHROME}"
-##############################
-FOX_VER="$(findVer 'set(laterFirefox_VER' SWATFramework/CMakeLists.txt CMakeLists.txt */defaults.txt)"
-if [[ -n "${FOX_VER}" ]] && command -v host >/dev/null && host ftp.mozilla.org | grep "has address" >/dev/null; then
-  LATER_FIREFOX="mkdir -p /opt/browsers-later \
-    && wget -qO- 'https://ftp.mozilla.org/pub/firefox/releases/${FOX_VER}esr/linux-$(uname -m)/en-US/firefox-${FOX_VER}esr.tar.bz2' \
-         | tar -xj -C /opt/browsers-later"
-fi
-env="${env}\nLATER_FIREFOX=${LATER_FIREFOX}"
-##############################
 echo -e "${env}" > .env
 [[ -n ${ver} ]] && echo -e "${ver}" > .devcontainer/.env
 ##############################
