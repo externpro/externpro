@@ -44,13 +44,11 @@ services:
     build:
       context: .devcontainer
       dockerfile: rocky85-bld.dockerfile
-      network: host
       args:
         <<: [*all-build-args-alias, *bld-build-args-alias]
         ADDSRC1: ${ADDSRC1}
         ADDSRC2: ${ADDSRC2}
     hostname: ${HNAME}
-    network_mode: host
     profiles:
       - pbld
   run:
@@ -58,7 +56,6 @@ services:
     build:
       context: .devcontainer
       dockerfile: centos7-run.dockerfile
-      network: host
       args:
         <<: *all-build-args-alias
     container_name: vantagerun
@@ -72,7 +69,6 @@ services:
     build:
       context: .devcontainer
       dockerfile: rocky85-dev.dockerfile
-      network: host
       args:
         <<: [*all-build-args-alias, *bld-build-args-alias]
     container_name: vantagedev

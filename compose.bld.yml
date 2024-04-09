@@ -32,12 +32,10 @@ services:
     build:
       context: .devcontainer
       dockerfile: rocky85-bld.dockerfile
-      network: host
       args:
         <<: [*all-build-args-alias, *bld-build-args-alias]
         ADDSRC1: ${ADDSRC1}
         ADDSRC2: ${ADDSRC2}
     hostname: ${HNAME}
-    network_mode: host
     profiles:
       - pbld
