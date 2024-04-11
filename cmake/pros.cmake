@@ -61,6 +61,8 @@ set(xp_kakadu REPO isrhub.usurf.usu.edu/internpro/kakadu TAG v6.1.1.0
   SHA256_Linux 491323e88514eb27b46e2cebcbfbb637a8ce58c2242fb434eb5951a429f5d0dd
   SHA256_win64 2a3a791616c2fe745279d08d209fbabd63bd5eb661127160671f0ccdd75124a8
   )
-set(xp_palam XP_MODULE)
+set(xp_palam REPO isrhub.usurf.usu.edu/palam/palam TAG v1.10.10.5
+  SHA256_Linux 531cb178673e5870911d26f467643a2787732c430312e14331da8c3044c1e78c
+  )
 set(xp_sdl_ggdp XP_MODULE)
 set(xp_sdvideo XP_MODULE)
