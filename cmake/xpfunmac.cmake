@@ -2430,6 +2430,17 @@ macro(xpCommonFlags)
   else()
     set(XP_BUILD_STATIC_RT)
   endif()
+  if(CMAKE_CONFIGURATION_TYPES)
+    # https://gitlab.kitware.com/cmake/community/-/wikis/FAQ#how-can-i-specify-my-own-configurations-for-generators-that-allow-it-
+    # For generators that allow it (like Visual Studio), CMake generates four
+    # configurations by default: Debug, Release, MinSizeRel and RelWithDebInfo.
+    # Many people just need Debug and Release, or need other configurations. To
+    # modify this change the variable CMAKE_CONFIGURATION_TYPES in the cache:
+    set(CMAKE_CONFIGURATION_TYPES Debug Release)
+    set(CMAKE_CONFIGURATION_TYPES "${CMAKE_CONFIGURATION_TYPES}" CACHE STRING
+      "Set the configurations to what we need" FORCE
+      )
+  endif()
   xpSetPostfix()
   xpDebugInfoOption()
   if(MSVC)
