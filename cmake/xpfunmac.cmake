@@ -2152,13 +2152,11 @@ function(xpAddCoverage)
     add_custom_target(precoveragecsharp
       COMMAND ${CMAKE_COMMAND} -E make_directory coveragecsharp
       COMMAND ${CMAKE_COMMAND} -E rm -rf coveragecsharp/*
-      COMMAND ${CMAKE_COMMAND} -E chdir coveragecsharp dotnet new tool-manifest --force
-      COMMAND ${CMAKE_COMMAND} -E chdir coveragecsharp dotnet tool install dotnet-reportgenerator-globaltool
       WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
       )
     list(APPEND precoverage precoveragecsharp)
     add_custom_target(postcoveragecsharp
-      COMMAND dotnet tool run reportgenerator -reports:TestResults/**/coverage.cobertura.xml
+      COMMAND reportgenerator -reports:TestResults/**/coverage.cobertura.xml
         -targetdir:${CMAKE_BINARY_DIR}/coveragecsharp -reporttypes:Html
       WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/coveragecsharp
       )
