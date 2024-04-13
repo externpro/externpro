@@ -39,6 +39,7 @@
       "name": "LinuxRelease",
       "displayName": "build Linux Release",
       "inherits": ["isLinux"],
+      "targets": ["all", "install"],
       "configurePreset": "Linux",
       "configuration": "Release"
     }
