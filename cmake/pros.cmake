@@ -2,9 +2,9 @@ set(xp_apr REPO github.com/externpro/apr XP_MODULE)
 set(xp_bzip2 REPO github.com/externpro/bzip2 XP_MODULE)
 set(xp_cares REPO github.com/externpro/c-ares XP_MODULE)
 set(xp_clangformat XP_MODULE)
-set(xp_criticalio REPO isrhub.usurf.usu.edu/internpro/CriticalIO TAG v2.0.02.1
-  SHA256_Linux 28849c86f3121d45d7cfff230cf2316e9c7fa73ff9d696a51cf710dfb1356153
-  SHA256_win64 4a55a1743e9d330377e20615d06ab56a9a4b86d054b4c56e4a19476f66b05833
+set(xp_criticalio REPO isrhub.usurf.usu.edu/internpro/CriticalIO TAG v2.0.02.7
+  SHA256_Linux a7f5c669341df7f7e24b9405c448531f8377c366bb59676f301f409206beec46
+  SHA256_win64 9d4462f14d5baaf12f34adc2f2c5317a59b98069be6845c2f02dd11417f8066f
   )
 set(xp_eigen REPO github.com/externpro/eigen XP_MODULE)
 set(xp_expat REPO github.com/externpro/libexpat XP_MODULE)
