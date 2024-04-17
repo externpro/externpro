@@ -15,9 +15,9 @@ set(xp_fftw REPO isrhub.usurf.usu.edu/internpro/xpfftw TAG v3.3.8.1
 set(xp_flatbuffers REPO github.com/externpro/flatbuffers XP_MODULE)
 set(xp_geotrans REPO github.com/externpro/geotranz XP_MODULE)
 set(xp_glew REPO github.com/externpro/glew XP_MODULE)
-set(xp_gsoap REPO isrhub.usurf.usu.edu/internpro/gsoap TAG v2.8.97.1
-  SHA256_Linux 67022a5a489989ed5efc4a640d5f41e6aabad7bf1e23d7745a65b98ec9727ca3
-  SHA256_win64 3edf169315ea781dbe8234851a1306a23824f9fe3cf810c05c010f4d76513502
+set(xp_gsoap REPO isrhub.usurf.usu.edu/internpro/gsoap TAG v2.8.97.2
+  SHA256_Linux 6a1e6143e19626aab6df1c24e0df3b43390f69afcc2af6673f56329887e3c038
+  SHA256_win64 a2d8ed8759892e341b4dd19be5968cc672dbf658aa5e6c4316c0940c464d89bd
   )
 set(xp_jasper REPO github.com/externpro/jasper XP_MODULE)
 set(xp_jpegxp REPO github.com/externpro/jpegxp XP_MODULE)
