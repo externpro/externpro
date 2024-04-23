@@ -1914,7 +1914,7 @@ macro(xpPackageDevel)
   cmake_parse_arguments(P "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
   set(CMAKE_INSTALL_DEFAULT_COMPONENT_NAME devel)
   set(CPACK_ARCHIVE_COMPONENT_INSTALL ON)
-  set(CPACK_COMPONENTS_ALL devel)
+  list(APPEND CPACK_COMPONENTS_ALL devel)
   set(gitDescribe ${CMAKE_PROJECT_VERSION})
   if(EXISTS ${CMAKE_SOURCE_DIR}/.git)
     execute_process(COMMAND git describe --tags
