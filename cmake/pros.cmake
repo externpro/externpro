@@ -33,6 +33,10 @@ set(xp_patch REPO github.com/externpro/xppatch TAG v2.7
   SHA256_Linux b72b6b36acd65f6dc66e988a2edbbf483377c69d9fdf1f2537f3ec474f345196
   SHA256_win64 0e7852bd14863f7e1f5ac29a29dba83d75d92963e2f4c4bb7628397a2bf96e63
   )
+set(xp_pluginsdk REPO isrhub.usurf.usu.edu/Vantage/PluginSdk TAG v3.5.0.1
+  SHA256_Linux c8264d078be2e4b7e7f0cd7ac8727a41fdad35ade52f98db6bd478e2a8aeebf7
+  SHA256_win64 15b3dd69beb07e246a005e4bd377d49d741c12e9aa2ff5f5bbc008fed3ade280
+  )
 set(xp_rapidjson REPO github.com/externpro/rapidjson XP_MODULE)
 set(xp_rapidxml REPO github.com/externpro/rapidxml XP_MODULE)
 set(xp_shapelib REPO github.com/externpro/shapelib XP_MODULE)
