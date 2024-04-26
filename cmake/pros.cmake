@@ -79,9 +79,9 @@ set(xp_zmqpp REPO github.com/externpro/zmqpp DEPS libzmq XP_MODULE)
 ### depend on previous group
 set(xp_curl REPO github.com/externpro/curl DEPS cares libssh2 XP_MODULE)
 set(xp_libgit2 REPO github.com/externpro/libgit2 DEPS libssh2 XP_MODULE)
-set(xp_pluginsdk REPO isrhub.usurf.usu.edu/Vantage/PluginSdk TAG v3.5.0.1 EXE_DEPS palam
-  SHA256_Linux c8264d078be2e4b7e7f0cd7ac8727a41fdad35ade52f98db6bd478e2a8aeebf7
-  SHA256_win64 15b3dd69beb07e246a005e4bd377d49d741c12e9aa2ff5f5bbc008fed3ade280
+set(xp_pluginsdk REPO isrhub.usurf.usu.edu/Vantage/PluginSdk TAG v3.5.0.2 EXE_DEPS palam
+  SHA256_Linux 30f268d16df0ebb28d168b776eccf4c3cba6de0c82b265382fd9fc921442bd1f
+  SHA256_win64 ea919c4a2615f127a6264b81e31010f8a314feefd5c5227bd740ee250fe35fbe
   )
 set(xp_sdvideo REPO isrhub.usurf.usu.edu/internpro/Sdvideo TAG v24.01 DEPS boost ffmpeg
   SHA256_Linux 7976e19d0aa5277f94094f95dee629e67fecd22e5f377619385a7504d2a89d73
