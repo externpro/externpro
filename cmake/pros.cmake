@@ -74,7 +74,7 @@ set(xp_ng_gdp REPO isrhub.usurf.usu.edu/internpro/NG_GDP TAG v24.01 DEPS boost
   SHA256_Linux a5ca9eede75a00b436499d714b7fef703414b30d00463baa8420c30cf4606dee
   SHA256_win64 df337bb8de204ce8b9f1ab263c31e01f9213e17e27c222e8b0043292d5d78d36
   )
-set(xp_wxinclude REPO github.com/externpro/wxInclude DEPS boost XP_MODULE)
+set(xp_wxinclude REPO github.com/externpro/wxInclude EXE_DEPS boost XP_MODULE)
 set(xp_zmqpp REPO github.com/externpro/zmqpp DEPS libzmq XP_MODULE)
 ### depend on previous group
 set(xp_curl REPO github.com/externpro/curl DEPS cares libssh2 XP_MODULE)
