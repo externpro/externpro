@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 cd "$( dirname "$0" )"
-for img in centos7-run rocky85-pro rocky85-bld rocky85-dev
+for img in centos7-run rocky85-run rocky85-pro rocky85-bld rocky85-dev
 do
   dfile=../${img}.dockerfile
   awk -v r="${img}" '{gsub(/%BP_REPO%/,r)} 1' bit.head.dockerfile > ${dfile}
