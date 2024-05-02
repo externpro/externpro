@@ -55,7 +55,7 @@ services:
     <<: [*all-alias, *run-alias]
     build:
       context: .devcontainer
-      dockerfile: centos7-run.dockerfile
+      dockerfile: rocky85-run.dockerfile
       args:
         <<: *all-build-args-alias
     container_name: vantagerun
