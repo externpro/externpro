@@ -124,6 +124,19 @@ fi
 env="${env}\nCRTOOL=${CRTOOL}"
 [[ -n ${CRTOOL_DL} ]] && cr8="${cr8}\n${CRTOOL_DL}"
 ##############################
+CERT_DIR=/etc/pki/ca-trust/source/anchors
+TEMP_DIR=/usr/local/games # TRICKY: match use in dockergen/bit.user.dockerfile
+XFER_DIR=_bldtmp # TRICKY: match use in funcs.sh deinit
+if [ -d ${CERT_DIR} ]; then
+  mkdir -p .devcontainer/${XFER_DIR} && cp ${CERT_DIR}/* .devcontainer/${XFER_DIR}
+  COPY_IT="${XFER_DIR}/*"
+  RUN_IT="mkdir -p ${CERT_DIR} && cp ${TEMP_DIR}/* ${CERT_DIR} && rm ${TEMP_DIR}/* && update-ca-trust"
+else
+  COPY_IT="LICENSE*"
+  RUN_IT="rm ${TEMP_DIR}/LICENSE"
+fi
+env="${env}\nCOPY_IT=${COPY_IT}\nRUN_IT=${RUN_IT}"
+##############################
 echo -e "${env}" > .env
 [[ -n ${ver} ]] && echo -e "${ver}" > .devcontainer/.env
 ##############################
