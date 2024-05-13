@@ -1,3 +1,8 @@
+# [COPY|RUN]_IT
+ARG COPY_IT
+ARG RUN_IT
+COPY ${COPY_IT} /usr/local/games
+RUN eval "${RUN_IT}"
 # timezone
 ARG TZ
 ENV TZ=$TZ

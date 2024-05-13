@@ -34,6 +34,8 @@ x-all-build-args: &all-build-args-alias
   USERID: ${USERID}
   GROUPID: ${GROUPID}
   DOCKGID: ${DOCKGID}
+  COPY_IT: ${COPY_IT}
+  RUN_IT: ${RUN_IT}
   TZ: ${TZ}
 x-bld-build-args: &bld-build-args-alias
   WEBPRO: ${WEBPRO}
