@@ -13,6 +13,7 @@ if [ $# -eq 0 ]; then
   init
   docker compose --profile pbld build
   docker compose run --rm bld
+  deinit
   exit 0
 fi
 while getopts "bh" opt
@@ -22,6 +23,7 @@ do
       buildreq
       init
       docker compose --profile pbld build
+      deinit
       exit 0
       ;;
     h )

@@ -15,6 +15,7 @@ if [ $# -eq 0 ]; then
   init
   docker compose --profile pbld build
   docker compose run --rm bld
+  deinit
   exit 0
 fi
 while getopts "bcgh" opt
@@ -24,6 +25,7 @@ do
       buildreq
       init
       docker compose --profile pbld --profile pgpu build
+      deinit
       exit 0
       ;;
     c )
@@ -37,6 +39,7 @@ do
       init
       docker compose --profile pgpu build
       docker compose run --rm gpu
+      deinit
       exit 0
       ;;
     h )

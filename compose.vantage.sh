@@ -15,6 +15,7 @@ if [ $# -eq 0 ]; then
   init
   docker compose --profile pbld build
   docker compose run --rm bld
+  deinit
   exit 0
 fi
 while getopts "bdhr" opt
@@ -24,6 +25,7 @@ do
       buildreq
       init
       docker compose --profile pbld --profile pdev --profile prun build
+      deinit
       exit 0
       ;;
     d )
@@ -33,6 +35,7 @@ do
       docker compose --profile pdev up -d --build
       docker exec -it vantagedev bash
       docker compose --profile pdev down
+      deinit
       exit 0
       ;;
     r )
@@ -42,6 +45,7 @@ do
       docker compose --profile prun up -d --build
       docker exec -it vantagerun bash
       docker compose --profile prun down
+      deinit
       exit 0
       ;;
     h )

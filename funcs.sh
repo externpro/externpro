@@ -1,9 +1,15 @@
 #!/usr/bin/env bash
 function init
 {
-  if  [[ -x .devcontainer/denv.sh ]]; then
+  if [[ -x .devcontainer/denv.sh ]]; then
     ./.devcontainer/denv.sh
     cat .env
+  fi
+}
+function deinit
+{
+  if [ -d .devcontainer/_bldtmp ]; then
+    rm -rf .devcontainer/_bldtmp
   fi
 }
 function findVer
