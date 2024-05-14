@@ -1,0 +1,70 @@
+CMakeLists.txt text eol=lf
+Dockerfile text eol=lf
+.gitattributes text eol=lf
+*.c text eol=lf
+*.cfg text eol=lf
+*.cmake text eol=lf
+*.conf text eol=lf
+*.cpp text eol=lf
+*.cs text eol=lf
+*.css text eol=lf
+*.cu text eol=lf
+*.cuh text eol=lf
+*.dae text eol=lf
+*.dockerfile text eol=lf
+*.fbs text eol=lf
+*.h text eol=lf
+*.h.in text eol=lf
+*.hpp text eol=lf
+*.hpp.in text eol=lf
+*.hrc text eol=lf
+*.html text eol=lf
+*.js text eol=lf
+*.json text eol=lf
+*.less text eol=lf
+*.lua text eof=lf
+*.md text eol=lf
+*.pjd text eol=lf
+*.proto text eol=lf
+*.rc text eol=lf
+*.rch text eol=lf
+*.scss text eol=lf
+*.sh text eol=lf
+*.svg text eol=lf
+*.ts text eol=lf
+*.txt text eol=lf
+*.type text eol=lf
+*.xml text eol=lf
+*.xpm text eol=lf
+*.xsd text eol=lf
+*.yml text eol=lf
+.*rc text eol=lf
+####################
+*.csproj.in text eol=crlf
+*.filters text eol=crlf
+*.m text eol=crlf
+*.resx text eol=crlf
+*.rst text eol=crlf
+*.sln text eol=crlf
+*.sql text eol=crlf
+*.vcproj text eol=crlf
+*.vcxproj text eol=crlf
+####################
+*.bin binary
+*.bmp binary
+*.db binary
+*.doc binary
+*.eap binary
+*.gif binary
+*.ico binary
+*.jpeg binary
+*.jpg binary
+*.mp3 binary
+*.ntf binary
+*.pdf binary
+*.png binary
+*.rtf binary
+*.vsd binary
+*.xcf binary
+*.xlsx binary
+*.zip binary
