@@ -1267,7 +1267,7 @@ macro(xpSourceListAppend)
         endforeach()
         foreach(boolOpt EXECUTABLES STATIC_LIBS SHARED_LIBS MODULE_LIBS INTERFACE_LIBS OBJECT_LIBS UNKNOWN_LIBS
                         EXTERNAL_LIBS CUSTOM_TARGETS GENERATE_PER_TARGET GENERATE_DEPENDERS
-            )
+          )
           if(DEFINED GRAPHVIZ_${boolOpt})
             set(opts "${opts}set(GRAPHVIZ_${boolOpt} ${GRAPHVIZ_${boolOpt}})\n")
           endif()
@@ -2327,7 +2327,7 @@ function(xpToggleDebugInfo)
     set(reldebLinker "/debug /INCREMENTAL")
   elseif(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX OR
          ${CMAKE_C_COMPILER_ID} MATCHES "Clang" OR ${CMAKE_CXX_COMPILER_ID} MATCHES "Clang"
-      )
+    )
     set(releaseCompiler "-O3")
     set(reldebCompiler "-O2 -g")
   else()
