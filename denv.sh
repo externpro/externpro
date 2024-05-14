@@ -106,6 +106,9 @@ if [ -f .crtoolrc ]; then
 fi
 crToolVer=`echo ${crtv} | awk '{$1=$1};1' | cut -d " " -f2 | cut -d "\"" -f2`
 crWrapVer=20.07.1
+if [[ ${crToolVer} > "24.01" || ${crToolVer} == "24.01" ]]; then
+  crToolVer=v${crToolVer}
+fi
 if [[ -n "${crToolVer}" && -n "${crWrapVer}" ]]; then
   if ${doisrhub}; then
     CRTOOL_DL="wget -q \"${urlPfx}/CRTool/CRTool/releases/download/${crWrapVer}/CRTool-${crWrapVer}.sh\" \
