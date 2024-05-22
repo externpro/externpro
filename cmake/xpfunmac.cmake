@@ -1972,7 +1972,28 @@ macro(xpPackageDevel)
   endif()
   set(xpuseFile ${CMAKE_CURRENT_BINARY_DIR}/xpuse-${NAME}-config.cmake)
   configure_file(${xpThisDir}/xpuse.cmake.in ${xpuseFile} @ONLY NEWLINE_STYLE LF)
-  install(FILES ${xpuseFile} DESTINATION ${XP_INSTALL_CMAKEDIR})
+  set(xpinfoFile ${CMAKE_CURRENT_BINARY_DIR}/sysinfo.txt)
+  file(WRITE ${xpinfoFile} "${CPACK_PACKAGE_VERSION}\n")
+  execute_process(COMMAND uname -a
+    OUTPUT_VARIABLE uname
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    ERROR_VARIABLE unameErr
+    )
+  if(NOT unameErr)
+    file(APPEND ${xpinfoFile} "${uname}\n")
+  endif()
+  execute_process(COMMAND lsb_release --description
+    OUTPUT_VARIABLE lsbDesc # LSB (Linux Standard Base)
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    ERROR_QUIET
+    )
+  if(NOT lsbDesc STREQUAL "")
+    file(APPEND ${xpinfoFile} "lsb_release ${lsbDesc}\n")
+  endif()
+  if(DEFINED MSVC_VERSION)
+    file(APPEND ${xpinfoFile} "MSVC_VERSION ${MSVC_VERSION}\n")
+  endif()
+  install(FILES ${xpinfoFile} ${xpuseFile} DESTINATION ${XP_INSTALL_CMAKEDIR})
 endmacro()
 
 function(xpProjectInstall)
