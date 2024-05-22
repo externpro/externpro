@@ -1993,6 +1993,8 @@ macro(xpPackageDevel)
   if(DEFINED MSVC_VERSION)
     file(APPEND ${xpinfoFile} "MSVC_VERSION ${MSVC_VERSION}\n")
   endif()
+  xpGetCompilerPrefix(compilerPrefix)
+  file(APPEND ${xpinfoFile} "COMPILER_PREFIX: ${compilerPrefix}\n")
   install(FILES ${xpinfoFile} ${xpuseFile} DESTINATION ${XP_INSTALL_CMAKEDIR})
 endmacro()
 
