@@ -1921,6 +1921,13 @@ macro(xpPackageDevel)
       OUTPUT_STRIP_TRAILING_WHITESPACE
       ERROR_VARIABLE gitErr
       )
+    execute_process(COMMAND git status --porcelain
+      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+      OUTPUT_VARIABLE dirty
+      )
+    if(dirty)
+      set(gitDescribe ${gitDescribe}-dr)
+    endif()
   endif()
   set(CPACK_PACKAGE_VERSION ${gitDescribe})
   set(CPACK_COMPONENT_INCLUDE_TOPLEVEL_DIRECTORY ON)
