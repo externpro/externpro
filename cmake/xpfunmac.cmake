@@ -1924,9 +1924,14 @@ macro(xpPackageDevel)
     execute_process(COMMAND git status --porcelain
       WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
       OUTPUT_VARIABLE dirty
+      OUTPUT_STRIP_TRAILING_WHITESPACE
       )
     if(dirty)
-      set(gitDescribe ${gitDescribe}-dr)
+      string(REPLACE "\n" ";" dirtyList ${dirty})
+      list(LENGTH dirtyList len)
+      if(${len} GREATER 1 OR NOT " M CMakePresetsBase.json" IN_LIST dirtyList)
+        set(gitDescribe ${gitDescribe}-dr)
+      endif()
     endif()
   endif()
   set(CPACK_PACKAGE_VERSION ${gitDescribe})
