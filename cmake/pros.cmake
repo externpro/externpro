@@ -22,9 +22,9 @@ set(xp_gsoap REPO isrhub.usurf.usu.edu/internpro/gsoap TAG v2.8.97.2
 set(xp_jasper REPO github.com/externpro/jasper XP_MODULE)
 set(xp_jpegxp REPO github.com/externpro/jpegxp XP_MODULE)
 set(xp_jxrlib REPO github.com/externpro/jxrlib XP_MODULE)
-set(xp_kakadu REPO isrhub.usurf.usu.edu/internpro/kakadu TAG v6.1.1.2
-  SHA256_Linux db3eb67ff724c8e41342905d0d51e5e24366133e39c20910af07358721977233
-  SHA256_win64 759cdbb9dfcfb2ed51b488d0338fc9f5b2e380e2dfc975173e70f100bd73eb8d
+set(xp_kakadu REPO isrhub.usurf.usu.edu/internpro/kakadu TAG v6.1.1.4
+  SHA256_Linux cf26edb0b133ce6a85245ebf59e89bc0263ce1acc93d7f3fc555f241e7e9c9e7
+  SHA256_win64 311c4b20e95ffdceb0e158236e27d075ce4db952b1001fc0fe530353d54e76da
   )
 set(xp_lua REPO github.com/externpro/lua XP_MODULE)
 set(xp_opensslasm REPO github.com/externpro/opensslasm)
