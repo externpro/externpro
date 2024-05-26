@@ -8,9 +8,9 @@ set(xp_criticalio REPO isrhub.usurf.usu.edu/internpro/CriticalIO TAG v2.0.02.8
   )
 set(xp_eigen REPO github.com/externpro/eigen XP_MODULE)
 set(xp_expat REPO github.com/externpro/libexpat XP_MODULE)
-set(xp_fftw REPO isrhub.usurf.usu.edu/internpro/fftw TAG v3.3.8.1
-  SHA256_Linux 141b17828250cb9ce1bf9fcef0e34b398b0ca78682531879156022a26bdc5185
-  SHA256_win64 af6fa110206183a89417aa0826bfd2d50af119a4ae0728ea4bfa78712bd466f7
+set(xp_fftw REPO isrhub.usurf.usu.edu/internpro/fftw TAG v3.3.8.2
+  SHA256_Linux 9c296f908984fda88d2bb198048ccf56d32f046cff6e60b18c675b6280552deb
+  SHA256_win64 e8d034171b2453d4c0981c268d7a39c6b3456584c94e91790a5d1ee32432a3c8
   )
 set(xp_flatbuffers REPO github.com/externpro/flatbuffers XP_MODULE)
 set(xp_geotrans REPO github.com/externpro/geotranz XP_MODULE)
