@@ -29,7 +29,7 @@ set(xp_kakadu REPO isrhub.usurf.usu.edu/internpro/kakadu TAG v6.1.1.4
 set(xp_lua REPO github.com/externpro/lua XP_MODULE)
 set(xp_opensslasm REPO github.com/externpro/opensslasm)
 set(xp_nasm)
-set(xp_patch REPO github.com/externpro/xppatch TAG v2.7
+set(xp_patch REPO github.com/externpro/patch TAG v2.7
   SHA256_Linux b72b6b36acd65f6dc66e988a2edbbf483377c69d9fdf1f2537f3ec474f345196
   SHA256_win64 0e7852bd14863f7e1f5ac29a29dba83d75d92963e2f4c4bb7628397a2bf96e63
   )
