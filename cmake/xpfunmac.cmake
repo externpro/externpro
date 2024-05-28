@@ -1101,14 +1101,9 @@ macro(xpSourceListAppend)
   file(GLOB miscFiles LIST_DIRECTORIES false
     ${_dir}/.git*
     ${_dir}/*clang-format
-    ${_dir}/.crtoolrc
-    ${_dir}/.eslintrc.json
-    ${_dir}/.prettierrc
-    ${_dir}/CMakePresets*.json
-    ${_dir}/package.json
+    ${_dir}/*.json
+    ${_dir}/.*rc
     ${_dir}/README.md
-    ${_dir}/tsconfig.json
-    ${_dir}/version.cmake
     )
   if(miscFiles)
     list(APPEND masterSrcList ${miscFiles})
