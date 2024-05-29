@@ -56,9 +56,9 @@ set(xp_wxx REPO github.com/externpro/wxx DEPS wxwidgets XP_MODULE)
 set(xp_activemqcpp REPO github.com/externpro/activemq-cpp DEPS apr openssl XP_MODULE)
 set(xp_azmq REPO github.com/externpro/azmq DEPS boost libzmq XP_MODULE)
 set(xp_cppzmq REPO github.com/externpro/cppzmq DEPS libzmq XP_MODULE)
-set(xp_dde_lib REPO isrhub.usurf.usu.edu/DDE/dde_lib TAG v0.0.0.8 DEPS boost protobuf wirehair
-  SHA256_Linux 20dfd9dc7726aaa8e3667df764ba0a77ebfb09ba0be42227e20002eada7f69a3
-  SHA256_win64 9e571c600a362e18141c9c50ab6bfc7add7405ec553003caf06a1923286a2772
+set(xp_dde_lib REPO isrhub.usurf.usu.edu/DDE/dde_lib TAG v0.0.0.9 DEPS boost protobuf wirehair
+  SHA256_Linux 89cd585be2403a904e8241d9b1893774e275ab020275b4e1703df819ac734cb6
+  SHA256_win64 dc1133d19be5f36fbc53a799a9a75f662259b67d5ec9d2f1b304fb34b4c7b350
   )
 set(xp_fecpp REPO github.com/externpro/fecpp DEPS boost XP_MODULE)
 set(xp_ffmpeg REPO github.com/externpro/FFmpeg openh264 yasm XP_MODULE)
