@@ -70,9 +70,9 @@ set(xp_palam REPO isrhub.usurf.usu.edu/palam/palam TAG v1.11.0.0
   SHA256_Linux 8561de9d2bbf1b04badf461639028a1b164cbf4ef5083c9485dc206e09634b8c
   SHA256_win64 b9d3e691aa23358076604a141b13402f45f994cb1ed2dfe3263244eb4d35313f
   )
-set(xp_ng_gdp REPO isrhub.usurf.usu.edu/internpro/NG_GDP TAG v24.01 DEPS boost
-  SHA256_Linux a5ca9eede75a00b436499d714b7fef703414b30d00463baa8420c30cf4606dee
-  SHA256_win64 df337bb8de204ce8b9f1ab263c31e01f9213e17e27c222e8b0043292d5d78d36
+set(xp_ng_gdp REPO isrhub.usurf.usu.edu/internpro/NG_GDP TAG v24.02 DEPS boost
+  SHA256_Linux f6356221c2111223327aa70101d1d93d7fc6a11be835a3d1ec04da9353975c97
+  SHA256_win64 0e0f3ba69faa7c902bf1a6dea13bde161b5622cfa6eb430909a67aa1f156148f
   )
 set(xp_wxinclude REPO github.com/externpro/wxInclude EXE_DEPS boost XP_MODULE)
 set(xp_zmqpp REPO github.com/externpro/zmqpp DEPS libzmq XP_MODULE)
