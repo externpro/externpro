@@ -83,7 +83,7 @@ set(xp_pluginsdk REPO isrhub.usurf.usu.edu/Vantage/PluginSdk TAG v3.5.0.2 EXE_DE
   SHA256_Linux 30f268d16df0ebb28d168b776eccf4c3cba6de0c82b265382fd9fc921442bd1f
   SHA256_win64 ea919c4a2615f127a6264b81e31010f8a314feefd5c5227bd740ee250fe35fbe
   )
-set(xp_sdvideo REPO isrhub.usurf.usu.edu/internpro/Sdvideo TAG v24.01 DEPS boost ffmpeg
-  SHA256_Linux 7976e19d0aa5277f94094f95dee629e67fecd22e5f377619385a7504d2a89d73
-  SHA256_win64 db414f7c15dfeac971e0dc13bfbc9fdd03682294cb77a6de18a4be9c457ad2e0
+set(xp_sdvideo REPO isrhub.usurf.usu.edu/internpro/Sdvideo TAG v24.02 DEPS boost ffmpeg
+  SHA256_Linux 25ba1530f23c483ea1817266bad303665cdd43a265283d8f5c1cccda2068cf7f
+  SHA256_win64 860006e31454e0074c9ef365210d92c199e9cdc1741fe1835ecc569344e2b0bb
   )
