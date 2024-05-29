@@ -2,34 +2,34 @@ set(xp_apr REPO github.com/externpro/apr XP_MODULE)
 set(xp_bzip2 REPO github.com/externpro/bzip2 XP_MODULE)
 set(xp_cares REPO github.com/externpro/c-ares XP_MODULE)
 set(xp_clangformat XP_MODULE)
-set(xp_criticalio REPO isrhub.usurf.usu.edu/internpro/CriticalIO TAG v2.0.02.7
-  SHA256_Linux a7f5c669341df7f7e24b9405c448531f8377c366bb59676f301f409206beec46
-  SHA256_win64 9d4462f14d5baaf12f34adc2f2c5317a59b98069be6845c2f02dd11417f8066f
+set(xp_criticalio REPO isrhub.usurf.usu.edu/internpro/CriticalIO TAG v2.0.02.8
+  SHA256_Linux abbcbeccfede2ab2538e85aec06f59b4d288a549f3969c5e39b666b47df06bc8
+  SHA256_win64 0cf13caaaf04d55bd32ff5578eba6265579afcd287162b978a8683945eebc248
   )
 set(xp_eigen REPO github.com/externpro/eigen XP_MODULE)
 set(xp_expat REPO github.com/externpro/libexpat XP_MODULE)
-set(xp_fftw REPO isrhub.usurf.usu.edu/internpro/fftw TAG v3.3.8.1
-  SHA256_Linux 141b17828250cb9ce1bf9fcef0e34b398b0ca78682531879156022a26bdc5185
-  SHA256_win64 af6fa110206183a89417aa0826bfd2d50af119a4ae0728ea4bfa78712bd466f7
+set(xp_fftw REPO isrhub.usurf.usu.edu/internpro/fftw TAG v3.3.8.2
+  SHA256_Linux 9c296f908984fda88d2bb198048ccf56d32f046cff6e60b18c675b6280552deb
+  SHA256_win64 e8d034171b2453d4c0981c268d7a39c6b3456584c94e91790a5d1ee32432a3c8
   )
 set(xp_flatbuffers REPO github.com/externpro/flatbuffers XP_MODULE)
 set(xp_geotrans REPO github.com/externpro/geotranz XP_MODULE)
 set(xp_glew REPO github.com/externpro/glew XP_MODULE)
-set(xp_gsoap REPO isrhub.usurf.usu.edu/internpro/gsoap TAG v2.8.97.2
-  SHA256_Linux 6a1e6143e19626aab6df1c24e0df3b43390f69afcc2af6673f56329887e3c038
-  SHA256_win64 a2d8ed8759892e341b4dd19be5968cc672dbf658aa5e6c4316c0940c464d89bd
+set(xp_gsoap REPO isrhub.usurf.usu.edu/internpro/gsoap TAG v2.8.97.3
+  SHA256_Linux d4447bf40ea1952d013c23d328af9cd3d8244ff126b7856c1b1c96655a6a7b2f
+  SHA256_win64 0faafb04dbb116bd66a5c958f10df83efccc8e5368f31fa55aed3edb139ce14e
   )
 set(xp_jasper REPO github.com/externpro/jasper XP_MODULE)
 set(xp_jpegxp REPO github.com/externpro/jpegxp XP_MODULE)
 set(xp_jxrlib REPO github.com/externpro/jxrlib XP_MODULE)
-set(xp_kakadu REPO isrhub.usurf.usu.edu/internpro/kakadu TAG v6.1.1.2
-  SHA256_Linux db3eb67ff724c8e41342905d0d51e5e24366133e39c20910af07358721977233
-  SHA256_win64 759cdbb9dfcfb2ed51b488d0338fc9f5b2e380e2dfc975173e70f100bd73eb8d
+set(xp_kakadu REPO isrhub.usurf.usu.edu/internpro/kakadu TAG v6.1.1.4
+  SHA256_Linux cf26edb0b133ce6a85245ebf59e89bc0263ce1acc93d7f3fc555f241e7e9c9e7
+  SHA256_win64 311c4b20e95ffdceb0e158236e27d075ce4db952b1001fc0fe530353d54e76da
   )
 set(xp_lua REPO github.com/externpro/lua XP_MODULE)
 set(xp_opensslasm REPO github.com/externpro/opensslasm)
 set(xp_nasm)
-set(xp_patch REPO github.com/externpro/xppatch TAG v2.7
+set(xp_patch REPO github.com/externpro/patch TAG v2.7
   SHA256_Linux b72b6b36acd65f6dc66e988a2edbbf483377c69d9fdf1f2537f3ec474f345196
   SHA256_win64 0e7852bd14863f7e1f5ac29a29dba83d75d92963e2f4c4bb7628397a2bf96e63
   )
@@ -70,9 +70,9 @@ set(xp_palam REPO isrhub.usurf.usu.edu/palam/palam TAG v1.11.0.0
   SHA256_Linux 8561de9d2bbf1b04badf461639028a1b164cbf4ef5083c9485dc206e09634b8c
   SHA256_win64 b9d3e691aa23358076604a141b13402f45f994cb1ed2dfe3263244eb4d35313f
   )
-set(xp_ng_gdp REPO isrhub.usurf.usu.edu/internpro/NG_GDP TAG v24.01 DEPS boost
-  SHA256_Linux a5ca9eede75a00b436499d714b7fef703414b30d00463baa8420c30cf4606dee
-  SHA256_win64 df337bb8de204ce8b9f1ab263c31e01f9213e17e27c222e8b0043292d5d78d36
+set(xp_ng_gdp REPO isrhub.usurf.usu.edu/internpro/NG_GDP TAG v24.02 DEPS boost
+  SHA256_Linux f6356221c2111223327aa70101d1d93d7fc6a11be835a3d1ec04da9353975c97
+  SHA256_win64 0e0f3ba69faa7c902bf1a6dea13bde161b5622cfa6eb430909a67aa1f156148f
   )
 set(xp_wxinclude REPO github.com/externpro/wxInclude EXE_DEPS boost XP_MODULE)
 set(xp_zmqpp REPO github.com/externpro/zmqpp DEPS libzmq XP_MODULE)
@@ -83,7 +83,7 @@ set(xp_pluginsdk REPO isrhub.usurf.usu.edu/Vantage/PluginSdk TAG v3.5.0.2 EXE_DE
   SHA256_Linux 30f268d16df0ebb28d168b776eccf4c3cba6de0c82b265382fd9fc921442bd1f
   SHA256_win64 ea919c4a2615f127a6264b81e31010f8a314feefd5c5227bd740ee250fe35fbe
   )
-set(xp_sdvideo REPO isrhub.usurf.usu.edu/internpro/Sdvideo TAG v24.01 DEPS boost ffmpeg
-  SHA256_Linux 7976e19d0aa5277f94094f95dee629e67fecd22e5f377619385a7504d2a89d73
-  SHA256_win64 db414f7c15dfeac971e0dc13bfbc9fdd03682294cb77a6de18a4be9c457ad2e0
+set(xp_sdvideo REPO isrhub.usurf.usu.edu/internpro/Sdvideo TAG v24.02 DEPS boost ffmpeg
+  SHA256_Linux 25ba1530f23c483ea1817266bad303665cdd43a265283d8f5c1cccda2068cf7f
+  SHA256_win64 860006e31454e0074c9ef365210d92c199e9cdc1741fe1835ecc569344e2b0bb
   )
