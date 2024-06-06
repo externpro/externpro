@@ -49,57 +49,28 @@ elif command -v timedatectl >/dev/null; then
 fi
 env="${env}\nDISPLAY_ENV=${display_env}"
 env="${env}\nXAUTH_ENV=${xauth_env}"
-cr8="#/usr/bin/env bash"
-cr8="${cr8}\ncd \"\$( dirname \"\$0\" )\""
-cr8="${cr8}\ndocker pull ${dkr}"
-cr8="${cr8}\necho \"saving docker image ${dkr}...\""
-cr8="${cr8}\ndocker save ${dkr} | pv -s \$(docker image inspect ${dkr} --format='{{.Size}}') | bzip2 > docker.${rel}.tar.bz2"
-##############################
-isrhub=isrhub.usurf.usu.edu
-secure=isrhub.vip.local
-if command -v host >/dev/null && host ${secure} | grep "has address" >/dev/null; then
-  doisrhub=false
-  ver="docker image built offline"
-  env="${env}\nADDSRC1=_bld/*.tar.xz"
-  env="${env}\nADDSRC2=_bld/*.sh"
-elif command -v host >/dev/null && host ${isrhub} | grep "has address" >/dev/null; then
-  urlPfx="https://${isrhub}"
-  doisrhub=true
-  ver="docker image built online"
-  env="${env}\nADDSRC1=.env"
-  env="${env}\nADDSRC2=.env"
-else
-  doisrhub=false
-  ver="docker image built offline"
-  env="${env}\nADDSRC1=_bld/*.tar.xz"
-  env="${env}\nADDSRC2=_bld/*.sh"
-fi
 ##############################
 # NOTE: EXTERN_DIR and GCC_VER need to match buildpro's public/rocky85-pro.dockerfile
 EXTERN_DIR=/opt/extern
 GCC_VER=gcc921
+urlPfx="https://isrhub.usurf.usu.edu"
 ##############################
 wproVer="$(findVer 'set(webpro_REV' CMakeLists.txt */CMakeLists.txt */toplevel.cmake */*/toplevel.cmake)"
 [[ "${wproVer}" == "NONE" ]] && wproVer=""
 if [[ -n "${wproVer}" ]]; then
   wproBase=webpro-${wproVer}-${GCC_VER}-64-$(uname -s)
   if [[ ${wproVer} < "20.05.1" ]]; then
-    if ${doisrhub}; then
-      WEBPRO_DL="wget -q \"${urlPfx}/webpro/webpro/releases/download/${wproVer}/${wproBase}.sh\" \
+    WEBPRO_DL="wget -q \"${urlPfx}/webpro/webpro/releases/download/${wproVer}/${wproBase}.sh\" \
 && chmod 755 webpro*.sh "
-    else
-      WEBPRO_DL="cd ${EXTERN_DIR}"
-    fi
     WEBPRO="${WEBPRO_DL} \
 && ./${wproBase}.sh --prefix=${EXTERN_DIR} --include-subdir \
 && rm ${wproBase}.sh"
-  elif ${doisrhub}; then
+  else
     WEBPRO_DL="wget ${urlPfx}/webpro/webpro/releases/download/${wproVer}/${wproBase}.tar.xz"
     WEBPRO="${WEBPRO_DL} -qO- | tar --no-same-owner -xJ -C ${EXTERN_DIR}"
   fi
 fi
 env="${env}\nWEBPRO=${WEBPRO}"
-[[ -n ${WEBPRO_DL} ]] && cr8="${cr8}\n${WEBPRO_DL}"
 ##############################
 if [ -f .crtoolrc ]; then
   crtv=`grep version .crtoolrc`
@@ -110,13 +81,9 @@ if [[ ${crToolVer} > "24.01" || ${crToolVer} == "24.01" ]]; then
   crToolVer=v${crToolVer}
 fi
 if [[ -n "${crToolVer}" && -n "${crWrapVer}" ]]; then
-  if ${doisrhub}; then
-    CRTOOL_DL="wget -q \"${urlPfx}/CRTool/CRTool/releases/download/${crWrapVer}/CRTool-${crWrapVer}.sh\" \
+  CRTOOL_DL="wget -q \"${urlPfx}/CRTool/CRTool/releases/download/${crWrapVer}/CRTool-${crWrapVer}.sh\" \
 && wget -q \"${urlPfx}/CRTool/CRToolImpl/releases/download/${crToolVer}/CRToolImpl-${crToolVer}.sh\" \
 && chmod 755 CRTool*.sh"
-  else
-    CRTOOL_DL="cd ${EXTERN_DIR}"
-  fi
   CRTOOL="mkdir ${EXTERN_DIR}/CRTool \
 && ${CRTOOL_DL} \
 && ./CRTool-${crWrapVer}.sh --prefix=${EXTERN_DIR}/CRTool --exclude-subdir \
@@ -125,7 +92,6 @@ if [[ -n "${crToolVer}" && -n "${crWrapVer}" ]]; then
 && rm CRToolImpl-${crToolVer}.sh"
 fi
 env="${env}\nCRTOOL=${CRTOOL}"
-[[ -n ${CRTOOL_DL} ]] && cr8="${cr8}\n${CRTOOL_DL}"
 ##############################
 CERT_DIR=/etc/pki/ca-trust/source/anchors
 TEMP_DIR=/usr/local/games # TRICKY: match use in dockergen/bit.user.dockerfile
@@ -141,48 +107,4 @@ fi
 env="${env}\nCOPY_IT=${COPY_IT}\nRUN_IT=${RUN_IT}"
 ##############################
 echo -e "${env}" > .env
-[[ -n ${ver} ]] && echo -e "${ver}" > .devcontainer/.env
-##############################
-offlineDir=.devcontainer/_bld
-if command -v host >/dev/null && host ${hst} | grep "not found" >/dev/null; then
-  if ! docker inspect ${dkr} > /dev/null 2>&1; then
-    if [[ -f ${offlineDir}/docker.${rel}.tar.bz2 ]]; then
-      # if the host specified by FROM isn't reachable, the docker image isn't local, and the offline tar.bz2 exists
-      # then load the offline docker image
-      echo "loading docker image from docker.${rel}.tar.bz2..."
-      if ! command -v pv >/dev/null; then
-        echo "NOTE: installing pv will show 'docker load' progress"
-        pipe=cat
-      else
-        pipe=pv
-      fi
-      ${pipe} ${offlineDir}/docker.${rel}.tar.bz2 | docker load
-    fi
-  fi
-fi
-if [ -d ${offlineDir} ]; then
-  if ${doisrhub}; then
-    if [[ -x ${offlineDir}/create.bash ]]; then
-      # if the offlineDir exists, isrhub is reachable, the create script exists,
-      # then wipeout the offlineDir because it shouldn't be in the build context
-      rm -rf ${offlineDir}
-    else
-      # if the offlineDir exists, isrhub is reachable, the create script doesn't exist,
-      # then create the offline container bundle (docker-compose.sh -c)
-      echo -e "${cr8}" > ${offlineDir}/create.bash
-      chmod 755 ${offlineDir}/create.bash
-      ./${offlineDir}/create.bash
-      ls -l ${offlineDir}
-      du -sh ${offlineDir}
-    fi
-  elif [[ ! -x ${offlineDir}/create.bash ]]; then
-    # if the offlineDir exists, but the create script doesn't, and isrhub isn't reachable,
-    # then the offline container bundle can't be created (docker-compose.sh -c)
-    rm -rf ${offlineDir}
-    echo -e "ERROR: can't create offline container bundle when ${isrhub} not accessible"
-  fi
-elif ! ${doisrhub}; then
-  # the offlineDir doesn't exist, and isrhub isn't reachable
-  echo "NOTE: create offline container bundle with 'docker-compose.sh -c'"
-fi
 popd > /dev/null

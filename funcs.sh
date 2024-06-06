@@ -76,17 +76,6 @@ function buildreq
   gitcfgreq
   composereq
 }
-function offlinereq
-{
-  if ! command -v pv >/dev/null; then
-    echo "NOTE: install pv before creating an offline container bundle"
-    exit 1
-  fi
-  if ! command -v bzip2 >/dev/null; then
-    echo "NOTE: install bzip2 before creating an offline container bundle"
-    exit 1
-  fi
-}
 function runreq
 {
   check=$(./.devcontainer/check-bpnet-perform.sh)
@@ -153,16 +142,5 @@ function gpureq
       sudo yum install -y nvidia-container-toolkit
       sudo systemctl restart docker
     fi
-  fi
-}
-function createContainerBundle
-{
-  offlineDir=.devcontainer/_bld
-  if [[ -d ${offlineDir} ]]; then
-    rm -rf ${offlineDir}
-  fi
-  mkdir ${offlineDir}
-  if [[ -x .devcontainer/denv.sh ]]; then
-    ./.devcontainer/denv.sh
   fi
 }

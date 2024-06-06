@@ -36,8 +36,6 @@ services:
       dockerfile: rocky85-bld.dockerfile
       args:
         <<: [*all-build-args-alias, *bld-build-args-alias]
-        ADDSRC1: ${ADDSRC1}
-        ADDSRC2: ${ADDSRC2}
     hostname: ${HNAME}
     profiles:
       - pbld
