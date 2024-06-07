@@ -96,7 +96,11 @@ env="${env}\nCRTOOL=${CRTOOL}"
 CERT_DIR=/etc/pki/ca-trust/source/anchors
 TEMP_DIR=/usr/local/games # TRICKY: match use in dockergen/bit.user.dockerfile
 XFER_DIR=_bldtmp # TRICKY: match use in funcs.sh deinit
-if [ -d ${CERT_DIR} ]; then
+SECURE=isrhub.sdl.secure
+if command -v host >/dev/null && host ${SECURE} | grep "has address" >/dev/null; then
+  isSecure=true
+fi
+if [[ -d ${CERT_DIR} && ${isSecure} ]]; then
   mkdir -p .devcontainer/${XFER_DIR} && cp ${CERT_DIR}/* .devcontainer/${XFER_DIR}
   COPY_IT="${XFER_DIR}/*"
   RUN_IT="mkdir -p ${CERT_DIR} && cp ${TEMP_DIR}/* ${CERT_DIR} && rm ${TEMP_DIR}/* && update-ca-trust"
