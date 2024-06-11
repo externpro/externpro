@@ -33,6 +33,7 @@
       "name": "LinuxRelease",
       "displayName": "build Linux Release",
       "inherits": ["isLinux"],
+      "jobs": 8,
       "configurePreset": "Linux",
       "configuration": "Release"
     }
