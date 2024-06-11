@@ -65,10 +65,6 @@
           "name": "Windows"
         },
         {
-          "type": "build",
-          "name": "WindowsRelease"
-        },
-        {
           "type": "package",
           "name": "Windows"
         }
