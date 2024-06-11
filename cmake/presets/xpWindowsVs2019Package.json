@@ -34,25 +34,9 @@
       "displayName": "build Windows Release",
       "inherits": ["isWindows"],
       "configurePreset": "Windows",
-      "configuration": "Release"
-    }
-  ],
-  "packagePresets": [
-    {
-      "name": "isWindows",
-      "hidden": true,
-      "condition": {
-        "type": "equals",
-        "lhs": "${hostSystemName}",
-        "rhs": "Windows"
-      }
-    },
-    {
-      "name": "Windows",
-      "displayName": "package Windows",
-      "inherits": ["isWindows"],
-      "configurePreset": "Windows",
-      "configurations": ["Release"]
+      "configuration": "Release",
+      "jobs": 8,
+      "targets": ["PACKAGE"]
     }
   ],
   "workflowPresets": [
@@ -65,8 +49,8 @@
           "name": "Windows"
         },
         {
-          "type": "package",
-          "name": "Windows"
+          "type": "build",
+          "name": "WindowsRelease"
         }
       ]
     }
