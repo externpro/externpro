@@ -71,7 +71,7 @@ ldi="${ldi}\nelse"
 ldi="${ldi}\n  pipe=pv"
 ldi="${ldi}\nfi"
 ldi="${ldi}\n\${pipe} ${oimg} | docker load"
-ldi="${ldi}\nif command -v host >/dev/null && host isrhub.sdl.secure | grep \"has address\ >/dev/null; then"
+ldi="${ldi}\nif command -v host >/dev/null && host isrhub.sdl.secure | grep \"has address\" >/dev/null; then"
 ldi="${ldi}\n  docker push ${dkr}"
 ldi="${ldi}\nfi"
 echo -e "${ldi}" > ${odir}/loadImage.sh
