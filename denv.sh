@@ -2,10 +2,15 @@
 cd "$( dirname "$0" )"
 pushd .. > /dev/null
 source ./.devcontainer/funcs.sh
-BPROTAG="$(findVer 'set(buildpro_REV' CMakeLists.txt */toplevel.cmake */*/toplevel.cmake)"
-if [ -z ${BPROTAG} ]; then
+if [[ $(basename -s .git `git config --get remote.origin.url`) == buildpro ]]; then
   BPROTAG=`git describe --tags`
   if [ -n "$(git status --porcelain --untracked=no)" ] || [[ ${BPROTAG} == *"-g"* ]]; then
+    BPROTAG=latest
+  fi
+else
+  BPROTAG="$(findVer 'set(buildpro_REV' CMakeLists.txt */toplevel.cmake */*/toplevel.cmake)"
+  if [ -z ${BPROTAG} ]; then
+    echo "*** buildpro_REV should be set"
     BPROTAG=latest
   fi
 fi
