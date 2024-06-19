@@ -239,11 +239,18 @@ macro(proSetStageDir) # NOTE: called by cmake-generated xpbase/pro/build.cmake f
         execute_process(COMMAND ${GIT_EXECUTABLE} status --porcelain
           WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
           OUTPUT_VARIABLE dirty
+          OUTPUT_STRIP_TRAILING_WHITESPACE
           )
-        if(dirty AND UNIX)
-          set(PREFIX "$ENV{USER}-dirtyrepo-")
-        elseif(dirty AND WIN32)
-          set(PREFIX "$ENV{USERNAME}-dirtyrepo-")
+        if(dirty)
+          string(REPLACE "\n" ";" dirtyList ${dirty})
+          list(LENGTH dirtyList len)
+          if(${len} GREATER 1 OR NOT " M CMakePresetsBase.json" IN_LIST dirtyList)
+            if(UNIX)
+              set(PREFIX "$ENV{USER}-dirtyrepo-")
+            elseif(WIN32)
+              set(PREFIX "$ENV{USERNAME}-dirtyrepo-")
+            endif()
+          endif()
         endif()
       endif()
       xpGetCompilerPrefix(COMPILER)
