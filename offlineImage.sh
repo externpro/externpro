@@ -11,18 +11,23 @@ function usage
 {
   echo "`basename -- $0` usage:"
   echo " -h            display this help message"
-  echo " (no switches) save/compress latest or current tag (if on a tagged commit)"
+  echo " (no switches) save/compress buildpro_REV"
   echo " -t [tag]      save/compress specified tag"
 }
 cd "$( dirname "$0" )"
 pushd .. > /dev/null
 source ./.devcontainer/funcs.sh
 if [ $# -eq 0 ]; then
-  BPROTAG="$(findVer 'set(buildpro_REV' CMakeLists.txt */toplevel.cmake */*/toplevel.cmake)"
-  if [ -z ${BPROTAG} ]; then
+  if [[ $(basename -s .git `git config --get remote.origin.url`) == buildpro ]]; then
     BPROTAG=`git describe --tags`
     if [ -n "$(git status --porcelain --untracked=no)" ] || [[ ${BPROTAG} == *"-g"* ]]; then
       BPROTAG=latest
+    fi
+  else
+    BPROTAG="$(findVer 'set(buildpro_REV' CMakeLists.txt */toplevel.cmake */*/toplevel.cmake)"
+    if [ -z ${BPROTAG} ]; then
+      echo "*** buildpro_REV should be set"
+      exit 1
     fi
   fi
 fi
