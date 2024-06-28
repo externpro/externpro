@@ -1157,8 +1157,6 @@ macro(xpSourceListAppend)
       foreach(item ${topdir})
         xpGlobFiles(repoFiles ${item} *)
       endforeach()
-      set(fmtFiles ${repoFiles})
-      list(FILTER fmtFiles INCLUDE REGEX "^.*\\.(c|h|cpp|hpp|cu|cuh|proto)$")
       foreach(item ${XP_SOURCE_DIR_IGNORE})
         xpGlobFiles(ignoreFiles ${item} *)
       endforeach()
@@ -1187,29 +1185,6 @@ macro(xpSourceListAppend)
         endif()
       elseif(EXISTS ${CMAKE_BINARY_DIR}/notincmake.txt)
         file(REMOVE ${CMAKE_BINARY_DIR}/notincmake.txt)
-      endif()
-      ####
-      # Windows can't handle passing very many files to clang-format
-      if(NOT MSVC AND fmtFiles)
-        # make paths relative to CMAKE_SOURCE_DIR
-        xpListRemoveFromAll(fmtFiles ${CMAKE_SOURCE_DIR} . ${fmtFiles})
-        list(LENGTH fmtFiles lenFmtFiles)
-        # NOTE: externpro doesn't have usexp-clangformat-config.cmake at cmake time
-        if(NOT CMAKE_PROJECT_NAME STREQUAL externpro)
-          xpGetPkgVar(clangformat EXE)
-          add_custom_command(OUTPUT format_cmake
-            COMMAND ${CLANGFORMAT_EXE} -style=file -i ${fmtFiles}
-            WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-            COMMENT "Running clang-format on ${lenFmtFiles} files..."
-            )
-        endif()
-        string(REPLACE ";" "\n" fmtFiles "${fmtFiles}")
-        file(WRITE ${CMAKE_BINARY_DIR}/formatfiles.txt ${fmtFiles}\n)
-        list(APPEND masterSrcList ${CMAKE_BINARY_DIR}/formatfiles.txt)
-        if(NOT TARGET format)
-          add_custom_target(format SOURCES ${CMAKE_BINARY_DIR}/formatfiles.txt DEPENDS format_cmake)
-          set_property(TARGET format PROPERTY FOLDER CMakeTargets)
-        endif()
       endif()
     endif() # is a .git repo
     find_program(XP_DOT_EXE "dot")
