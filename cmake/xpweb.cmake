@@ -330,9 +330,9 @@ function(wpAddSharedLibrary)
   endif()
   ipwebVerifySrcs(P_SRCS)
   set(build_dir ${CMAKE_CURRENT_BINARY_DIR}/build)
-  set(build_stamp ${CMAKE_CURRENT_BINARY_DIR}/wpStamp/${BUILD_TARGET}.stamp)
+  set(build_stamp ${CMAKE_CURRENT_BINARY_DIR}/xpwebStamp/${BUILD_TARGET}.stamp)
   add_custom_command(OUTPUT ${build_stamp}
-    COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/wpStamp
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/xpwebStamp
     COMMAND ${CMAKE_COMMAND} -E touch ${build_stamp}
     COMMENT "Building ${BUILD_TARGET}"
     WORKING_DIRECTORY ${P_WORKING_DIRECTORY}
@@ -377,8 +377,8 @@ function(wpAddBuildWebpack)
     xpGetPkgVar(webpack-cli SCRIPT) # sets WEBPACK-CLI_SCRIPT
   endif()
   if(P_EXCLUDE_WEB_LIBRARIES)
-    set(build_stamp ${CMAKE_CURRENT_BINARY_DIR}/wpStamp/${BUILD_TARGET}.stamp)
-    set(commandToRun ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/wpStamp
+    set(build_stamp ${CMAKE_CURRENT_BINARY_DIR}/xpwebStamp/${BUILD_TARGET}.stamp)
+    set(commandToRun ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/xpwebStamp
       COMMAND ${CMAKE_COMMAND} -E touch ${build_stamp}
       )
   else()
@@ -447,8 +447,8 @@ function(wpAddBuildAngular)
     set(project --project=${P_ANGULAR_PROJECT})
   endif()
   if(P_EXCLUDE_WEB_LIBRARIES)
-    set(build_stamp ${CMAKE_CURRENT_BINARY_DIR}/wpStamp/${BUILD_TARGET}.stamp)
-    set(commandToRun -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/wpStamp
+    set(build_stamp ${CMAKE_CURRENT_BINARY_DIR}/xpwebStamp/${BUILD_TARGET}.stamp)
+    set(commandToRun -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/xpwebStamp
       COMMAND ${CMAKE_COMMAND} -E touch ${build_stamp}
       )
   else()
