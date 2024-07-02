@@ -1,17 +1,19 @@
-################## Public Helpers ######################
-function(wpVerifyWebproDir)
+# ipweb prefix = private web functions (intended to be used only internally)
+# xpweb prefix = public web functions
+
+function(ipwebVerifyWebproDir)
   if(NOT webpro_DIR)
     message(FATAL_ERROR "webpro_DIR is undefined")
   endif()
 endfunction()
 
-function(wpVerifyTargetName targetName)
+function(ipwebVerifyTargetName targetName)
   if(NOT DEFINED ${targetName})
     message(FATAL_ERROR "Target name is required but not provided")
   endif()
 endfunction()
 
-function(wpVerifyCMakeLists)
+function(ipwebVerifyCMakeLists)
   if(NOT DEFINED P_CMAKELIST)
     if(EXISTS ${CommonLibraries_SOURCE_DIR}/cmake/toplevel.cmake)
       set(P_CMAKELIST ${CommonLibraries_SOURCE_DIR}/cmake/toplevel.cmake)
@@ -22,7 +24,7 @@ function(wpVerifyCMakeLists)
   endif()
 endfunction()
 
-function(wpVerifyWorkingDirectory)
+function(ipwebVerifyWorkingDirectory)
   if(NOT DEFINED P_WORKING_DIRECTORY OR P_WORKING_DIRECTORY STREQUAL "")
     set(P_WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
     set(P_WORKING_DIRECTORY ${P_WORKING_DIRECTORY} PARENT_SCOPE)
@@ -32,34 +34,34 @@ function(wpVerifyWorkingDirectory)
   endif()
 endfunction()
 
-function(wpGetNodePath)
+function(ipwebGetNodePath)
   if(NOT DEFINED NODE_EXE)
     xpGetPkgVar(Node EXE) # sets NODE_EXE
     set(NODE_EXE ${NODE_EXE} PARENT_SCOPE)
   endif()
 endfunction()
 
-function(wpGetYarnPath)
+function(ipwebGetYarnPath)
   if(NOT DEFINED YARN_SCRIPT)
     xpGetPkgVar(yarn SCRIPT) # sets YARN_SCRIPT
     set(YARN_SCRIPT ${YARN_SCRIPT} PARENT_SCOPE)
   endif()
 endfunction()
 
-function(wpGetAngularPath)
+function(ipwebGetAngularPath)
   if(NOT DEFINED ANGULAR-CLI_SCRIPT)
     xpGetPkgVar(angular-cli SCRIPT) # sets ANGULAR-CLI_SCRIPT
     set(ANGULAR-CLI_SCRIPT ${ANGULAR-CLI_SCRIPT} PARENT_SCOPE)
   endif()
 endfunction()
 
-function(wpVerifySrcs srcs)
+function(ipwebVerifySrcs srcs)
   if(NOT DEFINED ${srcs})
     message(FATAL_ERROR "No sources were given, this target will not rebuild correctly")
   endif()
 endfunction()
 
-function(wpVerifyFolder)
+function(ipwebVerifyFolder)
   if(DEFINED P_FOLDER)
     set(P_FOLDER FOLDER ${P_FOLDER})
   elseif(DEFINED folder)
@@ -68,14 +70,14 @@ function(wpVerifyFolder)
   set(P_FOLDER ${P_FOLDER} PARENT_SCOPE)
 endfunction()
 
-function(wpVerifyTestDir)
+function(ipwebVerifyTestDir)
   if(NOT DEFINED P_TEST_DIR)
     set(P_TEST_DIR test)
     set(P_TEST_DIR ${P_TEST_DIR} PARENT_SCOPE)
   endif()
 endfunction()
 
-function(wpVerifyTestFolder)
+function(ipwebVerifyTestFolder)
   if(DEFINED P_TEST_FOLDER)
     set(P_TEST_FOLDER FOLDER ${P_TEST_FOLDER})
   elseif(DEFINED folder_unittest)
@@ -84,7 +86,7 @@ function(wpVerifyTestFolder)
   set(P_TEST_FOLDER ${P_TEST_FOLDER} PARENT_SCOPE)
 endfunction()
 
-function(wpVerifyYarnTarget)
+function(ipwebVerifyYarnTarget)
   if(NOT DEFINED P_YARN_TARGET)
     message(FATAL_ERROR "This target requires a dependency upon an install target")
   endif()
@@ -92,7 +94,7 @@ function(wpVerifyYarnTarget)
   set(P_DEPENDS ${P_DEPENDS} PARENT_SCOPE)
 endfunction()
 
-function(wpSetBuildProperties target)
+function(ipwebSetBuildProperties target)
   set_property(TARGET ${target} PROPERTY STAMP ${build_stamp})
   if(DEFINED P_FOLDER)
     set_property(TARGET ${target} PROPERTY ${P_FOLDER})
@@ -102,7 +104,7 @@ function(wpSetBuildProperties target)
   endif()
 endfunction()
 
-function(wpCalculateDependencies)
+function(ipwebCalculateDependencies)
   if(NOT DEFINED P_DEPENDS)
     message(FATAL_ERROR "No dependencies were given")
   endif()
@@ -116,34 +118,34 @@ function(wpCalculateDependencies)
   set(depends ${depends} PARENT_SCOPE)
 endfunction()
 
-function(wpGetInstallComponent)
+function(ipwebGetInstallComponent)
   if(DEFINED P_INSTALL_COMPONENT)
     set(component COMPONENT ${P_INSTALL_COMPONENT})
     set(component ${component} PARENT_SCOPE)
   endif()
 endfunction()
 
-function(wpInstallBuildDir)
+function(ipwebInstallBuildDir)
   if(DEFINED P_INSTALL_DESTINATION)
-    wpGetInstallComponent()
+    ipwebGetInstallComponent()
     install(DIRECTORY ${build_dir}/ DESTINATION ${P_INSTALL_DESTINATION} ${component} PATTERN "bin/Node*.node" EXCLUDE)
   endif()
 endfunction()
 
-function(wpSetIfNotDefined)
+function(ipwebSetIfNotDefined)
   if(NOT DEFINED ${ARGV0})
     set(${ARGV0} ${ARGV1} PARENT_SCOPE)
   endif()
 endfunction()
 
-function(wpSetIfDefined arg)
+function(ipwebSetIfDefined arg)
   if(DEFINED P_${arg})
     set(P_${arg} ${arg} "${P_${arg}}")
     set(P_${arg} ${P_${arg}} PARENT_SCOPE)
   endif()
 endfunction()
 
-function(wpAddTypescriptLibrary)
+function(ipwebAddTypescriptLibrary)
   if(ARGV0 OR ARGV1)
     return()
   endif()
@@ -152,9 +154,9 @@ function(wpAddTypescriptLibrary)
   set_property(GLOBAL PROPERTY ecmaScriptTargets_property "${ecmaScriptTargets}")
 endfunction()
 
-function(wpAddTestTarget target)
-  wpVerifyTestDir() # Can set P_TEST_DIR
-  wpVerifyFolder() # Can set P_FOLDER
+function(ipwebAddTestTarget target)
+  ipwebVerifyTestDir() # Can set P_TEST_DIR
+  ipwebVerifyFolder() # Can set P_FOLDER
   set(projectName ${target}Test)
   ipParseDir(${P_TEST_DIR} "")
   list(APPEND P_DEPENDS ${target})
@@ -174,13 +176,13 @@ function(wpAddYarnTarget)
   set(YARN_TARGET ${ARGV0})
   set(oneValueArgs CMAKELIST FOLDER WORKING_DIRECTORY)
   cmake_parse_arguments(P "" "${oneValueArgs}" "" ${ARGN})
-  wpVerifyWebproDir()
-  wpVerifyTargetName(YARN_TARGET)
-  wpVerifyCMakeLists()
-  wpVerifyWorkingDirectory() # Can set P_WORKING_DIRECTORY
-  wpGetNodePath() # sets NODE_EXE
-  wpGetYarnPath() # sets YARN_SCRIPT
-  wpVerifyFolder() # Can set P_FOLDER
+  ipwebVerifyWebproDir()
+  ipwebVerifyTargetName(YARN_TARGET)
+  ipwebVerifyCMakeLists()
+  ipwebVerifyWorkingDirectory() # Can set P_WORKING_DIRECTORY
+  ipwebGetNodePath() # sets NODE_EXE
+  ipwebGetYarnPath() # sets YARN_SCRIPT
+  ipwebVerifyFolder() # Can set P_FOLDER
   if(TARGET ${YARN_TARGET})
     return()
   endif()
@@ -200,7 +202,7 @@ function(wpAddYarnTarget)
     SOURCES ${P_WORKING_DIRECTORY}/package.json
     WORKING_DIRECTORY ${P_WORKING_DIRECTORY}
     )
-  wpSetBuildProperties(${YARN_TARGET})
+  ipwebSetBuildProperties(${YARN_TARGET})
 endfunction()
 
 # ARGV0 - What to name the target
@@ -210,9 +212,9 @@ function(wpAddGenerateVersion)
   set(VERSION_TARGET ${ARGV0})
   set(oneValueArgs FOLDER VERSION_DEST)
   cmake_parse_arguments(P "" "${oneValueArgs}" "" ${ARGN})
-  wpVerifyWebproDir()
-  wpVerifyTargetName(VERSION_TARGET)
-  wpVerifyFolder() # Can set P_FOLDER
+  ipwebVerifyWebproDir()
+  ipwebVerifyTargetName(VERSION_TARGET)
+  ipwebVerifyFolder() # Can set P_FOLDER
   if(NOT DEFINED P_VERSION_DEST)
     message(FATAL_ERROR "wpAddGenerateVersion requires a destination")
   endif()
@@ -223,14 +225,14 @@ function(wpAddGenerateVersion)
   else()
     message(FATAL_ERROR "wpAddGenerateVersion only supports .ts or .js")
   endif()
-  wpSetIfNotDefined(PACKAGE_VERSION_MAJOR ${CMAKE_PROJECT_VERSION_MAJOR})
-  wpSetIfNotDefined(PACKAGE_VERSION_MINOR ${CMAKE_PROJECT_VERSION_MINOR})
-  wpSetIfNotDefined(PACKAGE_VERSION_PATCH ${CMAKE_PROJECT_VERSION_PATCH})
-  wpSetIfNotDefined(PACKAGE_VERSION_TWEAK ${CMAKE_PROJECT_VERSION_TWEAK})
-  wpSetIfNotDefined(FILE_VERSION_MAJOR ${CMAKE_PROJECT_VERSION_MAJOR})
-  wpSetIfNotDefined(FILE_VERSION_MINOR ${CMAKE_PROJECT_VERSION_MINOR})
-  wpSetIfNotDefined(FILE_VERSION_PATCH ${CMAKE_PROJECT_VERSION_PATCH})
-  wpSetIfNotDefined(FILE_VERSION_TWEAK ${CMAKE_PROJECT_VERSION_TWEAK})
+  ipwebSetIfNotDefined(PACKAGE_VERSION_MAJOR ${CMAKE_PROJECT_VERSION_MAJOR})
+  ipwebSetIfNotDefined(PACKAGE_VERSION_MINOR ${CMAKE_PROJECT_VERSION_MINOR})
+  ipwebSetIfNotDefined(PACKAGE_VERSION_PATCH ${CMAKE_PROJECT_VERSION_PATCH})
+  ipwebSetIfNotDefined(PACKAGE_VERSION_TWEAK ${CMAKE_PROJECT_VERSION_TWEAK})
+  ipwebSetIfNotDefined(FILE_VERSION_MAJOR ${CMAKE_PROJECT_VERSION_MAJOR})
+  ipwebSetIfNotDefined(FILE_VERSION_MINOR ${CMAKE_PROJECT_VERSION_MINOR})
+  ipwebSetIfNotDefined(FILE_VERSION_PATCH ${CMAKE_PROJECT_VERSION_PATCH})
+  ipwebSetIfNotDefined(FILE_VERSION_TWEAK ${CMAKE_PROJECT_VERSION_TWEAK})
   xpCreateVersionString(PACKAGE) # Sets PACKAGE_VERSION_NUM and PACKAGE_STR
   xpCreateVersionString(FILE) # Sets FILE_VERSION_NUM and FILE_STR
   string(TIMESTAMP PACKAGE_CURRENT_YEAR %Y)
@@ -267,14 +269,14 @@ function(wpAddGenerateProto)
   set(oneValueArgs FOLDER PROTO_DEST TARGET_FORMAT WORKING_DIRECTORY YARN_TARGET)
   set(multiValueArgs PROTO_SRCS)
   cmake_parse_arguments(P "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
-  wpVerifyWebproDir()
-  wpVerifyTargetName(GENERATE_TARGET)
-  wpVerifyFolder() # Can set P_FOLDER
-  wpVerifyWorkingDirectory() # Can set P_WORKING_DIRECTORY
-  wpVerifyYarnTarget()
+  ipwebVerifyWebproDir()
+  ipwebVerifyTargetName(GENERATE_TARGET)
+  ipwebVerifyFolder() # Can set P_FOLDER
+  ipwebVerifyWorkingDirectory() # Can set P_WORKING_DIRECTORY
+  ipwebVerifyYarnTarget()
   file(GLOB P_PROTO_SRCS ${P_PROTO_SRCS})
-  wpVerifySrcs(P_PROTO_SRCS)
-  wpGetNodePath() # sets NODE_EXE
+  ipwebVerifySrcs(P_PROTO_SRCS)
+  ipwebGetNodePath() # sets NODE_EXE
   if(NOT DEFINED P_PROTO_DEST)
     message(FATAL_ERROR "wpAddGenerateProto requires a destination")
   endif()
@@ -300,7 +302,7 @@ function(wpAddGenerateProto)
     DEPENDS ${P_YARN_TARGET}
     SOURCES ${P_PROTO_SRCS}
     )
-  wpSetBuildProperties(${GENERATE_TARGET})
+  ipwebSetBuildProperties(${GENERATE_TARGET})
 endfunction()
 
 # ARGV0 - What to name the target
@@ -318,15 +320,15 @@ function(wpAddSharedLibrary)
   set(oneValueArgs FOLDER WORKING_DIRECTORY YARN_TARGET)
   set(multiValueArgs SRCS DEPENDS)
   cmake_parse_arguments(P "${optionArgs}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
-  wpVerifyWebproDir()
-  wpVerifyTargetName(BUILD_TARGET)
-  wpVerifyFolder() # Can set P_FOLDER
-  wpVerifyWorkingDirectory() # Can set P_WORKING_DIRECTORY
+  ipwebVerifyWebproDir()
+  ipwebVerifyTargetName(BUILD_TARGET)
+  ipwebVerifyFolder() # Can set P_FOLDER
+  ipwebVerifyWorkingDirectory() # Can set P_WORKING_DIRECTORY
   if(NOT P_SKIP_YARN_TARGET)
-    wpVerifyYarnTarget() # appends YARN_TARGET to P_DEPENDS
-    wpCalculateDependencies() # returns: depends
+    ipwebVerifyYarnTarget() # appends YARN_TARGET to P_DEPENDS
+    ipwebCalculateDependencies() # returns: depends
   endif()
-  wpVerifySrcs(P_SRCS)
+  ipwebVerifySrcs(P_SRCS)
   set(build_dir ${CMAKE_CURRENT_BINARY_DIR}/build)
   set(build_stamp ${CMAKE_CURRENT_BINARY_DIR}/wpStamp/${BUILD_TARGET}.stamp)
   add_custom_command(OUTPUT ${build_stamp}
@@ -341,8 +343,8 @@ function(wpAddSharedLibrary)
     SOURCES ${P_SRCS}
     WORKING_DIRECTORY ${P_WORKING_DIRECTORY}
     )
-  wpSetBuildProperties(${BUILD_TARGET})
-  wpAddTypescriptLibrary(${P_TEST_TOOL} ${P_LIBRARY_DIR})
+  ipwebSetBuildProperties(${BUILD_TARGET})
+  ipwebAddTypescriptLibrary(${P_TEST_TOOL} ${P_LIBRARY_DIR})
 endfunction()
 
 # ARGV0 - What to name the target
@@ -363,14 +365,14 @@ function(wpAddBuildWebpack)
   set(oneValueArgs FOLDER INSTALL_COMPONENT INSTALL_DESTINATION INSTALL_NODE_DESTINATION WORKING_DIRECTORY YARN_TARGET)
   set(multiValueArgs SRCS DEPENDS OUTPUT_FILES)
   cmake_parse_arguments(P "${optionArgs}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
-  wpVerifyWebproDir()
-  wpVerifyTargetName(BUILD_TARGET)
-  wpVerifyFolder() # Can set P_FOLDER
-  wpVerifyWorkingDirectory() # Can set P_WORKING_DIRECTORY
-  wpVerifyYarnTarget() # appends YARN_TARGET to P_DEPENDS
-  wpVerifySrcs(P_SRCS)
-  wpGetNodePath() # sets NODE_EXE
-  wpCalculateDependencies() # returns: depends
+  ipwebVerifyWebproDir()
+  ipwebVerifyTargetName(BUILD_TARGET)
+  ipwebVerifyFolder() # Can set P_FOLDER
+  ipwebVerifyWorkingDirectory() # Can set P_WORKING_DIRECTORY
+  ipwebVerifyYarnTarget() # appends YARN_TARGET to P_DEPENDS
+  ipwebVerifySrcs(P_SRCS)
+  ipwebGetNodePath() # sets NODE_EXE
+  ipwebCalculateDependencies() # returns: depends
   if(NOT DEFINED WEBPACK-CLI_SCRIPT)
     xpGetPkgVar(webpack-cli SCRIPT) # sets WEBPACK-CLI_SCRIPT
   endif()
@@ -401,16 +403,16 @@ function(wpAddBuildWebpack)
     SOURCES ${P_SRCS}
     WORKING_DIRECTORY ${P_WORKING_DIRECTORY}
     )
-  wpSetBuildProperties(${BUILD_TARGET})
+  ipwebSetBuildProperties(${BUILD_TARGET})
   if(NOT P_EXCLUDE_WEB_LIBRARIES)
-    wpInstallBuildDir()
-    wpGetInstallComponent() # Sets component
+    ipwebInstallBuildDir()
+    ipwebGetInstallComponent() # Sets component
     if(NOT DEFINED P_INSTALL_NODE_DESTINATION)
       set(P_INSTALL_NODE_DESTINATION bin)
     endif()
     install(PROGRAMS ${NODE_EXE} DESTINATION ${P_INSTALL_NODE_DESTINATION} ${component})
   endif()
-  wpAddTypescriptLibrary(${P_TEST_TOOL} FALSE)
+  ipwebAddTypescriptLibrary(${P_TEST_TOOL} FALSE)
 endfunction()
 
 # ARGV0 - What to name the target
@@ -432,15 +434,15 @@ function(wpAddBuildAngular)
   set(oneValueArgs ANGULAR_PROJECT FOLDER INSTALL_COMPONENT INSTALL_DESTINATION WORKING_DIRECTORY YARN_TARGET)
   set(multiValueArgs SRCS DEPENDS EXTRA_PACKAGE_FILES)
   cmake_parse_arguments(P "${optionArgs}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
-  wpVerifyWebproDir()
-  wpVerifyTargetName(BUILD_TARGET)
-  wpVerifyFolder() # Can set P_FOLDER
-  wpVerifyWorkingDirectory() # Can set P_WORKING_DIRECTORY
-  wpVerifyYarnTarget() # appends YARN_TARGET to P_DEPENDS
-  wpVerifySrcs(P_SRCS)
-  wpGetNodePath() # sets NODE_EXE
-  wpCalculateDependencies() # returns: depends
-  wpGetAngularPath() # sets ANGULAR-CLI_SCRIPT
+  ipwebVerifyWebproDir()
+  ipwebVerifyTargetName(BUILD_TARGET)
+  ipwebVerifyFolder() # Can set P_FOLDER
+  ipwebVerifyWorkingDirectory() # Can set P_WORKING_DIRECTORY
+  ipwebVerifyYarnTarget() # appends YARN_TARGET to P_DEPENDS
+  ipwebVerifySrcs(P_SRCS)
+  ipwebGetNodePath() # sets NODE_EXE
+  ipwebCalculateDependencies() # returns: depends
+  ipwebGetAngularPath() # sets ANGULAR-CLI_SCRIPT
   if(DEFINED P_ANGULAR_PROJECT)
     set(project --project=${P_ANGULAR_PROJECT})
   endif()
@@ -485,16 +487,16 @@ function(wpAddBuildAngular)
     SOURCES ${P_SRCS}
     WORKING_DIRECTORY ${P_WORKING_DIRECTORY}
     )
-  wpSetBuildProperties(${BUILD_TARGET})
+  ipwebSetBuildProperties(${BUILD_TARGET})
   if(NOT P_EXCLUDE_WEB_LIBRARIES)
     if(DEFINED archive AND P_INSTALL_DESTINATION)
-      wpGetInstallComponent()
+      ipwebGetInstallComponent()
       install(FILES ${archive} DESTINATION ${P_INSTALL_DESTINATION} ${component})
     else()
-      wpInstallBuildDir()
+      ipwebInstallBuildDir()
     endif()
   endif()
-  wpAddTypescriptLibrary(${P_TEST_TOOL} FALSE)
+  ipwebAddTypescriptLibrary(${P_TEST_TOOL} FALSE)
 endfunction()
 
 # ARGV0 - What to name the target
@@ -509,17 +511,17 @@ function(wpAddJasmineTest)
   set(oneValueArgs FOLDER TEST_DIR WORKING_DIRECTORY)
   set(multiValueArgs DEPENDS)
   cmake_parse_arguments(P "${optionArgs}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
-  wpVerifyWebproDir()
-  wpVerifyTargetName(BUILD_TARGET)
-  wpVerifyWorkingDirectory() # Can set P_WORKING_DIRECTORY
-  wpGetNodePath() # Sets NODE_EXE
+  ipwebVerifyWebproDir()
+  ipwebVerifyTargetName(BUILD_TARGET)
+  ipwebVerifyWorkingDirectory() # Can set P_WORKING_DIRECTORY
+  ipwebGetNodePath() # Sets NODE_EXE
   if(NOT DEFINED JASMINE_SCRIPT)
     xpGetPkgVar(jasmine SCRIPT) # Sets JASMINE_SCRIPT
   endif()
   if(NOT DEFINED TS-NODE_SCRIPT)
     xpGetPkgVar(ts-node SCRIPT) # Sets TS-NODE_SCRIPT
   endif()
-  wpAddTestTarget(${BUILD_TARGET}) # Uses DEPENDS, FOLDER, TEST_DIR
+  ipwebAddTestTarget(${BUILD_TARGET}) # Uses DEPENDS, FOLDER, TEST_DIR
   if(P_EXCLUDE_COVERAGE)
     set(JS_SERVER_COVERAGE_FLAGS)
   else()
@@ -556,11 +558,11 @@ function(wpAddAngularTest)
   set(oneValueArgs ANGULAR_PROJECT FOLDER TEST_DIR WORKING_DIRECTORY)
   set(multiValueArgs DEPENDS)
   cmake_parse_arguments(P "${optionArgs}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
-  wpVerifyWebproDir()
-  wpVerifyTargetName(BUILD_TARGET)
-  wpVerifyWorkingDirectory() # Can set P_WORKING_DIRECTORY
-  wpGetNodePath() # sets NODE_EXE
-  wpGetAngularPath() # sets ANGULAR-CLI_SCRIPT
+  ipwebVerifyWebproDir()
+  ipwebVerifyTargetName(BUILD_TARGET)
+  ipwebVerifyWorkingDirectory() # Can set P_WORKING_DIRECTORY
+  ipwebGetNodePath() # sets NODE_EXE
+  ipwebGetAngularPath() # sets ANGULAR-CLI_SCRIPT
   if(WIN32)
     set(unit_test_browser ChromeHeadless)
   else()
@@ -569,7 +571,7 @@ function(wpAddAngularTest)
   if(DEFINED P_ANGULAR_PROJECT)
     set(project --project=${P_ANGULAR_PROJECT})
   endif()
-  wpAddTestTarget(${BUILD_TARGET})
+  ipwebAddTestTarget(${BUILD_TARGET})
   add_test(NAME ${BUILD_TARGET}Test
     COMMAND ${NODE_EXE} ${ANGULAR-CLI_SCRIPT} test ${project}
       --no-watch --no-progress --browsers=${unit_test_browser} ${JS_CLIENT_COVERAGE_FLAGS}
@@ -591,9 +593,9 @@ function(wpGenerateApiDoc)
   set(GENERATE_TARGET ${ARGV0})
   set(oneValueArgs FOLDER INPUT OUTPUT WORKING_DIRECTORY YARN_TARGET)
   cmake_parse_arguments(P "" "${oneValueArgs}" "" ${ARGN})
-  wpVerifyFolder() # Can set P_FOLDER
-  wpGetNodePath() # sets NODE_EXE
-  wpVerifyWorkingDirectory() # Can set P_WORKING_DIRECTORY
+  ipwebVerifyFolder() # Can set P_FOLDER
+  ipwebGetNodePath() # sets NODE_EXE
+  ipwebVerifyWorkingDirectory() # Can set P_WORKING_DIRECTORY
   if(NOT DEFINED APIDOC_SCRIPT)
     xpGetPkgVar(Apidoc SCRIPT) # sets APIDOC_SCRIPT
   endif()
@@ -612,7 +614,7 @@ function(wpGenerateApiDoc)
     DEPENDS ${routeSrcs} ${P_YARN_TARGET}
     )
   add_custom_target(${GENERATE_TARGET} ALL DEPENDS ${build_stamp})
-  wpSetBuildProperties(${GENERATE_TARGET})
+  ipwebSetBuildProperties(${GENERATE_TARGET})
 endfunction()
 
 # ARGV0 - What to name the targets
@@ -672,23 +674,23 @@ function(wpInstallNBuild)
     endif()
     set(P_YARN_TARGET ${PROJECT_NAME}Deps)
   endif()
-  wpSetIfDefined(CMAKELIST) # Sets P_CMAKELIST
-  wpVerifyFolder() # Sets P_FOLDER
+  ipwebSetIfDefined(CMAKELIST) # Sets P_CMAKELIST
+  ipwebVerifyFolder() # Sets P_FOLDER
   if(DEFINED P_FOLDER AND (DEFINED P_APIDOC_INPUT OR DEFINED P_PROTO_SRCS OR NOT TARGET ${P_YARN_TARGET}))
     set(P_FOLDER ${P_FOLDER}/${BUILD_TARGET}Targets)
   endif()
-  wpSetIfDefined(WORKING_DIRECTORY) # Sets P_WORKING_DIRECTORY
+  ipwebSetIfDefined(WORKING_DIRECTORY) # Sets P_WORKING_DIRECTORY
   wpAddYarnTarget(${P_YARN_TARGET} ${P_CMAKELIST} ${P_FOLDER} ${P_WORKING_DIRECTORY})
   set(P_YARN_TARGET YARN_TARGET ${P_YARN_TARGET})
-  wpSetIfDefined(DEPENDS) # Sets P_DEPENDS
+  ipwebSetIfDefined(DEPENDS) # Sets P_DEPENDS
   if(DEFINED P_VERSION_DEST)
     wpAddGenerateVersion(${BUILD_TARGET}_version ${P_FOLDER} VERSION_DEST ${P_VERSION_DEST})
     list(APPEND P_DEPENDS ${BUILD_TARGET}_version)
   endif()
   if(DEFINED P_PROTO_SRCS)
-    wpSetIfDefined(PROTO_DEST) # Sets P_PROTO_DEST
-    wpSetIfDefined(PROTO_SRCS) # Sets P_PROTO_SRCS
-    wpSetIfDefined(TARGET_FORMAT) # Sets P_TARGET_FORMAT
+    ipwebSetIfDefined(PROTO_DEST) # Sets P_PROTO_DEST
+    ipwebSetIfDefined(PROTO_SRCS) # Sets P_PROTO_SRCS
+    ipwebSetIfDefined(TARGET_FORMAT) # Sets P_TARGET_FORMAT
     wpAddGenerateProto(${BUILD_TARGET}-pb
       ${P_FOLDER}
       ${P_PROTO_DEST}
@@ -699,11 +701,11 @@ function(wpInstallNBuild)
       )
     list(APPEND P_DEPENDS ${BUILD_TARGET}-pb)
   endif()
-  wpSetIfDefined(SRCS) # Sets P_SRCS
-  wpSetIfDefined(INSTALL_COMPONENT) # Sets P_INSTALL_COMPONENT
-  wpSetIfDefined(INSTALL_DESTINATION) # Sets P_INSTALL_DESTINATION
-  wpSetIfDefined(ANGULAR_PROJECT) # Sets P_ANGULAR_PROJECT
-  wpSetIfDefined(EXCLUDE_FROM_ALL) # Sets P_EXCLUDE_FROM_ALL
+  ipwebSetIfDefined(SRCS) # Sets P_SRCS
+  ipwebSetIfDefined(INSTALL_COMPONENT) # Sets P_INSTALL_COMPONENT
+  ipwebSetIfDefined(INSTALL_DESTINATION) # Sets P_INSTALL_DESTINATION
+  ipwebSetIfDefined(ANGULAR_PROJECT) # Sets P_ANGULAR_PROJECT
+  ipwebSetIfDefined(EXCLUDE_FROM_ALL) # Sets P_EXCLUDE_FROM_ALL
   if(P_EXCLUDE_WEB_LIBRARIES)
     set(EXCLUDE_WEB_LIBRARIES EXCLUDE_WEB_LIBRARIES)
   endif()
@@ -716,8 +718,8 @@ function(wpInstallNBuild)
     endif()
     wpAddSharedLibrary(${BUILD_TARGET} ${P_DEPENDS} ${P_FOLDER} ${LIBRARY_DIR} ${P_SRCS} ${TEST_TOOL} ${P_WORKING_DIRECTORY} ${P_YARN_TARGET})
   elseif(P_TYPE STREQUAL "webpack")
-    wpSetIfDefined(OUTPUT_FILES) # Sets P_OUTPUT_FILES
-    wpSetIfDefined(INSTALL_NODE_DESTINATION) # Sets P_INSTALL_NODE_DESTINATION
+    ipwebSetIfDefined(OUTPUT_FILES) # Sets P_OUTPUT_FILES
+    ipwebSetIfDefined(INSTALL_NODE_DESTINATION) # Sets P_INSTALL_NODE_DESTINATION
     wpAddBuildWebpack(${BUILD_TARGET}
       ${EXCLUDE_WEB_LIBRARIES}
       ${P_DEPENDS}
@@ -735,7 +737,7 @@ function(wpInstallNBuild)
     if(P_ARCHIVE_BUILD)
       set(ARCHIVE_BUILD ARCHIVE_BUILD)
     endif()
-    wpSetIfDefined(EXTRA_PACKAGE_FILES) # Sets P_EXTRA_PACKAGE_FILES
+    ipwebSetIfDefined(EXTRA_PACKAGE_FILES) # Sets P_EXTRA_PACKAGE_FILES
     wpAddBuildAngular(${BUILD_TARGET}
       ${EXCLUDE_WEB_LIBRARIES}
       ${P_ANGULAR_PROJECT}
@@ -752,14 +754,14 @@ function(wpInstallNBuild)
       )
   endif()
   if(P_ADD_TO_TEST)
-    wpSetIfDefined(TEST_DIR) # Sets P_TEST_DIR
+    ipwebSetIfDefined(TEST_DIR) # Sets P_TEST_DIR
     if(DEFINED P_TEST_DEPENDS)
       set(P_TEST_DEPENDS DEPENDS ${P_TEST_DEPENDS})
     endif()
     if(P_ADD_SUBMODULE_TEST_LABEL)
       set(ADD_SUBMODULE_TEST_LABEL ADD_SUBMODULE_TEST_LABEL)
     endif()
-    wpVerifyTestFolder() # Sets P_TEST_FOLDER
+    ipwebVerifyTestFolder() # Sets P_TEST_FOLDER
     if(P_TYPE STREQUAL "angular")
       wpAddAngularTest(${BUILD_TARGET} ${ADD_SUBMODULE_TEST_LABEL} ${P_ANGULAR_PROJECT} ${P_TEST_DEPENDS} ${P_TEST_DIR} ${P_TEST_FOLDER} ${P_WORKING_DIRECTORY} ${P_YARN_TARGET})
     else()
@@ -791,7 +793,7 @@ function(wpAddAddonTest)
   set(oneValueArgs CMAKELIST FOLDER TEST_DIR WORKING_DIRECTORY)
   set(multiValueArgs DEPENDS)
   cmake_parse_arguments(P "${optionArgs}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
-  wpVerifyCMakeLists(CMAKELIST) # Sets P_CMAKELIST
+  ipwebVerifyCMakeLists(CMAKELIST) # Sets P_CMAKELIST
   if(NOT DEFINED P_FOLDER AND DEFINED folder_unittest)
     set(P_FOLDER FOLDER ${folder_unittest}/${TEST_TARGET})
   endif()
@@ -799,10 +801,10 @@ function(wpAddAddonTest)
   if(P_ADD_SUBMODULE_TEST_LABEL)
     set(ADD_SUBMODULE_TEST_LABEL ADD_SUBMODULE_TEST_LABEL)
   endif()
-  wpVerifyTestFolder() # Sets P_TEST_FOLDER
-  wpSetIfDefined(TEST_DIR) # Sets P_TEST_DIR
-  wpSetIfDefined(DEPENDS) # Sets P_DEPENDS
-  wpSetIfDefined(WORKING_DIRECTORY) # Sets P_WORKING_DIRECTORY
+  ipwebVerifyTestFolder() # Sets P_TEST_FOLDER
+  ipwebSetIfDefined(TEST_DIR) # Sets P_TEST_DIR
+  ipwebSetIfDefined(DEPENDS) # Sets P_DEPENDS
+  ipwebSetIfDefined(WORKING_DIRECTORY) # Sets P_WORKING_DIRECTORY
   wpAddYarnTarget(${TEST_TARGET}Deps ${P_CMAKELIST} ${P_TEST_FOLDER} ${P_WORKING_DIRECTORY})
   list(APPEND P_DEPENDS ${TEST_TARGET}Deps)
   wpAddJasmineTest(${TEST_TARGET} ${ADD_SUBMODULE_TEST_LABEL} ${P_DEPENDS} EXCLUDE_COVERAGE ${P_TEST_FOLDER} ${P_TEST_DIR} ${P_WORKING_DIRECTORY})
