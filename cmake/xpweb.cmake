@@ -172,7 +172,7 @@ endfunction()
 # CMAKELIST - Where is webpro version specified
 # FOLDER - What folder to put the target under
 # WORKING_DIRECTORY - Where to perform the install
-function(wpAddYarnTarget)
+function(xpwebAddYarnTarget)
   set(YARN_TARGET ${ARGV0})
   set(oneValueArgs CMAKELIST FOLDER WORKING_DIRECTORY)
   cmake_parse_arguments(P "" "${oneValueArgs}" "" ${ARGN})
@@ -208,7 +208,7 @@ endfunction()
 # ARGV0 - What to name the target
 # FOLDER - What folder to put the target under
 # VERSION_DEST - Where to put the version file
-function(wpAddGenerateVersion)
+function(xpwebGenerateVersion)
   set(VERSION_TARGET ${ARGV0})
   set(oneValueArgs FOLDER VERSION_DEST)
   cmake_parse_arguments(P "" "${oneValueArgs}" "" ${ARGN})
@@ -216,14 +216,14 @@ function(wpAddGenerateVersion)
   ipwebVerifyTargetName(VERSION_TARGET)
   ipwebVerifyFolder() # Can set P_FOLDER
   if(NOT DEFINED P_VERSION_DEST)
-    message(FATAL_ERROR "wpAddGenerateVersion requires a destination")
+    message(FATAL_ERROR "xpwebGenerateVersion requires a destination")
   endif()
   if(P_VERSION_DEST MATCHES ".*ts")
     set(versionToMake ts)
   elseif(P_VERSION_DEST MATCHES ".*js")
     set(versionToMake js)
   else()
-    message(FATAL_ERROR "wpAddGenerateVersion only supports .ts or .js")
+    message(FATAL_ERROR "xpwebGenerateVersion only supports .ts or .js")
   endif()
   ipwebSetIfNotDefined(PACKAGE_VERSION_MAJOR ${CMAKE_PROJECT_VERSION_MAJOR})
   ipwebSetIfNotDefined(PACKAGE_VERSION_MINOR ${CMAKE_PROJECT_VERSION_MINOR})
@@ -264,7 +264,7 @@ endfunction()
 # TARGET_FORMAT - The target format for the generated files
 # WORKING_DIRECTORY - Where to perform the command
 # YARN_TARGET - What install target is depended upon
-function(wpAddGenerateProto)
+function(xpwebGenerateProto)
   set(GENERATE_TARGET ${ARGV0})
   set(oneValueArgs FOLDER PROTO_DEST TARGET_FORMAT WORKING_DIRECTORY YARN_TARGET)
   set(multiValueArgs PROTO_SRCS)
@@ -278,7 +278,7 @@ function(wpAddGenerateProto)
   ipwebVerifySrcs(P_PROTO_SRCS)
   ipwebGetNodePath() # sets NODE_EXE
   if(NOT DEFINED P_PROTO_DEST)
-    message(FATAL_ERROR "wpAddGenerateProto requires a destination")
+    message(FATAL_ERROR "xpwebGenerateProto requires a destination")
   endif()
   if(NOT DEFINED P_TARGET_FORMAT)
     set(P_TARGET_FORMAT "static-module")
@@ -314,7 +314,7 @@ endfunction()
 # TEST_TOOL - Whether the target is a test tool or not (to be scanned with fortify)
 # WORKING_DIRECTORY - Where to perform the command
 # YARN_TARGET - What install target is depended upon
-function(wpAddSharedLibrary)
+function(xpwebAddLibrary)
   set(BUILD_TARGET ${ARGV0})
   set(optionArgs LIBRARY_DIR SKIP_YARN_TARGET TEST_TOOL)
   set(oneValueArgs FOLDER WORKING_DIRECTORY YARN_TARGET)
@@ -359,7 +359,7 @@ endfunction()
 # TEST_TOOL - Whether the target is a test tool or not (to be scanned with fortify)
 # WORKING_DIRECTORY - Where to perform the command
 # YARN_TARGET - What install target is depended upon
-function(wpAddBuildWebpack)
+function(xpwebAddBuildWebpack)
   set(BUILD_TARGET ${ARGV0})
   set(optionArgs EXCLUDE_WEB_LIBRARIES TEST_TOOL)
   set(oneValueArgs FOLDER INSTALL_COMPONENT INSTALL_DESTINATION INSTALL_NODE_DESTINATION WORKING_DIRECTORY YARN_TARGET)
@@ -428,7 +428,7 @@ endfunction()
 # TEST_TOOL - Whether the target is a test tool or not (to be scanned with fortify)
 # WORKING_DIRECTORY - Where to perform the command
 # YARN_TARGET - What install target is depended upon
-function(wpAddBuildAngular)
+function(xpwebAddBuildAngular)
   set(BUILD_TARGET ${ARGV0})
   set(optionArgs ARCHIVE_BUILD EXCLUDE_WEB_LIBRARIES TEST_TOOL)
   set(oneValueArgs ANGULAR_PROJECT FOLDER INSTALL_COMPONENT INSTALL_DESTINATION WORKING_DIRECTORY YARN_TARGET)
@@ -505,7 +505,7 @@ endfunction()
 # FOLDER - What folder to put the target under
 # TEST_DIR - Where are the test files
 # WORKING_DIRECTORY - Where to perform the command
-function(wpAddJasmineTest)
+function(xpwebAddTestJasmine)
   set(BUILD_TARGET ${ARGV0})
   set(optionArgs ADD_SUBMODULE_TEST_LABEL EXCLUDE_COVERAGE)
   set(oneValueArgs FOLDER TEST_DIR WORKING_DIRECTORY)
@@ -552,7 +552,7 @@ endfunction()
 # FOLDER - What folder to put the target under
 # TEST_DIR - Where are the test files
 # WORKING_DIRECTORY - Where to perform the command
-function(wpAddAngularTest)
+function(xpwebAddTestAngular)
   set(BUILD_TARGET ${ARGV0})
   set(optionArgs ADD_SUBMODULE_TEST_LABEL)
   set(oneValueArgs ANGULAR_PROJECT FOLDER TEST_DIR WORKING_DIRECTORY)
@@ -589,7 +589,7 @@ endfunction()
 # OUTPUT - Where to output the api docs
 # WORKING_DIRECTORY - Where to perform the command
 # YARN_TARGET - What install target is depended upon
-function(wpGenerateApiDoc)
+function(xpwebGenerateApiDoc)
   set(GENERATE_TARGET ${ARGV0})
   set(oneValueArgs FOLDER INPUT OUTPUT WORKING_DIRECTORY YARN_TARGET)
   cmake_parse_arguments(P "" "${oneValueArgs}" "" ${ARGN})
@@ -645,7 +645,7 @@ endfunction()
 # VERSION_DEST - Where to put the version file
 # WORKING_DIRECTORY - Where to perform the command
 # YARN_TARGET - What install target is depended upon
-function(wpInstallNBuild)
+function(xpwebInstallNBuild)
   set(BUILD_TARGET ${ARGV0})
   set(optionArgs ADD_SUBMODULE_TEST_LABEL ADD_TO_TEST ARCHIVE_BUILD EXCLUDE_WEB_LIBRARIES LIBRARY_DIR TEST_TOOL)
   set(oneValueArgs
@@ -680,18 +680,18 @@ function(wpInstallNBuild)
     set(P_FOLDER ${P_FOLDER}/${BUILD_TARGET}Targets)
   endif()
   ipwebSetIfDefined(WORKING_DIRECTORY) # Sets P_WORKING_DIRECTORY
-  wpAddYarnTarget(${P_YARN_TARGET} ${P_CMAKELIST} ${P_FOLDER} ${P_WORKING_DIRECTORY})
+  xpwebAddYarnTarget(${P_YARN_TARGET} ${P_CMAKELIST} ${P_FOLDER} ${P_WORKING_DIRECTORY})
   set(P_YARN_TARGET YARN_TARGET ${P_YARN_TARGET})
   ipwebSetIfDefined(DEPENDS) # Sets P_DEPENDS
   if(DEFINED P_VERSION_DEST)
-    wpAddGenerateVersion(${BUILD_TARGET}_version ${P_FOLDER} VERSION_DEST ${P_VERSION_DEST})
+    xpwebGenerateVersion(${BUILD_TARGET}_version ${P_FOLDER} VERSION_DEST ${P_VERSION_DEST})
     list(APPEND P_DEPENDS ${BUILD_TARGET}_version)
   endif()
   if(DEFINED P_PROTO_SRCS)
     ipwebSetIfDefined(PROTO_DEST) # Sets P_PROTO_DEST
     ipwebSetIfDefined(PROTO_SRCS) # Sets P_PROTO_SRCS
     ipwebSetIfDefined(TARGET_FORMAT) # Sets P_TARGET_FORMAT
-    wpAddGenerateProto(${BUILD_TARGET}-pb
+    xpwebGenerateProto(${BUILD_TARGET}-pb
       ${P_FOLDER}
       ${P_PROTO_DEST}
       ${P_PROTO_SRCS}
@@ -716,11 +716,11 @@ function(wpInstallNBuild)
     if(P_LIBRARY_DIR)
       set(LIBRARY_DIR LIBRARY_DIR)
     endif()
-    wpAddSharedLibrary(${BUILD_TARGET} ${P_DEPENDS} ${P_FOLDER} ${LIBRARY_DIR} ${P_SRCS} ${TEST_TOOL} ${P_WORKING_DIRECTORY} ${P_YARN_TARGET})
+    xpwebAddLibrary(${BUILD_TARGET} ${P_DEPENDS} ${P_FOLDER} ${LIBRARY_DIR} ${P_SRCS} ${TEST_TOOL} ${P_WORKING_DIRECTORY} ${P_YARN_TARGET})
   elseif(P_TYPE STREQUAL "webpack")
     ipwebSetIfDefined(OUTPUT_FILES) # Sets P_OUTPUT_FILES
     ipwebSetIfDefined(INSTALL_NODE_DESTINATION) # Sets P_INSTALL_NODE_DESTINATION
-    wpAddBuildWebpack(${BUILD_TARGET}
+    xpwebAddBuildWebpack(${BUILD_TARGET}
       ${EXCLUDE_WEB_LIBRARIES}
       ${P_DEPENDS}
       ${P_FOLDER}
@@ -738,7 +738,7 @@ function(wpInstallNBuild)
       set(ARCHIVE_BUILD ARCHIVE_BUILD)
     endif()
     ipwebSetIfDefined(EXTRA_PACKAGE_FILES) # Sets P_EXTRA_PACKAGE_FILES
-    wpAddBuildAngular(${BUILD_TARGET}
+    xpwebAddBuildAngular(${BUILD_TARGET}
       ${EXCLUDE_WEB_LIBRARIES}
       ${P_ANGULAR_PROJECT}
       ${ARCHIVE_BUILD}
@@ -763,13 +763,13 @@ function(wpInstallNBuild)
     endif()
     ipwebVerifyTestFolder() # Sets P_TEST_FOLDER
     if(P_TYPE STREQUAL "angular")
-      wpAddAngularTest(${BUILD_TARGET} ${ADD_SUBMODULE_TEST_LABEL} ${P_ANGULAR_PROJECT} ${P_TEST_DEPENDS} ${P_TEST_DIR} ${P_TEST_FOLDER} ${P_WORKING_DIRECTORY} ${P_YARN_TARGET})
+      xpwebAddTestAngular(${BUILD_TARGET} ${ADD_SUBMODULE_TEST_LABEL} ${P_ANGULAR_PROJECT} ${P_TEST_DEPENDS} ${P_TEST_DIR} ${P_TEST_FOLDER} ${P_WORKING_DIRECTORY} ${P_YARN_TARGET})
     else()
-      wpAddJasmineTest(${BUILD_TARGET} ${ADD_SUBMODULE_TEST_LABEL} ${P_TEST_DIR} ${P_TEST_DEPENDS} ${P_TEST_FOLDER} ${P_WORKING_DIRECTORY})
+      xpwebAddTestJasmine(${BUILD_TARGET} ${ADD_SUBMODULE_TEST_LABEL} ${P_TEST_DIR} ${P_TEST_DEPENDS} ${P_TEST_FOLDER} ${P_WORKING_DIRECTORY})
     endif()
   endif()
   if(DEFINED P_APIDOC_INPUT)
-    wpGenerateApiDoc(${BUILD_TARGET}apidoc
+    xpwebGenerateApiDoc(${BUILD_TARGET}apidoc
       ${P_FOLDER}
       INPUT ${P_APIDOC_INPUT}
       OUTPUT ${P_APIDOC_OUTPUT}
@@ -787,7 +787,7 @@ endfunction()
 # DEPENDS - What targets does the test depend on
 # TEST_DIR - Where are the test files
 # WORKING_DIRECTORY - Where to perform the command
-function(wpAddAddonTest)
+function(xpwebAddTestAddon)
   set(TEST_TARGET ${ARGV0})
   set(optionArgs ADD_SUBMODULE_TEST_LABEL)
   set(oneValueArgs CMAKELIST FOLDER TEST_DIR WORKING_DIRECTORY)
@@ -805,13 +805,13 @@ function(wpAddAddonTest)
   ipwebSetIfDefined(TEST_DIR) # Sets P_TEST_DIR
   ipwebSetIfDefined(DEPENDS) # Sets P_DEPENDS
   ipwebSetIfDefined(WORKING_DIRECTORY) # Sets P_WORKING_DIRECTORY
-  wpAddYarnTarget(${TEST_TARGET}Deps ${P_CMAKELIST} ${P_TEST_FOLDER} ${P_WORKING_DIRECTORY})
+  xpwebAddYarnTarget(${TEST_TARGET}Deps ${P_CMAKELIST} ${P_TEST_FOLDER} ${P_WORKING_DIRECTORY})
   list(APPEND P_DEPENDS ${TEST_TARGET}Deps)
-  wpAddJasmineTest(${TEST_TARGET} ${ADD_SUBMODULE_TEST_LABEL} ${P_DEPENDS} EXCLUDE_COVERAGE ${P_TEST_FOLDER} ${P_TEST_DIR} ${P_WORKING_DIRECTORY})
+  xpwebAddTestJasmine(${TEST_TARGET} ${ADD_SUBMODULE_TEST_LABEL} ${P_DEPENDS} EXCLUDE_COVERAGE ${P_TEST_FOLDER} ${P_TEST_DIR} ${P_WORKING_DIRECTORY})
   xpSourceListAppend()
 endfunction()
 
-function(wpAddTypescriptEchoTarget)
+function(xpwebAddTypescriptEchoTarget)
   if(CMAKE_BINARY_DIR STREQUAL CMAKE_CURRENT_BINARY_DIR)
     get_property(ecmaScriptTargets GLOBAL PROPERTY ecmaScriptTargets_property)
     add_custom_target(ListTypescript
