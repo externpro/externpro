@@ -1,0 +1,12 @@
+"use strict";
+module.exports = {
+  name: "@FILE_DESC@",
+  num: @PACKAGE_VERSION_NUM@,
+  str: "@PACKAGE_STR@",
+  copyright: "\u00A9 @PACKAGE_START_YEAR@ - @PACKAGE_CURRENT_YEAR@",
+  vendor: "@PACKAGE_VENDOR@",
+  fileVersionNum: @FILE_VERSION_NUM@,
+  fileVersionStr: "@FILE_STR@",
+  isClassifiedBuild: @isClassifiedBuild@,
+  revision: "${gitRevision}"
+};

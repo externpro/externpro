@@ -1,0 +1,24 @@
+interface Version {
+  copyright: string;
+  fileVersionNum: number;
+  fileVersionStr: string;
+  isClassifiedBuild: boolean;
+  name: string;
+  num: number;
+  revision: string;
+  str: string;
+  vendor: string;
+}
+const version: Version = {
+  copyright: "\u00A9 @PACKAGE_START_YEAR@ - @PACKAGE_CURRENT_YEAR@",
+  fileVersionNum: @FILE_VERSION_NUM@,
+  fileVersionStr: "@FILE_STR@",
+  isClassifiedBuild: @isClassifiedBuild@,
+  name: "@FILE_DESC@",
+  num: @PACKAGE_VERSION_NUM@,
+  revision: "${gitRevision}",
+  str: "@PACKAGE_STR@",
+  vendor: "@PACKAGE_VENDOR@",
+};
+
+export { Version, version };
