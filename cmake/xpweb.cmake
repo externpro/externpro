@@ -1,6 +1,8 @@
 # ipweb prefix = private web functions (intended to be used only internally)
 # xpweb prefix = public web functions
 
+set(xpThisDir ${CMAKE_CURRENT_LIST_DIR})
+
 function(ipwebVerifyWebproDir)
   if(NOT webpro_DIR)
     message(FATAL_ERROR "webpro_DIR is undefined")
@@ -251,8 +253,8 @@ function(xpwebGenerateVersion)
   else()
     set(isClassifiedBuild "false")
   endif()
-  configure_file(${webpro_DIR}/share/cmake/version.${versionToMake}.in ${CMAKE_CURRENT_BINARY_DIR}/version.es.in @ONLY)
-  include(${webpro_DIR}/share/cmake/versionjs.cmake)
+  configure_file(${xpThisDir}/version.${versionToMake}.in ${CMAKE_CURRENT_BINARY_DIR}/version.es.in @ONLY)
+  include(versionjs)
   set(versionTarget Version_js PARENT_SCOPE)
   set(version_ts_src ${version_ts_src} PARENT_SCOPE)
 endfunction()
@@ -454,7 +456,7 @@ function(xpwebAddBuildAngular)
   else()
     set(build_dir ${CMAKE_CURRENT_BINARY_DIR}/build)
     set(build_stamp ${build_dir}/index.html)
-    set(commandToRun -P ${webpro_DIR}/share/cmake/NodePath.cmake ${P_WORKING_DIRECTORY}
+    set(commandToRun -P ${xpThisDir}/NodePath.cmake ${P_WORKING_DIRECTORY}
       ${NODE_EXE} ${CMAKE_COMMAND} -E env BROWSERSLIST_IGNORE_OLD_DATA=True ${NODE_EXE} ${ANGULAR-CLI_SCRIPT} build ${project}
       --configuration production --output-path ${build_dir} --no-progress 2>&1
       )
