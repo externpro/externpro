@@ -1,0 +1,35 @@
+#!/bin/sh
+########################################
+# postinstall
+##########
+# create (persistent) directories, if DNE
+AllUsersDir=/etc@XP_RPM_INSTALLDIR@/
+if [ ! -d ${AllUsersDir} ]; then
+  mkdir -m 775 -p ${AllUsersDir}
+fi
+# change the group to the primary group of the @XP_RPM_OWNER@ user
+chgrp `id -gn @XP_RPM_OWNER@` ${AllUsersDir}
+##########
+# create (persistent) links, if DNE
+if [ ! -L /var/log/@CPACK_PACKAGE_NAME@ ]; then
+  ln -s /etc@XP_RPM_INSTALLDIR@/log /var/log/@CPACK_PACKAGE_NAME@
+fi
+ln -s /etc@XP_RPM_INSTALLDIR@/ @XP_RPM_INSTALLDIR@/etc # removed by preremove script
+##########
+readlink -f /sbin/init | grep -q systemd
+if [ $? -eq 0 ]; then
+  sys_unit_file=/etc/systemd/system/@XP_RPM_UNIT_FILE@
+  if [ -f $sys_unit_file ]; then
+    rm -f $sys_unit_file
+  fi
+  # copy unit file to system location (removed by preremove script)
+  cp @XP_RPM_INSTALLDIR@/.init/@XP_RPM_UNIT_FILE@ $sys_unit_file
+  # start at boot (creates symbolic links for autostart)
+  systemctl enable @XP_RPM_UNIT_FILE@
+fi
+##########
+# @CPACK_PACKAGE_NAME@ processes may require binding to privileged ports
+if [ -x /usr/sbin/setcap -a -x @XP_RPM_INSTALLDIR@/bin/node ]; then # RHEL
+  /usr/sbin/setcap cap_net_bind_service=+ep @XP_RPM_INSTALLDIR@/bin/node
+fi
+exit 0

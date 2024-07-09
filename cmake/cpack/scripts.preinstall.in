@@ -1,0 +1,21 @@
+#!/bin/sh
+########################################
+# preinstall
+# check to see if the @XP_RPM_OWNER@ user exists
+id @XP_RPM_OWNER@ >/dev/null 2>&1
+if [ $? -ne 0 ]; then
+  echo "--------------------------------------------------------"
+  echo "  Please create the @XP_RPM_OWNER@ user prior to installation"
+  echo "  NOTE: the @XP_RPM_OWNER@ user can be in any group"
+  echo "--------------------------------------------------------"
+  exit 1 # fatal error - terminate installation process
+fi
+homeDir=`getent passwd @XP_RPM_OWNER@ | cut -d: -f6`
+if [ ${homeDir} = @XP_RPM_INSTALLDIR@ ]; then
+  echo "--------------------------------------------------------"
+  echo "  @XP_RPM_OWNER@ user home directory can't be @XP_RPM_INSTALLDIR@"
+  echo "  please modify (usermod -m -d /path/elsewhere @XP_RPM_OWNER@)"
+  echo "--------------------------------------------------------"
+  exit 1 # fatal error - terminate installation process
+fi
+exit 0

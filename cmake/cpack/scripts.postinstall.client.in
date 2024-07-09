@@ -1,0 +1,14 @@
+#!/bin/sh
+########################################
+# postinstall.client
+# create (persistent) directories, if DNE
+AllUsersDir=/etc@XP_RPM_INSTALLDIR@/
+if [ ! -d ${AllUsersDir} ]; then
+  mkdir -m 775 -p ${AllUsersDir}
+fi
+##########
+# create (persistent) links, if DNE
+if [ ! -L /var/log/@CPACK_PACKAGE_NAME@ ]; then
+  ln -s /etc@XP_RPM_INSTALLDIR@/log /var/log/@CPACK_PACKAGE_NAME@
+fi
+exit 0
