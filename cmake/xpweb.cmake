@@ -1,6 +1,5 @@
 # ipweb prefix = private web functions (intended to be used only internally)
 # xpweb prefix = public web functions
-
 set(xpThisDir ${CMAKE_CURRENT_LIST_DIR})
 
 function(ipwebVerifyWebproDir)
