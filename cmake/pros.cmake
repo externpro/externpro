@@ -41,6 +41,10 @@ set(xp_rapidxml REPO github.com/externpro/rapidxml XP_MODULE)
 set(xp_shapelib REPO github.com/externpro/shapelib XP_MODULE)
 set(xp_sodium REPO github.com/externpro/libsodium XP_MODULE)
 set(xp_sqlite REPO github.com/externpro/sqlite-amalgamation XP_MODULE)
+set(xp_sqlite3 REPO github.com/externpro/SQLite3 TAG v3.37.2.1
+  SHA256_Linux c16381a6456ed66e62c9815f50aa09ef61f6fabf175c4de287ded10576bc4b4a
+  SHA256_win64 36d0a73cd7caed9450fbc6d92a2508ab0ba5080f9bfa507c593034285103ac3d
+  )
 set(xp_wirehair REPO github.com/externpro/wirehair XP_MODULE)
 set(xp_wxwidgets REPO github.com/externpro/wxWidgets XP_MODULE)
 set(xp_yasm REPO github.com/externpro/yasm)
