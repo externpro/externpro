@@ -8,7 +8,7 @@ if [[ $(basename -s .git `git config --get remote.origin.url`) == buildpro ]]; t
     BPROTAG=latest
   fi
 else
-  BPROTAG="$(findVer 'set(buildpro_REV' CMakeLists.txt */toplevel.cmake */*/toplevel.cmake)"
+  BPROTAG="$(findVer 'set(buildpro_REV' CMakeLists.txt */toplevel.cmake */*/toplevel.cmake .devcontainer/cmake/xptoplevel.cmake)"
   if [ -z ${BPROTAG} ]; then
     echo "*** buildpro_REV should be set"
     BPROTAG=latest
@@ -60,7 +60,7 @@ EXTERN_DIR=/opt/extern
 GCC_VER=gcc921
 urlPfx="https://isrhub.usurf.usu.edu"
 ##############################
-wproVer="$(findVer 'set(webpro_REV' CMakeLists.txt */CMakeLists.txt */toplevel.cmake */*/toplevel.cmake)"
+wproVer="$(findVer 'set(webpro_REV' CMakeLists.txt */CMakeLists.txt */toplevel.cmake */*/toplevel.cmake .devcontainer/cmake/xptoplevel.cmake)"
 [[ "${wproVer}" == "NONE" ]] && wproVer=""
 if [[ -n "${wproVer}" ]]; then
   wproBase=webpro-${wproVer}-${GCC_VER}-64-$(uname -s)

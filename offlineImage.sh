@@ -24,7 +24,7 @@ if [ $# -eq 0 ]; then
       BPROTAG=latest
     fi
   else
-    BPROTAG="$(findVer 'set(buildpro_REV' CMakeLists.txt */toplevel.cmake */*/toplevel.cmake)"
+    BPROTAG="$(findVer 'set(buildpro_REV' CMakeLists.txt */toplevel.cmake */*/toplevel.cmake .devcontainer/cmake/xptoplevel.cmake)"
     if [ -z ${BPROTAG} ]; then
       echo "*** buildpro_REV should be set"
       exit 1

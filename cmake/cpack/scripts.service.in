@@ -1,0 +1,14 @@
+[Unit]
+Description=@CPACK_PACKAGE_NAME@ service
+After=network.target
+After=network-online.target
+After=syslog.target@XP_RPM_UNIT_ADDITIONS@
+
+[Service]
+Type=simple
+ExecStart=@XP_RPM_INSTALLDIR@/bin/@XP_SERVER_EXECUTABLE@@XP_RPM_EXECSTOP@
+User=@XP_RPM_OWNER@
+UMask=@XP_RPM_UMASK@
+
+[Install]
+WantedBy=multi-user.target

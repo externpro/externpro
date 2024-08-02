@@ -1,0 +1,16 @@
+#!/bin/sh
+########################################
+# preremove
+readlink -f /sbin/init | grep -q systemd
+if [ $? -eq 0 ]; then
+  systemctl stop @XP_RPM_UNIT_FILE@
+  # Remove symbolic links created by enable in postinstall script
+  systemctl disable @XP_RPM_UNIT_FILE@
+  # Clean up any logged issues
+  systemctl reset-failed
+fi
+##########
+# remove file(s), ln(s) created by postinstall
+rm -f /etc/systemd/system/@XP_RPM_UNIT_FILE@
+rm @XP_RPM_INSTALLDIR@/etc
+exit 0
