@@ -1,6 +1,6 @@
-# CommonLibraries/cmake
+# cmake/xpcpack
 
-common cmake for CommonLibraries and projects that use it as a submodule 
+common cpack for projects that include xpcpack
 
 ## Table of Contents
 - [Developing Packages](#developing-packages)
@@ -20,6 +20,10 @@ common cmake for CommonLibraries and projects that use it as a submodule
     ```cmake
     install(... DESTINATION bin COMPONENT client)
     ```
+  * plugin files, specify
+    ```cmake
+    install(... DESTINATION bin COMPONENT plugin)
+    ```
   * server files, specify
     ```cmake
     install(... DESTINATION bin COMPONENT server)
@@ -29,15 +33,19 @@ common cmake for CommonLibraries and projects that use it as a submodule
     install(... DESTINATION bintool COMPONENT tool)
     ```
 * in the top level of the source tree (`CMAKE_SOURCE_DIR`), make sure required params are set
-  and consider optional params to set (see head of [cpackvar.cmake](cpackvar.cmake) file)
+  and consider optional params to set (see head of [xpcpack.cmake](../xpcpack.cmake) file)
   * for example, one of the required params is `CPACK_COMPONENTS_ALL` --
     if your project contains both server and tool components
     ```cmake
     set(CPACK_COMPONENTS_ALL server tool)
     ```
+    of if your project contains both plugin and tool components
+    ```cmake
+    set(CPACK_COMPONENTS_ALL plugin tool)
+    ```
   * and then
     ```cmake
-    include(cpackvar)
+    include(xpcpack)
     ```
 
 ## Building Packages
@@ -53,17 +61,18 @@ NOTE: Requires [WiX Toolset](http://wixtoolset.org/) to be installed (currently 
 ### Linux
 `make -j4 package`
 
-NOTE: Requires rpm-build to be installed (`yum install rpm-build`). The buildpro/centos7-bld docker image has [rpm-build installed](https://github.com/smanders/buildpro/blob/22.04/public/centos7-bld.dockerfile#L15).
+NOTE: Requires rpm-build to be installed (`dnf install rpm-build`). The buildpro/rocky85-bld docker image has [rpm-build installed](https://github.com/externpro/buildpro/blob/24.07/public/rocky85-bld.dockerfile#L17).
 
 ## Installing Packages
 
-The default [`CPACK_GENERATOR`](https://cmake.org/cmake/help/latest/manual/cpack-generators.7.html) list includes
+The [`CPACK_GENERATOR`](https://cmake.org/cmake/help/latest/manual/cpack-generators.7.html) list can include
 * Windows: ZIP WIX
 * Linux: TXZ RPM
 * NOTES
   * TXZ: tar.xz files (Tar XZ compression)
   * WIX: creates .msi files via the WiX tools
-  * WIX and RPM are not built for `COMPONENT tool`, which only builds the two archive formats (ZIP, TXZ)
+  * WIX and RPM are only built for `COMPONENT client` and/or `COMPONENT server`
+  * any COMPONENT other than `client server` only build the two archive formats (ZIP, TXZ)
 
 ### Windows MSI
 
@@ -114,11 +123,11 @@ Packages created using the ZIP generator create a .zip archive file.
 Common commands
 * list contents of package
   ```
-  unzip -l /path/to/[CMAKE_PROJECT_NAME]-[version]-win64-[client|server|tool].zip
+  unzip -l /path/to/[CMAKE_PROJECT_NAME]-[version]-win64-[client|plugin|server|tool].zip
   ```
 * extract package
   ```
-  unzip /path/to/[CMAKE_PROJECT_NAME]-[version]-win64-[client|server|tool].zip -d /existing/path/to/extract/to/
+  unzip /path/to/[CMAKE_PROJECT_NAME]-[version]-win64-[client|plugin|server|tool].zip -d /existing/path/to/extract/to/
   ```
 * remove package
   ```
@@ -182,11 +191,11 @@ Packages created using the TXZ generator create a .tar.xz archive file.
 Common commands
 * list contents of package
   ```
-  tar -tf /path/to/[CMAKE_PROJECT_NAME]-[version]-Linux-[client|server|tool].tar.xz
+  tar -tf /path/to/[CMAKE_PROJECT_NAME]-[version]-Linux-[client|plugin|server|tool].tar.xz
   ```
 * extract package
   ```
-  tar -xf /path/to/[CMAKE_PROJECT_NAME]-[version]-Linux-[client|server|tool].tar.xz --directory=/existing/path/to/extract/to/
+  tar -xf /path/to/[CMAKE_PROJECT_NAME]-[version]-Linux-[client|plugin|server|tool].tar.xz --directory=/existing/path/to/extract/to/
   ```
 * remove package
   ```
