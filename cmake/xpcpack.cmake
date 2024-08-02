@@ -1,21 +1,27 @@
-# @param[in] PACKAGE_VENDOR - vendor (example: "Space Dynamics Lab")
-# @param[in] CPACK_COMPONENTS_ALL - list of components (example: client server tool)
+# @param[in] CPACK_COMPONENTS_ALL - list of components (example: server tool)
 # @param[in] CPACK_WIX_UPGRADE_GUID - unique product GUID (example: F06A4693-34EF-4695-B6B2-9E89A070CF2F)
+#
 # @param[in,optional] CPACK_PACKAGE_NAME - package name (default: CMAKE_PROJECT_NAME)
-# @param[in,optional] XP_SERVER_EXECUTABLE - windows service, unix daemon (default: ${CPACK_PACKAGE_NAME})
-# @param[in,optional] CPACK_RESOURCE_FILE_LICENSE - license embedded in the installer (default: License.txt, in this directory)
+# @param[in,optional] PACKAGE_VENDOR - sets CPACK_PACKAGE_VENDOR
 # @param[in,optional] XP_INSTALLDIR - modify the default install directory
-# @param[in,optional] XP_RPM_OWNER - RPM daemon user (default: vantage)
+# @param[in,optional] XP_RPM_OWNER - RPM daemon user (default: daemon)
 # @param[in,optional] XP_RPM_UMASK - RPM daemon umask (default: 0002)
 # @param[in,optional] XP_RPM_UNIT_FILE - RPM daemon unit file (default: all-lowercase ${CPACK_PACKAGE_NAME}.service)
 # @param[in,optional] XP_RPM_UNIT_ADDITIONS - Additions to the [Unit] section of the service file (default: none)
 # @param[in,optional] XP_RPM_STOP_EXECUTABLE - RPM daemon unit file stop command, aka ExecStop (default: none)
-# @param[in,optional] CPACK_WIX_PRODUCT_ICON - Control Panel "Programs and Features" icon (default: Vantage.ico, in this directory)
-# @param[in,optional] CPACK_WIX_UI_BANNER - bitmap at top of installer pages (default: VantageBannerWix.bmp, in this directory)
-# @param[in,optional] CPACK_WIX_UI_DIALOG - background bitmap on welcome & completion dialogs (default: VantageDialogWix.bmp, in this directory)
+# @param[in,optional] XP_SERVER_EXECUTABLE - windows service, unix daemon (default: ${CPACK_PACKAGE_NAME})
 # @param[in,optional] XP_WIX_SHORTCUTS - list of pairs [executable "label"] for Desktop, Start Menu shortcuts
 # @param[in,optional] XP_WIX_SERVER_RUNAPP - application to launch when installer exits
-# xpGenerateRevision() should be called before including this file, so ${CMAKE_BINARY_DIR}/revision.txt exists
+#
+# [optional] CPACK_PACKAGE_CONTACT
+# [optional] CPACK_PACKAGE_HOMEPAGE_URL
+# [optional] CPACK_RESOURCE_FILE_LICENSE - license embedded in the installer
+# [optional] CPACK_RPM_PACKAGE_LICENSE
+# [optional] CPACK_WIX_PRODUCT_ICON - Control Panel "Programs and Features" icon
+# [optional] CPACK_WIX_UI_BANNER - bitmap at top of installer pages
+# [optional] CPACK_WIX_UI_DIALOG - background bitmap on welcome & completion dialogs
+#
+# NOTE: xpGenerateRevision() should be called before including this file, so ${CMAKE_BINARY_DIR}/revision.txt exists
 if(NOT DEFINED CPACK_PACKAGE_NAME)
   set(CPACK_PACKAGE_NAME ${CMAKE_PROJECT_NAME})
 endif()
