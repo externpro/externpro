@@ -5,7 +5,7 @@ if(NOT DEFINED externpro_REV)
 endif()
 find_package(externpro REQUIRED) # github.com/smanders/externpro
 if(webpro)
-  set(webpro_REV 24.03)
+  set(webpro_REV 24.05)
   find_package(webpro REQUIRED)
   include(xpweb)
 endif()
