@@ -2144,14 +2144,15 @@ function(xpAddCoverage)
   endif()
   if(P_CSharp)
     add_custom_target(precoveragecsharp
-      COMMAND ${CMAKE_COMMAND} -E make_directory coveragecsharp
+      COMMAND dotnet tool install dotnet-reportgenerator-globaltool --version 5.1.26 --global || (exit 0) 
       COMMAND ${CMAKE_COMMAND} -E rm -rf coveragecsharp/*
+      COMMAND ${CMAKE_COMMAND} -E make_directory coveragecsharp
       WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
       )
     list(APPEND precoverage precoveragecsharp)
     add_custom_target(postcoveragecsharp
-      COMMAND reportgenerator -reports:TestResults/**/coverage.cobertura.xml
-        -targetdir:${CMAKE_BINARY_DIR}/coveragecsharp -reporttypes:Html
+      COMMAND $ENV{HOME}/.dotnet/tools/reportgenerator -reports:TestResults/**/coverage.cobertura.xml
+        -targetdir:${CMAKE_BINARY_DIR}/coveragecsharp -reporttypes:Html ${XP_COVERAGE_RM_CSHARP}
       WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/coveragecsharp
       )
     list(APPEND postcoverage postcoveragecsharp)
@@ -2160,8 +2161,8 @@ function(xpAddCoverage)
   endif()
   if(P_JS)
     add_custom_target(precoveragejs
-      COMMAND ${CMAKE_COMMAND} -E make_directory coveragejs
       COMMAND ${CMAKE_COMMAND} -E rm -rf coveragejs/*
+      COMMAND ${CMAKE_COMMAND} -E make_directory coveragejs
       WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
       )
     list(APPEND precoverage precoveragejs)
