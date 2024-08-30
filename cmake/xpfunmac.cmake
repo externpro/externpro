@@ -2144,7 +2144,7 @@ function(xpAddCoverage)
   endif()
   if(P_CSharp)
     add_custom_target(precoveragecsharp
-      COMMAND dotnet tool install dotnet-reportgenerator-globaltool --version 5.1.26 --global || (exit 0) 
+      COMMAND dotnet tool install dotnet-reportgenerator-globaltool --version 5.1.26 --global || (exit 0)
       COMMAND ${CMAKE_COMMAND} -E rm -rf coveragecsharp/*
       COMMAND ${CMAKE_COMMAND} -E make_directory coveragecsharp
       WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
