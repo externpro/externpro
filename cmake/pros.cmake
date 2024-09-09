@@ -48,7 +48,10 @@ set(xp_sqlite3 REPO github.com/externpro/SQLite3 TAG v3.37.2.2
 set(xp_wirehair REPO github.com/externpro/wirehair XP_MODULE)
 set(xp_wxwidgets REPO github.com/externpro/wxWidgets XP_MODULE)
 set(xp_yasm REPO github.com/externpro/yasm)
-set(xp_zlib REPO github.com/externpro/zlib XP_MODULE)
+set(xp_zlib REPO github.com/externpro/zlib TAG v1.2.8.1
+  SHA256_Linux af04a6e973ae6706082dd0957f823afc5e4e98c3d21e51e13f55ebe8cbdaba88
+  SHA256_win64 ac93aca18cc9f4aee1ff11e6e2cc1f4bb3216708a5d216916b675078f83747d0
+  )
 ### depend on previous group
 set(xp_boost DEPS bzip2 zlib XP_MODULE)
 set(xp_ceres REPO github.com/externpro/ceres-solver DEPS eigen XP_MODULE)
