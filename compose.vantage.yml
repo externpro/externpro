@@ -45,9 +45,11 @@ services:
     build:
       context: .devcontainer
       dockerfile: rocky85-bld.dockerfile
+      network: host
       args:
         <<: [*all-build-args-alias, *bld-build-args-alias]
     hostname: ${HNAME}
+    network_mode: host
     profiles:
       - pbld
   run:
@@ -55,6 +57,7 @@ services:
     build:
       context: .devcontainer
       dockerfile: rocky85-run.dockerfile
+      network: host
       args:
         <<: *all-build-args-alias
     container_name: vantagerun
@@ -68,6 +71,7 @@ services:
     build:
       context: .devcontainer
       dockerfile: rocky85-dev.dockerfile
+      network: host
       args:
         <<: [*all-build-args-alias, *bld-build-args-alias]
     container_name: vantagedev

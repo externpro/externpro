@@ -34,9 +34,11 @@ services:
     build:
       context: .devcontainer
       dockerfile: rocky85-bld.dockerfile
+      network: host
       args:
         <<: [*all-build-args-alias, *bld-build-args-alias]
     hostname: ${HNAME}
+    network_mode: host
     profiles:
       - pbld
   gpu:
@@ -44,6 +46,7 @@ services:
     build:
       context: .devcontainer
       dockerfile: rocky85-bld.dockerfile
+      network: host
       args:
         <<: [*all-build-args-alias, *bld-build-args-alias]
     deploy:
@@ -54,5 +57,6 @@ services:
             count: 1
             capabilities: [gpu]
     hostname: ${HNAME}-gpu
+    network_mode: host
     profiles:
       - pgpu
