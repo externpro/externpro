@@ -1,35 +1,34 @@
 #!/bin/bash -xe
 set -e
 
-rm -rf palam
-mkdir palam
+rm -rf @P_PKG@
+mkdir @P_PKG@
 rm -rf WorkDir
 mkdir WorkDir
 
-baseurl=https://isrhub.usurf.usu.edu/palam/palam/releases/download/v1.11.2.0
+baseurl=https://@P_REPO@/releases/download/@P_TAG@
 downloadAndCompare() {
-  curl -L -o palam/$1 $baseurl/$1
-  echo "$2 ./palam/$1" > WorkDir/checksum
+  curl -L -o @P_PKG@/$1 $baseurl/$1
+  echo "$2 ./@P_PKG@/$1" > WorkDir/checksum
   sha256sum --check WorkDir/checksum
   rm WorkDir/checksum
 }
 
 downloadRepo() {
-  git clone https://isrhub.usurf.usu.edu/$1/$2 --bare
-  tar -cJf ../palam/$2.tar.xz $2.git
+  git clone https://@P_REPO@ --bare
+  tar -cJf ../@P_PKG@/@P_PKG@.tar.xz @P_PKG@.git
 }
 
 echo -e 'v2
-{"branch":"development","owner":"palam","projectName":"palam","secureWorkflows":[],"submodules":[],"version":"v1.11.2.0"}
-' > palam/info.txt
+{"branch":"@P_BRANCH@","owner":"@P_ORG@","projectName":"@P_PKG@","secureWorkflows":[],"submodules":[],"version":"@P_TAG@"}
+' > @P_PKG@/info.txt
 pushd WorkDir
-downloadRepo palam palam
+downloadRepo
 popd
+@unitTestResults@
+downloadAndCompare @P_PKG@-@P_TAG@-win64-devel.tar.xz @P_SHA256_win64@
+downloadAndCompare @P_PKG@-@P_TAG@-Linux-devel.tar.xz @P_SHA256_Linux@
+tar -cJf @P_PKG@_@P_TAG@.tar.xz @P_PKG@
 
-downloadAndCompare Unit_Test_Results.tar.xz 51659829d15a198128c02b481bf3d9363ab42733eca250628e70c94ff9ab32ff
-downloadAndCompare palam-v1.11.2.0-win64-devel.tar.xz 8761d810741d07b48188f3ba5adf0c9666a493d5b400d89b99be82fab78b507b
-downloadAndCompare palam-v1.11.2.0-Linux-devel.tar.xz 0a2c2a8058d6fb62913d886bd08bbb3b2bc1b3c9d54dc284260c366abad27a4d
-tar -cJf palam_v1.11.2.0.tar.xz palam
-
-rm -rf palam
+rm -rf @P_PKG@
 rm -rf WorkDir
