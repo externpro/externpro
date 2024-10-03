@@ -87,6 +87,7 @@ set(xp_palam REPO isrhub.usurf.usu.edu/palam/palam TAG v1.11.2.0
   BRANCH development DEPS boost eigen fftw geotrans jasper jpegxp jxrlib kakadu openssl protobuf rapidjson rapidxml wxwidgets wxx
   SHA256_Linux 0a2c2a8058d6fb62913d886bd08bbb3b2bc1b3c9d54dc284260c366abad27a4d
   SHA256_win64 8761d810741d07b48188f3ba5adf0c9666a493d5b400d89b99be82fab78b507b
+  SHA256_utres 51659829d15a198128c02b481bf3d9363ab42733eca250628e70c94ff9ab32ff
   )
 set(xp_ng_gdp REPO isrhub.usurf.usu.edu/internpro/NG_GDP TAG v24.02 DEPS boost
   SHA256_Linux f6356221c2111223327aa70101d1d93d7fc6a11be835a3d1ec04da9353975c97
