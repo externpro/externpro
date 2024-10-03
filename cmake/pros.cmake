@@ -3,12 +3,14 @@ set(xp_bzip2 REPO github.com/externpro/bzip2 XP_MODULE)
 set(xp_cares REPO github.com/externpro/c-ares XP_MODULE)
 set(xp_clangformat XP_MODULE)
 set(xp_criticalio REPO isrhub.usurf.usu.edu/internpro/CriticalIO TAG v2.0.02.8
+  BASE v2.0.02 BRANCH development
   SHA256_Linux abbcbeccfede2ab2538e85aec06f59b4d288a549f3969c5e39b666b47df06bc8
   SHA256_win64 0cf13caaaf04d55bd32ff5578eba6265579afcd287162b978a8683945eebc248
   )
 set(xp_eigen REPO github.com/externpro/eigen XP_MODULE)
 set(xp_expat REPO github.com/externpro/libexpat XP_MODULE)
 set(xp_fftw REPO isrhub.usurf.usu.edu/internpro/fftw TAG v3.3.8.2
+  BASE v3.3.8 BRANCH development
   SHA256_Linux 9c296f908984fda88d2bb198048ccf56d32f046cff6e60b18c675b6280552deb
   SHA256_win64 e8d034171b2453d4c0981c268d7a39c6b3456584c94e91790a5d1ee32432a3c8
   )
@@ -16,6 +18,7 @@ set(xp_flatbuffers REPO github.com/externpro/flatbuffers XP_MODULE)
 set(xp_geotrans REPO github.com/externpro/geotranz XP_MODULE)
 set(xp_glew REPO github.com/externpro/glew XP_MODULE)
 set(xp_gsoap REPO isrhub.usurf.usu.edu/internpro/gsoap TAG v2.8.97.3
+  BASE v2.8.97 BRANCH development
   SHA256_Linux d4447bf40ea1952d013c23d328af9cd3d8244ff126b7856c1b1c96655a6a7b2f
   SHA256_win64 0faafb04dbb116bd66a5c958f10df83efccc8e5368f31fa55aed3edb139ce14e
   )
@@ -23,16 +26,19 @@ set(xp_jasper REPO github.com/externpro/jasper XP_MODULE)
 set(xp_jpegxp REPO github.com/externpro/jpegxp XP_MODULE)
 set(xp_jxrlib REPO github.com/externpro/jxrlib XP_MODULE)
 set(xp_kakadu REPO isrhub.usurf.usu.edu/internpro/kakadu TAG v6.1.1.4
+  BASE v6_1_1 BRANCH development
   SHA256_Linux cf26edb0b133ce6a85245ebf59e89bc0263ce1acc93d7f3fc555f241e7e9c9e7
   SHA256_win64 311c4b20e95ffdceb0e158236e27d075ce4db952b1001fc0fe530353d54e76da
   )
 set(xp_lua REPO github.com/externpro/lua XP_MODULE)
 set(xp_opensslasm REPO github.com/externpro/opensslasm)
 set(xp_nasm REPO github.com/externpro/nasm TAG v2.14.02
+  BRANCH main
   SHA256_Linux 31fb78aa856e58716b5cf36927a24824e1fc931a375b02b9c24245a5ed3e3347
   SHA256_win64 ddf6097be3ecf6e63cdcc56dbc6f063f44cf4ba04e8df73c2c6c3798c3f98428
   )
 set(xp_patch REPO github.com/externpro/patch TAG v2.7
+  BRANCH main
   SHA256_Linux b72b6b36acd65f6dc66e988a2edbbf483377c69d9fdf1f2537f3ec474f345196
   SHA256_win64 0e7852bd14863f7e1f5ac29a29dba83d75d92963e2f4c4bb7628397a2bf96e63
   )
@@ -42,6 +48,7 @@ set(xp_shapelib REPO github.com/externpro/shapelib XP_MODULE)
 set(xp_sodium REPO github.com/externpro/libsodium XP_MODULE)
 set(xp_sqlite REPO github.com/externpro/sqlite-amalgamation XP_MODULE)
 set(xp_sqlite3 REPO github.com/externpro/SQLite3 TAG v3.37.2.2
+  BASE 3.37.2 BRANCH dev
   SHA256_Linux 4c48a644147936e5df118427308b177a9f8c276b58216b7aff4dee810b958a1f
   SHA256_win64 58d4f6b1997edaa532cdb0c9c9de287f898a69b8eeb0bc86cb4e73642d764191
   )
@@ -49,6 +56,7 @@ set(xp_wirehair REPO github.com/externpro/wirehair XP_MODULE)
 set(xp_wxwidgets REPO github.com/externpro/wxWidgets XP_MODULE)
 set(xp_yasm REPO github.com/externpro/yasm)
 set(xp_zlib REPO github.com/externpro/zlib TAG v1.2.8.1
+  BASE v1.2.8 BRANCH dev
   SHA256_Linux af04a6e973ae6706082dd0957f823afc5e4e98c3d21e51e13f55ebe8cbdaba88
   SHA256_win64 ac93aca18cc9f4aee1ff11e6e2cc1f4bb3216708a5d216916b675078f83747d0
   )
@@ -76,7 +84,7 @@ set(xp_libssh2 REPO github.com/externpro/libssh2 DEPS openssl zlib XP_MODULE)
 set(xp_libstrophe REPO github.com/externpro/libstrophe DEPS expat openssl XP_MODULE)
 set(xp_node-addon-api REPO github.com/externpro/node-addon-api DEPS node XP_MODULE)
 set(xp_palam REPO isrhub.usurf.usu.edu/palam/palam TAG v1.11.2.0
-  DEPS boost eigen fftw geotrans jasper jpegxp jxrlib kakadu openssl protobuf rapidjson rapidxml wxwidgets wxx
+  BRANCH development DEPS boost eigen fftw geotrans jasper jpegxp jxrlib kakadu openssl protobuf rapidjson rapidxml wxwidgets wxx
   SHA256_Linux 0a2c2a8058d6fb62913d886bd08bbb3b2bc1b3c9d54dc284260c366abad27a4d
   SHA256_win64 8761d810741d07b48188f3ba5adf0c9666a493d5b400d89b99be82fab78b507b
   )
