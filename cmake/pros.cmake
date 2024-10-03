@@ -74,7 +74,8 @@ set(xp_wxx REPO github.com/externpro/wxx DEPS wxwidgets XP_MODULE)
 set(xp_activemqcpp REPO github.com/externpro/activemq-cpp DEPS apr openssl XP_MODULE)
 set(xp_azmq REPO github.com/externpro/azmq DEPS boost libzmq XP_MODULE)
 set(xp_cppzmq REPO github.com/externpro/cppzmq DEPS libzmq XP_MODULE)
-set(xp_dde_lib REPO isrhub.usurf.usu.edu/DDE/dde_lib TAG v0.0.0.9 DEPS boost protobuf wirehair
+set(xp_dde_lib REPO isrhub.usurf.usu.edu/DDE/dde_lib TAG v0.0.0.9
+  BRANCH development DEPS boost protobuf wirehair
   SHA256_Linux 89cd585be2403a904e8241d9b1893774e275ab020275b4e1703df819ac734cb6
   SHA256_win64 dc1133d19be5f36fbc53a799a9a75f662259b67d5ec9d2f1b304fb34b4c7b350
   )
@@ -89,7 +90,8 @@ set(xp_palam REPO isrhub.usurf.usu.edu/palam/palam TAG v1.11.2.0
   SHA256_win64 8761d810741d07b48188f3ba5adf0c9666a493d5b400d89b99be82fab78b507b
   SHA256_utres 51659829d15a198128c02b481bf3d9363ab42733eca250628e70c94ff9ab32ff
   )
-set(xp_ng_gdp REPO isrhub.usurf.usu.edu/internpro/NG_GDP TAG v24.02 DEPS boost
+set(xp_ng_gdp REPO isrhub.usurf.usu.edu/internpro/NG_GDP TAG v24.02
+  BRANCH development DEPS boost
   SHA256_Linux f6356221c2111223327aa70101d1d93d7fc6a11be835a3d1ec04da9353975c97
   SHA256_win64 0e0f3ba69faa7c902bf1a6dea13bde161b5622cfa6eb430909a67aa1f156148f
   )
@@ -98,11 +100,13 @@ set(xp_zmqpp REPO github.com/externpro/zmqpp DEPS libzmq XP_MODULE)
 ### depend on previous group
 set(xp_curl REPO github.com/externpro/curl DEPS cares libssh2 XP_MODULE)
 set(xp_libgit2 REPO github.com/externpro/libgit2 DEPS libssh2 XP_MODULE)
-set(xp_pluginsdk REPO isrhub.usurf.usu.edu/Vantage/PluginSdk TAG v3.5.0.3 EXE_DEPS palam
+set(xp_pluginsdk REPO isrhub.usurf.usu.edu/Vantage/PluginSdk TAG v3.5.0.3
+  BRANCH development EXE_DEPS palam
   SHA256_Linux e1f9bc4724027c9f1fcf09e93edf2dcc5ee865d4ff5c7936ce051e6a29005880
   SHA256_win64 8436a774edfeb3dc7757e65fbe44c27a7db84b0f7725d398e4ce4faabc6f5751
   )
-set(xp_sdvideo REPO isrhub.usurf.usu.edu/internpro/Sdvideo TAG v24.02 DEPS boost ffmpeg
+set(xp_sdvideo REPO isrhub.usurf.usu.edu/internpro/Sdvideo TAG v24.02
+  BRANCH development DEPS boost ffmpeg
   SHA256_Linux 25ba1530f23c483ea1817266bad303665cdd43a265283d8f5c1cccda2068cf7f
   SHA256_win64 860006e31454e0074c9ef365210d92c199e9cdc1741fe1835ecc569344e2b0bb
   )
