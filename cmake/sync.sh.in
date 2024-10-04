@@ -20,7 +20,7 @@ downloadRepo() {
 }
 
 echo -e 'v2
-{"branch":"@P_BRANCH@","owner":"@P_ORG@","projectName":"@P_PKG@","secureWorkflows":[],"submodules":[],"version":"@P_TAG@"}
+{"branch":"@P_BRANCH@","owner":"@P_ORG@","preRelease":false,"projectName":"@P_PKG@","secureWorkflows":[],"submodules":[],"version":"@P_TAG@"}
 ' > @P_PKG@/info.txt
 pushd WorkDir
 downloadRepo
@@ -28,7 +28,7 @@ popd
 @unitTestResults@
 downloadAndCompare @P_PKG@-@P_TAG@-win64-devel.tar.xz @P_SHA256_win64@
 downloadAndCompare @P_PKG@-@P_TAG@-Linux-devel.tar.xz @P_SHA256_Linux@
-tar -cJf @P_PKG@_@P_TAG@.tar.xz @P_PKG@
+tar -cJf @P_PKG@__@P_TAG@.tar.xz @P_PKG@
 
 rm -rf @P_PKG@
 rm -rf WorkDir
