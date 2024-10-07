@@ -1,4 +1,4 @@
-ARG BPROTAG
+ARG BPROTAG=latest
 FROM ghcr.io/externpro/buildpro/rocky85-bld:${BPROTAG}
 LABEL maintainer="smanders"
 LABEL org.opencontainers.image.source=https://github.com/externpro/buildpro
