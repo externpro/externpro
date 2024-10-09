@@ -46,7 +46,6 @@ set(xp_rapidjson REPO github.com/externpro/rapidjson XP_MODULE)
 set(xp_rapidxml REPO github.com/externpro/rapidxml XP_MODULE)
 set(xp_shapelib REPO github.com/externpro/shapelib XP_MODULE)
 set(xp_sodium REPO github.com/externpro/libsodium XP_MODULE)
-set(xp_sqlite REPO github.com/externpro/sqlite-amalgamation XP_MODULE)
 set(xp_sqlite3 REPO github.com/externpro/SQLite3 TAG v3.37.2.2
   BASE 3.37.2 BRANCH dev
   SHA256_Linux 4c48a644147936e5df118427308b177a9f8c276b58216b7aff4dee810b958a1f
