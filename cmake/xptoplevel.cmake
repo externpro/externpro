@@ -1,7 +1,7 @@
-set(buildpro_REV 24.08.1)
+set(buildpro_REV 24.09)
 include(xpfunmac)
 if(NOT DEFINED externpro_REV)
-  set(externpro_REV 24.04)
+  set(externpro_REV 24.05)
 endif()
 find_package(externpro REQUIRED) # github.com/smanders/externpro
 if(webpro)
