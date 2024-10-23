@@ -104,6 +104,11 @@ set(xp_ng_gdp REPO isrhub.usurf.usu.edu/internpro/NG_GDP TAG v24.02
   SHA256_Linux f6356221c2111223327aa70101d1d93d7fc6a11be835a3d1ec04da9353975c97
   SHA256_win64 0e0f3ba69faa7c902bf1a6dea13bde161b5622cfa6eb430909a67aa1f156148f
   )
+set(xp_spatialite-tools REPO github.com/externpro/spatialite-tools TAG v5.1.0.1
+  BASE 5.1.0a BRANCH dev EXE_DEPS libspatialite
+  SHA256_Linux 804c7d64040b3f5d10432569446b783cead9b6bd282ba72ade13c03d1822daba
+  SHA256_win64 2ddea7ec73107dd5114e2418c61376680f4bcb33add6a705efd2b9eb9a7f10a6
+  )
 set(xp_wxinclude REPO github.com/externpro/wxInclude EXE_DEPS boost XP_MODULE)
 set(xp_zmqpp REPO github.com/externpro/zmqpp DEPS libzmq XP_MODULE)
 ### depend on previous group
