@@ -68,6 +68,11 @@ set(xp_zlib REPO github.com/externpro/zlib TAG v1.2.8.2
 set(xp_boost DEPS bzip2 zlib XP_MODULE)
 set(xp_ceres REPO github.com/externpro/ceres-solver DEPS eigen XP_MODULE)
 set(xp_geotiff REPO github.com/externpro/libgeotiff DEPS wxwidgets XP_MODULE)
+set(xp_libspatialite REPO github.com/externpro/libspatialite TAG v5.1.0.1
+  BASE 5.1.0 BRANCH dev DEPS libiconv sqlite3 zlib
+  SHA256_Linux ba5ca7ae4367a9b05ea7a7eb2fe87b972a6d914845881690f38703c46fcf8563
+  SHA256_win64 fb678eb4bac12c1192b8234760c310e3eb7fb8c52e516fd12c7769a875b5d485
+  )
 set(xp_libzmq REPO github.com/externpro/libzmq DEPS sodium XP_MODULE)
 set(xp_node REPO github.com/externpro/node DEPS nasm XP_MODULE)
 set(xp_openh264 REPO github.com/externpro/openh264 DEPS yasm XP_MODULE)
