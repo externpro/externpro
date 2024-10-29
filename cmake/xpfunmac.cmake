@@ -1110,7 +1110,7 @@ macro(xpSourceListAppend)
     ${_dir}/*clang-format
     ${_dir}/*.json
     ${_dir}/.*rc
-    ${_dir}/README.md
+    ${_dir}/*.md
     )
   if(miscFiles)
     list(APPEND masterSrcList ${miscFiles})
