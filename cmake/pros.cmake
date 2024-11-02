@@ -30,10 +30,10 @@ set(xp_kakadu REPO isrhub.usurf.usu.edu/internpro/kakadu TAG v6.1.1.4
   SHA256_Linux cf26edb0b133ce6a85245ebf59e89bc0263ce1acc93d7f3fc555f241e7e9c9e7
   SHA256_win64 311c4b20e95ffdceb0e158236e27d075ce4db952b1001fc0fe530353d54e76da
   )
-set(xp_libiconv REPO github.com/externpro/libiconv TAG v1.18.1
+set(xp_libiconv REPO github.com/externpro/libiconv TAG v1.18.2
   BASE 1.18-eed6782 BRANCH dev
-  SHA256_Linux 79ee67a286d3a6afaae49188038c346edf249641d084b32a9cedd9657770a164
-  SHA256_win64 2801a911cfb2007068558e8b0ac7a74783001164d78487a29922d1043ab248a3
+  SHA256_Linux 6ed38b170b73e968f0333544f13b27118cd637a586b7bca00d4284a9f16ee793
+  SHA256_win64 99e203a02633cc960929e45a97f8d6d48df89e79649d1e44ed96fb3e2fbe439e
   )
 set(xp_lua REPO github.com/externpro/lua XP_MODULE)
 set(xp_opensslasm REPO github.com/externpro/opensslasm)
