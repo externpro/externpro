@@ -15,6 +15,11 @@ set(xp_fftw REPO isrhub.usurf.usu.edu/internpro/fftw TAG v3.3.8.2
   SHA256_win64 e8d034171b2453d4c0981c268d7a39c6b3456584c94e91790a5d1ee32432a3c8
   )
 set(xp_flatbuffers REPO github.com/externpro/flatbuffers XP_MODULE)
+set(xp_geos REPO github.com/externpro/geos TAG v3.13.0.1
+  BASE 3.13.0 BRANCH dev
+  SHA256_Linux a2a077d7e4731f0e4d37a4895e71531e2229acad3160236a7cde04ffb4e3dee1
+  SHA256_win64 b48fbbe84b32372a5effbaed7555bf87f308dd061d7bc0ced73c724f9deff560
+  )
 set(xp_geotrans REPO github.com/externpro/geotranz XP_MODULE)
 set(xp_glew REPO github.com/externpro/glew XP_MODULE)
 set(xp_gsoap REPO isrhub.usurf.usu.edu/internpro/gsoap TAG v2.8.97.3
