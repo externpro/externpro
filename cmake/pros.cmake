@@ -78,6 +78,11 @@ set(xp_librttopo REPO github.com/externpro/librttopo TAG v1.1.0.1
   SHA256_Linux ce59d0a74f415ea35f5aa83e7382cd81d8abb131f29d8a6c2c0346b78271a027
   SHA256_win64 59a251d2f869b99f874a0dba242ec2af3bb69e7f672659da5d7ff337b654b4fe
   )
+set(xp_libspatialite REPO github.com/externpro/libspatialite TAG v5.1.0.3
+  BASE 5.1.0 BRANCH dev DEPS geos libiconv sqlite3 zlib
+  SHA256_Linux 52e162824c9b271328931a923f81ae99705adbe0c6112e82ba4e77ea8024b858
+  SHA256_win64 243f02109e669d86a6337ca15bd28a39ae458d459f2883920032ee4bd3ac35b0
+  )
 set(xp_libzmq REPO github.com/externpro/libzmq DEPS sodium XP_MODULE)
 set(xp_node REPO github.com/externpro/node DEPS nasm XP_MODULE)
 set(xp_openh264 REPO github.com/externpro/openh264 DEPS yasm XP_MODULE)
@@ -95,11 +100,6 @@ set(xp_dde_lib REPO isrhub.usurf.usu.edu/DDE/dde_lib TAG v0.0.0.9
   )
 set(xp_fecpp REPO github.com/externpro/fecpp DEPS boost XP_MODULE)
 set(xp_ffmpeg REPO github.com/externpro/FFmpeg openh264 yasm XP_MODULE)
-set(xp_libspatialite REPO github.com/externpro/libspatialite TAG v5.1.0.2
-  BASE 5.1.0 BRANCH dev DEPS libiconv librttopo sqlite3 zlib
-  SHA256_Linux 9af6aca8da9f3cbd74ea66854a3cddb91a98b3eda1936ac54f3b8b4a941cdf18
-  SHA256_win64 04505f876632a2444ee267fc3d57d0971b5dce671516e353646a1e412da3d403
-  )
 set(xp_libssh2 REPO github.com/externpro/libssh2 DEPS openssl zlib XP_MODULE)
 set(xp_libstrophe REPO github.com/externpro/libstrophe DEPS expat openssl XP_MODULE)
 set(xp_node-addon-api REPO github.com/externpro/node-addon-api DEPS node XP_MODULE)
