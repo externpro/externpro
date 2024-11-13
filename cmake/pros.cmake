@@ -114,6 +114,11 @@ set(xp_ng_gdp REPO isrhub.usurf.usu.edu/internpro/NG_GDP TAG v24.02
   SHA256_Linux f6356221c2111223327aa70101d1d93d7fc6a11be835a3d1ec04da9353975c97
   SHA256_win64 0e0f3ba69faa7c902bf1a6dea13bde161b5622cfa6eb430909a67aa1f156148f
   )
+set(xp_spatialite-tools REPO github.com/externpro/spatialite-tools TAG v5.1.0.3
+  BASE 5.1.0a BRANCH dev EXE_DEPS libspatialite
+  SHA256_Linux 6b4d8f7090f7f0aa23ed13abc5c5bdae3bbee3605ec5243ff2b082d21c76dc1e
+  SHA256_win64 86f35b3b25d428799aa2ed56bb69f754d4f8f4bc392487564ff4b0ea85198b22
+  )
 set(xp_wxinclude REPO github.com/externpro/wxInclude EXE_DEPS boost XP_MODULE)
 set(xp_zmqpp REPO github.com/externpro/zmqpp DEPS libzmq XP_MODULE)
 ### depend on previous group
@@ -128,9 +133,4 @@ set(xp_sdvideo REPO isrhub.usurf.usu.edu/internpro/Sdvideo TAG v24.02
   BRANCH development DEPS boost ffmpeg
   SHA256_Linux 25ba1530f23c483ea1817266bad303665cdd43a265283d8f5c1cccda2068cf7f
   SHA256_win64 860006e31454e0074c9ef365210d92c199e9cdc1741fe1835ecc569344e2b0bb
-  )
-set(xp_spatialite-tools REPO github.com/externpro/spatialite-tools TAG v5.1.0.2
-  BASE 5.1.0a BRANCH dev EXE_DEPS libspatialite
-  SHA256_Linux 7fca3af866370a689f3d31d1c77e57c40bdbc97bbd4c89f1a3c1172eea1ef38f
-  SHA256_win64 b8bf7a1b17397fa4ec82ea2194c7638c907740d35de500ac78d74e84071c3a85
   )
