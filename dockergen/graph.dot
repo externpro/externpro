@@ -7,8 +7,9 @@ digraph GG {
   "microservices" [shape=box];
   "buildpro/rocky85-pro" -> "rocky85";
   "buildpro/rocky85-bld" -> "buildpro/rocky85-pro";
+  "buildpro/rocky85-pin" -> "buildpro/rocky85-pro";
   "externpro" -> "buildpro/rocky85-pro";
-  "PluginSDK" -> "buildpro/rocky85-bld";
-  "plugins" -> "buildpro/rocky85-bld";
+  "PluginSDK" -> "buildpro/rocky85-pin";
+  "plugins" -> "buildpro/rocky85-pin";
   "microservices" -> "buildpro/rocky85-bld";
 }
