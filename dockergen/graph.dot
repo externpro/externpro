@@ -1,21 +1,14 @@
 digraph GG {
   node [fontsize=12];
   "rocky85" [shape=diamond];
-  "mysql-server" [shape=diamond];
   "externpro" [shape=box];
   "PluginSDK" [shape=box];
-  "Plugins" [shape=box];
-  "VANTAGE" [shape=box];
-  "buildpro/rocky85-run" -> "rocky85";
+  "plugins" [shape=box];
+  "microservices" [shape=box];
   "buildpro/rocky85-pro" -> "rocky85";
   "buildpro/rocky85-bld" -> "buildpro/rocky85-pro";
-  "buildpro/rocky85-dev" -> "buildpro/rocky85-bld";
-  "buildpro/rocky85-dev" -> "mysql-server";
-  "buildpro/rocky85-run" -> "mysql-server";
   "externpro" -> "buildpro/rocky85-pro";
   "PluginSDK" -> "buildpro/rocky85-bld";
-  "Plugins" -> "buildpro/rocky85-bld";
-  "VANTAGE" -> "buildpro/rocky85-bld";
-  "VANTAGE" -> "buildpro/rocky85-dev";
-  "VANTAGE" -> "buildpro/rocky85-run";
+  "plugins" -> "buildpro/rocky85-bld";
+  "microservices" -> "buildpro/rocky85-bld";
 }
