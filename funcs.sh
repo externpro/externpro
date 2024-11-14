@@ -76,26 +76,6 @@ function buildreq
   gitcfgreq
   composereq
 }
-function runreq
-{
-  check=$(./.devcontainer/check-bpnet-perform.sh)
-  bpnet=$(tail -10 .devcontainer/90-bpnet-perform.conf)
-  if [[ "${bpnet}" != "${check}" ]]; then
-    echo "network performance tuning"
-    echo "=========================="
-    echo "current linux kernel network settings: (./.devcontainer/check-bpnet-perform.sh)"
-    echo "${check}"
-    echo "*******"
-    echo "desired settings: (.devcontainer/90-bpnet-perform.conf)"
-    echo "${bpnet}"
-    echo "=========================="
-    echo "copying .devcontainer/90-bpnet-perform.conf to /etc/sysctl.d (requires sudo)..."
-    sudo cp .devcontainer/90-bpnet-perform.conf /etc/sysctl.d/
-    sudo service procps restart
-    sudo sysctl --system
-    exit 1
-  fi
-}
 function gpureq
 {
   if [[ -f "/proc/driver/nvidia/version" ]]; then
