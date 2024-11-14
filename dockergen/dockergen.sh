@@ -1,19 +1,12 @@
 #!/usr/bin/env bash
 cd "$( dirname "$0" )"
-for img in rocky85-run rocky85-pro rocky85-bld rocky85-dev
+for img in rocky85-pro rocky85-bld
 do
   dfile=../${img}.dockerfile
   awk -v r="${img}" '{gsub(/%BP_REPO%/,r)} 1' bit.head.dockerfile > ${dfile}
   if [[ ${img} == *"-bld"* ]]; then
     cat bit.isrhub.dockerfile >> ${dfile}
     cat bit.user.dockerfile >> ${dfile}
-  elif [[ ${img} == *"-run"* ]]; then
-    cat bit.user.dockerfile >> ${dfile}
-    cat bit.run.dockerfile >> ${dfile}
-  elif [[ ${img} == *"-dev"* ]]; then
-    cat bit.isrhub.dockerfile >> ${dfile}
-    cat bit.user.dockerfile >> ${dfile}
-    cat bit.run.dockerfile >> ${dfile}
   else
     cat bit.user.dockerfile >> ${dfile}
   fi
