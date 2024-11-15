@@ -33,7 +33,7 @@ services:
     <<: [*all-alias, *bld-alias]
     build:
       context: .devcontainer
-      dockerfile: rocky85-bld.dockerfile
+      dockerfile: rocky85-pin.dockerfile
       network: host
       args:
         <<: [*all-build-args-alias, *bld-build-args-alias]
@@ -45,7 +45,7 @@ services:
     <<: [*all-alias, *bld-alias]
     build:
       context: .devcontainer
-      dockerfile: rocky85-bld.dockerfile
+      dockerfile: rocky85-pin.dockerfile
       network: host
       args:
         <<: [*all-build-args-alias, *bld-build-args-alias]
