@@ -42,6 +42,13 @@
       "targets": ["all", "install"],
       "configurePreset": "Linux",
       "configuration": "Release"
+    },
+    {
+      "name": "LinuxReleaseNoInstall",
+      "displayName": "build Linux Release, no install",
+      "inherits": ["isLinux"],
+      "configurePreset": "Linux",
+      "configuration": "Release"
     }
   ],
   "packagePresets": [
@@ -82,6 +89,38 @@
         {
           "type": "package",
           "name": "Linux"
+        }
+      ]
+    },
+    {
+      "name": "LinuxRelease",
+      "displayName": "workflow LinuxRelease",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "Linux"
+        },
+        {
+          "type": "build",
+          "name": "LinuxRelease"
+        },
+        {
+          "type": "package",
+          "name": "Linux"
+        }
+      ]
+    },
+    {
+      "name": "LinuxReleaseNoInstall",
+      "displayName": "workflow LinuxRelease, no install",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "Linux"
+        },
+        {
+          "type": "build",
+          "name": "LinuxReleaseNoInstall"
         }
       ]
     }
