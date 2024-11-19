@@ -2166,7 +2166,9 @@ function(xpAddCoverage)
       WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
       )
     list(APPEND precoverage precoveragejs)
-    xpGetPkgVar(Node EXE)
+    if(NOT DEFINED NODE_EXE)
+      xpGetPkgVar(Node EXE)
+    endif()
     set(JS_SERVER_COVERAGE_FLAGS ${NODE_EXE} node_modules/nyc/bin/nyc.js --include @SRC_DIR@
       --report-dir ${CMAKE_BINARY_DIR}/coveragejs/@BUILD_TARGET@
       --temp-dir ${CMAKE_BINARY_DIR}/coveragejs/@BUILD_TARGET@/.nyc_output
