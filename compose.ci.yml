@@ -1,0 +1,36 @@
+x-all: &all-alias
+  environment:
+    - DISPLAY=${DISPLAY_ENV}
+    - XAUTHORITY=${XAUTH_ENV}
+  user: ${USER}
+  stdin_open: true
+  tty: true
+  working_dir: /bpvol/${COMPOSE_PROJECT_NAME}
+x-bld: &bld-alias
+  cap_add:
+    - SYS_PTRACE
+  volumes:
+    - .:/bpvol/${COMPOSE_PROJECT_NAME}
+    - ..:/bpvol/workspace
+    - /tmp/.X11-unix:/tmp/.X11-unix
+    - ~/.ssh:/home/${USER}/.ssh
+    - ~/.gitconfig:/home/${USER}/.gitconfig
+x-all-build-args: &all-build-args-alias
+  BPROTAG: ${BPROTAG}
+  USERNAME: ${USER}
+  USERID: ${USERID}
+  GROUPID: ${GROUPID}
+  TZ: ${TZ}
+services:
+  bld:
+    <<: [*all-alias, *bld-alias]
+    build:
+      context: .devcontainer
+      dockerfile: rocky85-ci.dockerfile
+      network: host
+      args:
+        <<: [*all-build-args-alias]
+    hostname: ${HNAME}
+    network_mode: host
+    profiles:
+      - pbld
