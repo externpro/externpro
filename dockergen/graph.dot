@@ -2,14 +2,17 @@ digraph GG {
   node [fontsize=12];
   "rocky85" [shape=diamond];
   "externpro" [shape=box];
-  "PluginSDK" [shape=box];
+  "PluginSdk" [shape=box];
   "plugins" [shape=box];
+  "plugin dev" [shape=box];
   "microservices" [shape=box];
   "buildpro/rocky85-pro" -> "rocky85";
   "buildpro/rocky85-bld" -> "buildpro/rocky85-pro";
   "buildpro/rocky85-pin" -> "buildpro/rocky85-pro";
+  "buildpro/rocky85-pdv" -> "buildpro/rocky85-pro";
   "externpro" -> "buildpro/rocky85-pro";
-  "PluginSDK" -> "buildpro/rocky85-pin";
+  "PluginSdk" -> "buildpro/rocky85-pin";
   "plugins" -> "buildpro/rocky85-pin";
+  "plugin dev" -> "buildpro/rocky85-pdv";
   "microservices" -> "buildpro/rocky85-bld";
 }
