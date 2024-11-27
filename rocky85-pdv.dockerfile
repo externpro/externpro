@@ -9,10 +9,11 @@ ARG COPY_IT
 ARG RUN_IT
 COPY ${COPY_IT} /usr/local/games
 RUN eval "${RUN_IT}"
-# CRTool
-ARG CRTOOL
-RUN eval "${CRTOOL}"
-ENV PATH=$PATH:${EXTERN_DIR}/CRTool
+# tools
+ARG TOOLS
+ARG TOOLS_PATH
+RUN eval "${TOOLS}"
+ENV PATH=$PATH${TOOLS_PATH}
 # webpro
 ARG WEBPRO
 RUN eval "${WEBPRO}"

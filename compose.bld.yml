@@ -25,7 +25,8 @@ x-all-build-args: &all-build-args-alias
   TZ: ${TZ}
 x-bld-build-args: &bld-build-args-alias
   WEBPRO: ${WEBPRO}
-  CRTOOL: ${CRTOOL}
+  TOOLS: ${TOOLS}
+  TOOLS_PATH: ${TOOLS_PATH}
 services:
   bld:
     <<: [*all-alias, *bld-alias]

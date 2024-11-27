@@ -83,14 +83,14 @@ if [[ -n "${crToolVer}" && -n "${crWrapVer}" ]]; then
   CRTOOL_DL="wget -q \"${urlPfx}/CRTool/CRTool/releases/download/${crWrapVer}/CRTool-${crWrapVer}.sh\" \
 && wget -q \"${urlPfx}/CRTool/CRToolImpl/releases/download/${crToolVer}/CRToolImpl-${crToolVer}.sh\" \
 && chmod 755 CRTool*.sh"
-  CRTOOL="mkdir ${EXTERN_DIR}/CRTool \
+  TOOLS="mkdir ${EXTERN_DIR}/CRTool \
 && ${CRTOOL_DL} \
 && ./CRTool-${crWrapVer}.sh --prefix=${EXTERN_DIR}/CRTool --exclude-subdir \
 && ./CRToolImpl-${crToolVer}.sh --prefix=${EXTERN_DIR} --include-subdir \
 && rm CRTool-${crWrapVer}.sh \
 && rm CRToolImpl-${crToolVer}.sh"
+  TOOLS_PATH=:${EXTERN_DIR}/CRTool
 fi
-env="${env}\nCRTOOL=${CRTOOL}"
 ##############################
 CERT_DIR=/etc/pki/ca-trust/source/anchors
 TEMP_DIR=/usr/local/games # TRICKY: match use in dockergen/bit.user.dockerfile
