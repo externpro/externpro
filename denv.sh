@@ -92,6 +92,23 @@ if [[ -n "${crToolVer}" && -n "${crWrapVer}" ]]; then
   TOOLS_PATH=:${EXTERN_DIR}/CRTool
 fi
 ##############################
+pemuVer="$(findVer 'set(PluginEmulatorRelease' PluginLibraries/CMakeLists.txt)"
+ictVer="$(findVer 'set(ImageChangeToolRelease' PluginLibraries/CMakeLists.txt)"
+if [[ -n "${pemuVer}" ]]; then
+  pemuBase=SDLPluginSDK-v${pemuVer}-gcc931-64-$(uname -s)
+  PEMU_DL="wget ${urlPfx}/PluginFramework/SDKSuper/releases/download/v${pemuVer}/${pemuBase}.tar.xz"
+  TOOLS=${TOOLS:+${TOOLS} && }
+  TOOLS=${TOOLS}"${PEMU_DL} -qO- | tar --no-same-owner -xJ -C ${EXTERN_DIR}"
+  TOOLS_PATH=${TOOLS_PATH}:${EXTERN_DIR}/${pemuBase}/bin
+fi
+if [[ -n "${ictVer}" ]]; then
+  ictBase=ImageChangeTool-${ictVer}-$(uname -s)
+  ICT_DL="wget ${urlPfx}/VantagePlugins/ImageChangeTool/releases/download/v${ictVer}/${ictBase}-tool.tar.xz"
+  TOOLS=${TOOLS:+${TOOLS} && }
+  TOOLS=${TOOLS}"mkdir ${EXTERN_DIR}/${ictBase} && ${ICT_DL} -qO- | tar --no-same-owner -xJ -C ${EXTERN_DIR}/${ictBase}"
+  TOOLS_PATH=${TOOLS_PATH}:${EXTERN_DIR}/${ictBase}
+fi
+##############################
 env="${env}\nTOOLS=${TOOLS}\nTOOLS_PATH=${TOOLS_PATH}"
 ##############################
 CERT_DIR=/etc/pki/ca-trust/source/anchors
