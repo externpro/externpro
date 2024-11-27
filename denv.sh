@@ -92,6 +92,8 @@ if [[ -n "${crToolVer}" && -n "${crWrapVer}" ]]; then
   TOOLS_PATH=:${EXTERN_DIR}/CRTool
 fi
 ##############################
+env="${env}\nTOOLS=${TOOLS}\nTOOLS_PATH=${TOOLS_PATH}"
+##############################
 CERT_DIR=/etc/pki/ca-trust/source/anchors
 TEMP_DIR=/usr/local/games # TRICKY: match use in dockergen/bit.user.dockerfile
 XFER_DIR=_bldtmp # TRICKY: match use in funcs.sh deinit
