@@ -67,6 +67,13 @@
       "inherits": ["isLinux"],
       "configurePreset": "Linux",
       "configurations": ["Debug", "Release"]
+    },
+    {
+      "name": "LinuxRelease",
+      "displayName": "package Linux Release",
+      "inherits": ["isLinux"],
+      "configurePreset": "Linux",
+      "configurations": ["Release"]
     }
   ],
   "workflowPresets": [
@@ -106,7 +113,7 @@
         },
         {
           "type": "package",
-          "name": "Linux"
+          "name": "LinuxRelease"
         }
       ]
     },
