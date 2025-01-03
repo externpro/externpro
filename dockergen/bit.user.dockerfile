@@ -8,7 +8,7 @@ ARG GROUPID
 RUN if [ ${USERID:-0} -ne 0 ] && [ ${GROUPID:-0} -ne 0 ]; then \
   export GROUPNAME=$(getent group ${GROUPID} | cut -d: -f1) \
   && if [[ -z ${GROUPNAME} ]]; then groupadd -g ${GROUPID} ${USERNAME}; fi \
-  && useradd --no-log-init --uid ${USERID} --gid ${GROUPID} ${USERNAME} \
+  && useradd --create-home --shell /bin/bash --no-log-init --uid ${USERID} --gid ${GROUPID} ${USERNAME} \
   && echo "" >> /etc/sudoers \
   && echo "## dockerfile adds ${USERNAME} to sudoers" >> /etc/sudoers \
   && echo "${USERNAME} ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers \
