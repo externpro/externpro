@@ -98,49 +98,20 @@ function runreq
 }
 function gpureq
 {
-  if [[ -f "/proc/driver/nvidia/version" ]]; then
-    # Check that driver version is current and supported (https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html)
-    currentver=`cat /proc/driver/nvidia/version | head -n1 | cut -d" " -f9`
-    requiredver="418.81.07"
-    if [ $(echo "$currentver $requiredver" | tr " " "\n" | sort --version-sort | head -n 1) = $currentver ]; then
-      echo "Unsupported NVIDIA driver version $currentver < $requiredver, continue anyway? (yes/no)"
-      read unsupported
-      if [[ ! $unsupported == "yes" ]]; then
-        echo "To install appropriate drivers, please consult system admin or see the installation guide https://docs.nvidia.com/cuda/cuda-installation-guide-linux/index.html"
-        exit 1
-      fi
-    fi
-  else
-    echo "To run containers with GPU, NVIDIA drivers must be manually installed specific to the hardware."
-    echo "NVIDIA drivers do not appear to be installed (required for GPU), continue anyway? (yes/no)"
-    read drivers
-    if [[ ! $drivers == "yes" ]]; then
-      echo "To install appropriate drivers, please consult system admin or see the installation guide https://docs.nvidia.com/cuda/cuda-installation-guide-linux/index.html"
-      exit 1
-    fi
-  fi
-  if ! command -v nvidia-docker &>/dev/null; then
+  if ! command -v nvidia-container-toolkit 2>&1 > /dev/null; then
     echo "nvidia-docker not installed, attempting to install (requires sudo)..."
     if [ -d "/etc/apt" ]; then
-      curl https://get.docker.com | sh \
-       && sudo systemctl --now enable docker
-      distribution=$(. /etc/os-release;echo $ID$VERSION_ID) \
-       && curl -s -L https://nvidia.github.io/nvidia-docker/gpgkey | sudo apt-key add - \
-       && curl -s -L https://nvidia.github.io/nvidia-docker/$distribution/nvidia-docker.list | \
-       sudo tee /etc/apt/sources.list.d/nvidia-docker.list
-      curl -s -L https://nvidia.github.io/nvidia-container-runtime/experimental/$distribution/nvidia-container-runtime.list | \
-       sudo tee /etc/apt/sources.list.d/nvidia-container-runtime.list
-      sudo apt update
-      sudo apt-get install -y nvidia-docker2
-      sudo systemctl restart docker
-    fi
-    if [ -d "/etc/yum.repos.d" ]; then
-      distribution=$(. /etc/os-release;echo $ID$VERSION_ID)
-      curl -s -L https://nvidia.github.io/nvidia-docker/$distribution/nvidia-docker.repo | \
-        sudo tee /etc/yum.repos.d/nvidia-docker.repo
-      sudo yum install -y nvidia-docker2
+      curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | \
+        sudo gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg && \
+        curl -s -L https://nvidia.github.io/libnvidia-container/stable/deb/nvidia-container-toolkit.list | \
+        sed 's#deb https://#deb [signed-by=/usr/share/keyrings/nvidia-container-toolkit-keyring.gpg] https://#g' | \
+        sudo tee /etc/apt/sources.list.d/nvidia-container-toolkit.list
+      sudo apt-get update
+      sudo apt-get install -y nvidia-container-toolkit
+    elif [ -d "/etc/yum.repos.d" ]; then
+      curl -s -L https://nvidia.github.io/libnvidia-container/stable/rpm/nvidia-container-toolkit.repo | \
+        sudo tee /etc/yum.repos.d/nvidia-container-toolkit.repo
       sudo yum install -y nvidia-container-toolkit
-      sudo systemctl restart docker
     fi
   fi
 }
