@@ -2,6 +2,7 @@
 cd "$( dirname "$0" )"
 pushd .. > /dev/null
 source ./.devcontainer/funcs.sh
+BPROIMG=${1:-rocky85-bld}
 if [[ $(basename -s .git `git config --get remote.origin.url`) == buildpro ]]; then
   BPROTAG=`git describe --tags`
   if [ -n "$(git status --porcelain --untracked=no)" ] || [[ ${BPROTAG} == *"-g"* ]]; then
@@ -14,12 +15,12 @@ else
     BPROTAG=latest
   fi
 fi
-dkr="$(findVer 'FROM' .devcontainer/rocky85-bld.dockerfile .devcontainer/rocky85-pro.dockerfile)"
-dkr=$(eval echo ${dkr}) # ghcr.io/externpro/buildpro/rocky85-[bld|pro]:TAG, where TAG=${BPROTAG}
+dkr="$(findVer 'FROM' .devcontainer/local.dockerfile)"
+dkr=$(eval echo ${dkr}) # ghcr.io/externpro/buildpro/${BPROIMG}:${BPROTAG}
 hst=$(echo "${dkr}" | cut -d/ -f1) # ghcr.io
-rel=$(echo "${dkr}" | cut -d- -f2) # bld:TAG
-rel=${rel//:} # parameter expansion substitution
-rel=bp${rel//./-}
+rel=$(echo "${dkr}" | cut -d/ -f4) # ${BPROIMG}:${BPROTAG}
+rel=${rel//:/-} # parameter expansion substitution
+rel=${rel//./-}
 display_host=$(echo ${DISPLAY} | cut -d: -f1)
 if [[ -z "${display_host}" ]]; then
   display_env=${DISPLAY}
@@ -37,7 +38,8 @@ else
   display_env=${docker_host}:${display_screen}
   xauth_env=${xauth_file}
 fi
-env="BPROTAG=${BPROTAG}"
+env="BPROIMG=${BPROIMG}"
+env="${env}\nBPROTAG=${BPROTAG}"
 env="${env}\nHNAME=${rel}"
 env="${env}\nUSERID=$(id -u ${USER})"
 env="${env}\nGROUPID=$(id -g ${USER})"
