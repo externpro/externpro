@@ -16,6 +16,7 @@ x-bld: &bld-alias
     - ~/.ssh:/home/${USER}/.ssh
     - ~/.gitconfig:/home/${USER}/.gitconfig
 x-all-build-args: &all-build-args-alias
+  BPROIMG: ${BPROIMG}
   BPROTAG: ${BPROTAG}
   USERNAME: ${USER}
   USERID: ${USERID}
@@ -32,7 +33,7 @@ services:
     <<: [*all-alias, *bld-alias]
     build:
       context: .devcontainer
-      dockerfile: rocky85-bld.dockerfile
+      dockerfile: local.dockerfile
       network: host
       args:
         <<: [*all-build-args-alias, *bld-build-args-alias]

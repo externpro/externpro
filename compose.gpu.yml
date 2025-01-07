@@ -18,6 +18,7 @@ x-bld: &bld-alias
     - ~/.gitconfig:/home/${USER}/.gitconfig
     - /mnt/gitRepo:/mnt/gitRepo
 x-all-build-args: &all-build-args-alias
+  BPROIMG: ${BPROIMG}
   BPROTAG: ${BPROTAG}
   USERNAME: ${USER}
   USERID: ${USERID}
@@ -34,7 +35,7 @@ services:
     <<: [*all-alias, *bld-alias]
     build:
       context: .devcontainer
-      dockerfile: rocky85-pin.dockerfile
+      dockerfile: local.dockerfile
       network: host
       args:
         <<: [*all-build-args-alias, *bld-build-args-alias]
@@ -46,7 +47,7 @@ services:
     <<: [*all-alias, *bld-alias]
     build:
       context: .devcontainer
-      dockerfile: rocky85-pdv.dockerfile
+      dockerfile: local.dockerfile
       network: host
       args:
         <<: [*all-build-args-alias, *bld-build-args-alias]
