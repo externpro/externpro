@@ -1,19 +1,28 @@
+ARG BPROIMG=rocky85-bld
 ARG BPROTAG=latest
-FROM ghcr.io/externpro/buildpro/rocky85-bld:${BPROTAG}
+FROM ghcr.io/externpro/buildpro/${BPROIMG}:${BPROTAG}
 LABEL maintainer="smanders"
 LABEL org.opencontainers.image.source=https://github.com/externpro/buildpro
 SHELL ["/bin/bash", "-c"]
 USER 0
-# install node
-ENV NODE_VERSION=20.18.0
-ENV NVM_DIR=/opt/.nvm
-RUN mkdir $NVM_DIR && dnf install -y curl \
-  && curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash \
-  && dnf clean all
-RUN . "$NVM_DIR/nvm.sh" && nvm install ${NODE_VERSION} \
-  && . "$NVM_DIR/nvm.sh" && nvm use v${NODE_VERSION} \
-  && . "$NVM_DIR/nvm.sh" && nvm alias default v${NODE_VERSION}
-ENV PATH="$NVM_DIR/versions/node/v${NODE_VERSION}/bin/:${PATH}"
+# [COPY|RUN]_IT
+ARG COPY_IT
+ARG RUN_IT
+COPY ${COPY_IT} /usr/local/games
+RUN eval "${RUN_IT}"
+# tools
+ARG TOOLS
+ARG TOOLS_PATH
+RUN eval "${TOOLS}"
+ENV PATH=$PATH${TOOLS_PATH}
+# webpro
+ARG WEBPRO
+RUN eval "${WEBPRO}"
+ARG WEBPRO_PATH="${EXTERN_DIR}/webpro*"
+ENV WEBPRO_PATH=${WEBPRO_PATH}
+# timezone
+ARG TZ
+ENV TZ=$TZ
 # create non-root user, add to sudoers
 ARG USERNAME
 ARG USERID
@@ -21,7 +30,7 @@ ARG GROUPID
 RUN if [ ${USERID:-0} -ne 0 ] && [ ${GROUPID:-0} -ne 0 ]; then \
   export GROUPNAME=$(getent group ${GROUPID} | cut -d: -f1) \
   && if [[ -z ${GROUPNAME} ]]; then groupadd -g ${GROUPID} ${USERNAME}; fi \
-  && useradd --no-log-init --uid ${USERID} --gid ${GROUPID} ${USERNAME} \
+  && useradd --create-home --shell /bin/bash --no-log-init --uid ${USERID} --gid ${GROUPID} ${USERNAME} \
   && echo "" >> /etc/sudoers \
   && echo "## dockerfile adds ${USERNAME} to sudoers" >> /etc/sudoers \
   && echo "${USERNAME} ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers \
