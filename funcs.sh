@@ -130,6 +130,7 @@ function defUsage
   echo " -h      display this help message"
   echo "         run the build container (no switches)"
   echo " -b      build docker image(s)"
+  echo " -x      run the cross-compile build container"
 }
 function defOptions
 {
@@ -141,13 +142,22 @@ function defOptions
     deinit
     exit 0
   fi
-  while getopts "bh" opt
+  while getopts "bhx" opt
   do
     case ${opt} in
       b )
         buildreq
         init
         docker compose --profile pbld build
+        deinit
+        exit 0
+        ;;
+      x )
+        BPROIMG=ubuntu
+        buildreq
+        init
+        docker compose --profile pbld build
+        docker compose run --rm bld
         deinit
         exit 0
         ;;
