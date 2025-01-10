@@ -37,6 +37,8 @@ services:
       network: host
       args:
         <<: [*all-build-args-alias, *bld-build-args-alias]
+    extra_hosts:
+      - "${HNAME}=127.0.0.1"
     hostname: ${HNAME}
     network_mode: host
     profiles:
