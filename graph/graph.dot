@@ -1,18 +1,23 @@
 digraph GG {
   node [fontsize=12];
-  "rocky85" [shape=diamond];
+  "ubuntu:20.04" [shape=diamond];
+  "rockylinux:8.5" [shape=diamond];
   "externpro" [shape=box];
   "PluginSdk" [shape=box];
   "plugins" [shape=box];
   "plugin dev" [shape=box];
   "microservices" [shape=box];
-  "buildpro/rocky85-pro" -> "rocky85";
+  "VantageCI" [shape=box];
+  "buildpro/rocky85-pro" -> "rockylinux:8.5";
   "buildpro/rocky85-bld" -> "buildpro/rocky85-pro";
   "buildpro/rocky85-pin" -> "buildpro/rocky85-pro";
   "buildpro/rocky85-pdv" -> "buildpro/rocky85-pro";
+  "buildpro/rocky85-ci" -> "buildpro/rocky85-bld";
+  "buildpro/ubuntu" -> "ubuntu:20.04";
   "externpro" -> "buildpro/rocky85-pro";
   "PluginSdk" -> "buildpro/rocky85-pin";
   "plugins" -> "buildpro/rocky85-pin";
   "plugin dev" -> "buildpro/rocky85-pdv";
   "microservices" -> "buildpro/rocky85-bld";
+  "VantageCI" -> "buildpro/rocky85-ci";
 }

@@ -2,7 +2,7 @@
 function init
 {
   if [[ -x .devcontainer/denv.sh ]]; then
-    ./.devcontainer/denv.sh
+    ./.devcontainer/denv.sh ${BPROIMG}
     cat .env
   fi
 }
@@ -94,4 +94,52 @@ function gpureq
       sudo yum install -y nvidia-container-toolkit
     fi
   fi
+}
+function defUsage
+{
+  echo "`basename -- $0` usage:"
+  echo " -h      display this help message"
+  echo "         run the build container (no switches)"
+  echo " -b      build docker image(s)"
+  echo " -x      run the cross-compile build container"
+}
+function defOptions
+{
+  if [ $# -eq 0 ]; then
+    buildreq
+    init
+    docker compose --profile pbld build
+    docker compose run --rm bld
+    deinit
+    exit 0
+  fi
+  while getopts "bhx" opt
+  do
+    case ${opt} in
+      b )
+        buildreq
+        init
+        docker compose --profile pbld build
+        deinit
+        exit 0
+        ;;
+      x )
+        BPROIMG=ubuntu
+        buildreq
+        init
+        docker compose --profile pbld build
+        docker compose run --rm bld
+        deinit
+        exit 0
+        ;;
+      h )
+        defUsage
+        exit 0
+        ;;
+      \? )
+        defUsage
+        exit 0
+        ;;
+    esac
+  done
 }

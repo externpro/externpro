@@ -2,6 +2,7 @@
 cd "$( dirname "$0" )"
 pushd .. > /dev/null
 source ./.devcontainer/funcs.sh
+BPROIMG=${1:-rocky85-bld}
 if [[ $(basename -s .git `git config --get remote.origin.url`) == buildpro ]]; then
   BPROTAG=`git describe --tags`
   if [ -n "$(git status --porcelain --untracked=no)" ] || [[ ${BPROTAG} == *"-g"* ]]; then
@@ -14,12 +15,12 @@ else
     BPROTAG=latest
   fi
 fi
-dkr="$(findVer 'FROM' .devcontainer/rocky85-bld.dockerfile .devcontainer/rocky85-pro.dockerfile)"
-dkr=$(eval echo ${dkr}) # ghcr.io/externpro/buildpro/rocky85-[bld|pro]:TAG, where TAG=${BPROTAG}
+dkr="$(findVer 'FROM' .devcontainer/local.dockerfile)"
+dkr=$(eval echo ${dkr}) # ghcr.io/externpro/buildpro/${BPROIMG}:${BPROTAG}
 hst=$(echo "${dkr}" | cut -d/ -f1) # ghcr.io
-rel=$(echo "${dkr}" | cut -d- -f2) # bld:TAG
-rel=${rel//:} # parameter expansion substitution
-rel=bp${rel//./-}
+rel=$(echo "${dkr}" | cut -d/ -f4) # ${BPROIMG}:${BPROTAG}
+rel=${rel//:/-} # parameter expansion substitution
+rel=${rel//./-}
 display_host=$(echo ${DISPLAY} | cut -d: -f1)
 if [[ -z "${display_host}" ]]; then
   display_env=${DISPLAY}
@@ -37,7 +38,8 @@ else
   display_env=${docker_host}:${display_screen}
   xauth_env=${xauth_file}
 fi
-env="BPROTAG=${BPROTAG}"
+env="BPROIMG=${BPROIMG}"
+env="${env}\nBPROTAG=${BPROTAG}"
 env="${env}\nHNAME=${rel}"
 env="${env}\nUSERID=$(id -u ${USER})"
 env="${env}\nGROUPID=$(id -g ${USER})"
@@ -83,7 +85,7 @@ if [[ -n "${crToolVer}" && -n "${crWrapVer}" ]]; then
   CRTOOL_DL="wget -q \"${urlPfx}/CRTool/CRTool/releases/download/${crWrapVer}/CRTool-${crWrapVer}.sh\" \
 && wget -q \"${urlPfx}/CRTool/CRToolImpl/releases/download/${crToolVer}/CRToolImpl-${crToolVer}.sh\" \
 && chmod 755 CRTool*.sh"
-  TOOLS="mkdir ${EXTERN_DIR}/CRTool \
+  TOOLS="mkdir -p ${EXTERN_DIR}/CRTool \
 && ${CRTOOL_DL} \
 && ./CRTool-${crWrapVer}.sh --prefix=${EXTERN_DIR}/CRTool --exclude-subdir \
 && ./CRToolImpl-${crToolVer}.sh --prefix=${EXTERN_DIR} --include-subdir \
@@ -101,21 +103,21 @@ if [[ -n "${bmvVer}" ]]; then
   bmvBase=BrokerMessageValidatorTool-${bmvVer}-$(uname -s)
   bmvDl="wget ${urlPfx}/VantagePlugins/BrokerMessageValidatorTool/releases/download/v${bmvVer}/${bmvBase}-tool.tar.xz"
   TOOLS=${TOOLS:+${TOOLS} && }
-  TOOLS=${TOOLS}"mkdir ${EXTERN_DIR}/${bmvBase} && ${bmvDl} -qO- | tar --no-same-owner -xJ -C ${EXTERN_DIR}/${bmvBase}"
+  TOOLS=${TOOLS}"mkdir -p ${EXTERN_DIR}/${bmvBase} && ${bmvDl} -qO- | tar --no-same-owner -xJ -C ${EXTERN_DIR}/${bmvBase}"
   TOOLS_PATH=${TOOLS_PATH}:${EXTERN_DIR}/${bmvBase}
 fi
 if [[ -n "${ictVer}" ]]; then
   ictBase=ImageChangeTool-${ictVer}-$(uname -s)
   ictDl="wget ${urlPfx}/VantagePlugins/ImageChangeTool/releases/download/v${ictVer}/${ictBase}-tool.tar.xz"
   TOOLS=${TOOLS:+${TOOLS} && }
-  TOOLS=${TOOLS}"mkdir ${EXTERN_DIR}/${ictBase} && ${ictDl} -qO- | tar --no-same-owner -xJ -C ${EXTERN_DIR}/${ictBase}"
+  TOOLS=${TOOLS}"mkdir -p ${EXTERN_DIR}/${ictBase} && ${ictDl} -qO- | tar --no-same-owner -xJ -C ${EXTERN_DIR}/${ictBase}"
   TOOLS_PATH=${TOOLS_PATH}:${EXTERN_DIR}/${ictBase}
 fi
 if [[ -n "${iqtVer}" ]]; then
   iqtBase=ImageQualityTool-${iqtVer}-$(uname -s)
   iqtDl="wget ${urlPfx}/VantagePlugins/ImageQualityTool/releases/download/v${iqtVer}/${iqtBase}-tool.tar.xz"
   TOOLS=${TOOLS:+${TOOLS} && }
-  TOOLS=${TOOLS}"mkdir ${EXTERN_DIR}/${iqtBase} && ${iqtDl} -qO- | tar --no-same-owner -xJ -C ${EXTERN_DIR}/${iqtBase}"
+  TOOLS=${TOOLS}"mkdir -p ${EXTERN_DIR}/${iqtBase} && ${iqtDl} -qO- | tar --no-same-owner -xJ -C ${EXTERN_DIR}/${iqtBase}"
   TOOLS_PATH=${TOOLS_PATH}:${EXTERN_DIR}/${iqtBase}
 fi
 if [[ -n "${pmuVer}" ]]; then
@@ -129,7 +131,7 @@ if [[ -n "${spvVer}" ]]; then
   spvBase=SARPyValidator-${spvVer}.0-$(uname -s)
   spvDl="wget ${urlPfx}/VantagePlugins/SARPyValidator/releases/download/v${spvVer}/${spvBase}-tool.tar.xz"
   TOOLS=${TOOLS:+${TOOLS} && }
-  TOOLS=${TOOLS}"mkdir ${EXTERN_DIR}/${spvBase} && ${spvDl} -qO- | tar --no-same-owner -xJ -C ${EXTERN_DIR}/${spvBase}"
+  TOOLS=${TOOLS}"mkdir -p ${EXTERN_DIR}/${spvBase} && ${spvDl} -qO- | tar --no-same-owner -xJ -C ${EXTERN_DIR}/${spvBase}"
   TOOLS_PATH=${TOOLS_PATH}:${EXTERN_DIR}/${spvBase}
 fi
 ##############################
