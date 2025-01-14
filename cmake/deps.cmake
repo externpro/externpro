@@ -11,7 +11,6 @@ function(proDeps)
   endif()
   set(dot "${dot}" PARENT_SCOPE)
 endfunction()
-
 string(JOIN "\n" dot
   "digraph GG {"
   "  node [fontsize=12]\;"
