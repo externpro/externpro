@@ -1,0 +1,135 @@
+{
+  "version": 8,
+  "include": ["../../../CMakePresetsBase.json"],
+  "configurePresets": [
+    {
+      "name": "isLinux",
+      "hidden": true,
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
+      "name": "Linux",
+      "displayName": "config Linux Ninja",
+      "inherits": ["config-base", "isLinux"],
+      "generator": "Ninja Multi-Config"
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "isLinux",
+      "hidden": true,
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
+      "name": "LinuxDebug",
+      "displayName": "build Linux Debug",
+      "inherits": ["isLinux"],
+      "configurePreset": "Linux",
+      "configuration": "Debug"
+    },
+    {
+      "name": "LinuxRelease",
+      "displayName": "build Linux Release",
+      "inherits": ["isLinux"],
+      "targets": ["all", "install"],
+      "configurePreset": "Linux",
+      "configuration": "Release"
+    },
+    {
+      "name": "LinuxReleaseNoInstall",
+      "displayName": "build Linux Release, no install",
+      "inherits": ["isLinux"],
+      "configurePreset": "Linux",
+      "configuration": "Release"
+    }
+  ],
+  "packagePresets": [
+    {
+      "name": "isLinux",
+      "hidden": true,
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
+      "name": "Linux",
+      "displayName": "package Linux",
+      "inherits": ["isLinux"],
+      "configurePreset": "Linux",
+      "configurations": ["Debug", "Release"]
+    },
+    {
+      "name": "LinuxRelease",
+      "displayName": "package Linux Release",
+      "inherits": ["isLinux"],
+      "configurePreset": "Linux",
+      "configurations": ["Release"]
+    }
+  ],
+  "workflowPresets": [
+    {
+      "name": "Linux",
+      "displayName": "workflow Linux",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "Linux"
+        },
+        {
+          "type": "build",
+          "name": "LinuxDebug"
+        },
+        {
+          "type": "build",
+          "name": "LinuxRelease"
+        },
+        {
+          "type": "package",
+          "name": "Linux"
+        }
+      ]
+    },
+    {
+      "name": "LinuxRelease",
+      "displayName": "workflow LinuxRelease",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "Linux"
+        },
+        {
+          "type": "build",
+          "name": "LinuxRelease"
+        },
+        {
+          "type": "package",
+          "name": "LinuxRelease"
+        }
+      ]
+    },
+    {
+      "name": "LinuxReleaseNoInstall",
+      "displayName": "workflow LinuxRelease, no install",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "Linux"
+        },
+        {
+          "type": "build",
+          "name": "LinuxReleaseNoInstall"
+        }
+      ]
+    }
+  ]
+}
