@@ -3,131 +3,120 @@
   "include": ["../../../CMakePresetsBase.json"],
   "configurePresets": [
     {
-      "name": "isLinux",
+      "name": "isJetPack",
       "hidden": true,
-      "condition": {
-        "type": "equals",
-        "lhs": "${hostSystemName}",
-        "rhs": "Linux"
-      }
+      "condition": { "lhs": "$penv{JETPACK}", "type": "notEquals", "rhs": "" }
     },
     {
-      "name": "Linux",
-      "displayName": "config Linux Ninja",
-      "inherits": ["config-base", "isLinux"],
+      "name": "JetPack",
+      "displayName": "config JetPack Ninja",
+      "inherits": ["config-base", "isJetPack"],
+      "toolchainFile": "${sourceDir}/.devcontainer/cmake/toolchain/jetpack5.cmake",
       "generator": "Ninja Multi-Config"
     }
   ],
   "buildPresets": [
     {
-      "name": "isLinux",
+      "name": "isJetPack",
       "hidden": true,
-      "condition": {
-        "type": "equals",
-        "lhs": "${hostSystemName}",
-        "rhs": "Linux"
-      }
+      "condition": { "lhs": "$penv{JETPACK}", "type": "notEquals", "rhs": "" }
     },
     {
-      "name": "LinuxDebug",
-      "displayName": "build Linux Debug",
-      "inherits": ["isLinux"],
-      "configurePreset": "Linux",
+      "name": "JetPackDebug",
+      "displayName": "build JetPack Debug",
+      "inherits": ["isJetPack"],
+      "configurePreset": "JetPack",
       "configuration": "Debug"
     },
     {
-      "name": "LinuxRelease",
-      "displayName": "build Linux Release",
-      "inherits": ["isLinux"],
+      "name": "JetPackRelease",
+      "displayName": "build JetPack Release",
+      "inherits": ["isJetPack"],
       "targets": ["all", "install"],
-      "configurePreset": "Linux",
+      "configurePreset": "JetPack",
       "configuration": "Release"
     },
     {
-      "name": "LinuxReleaseNoInstall",
-      "displayName": "build Linux Release, no install",
-      "inherits": ["isLinux"],
-      "configurePreset": "Linux",
+      "name": "JetPackReleaseNoInstall",
+      "displayName": "build JetPack Release, no install",
+      "inherits": ["isJetPack"],
+      "configurePreset": "JetPack",
       "configuration": "Release"
     }
   ],
   "packagePresets": [
     {
-      "name": "isLinux",
+      "name": "isJetPack",
       "hidden": true,
-      "condition": {
-        "type": "equals",
-        "lhs": "${hostSystemName}",
-        "rhs": "Linux"
-      }
+      "condition": { "lhs": "$penv{JETPACK}", "type": "notEquals", "rhs": "" }
     },
     {
-      "name": "Linux",
-      "displayName": "package Linux",
-      "inherits": ["isLinux"],
-      "configurePreset": "Linux",
+      "name": "JetPack",
+      "displayName": "package JetPack",
+      "inherits": ["isJetPack"],
+      "configurePreset": "JetPack",
       "configurations": ["Debug", "Release"]
     },
     {
-      "name": "LinuxRelease",
-      "displayName": "package Linux Release",
-      "inherits": ["isLinux"],
-      "configurePreset": "Linux",
+      "name": "JetPackRelease",
+      "displayName": "package JetPack Release",
+      "inherits": ["isJetPack"],
+      "configurePreset": "JetPack",
       "configurations": ["Release"]
     }
   ],
   "workflowPresets": [
     {
-      "name": "Linux",
-      "displayName": "workflow Linux",
+      "name": "JetPack",
+      "displayName": "workflow JetPack",
       "steps": [
         {
           "type": "configure",
-          "name": "Linux"
+          "name": "JetPack"
         },
         {
           "type": "build",
-          "name": "LinuxDebug"
+          "name": "JetPackDebug"
         },
         {
           "type": "build",
-          "name": "LinuxRelease"
+          "name": "JetPackRelease"
         },
         {
           "type": "package",
-          "name": "Linux"
+          "name": "JetPack"
         }
       ]
     },
     {
-      "name": "LinuxRelease",
-      "displayName": "workflow LinuxRelease",
+      "name": "JetPackRelease",
+      "displayName": "workflow JetPackRelease",
       "steps": [
         {
           "type": "configure",
-          "name": "Linux"
+          "name": "JetPack"
         },
         {
           "type": "build",
-          "name": "LinuxRelease"
+          "name": "JetPackRelease"
         },
         {
           "type": "package",
-          "name": "LinuxRelease"
+          "name": "JetPackRelease"
         }
       ]
     },
     {
-      "name": "LinuxReleaseNoInstall",
-      "displayName": "workflow LinuxRelease, no install",
+      "name": "JetPackReleaseNoInstall",
+      "displayName": "workflow JetPackRelease, no install",
       "steps": [
         {
           "type": "configure",
-          "name": "Linux"
+          "name": "JetPack"
         },
         {
           "type": "build",
-          "name": "LinuxReleaseNoInstall"
+          "name": "JetPackReleaseNoInstall"
         }
       ]
     }
