@@ -23,8 +23,7 @@ else()
 endif()
 get_filename_component(nodePath ${CMAKE_ARGV4} DIRECTORY)
 foreach(arg RANGE 5 ${CMAKE_ARGC})
-  separate_arguments(commandPart NATIVE_COMMAND ${CMAKE_ARGV${arg}})
-  list(APPEND command ${commandPart})
+  list(APPEND command "${CMAKE_ARGV${arg}}")
 endforeach()
 execute_process(
   COMMAND ${CMAKE_COMMAND} -E env PATH=${nodePath}${pathToUse} ${command}
