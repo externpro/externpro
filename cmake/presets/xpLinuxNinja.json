@@ -55,6 +55,37 @@
       "configuration": "Release"
     }
   ],
+  "testPresets": [
+    {
+      "name": "isLinux",
+      "hidden": true,
+      "condition": {
+        "type": "allOf",
+        "conditions": [
+          { "lhs": "${hostSystemName}", "type": "equals", "rhs": "Linux" },
+          { "lhs": "$penv{JETPACK}", "type": "equals", "rhs": "" }
+        ]
+      }
+    },
+    {
+      "name": "LinuxDebug",
+      "displayName": "test Linux Debug",
+      "inherits": ["isLinux"],
+      "configurePreset": "Linux",
+      "configuration": "Debug",
+      "output": { "outputOnFailure": true },
+      "execution": { "noTestsAction": "error", "stopOnFailure": true }
+    },
+    {
+      "name": "LinuxRelease",
+      "displayName": "test Linux Release",
+      "inherits": ["isLinux"],
+      "configurePreset": "Linux",
+      "configuration": "Release",
+      "output": { "outputOnFailure": true },
+      "execution": { "noTestsAction": "error", "stopOnFailure": true }
+    }
+  ],
   "packagePresets": [
     {
       "name": "isLinux",
@@ -100,6 +131,14 @@
           "name": "LinuxRelease"
         },
         {
+          "type": "test",
+          "name": "LinuxDebug"
+        },
+        {
+          "type": "test",
+          "name": "LinuxRelease"
+        },
+        {
           "type": "package",
           "name": "Linux"
         }
@@ -107,7 +146,7 @@
     },
     {
       "name": "LinuxRelease",
-      "displayName": "workflow LinuxRelease",
+      "displayName": "workflow Linux Release",
       "steps": [
         {
           "type": "configure",
@@ -125,7 +164,7 @@
     },
     {
       "name": "LinuxReleaseNoInstall",
-      "displayName": "workflow LinuxRelease, no install",
+      "displayName": "workflow Linux Release, no install",
       "steps": [
         {
           "type": "configure",
