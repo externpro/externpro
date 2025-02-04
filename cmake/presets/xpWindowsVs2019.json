@@ -35,6 +35,13 @@
       "targets": ["ALL_BUILD", "INSTALL"],
       "configurePreset": "Windows",
       "configuration": "Release"
+    },
+    {
+      "name": "WindowsReleaseNoInstall",
+      "displayName": "build Windows Release, no install",
+      "inherits": ["isWindows"],
+      "configurePreset": "Windows",
+      "configuration": "Release"
     }
   ],
   "packagePresets": [
@@ -49,6 +56,13 @@
       "inherits": ["isWindows"],
       "configurePreset": "Windows",
       "configurations": ["Debug", "Release"]
+    },
+    {
+      "name": "WindowsRelease",
+      "displayName": "package Windows Release",
+      "inherits": ["isWindows"],
+      "configurePreset": "Windows",
+      "configurations": ["Release"]
     }
   ],
   "workflowPresets": [
@@ -71,6 +85,38 @@
         {
           "type": "package",
           "name": "Windows"
+        }
+      ]
+    },
+    {
+      "name": "WindowsRelease",
+      "displayName": "workflow Windows Release",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "Windows"
+        },
+        {
+          "type": "build",
+          "name": "WindowsRelease"
+        },
+        {
+          "type": "package",
+          "name": "WindowsRelease"
+        }
+      ]
+    },
+    {
+      "name": "WindowsReleaseNoInstall",
+      "displayName": "workflow Windows Release, no install",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "Windows"
+        },
+        {
+          "type": "build",
+          "name": "WindowsReleaseNoInstall"
         }
       ]
     }
