@@ -103,11 +103,11 @@ set(xp_ffmpeg REPO github.com/externpro/FFmpeg openh264 yasm XP_MODULE)
 set(xp_libssh2 REPO github.com/externpro/libssh2 DEPS openssl zlib XP_MODULE)
 set(xp_libstrophe REPO github.com/externpro/libstrophe DEPS expat openssl XP_MODULE)
 set(xp_node-addon-api REPO github.com/externpro/node-addon-api DEPS node XP_MODULE)
-set(xp_palam REPO isrhub.usurf.usu.edu/palam/palam TAG v1.11.4.0
+set(xp_palam REPO isrhub.usurf.usu.edu/palam/palam TAG v1.11.5.0
   BRANCH development DEPS boost eigen fftw geotrans jasper jpegxp jxrlib kakadu openssl protobuf rapidjson rapidxml wxwidgets wxx
-  SHA256_Linux d5a1456a333f2ccb6c2bcd6dc89cca0b3092ed16ad7b03bde0fc5f28a0876f03
-  SHA256_win64 ad88ddb3d098273c2762104a926a9f778051926763b602adeb0b0ccbeea75dbf
-  SHA256_utres 6b2fc46693dfc9d6fc9e89659206c2c1b30eaf44bede490978a853cbfbeaaf22
+  SHA256_Linux 4a8d8c258a44186e045eac97d0e032bf530eb21e1df1d783906179e9c9bf93da
+  SHA256_win64 e0cb2e0c1664621a7c6a753e15eb3ae348c4fcf4ee6ef481e146dda808a4a640
+  SHA256_utres 502f8ed7685c1f6a215a1cba5f5765e72735849cdfb8c80de8d83ec8c38131f8
   )
 set(xp_ng_gdp REPO isrhub.usurf.usu.edu/internpro/NG_GDP TAG v24.02
   BRANCH development DEPS boost
