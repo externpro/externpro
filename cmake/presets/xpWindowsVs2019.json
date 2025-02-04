@@ -5,11 +5,7 @@
     {
       "name": "isWindows",
       "hidden": true,
-      "condition": {
-        "type": "equals",
-        "lhs": "${hostSystemName}",
-        "rhs": "Windows"
-      }
+      "condition": { "lhs": "${hostSystemName}", "type": "equals", "rhs": "Windows" }
     },
     {
       "name": "Windows",
@@ -23,11 +19,7 @@
     {
       "name": "isWindows",
       "hidden": true,
-      "condition": {
-        "type": "equals",
-        "lhs": "${hostSystemName}",
-        "rhs": "Windows"
-      }
+      "condition": { "lhs": "${hostSystemName}", "type": "equals", "rhs": "Windows" }
     },
     {
       "name": "WindowsDebug",
@@ -49,11 +41,7 @@
     {
       "name": "isWindows",
       "hidden": true,
-      "condition": {
-        "type": "equals",
-        "lhs": "${hostSystemName}",
-        "rhs": "Windows"
-      }
+      "condition": { "lhs": "${hostSystemName}", "type": "equals", "rhs": "Windows" }
     },
     {
       "name": "Windows",
