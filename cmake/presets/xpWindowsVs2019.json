@@ -44,6 +44,31 @@
       "configuration": "Release"
     }
   ],
+  "testPresets": [
+    {
+      "name": "isWindows",
+      "hidden": true,
+      "condition": { "lhs": "${hostSystemName}", "type": "equals", "rhs": "Windows" }
+    },
+    {
+      "name": "WindowsDebug",
+      "displayName": "test Windows Debug",
+      "inherits": ["isWindows"],
+      "configurePreset": "Windows",
+      "configuration": "Debug",
+      "output": { "outputOnFailure": true },
+      "execution": { "noTestsAction": "error", "stopOnFailure": true }
+    },
+    {
+      "name": "WindowsRelease",
+      "displayName": "test Windows Release",
+      "inherits": ["isWindows"],
+      "configurePreset": "Windows",
+      "configuration": "Release",
+      "output": { "outputOnFailure": true },
+      "execution": { "noTestsAction": "error", "stopOnFailure": true }
+    }
+  ],
   "packagePresets": [
     {
       "name": "isWindows",
@@ -80,6 +105,14 @@
         },
         {
           "type": "build",
+          "name": "WindowsRelease"
+        },
+        {
+          "type": "test",
+          "name": "WindowsDebug"
+        },
+        {
+          "type": "test",
           "name": "WindowsRelease"
         },
         {
