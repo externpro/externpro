@@ -9,7 +9,7 @@
     },
     {
       "name": "JetPack",
-      "displayName": "config JetPack Ninja",
+      "displayName": "configure JetPack Ninja",
       "inherits": ["config-base", "isJetPack"],
       "toolchainFile": "${sourceDir}/.devcontainer/cmake/toolchain/jetpack5.cmake",
       "generator": "Ninja Multi-Config"
@@ -90,7 +90,7 @@
     },
     {
       "name": "JetPackRelease",
-      "displayName": "workflow JetPackRelease",
+      "displayName": "workflow JetPack Release",
       "steps": [
         {
           "type": "configure",
@@ -108,7 +108,7 @@
     },
     {
       "name": "JetPackReleaseNoInstall",
-      "displayName": "workflow JetPackRelease, no install",
+      "displayName": "workflow JetPack Release, no install",
       "steps": [
         {
           "type": "configure",

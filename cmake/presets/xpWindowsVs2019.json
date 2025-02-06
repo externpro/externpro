@@ -9,7 +9,7 @@
     },
     {
       "name": "Windows",
-      "displayName": "config Windows VS2019",
+      "displayName": "configure Windows VS2019",
       "inherits": ["config-base", "isWindows"],
       "generator": "Visual Studio 16 2019",
       "architecture": "x64"

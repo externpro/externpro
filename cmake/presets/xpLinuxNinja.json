@@ -15,7 +15,7 @@
     },
     {
       "name": "Linux",
-      "displayName": "config Linux Ninja",
+      "displayName": "configure Linux Ninja",
       "inherits": ["config-base", "isLinux"],
       "generator": "Ninja Multi-Config"
     }
