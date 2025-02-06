@@ -44,6 +44,31 @@
       "configuration": "Release"
     }
   ],
+  "testPresets": [
+    {
+      "name": "isJetPack",
+      "hidden": true,
+      "condition": { "lhs": "$penv{JETPACK}", "type": "notEquals", "rhs": "" }
+    },
+    {
+      "name": "JetPackDebug",
+      "displayName": "test JetPack Debug",
+      "inherits": ["isJetPack"],
+      "configurePreset": "JetPack",
+      "configuration": "Debug",
+      "output": { "outputOnFailure": true },
+      "execution": { "noTestsAction": "ignore", "stopOnFailure": false }
+    },
+    {
+      "name": "JetPackRelease",
+      "displayName": "test JetPack Release",
+      "inherits": ["isJetPack"],
+      "configurePreset": "JetPack",
+      "configuration": "Release",
+      "output": { "outputOnFailure": true },
+      "execution": { "noTestsAction": "ignore", "stopOnFailure": false }
+    }
+  ],
   "packagePresets": [
     {
       "name": "isJetPack",
@@ -80,6 +105,14 @@
         },
         {
           "type": "build",
+          "name": "JetPackRelease"
+        },
+        {
+          "type": "test",
+          "name": "JetPackDebug"
+        },
+        {
+          "type": "test",
           "name": "JetPackRelease"
         },
         {
