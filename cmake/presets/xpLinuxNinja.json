@@ -74,7 +74,7 @@
       "configurePreset": "Linux",
       "configuration": "Debug",
       "output": { "outputOnFailure": true },
-      "execution": { "noTestsAction": "ignore", "stopOnFailure": true }
+      "execution": { "noTestsAction": "ignore", "stopOnFailure": false }
     },
     {
       "name": "LinuxRelease",
@@ -83,7 +83,7 @@
       "configurePreset": "Linux",
       "configuration": "Release",
       "output": { "outputOnFailure": true },
-      "execution": { "noTestsAction": "ignore", "stopOnFailure": true }
+      "execution": { "noTestsAction": "ignore", "stopOnFailure": false }
     }
   ],
   "packagePresets": [
