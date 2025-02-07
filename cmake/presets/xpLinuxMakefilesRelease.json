@@ -5,11 +5,7 @@
     {
       "name": "isLinux",
       "hidden": true,
-      "condition": {
-        "type": "equals",
-        "lhs": "${hostSystemName}",
-        "rhs": "Linux"
-      }
+      "condition": { "lhs": "${hostSystemName}", "type": "equals", "rhs": "Linux" }
     },
     {
       "name": "Linux",
@@ -23,11 +19,7 @@
     {
       "name": "isLinux",
       "hidden": true,
-      "condition": {
-        "type": "equals",
-        "lhs": "${hostSystemName}",
-        "rhs": "Linux"
-      }
+      "condition": { "lhs": "${hostSystemName}", "type": "equals", "rhs": "Linux" }
     },
     {
       "name": "LinuxRelease",
@@ -42,11 +34,7 @@
     {
       "name": "isLinux",
       "hidden": true,
-      "condition": {
-        "type": "equals",
-        "lhs": "${hostSystemName}",
-        "rhs": "Linux"
-      }
+      "condition": { "lhs": "${hostSystemName}", "type": "equals", "rhs": "Linux" }
     },
     {
       "name": "Linux",
