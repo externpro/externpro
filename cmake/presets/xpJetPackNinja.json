@@ -5,7 +5,7 @@
     {
       "name": "isJetPack",
       "hidden": true,
-      "condition": { "lhs": "$penv{JETPACK}", "type": "notEquals", "rhs": "" }
+      "condition": { "lhs": "$penv{XPX}", "type": "equals", "rhs": "JetPack" }
     },
     {
       "name": "JetPack",
@@ -19,7 +19,7 @@
     {
       "name": "isJetPack",
       "hidden": true,
-      "condition": { "lhs": "$penv{JETPACK}", "type": "notEquals", "rhs": "" }
+      "condition": { "lhs": "$penv{XPX}", "type": "equals", "rhs": "JetPack" }
     },
     {
       "name": "JetPackDebug",
@@ -48,7 +48,7 @@
     {
       "name": "isJetPack",
       "hidden": true,
-      "condition": { "lhs": "$penv{JETPACK}", "type": "notEquals", "rhs": "" }
+      "condition": { "lhs": "$penv{XPX}", "type": "equals", "rhs": "JetPack" }
     },
     {
       "name": "JetPackDebug",
@@ -73,7 +73,7 @@
     {
       "name": "isJetPack",
       "hidden": true,
-      "condition": { "lhs": "$penv{JETPACK}", "type": "notEquals", "rhs": "" }
+      "condition": { "lhs": "$penv{XPX}", "type": "equals", "rhs": "JetPack" }
     },
     {
       "name": "JetPack",

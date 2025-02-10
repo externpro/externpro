@@ -9,7 +9,7 @@
         "type": "allOf",
         "conditions": [
           { "lhs": "${hostSystemName}", "type": "equals", "rhs": "Linux" },
-          { "lhs": "$penv{JETPACK}", "type": "equals", "rhs": "" }
+          { "lhs": "$penv{XPX}", "type": "equals", "rhs": "" }
         ]
       }
     },
@@ -28,7 +28,7 @@
         "type": "allOf",
         "conditions": [
           { "lhs": "${hostSystemName}", "type": "equals", "rhs": "Linux" },
-          { "lhs": "$penv{JETPACK}", "type": "equals", "rhs": "" }
+          { "lhs": "$penv{XPX}", "type": "equals", "rhs": "" }
         ]
       }
     },
@@ -63,7 +63,7 @@
         "type": "allOf",
         "conditions": [
           { "lhs": "${hostSystemName}", "type": "equals", "rhs": "Linux" },
-          { "lhs": "$penv{JETPACK}", "type": "equals", "rhs": "" }
+          { "lhs": "$penv{XPX}", "type": "equals", "rhs": "" }
         ]
       }
     },
@@ -94,7 +94,7 @@
         "type": "allOf",
         "conditions": [
           { "lhs": "${hostSystemName}", "type": "equals", "rhs": "Linux" },
-          { "lhs": "$penv{JETPACK}", "type": "equals", "rhs": "" }
+          { "lhs": "$penv{XPX}", "type": "equals", "rhs": "" }
         ]
       }
     },
