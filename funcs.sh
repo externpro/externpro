@@ -61,13 +61,27 @@ function gitcfgreq
 function composereq
 {
   if ! docker compose version &>/dev/null; then
-    echo "docker needs update to support 'docker compose', attempting (requires sudo)..."
-    sudo sh -c " \
-      mkdir -p /usr/local/lib/docker/cli-plugins \
-      && curl -SL 'https://github.com/docker/compose/releases/download/v2.19.1/docker-compose-$(uname -s)-$(uname -m)' \
-           -o /usr/local/lib/docker/cli-plugins/docker-compose \
-      && chmod +x /usr/local/lib/docker/cli-plugins/docker-compose \
-    "
+    echo "docker needs update to support 'docker compose', please update docker or install docker-compose-plugin..."
+    exit 1
+  fi
+  dcmin="2.24.1"
+  dcver=`docker compose version --short`
+  if [[ "${dcver}" < "${dcmin}" ]]; then
+    echo "docker compose version ${dcver} needs to be at least ${dcmin}, please update or remove old versions in PATH..."
+    dcpath=/usr/local/lib/docker/cli-plugins/docker-compose
+    if [ -x ${dcpath} ]; then
+      dcver=`${dcpath} version --short`
+      if [[ "${dcver}" == "2.19.1" ]]; then
+        echo "consider removing ${dcpath} version 2.19.1 (used to be installed by this script)"
+      fi
+    fi
+    dcpath=/usr/local/bin/docker-compose
+    if [ -x ${dcpath} ]; then
+      dcver=`${dcpath} --version`
+      if [[ "${dcver}" =~ "1.29.2" ]]; then
+        echo "consider removing ${dcpath} version 1.29.2 (used to be installed by this script)"
+      fi
+    fi
     exit 1
   fi
 }
