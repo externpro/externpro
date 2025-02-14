@@ -1365,12 +1365,14 @@ function(ipGetPrefixPath pfx pth)
     # https://discourse.cmake.org/t/how-to-tell-fetchcontent-to-keep-archive-directory-structure/8012
     FetchContent_Declare(${fcName} URL ${url} URL_HASH SHA256=${sha} DOWNLOAD_NO_EXTRACT TRUE)
     FetchContent_MakeAvailable(${fcName})
-    # Only extract the contents of the package if they haven't been extracted before
-    # This approach requires that the developer doesn't modify anything in the `_deps`
-    # directory of the build directory, which is a reasonable expectation
+    # Only extract the package if it hasn't been extracted before
+    # This approach requires that a developer doesn't modify anything in the
+    # FETCHCONTENT_BASE_DIR (default: `_deps`) of the build directory
     if(${${fcName}_SOURCE_DIR}/${txz} IS_NEWER_THAN ${FETCHCONTENT_BASE_DIR})
       file(ARCHIVE_EXTRACT INPUT ${${fcName}_SOURCE_DIR}/${txz} DESTINATION ${FETCHCONTENT_BASE_DIR})
       file(TOUCH_NOCREATE ${FETCHCONTENT_BASE_DIR})
+      string(TOUPPER ${fcName} fcName)
+      mark_as_advanced(FETCHCONTENT_SOURCE_DIR_${fcName} FETCHCONTENT_UPDATES_DISCONNECTED_${fcName})
     endif()
     set(pfx xpuse)
     set(pth ${FETCHCONTENT_BASE_DIR}/${pkgdir}/share/cmake)
