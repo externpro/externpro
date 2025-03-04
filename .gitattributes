@@ -14,6 +14,7 @@ Dockerfile text eol=lf
 *.cuh text eol=lf
 *.dae text eol=lf
 *.dockerfile text eol=lf
+*.dot text eol=lf
 *.eps text eol=lf
 *.fbs text eol=lf
 *.h text eol=lf
