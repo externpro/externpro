@@ -1361,6 +1361,7 @@ function(ipGetPrefixPath pfx pth)
     string(REPLACE "-devel.tar.xz" "" pkgdir ${txz})
     set(fcName xp_${P_PKG})
     include(FetchContent)
+    cmake_policy(SET CMP0168 OLD)
     # DOWNLOAD_NO_EXTRACT because extractfile discards a single top level directory
     # https://discourse.cmake.org/t/how-to-tell-fetchcontent-to-keep-archive-directory-structure/8012
     FetchContent_Declare(${fcName} URL ${url} URL_HASH SHA256=${sha} DOWNLOAD_NO_EXTRACT TRUE)
