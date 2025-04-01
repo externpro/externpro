@@ -9,7 +9,7 @@ function usage
   echo " -b      build docker image(s)"
   echo " -g      GPU container"
 }
-BPROIMG=rocky85-pin
+BPROIMG=rocky-pin
 if [ $# -eq 0 ]; then
   buildreq
   init
@@ -29,7 +29,7 @@ do
       exit 0
       ;;
     g )
-      BPROIMG=rocky85-pdv
+      BPROIMG=rocky-pdv
       gpureq
       buildreq
       init

@@ -1,4 +1,4 @@
-ARG BPROIMG=rocky85-bld
+ARG BPROIMG=rocky-mdv
 ARG BPROTAG=latest
 FROM ghcr.io/externpro/buildpro/${BPROIMG}:${BPROTAG}
 LABEL maintainer="smanders"
