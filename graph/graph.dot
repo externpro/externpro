@@ -1,23 +1,23 @@
 digraph GG {
   node [fontsize=12];
   "ubuntu:20.04" [shape=diamond];
-  "rockylinux:8.5" [shape=diamond];
+  "rockylinux:8.9" [shape=diamond];
   "externpro" [shape=box];
   "PluginSdk" [shape=box];
   "plugins" [shape=box];
   "plugin dev" [shape=box];
   "microservices" [shape=box];
   "VantageCI" [shape=box];
-  "buildpro/rocky85-pro" -> "rockylinux:8.5";
-  "buildpro/rocky85-bld" -> "buildpro/rocky85-pro";
-  "buildpro/rocky85-pin" -> "buildpro/rocky85-pro";
-  "buildpro/rocky85-pdv" -> "buildpro/rocky85-pro";
-  "buildpro/rocky85-ci" -> "buildpro/rocky85-bld";
+  "buildpro/rocky-pro" -> "rockylinux:8.9";
+  "buildpro/rocky-mdv" -> "buildpro/rocky-pro";
+  "buildpro/rocky-pin" -> "buildpro/rocky-pro";
+  "buildpro/rocky-pdv" -> "buildpro/rocky-pro";
+  "buildpro/rocky-ci" -> "buildpro/rocky-mdv";
   "buildpro/ubuntu" -> "ubuntu:20.04";
-  "externpro" -> "buildpro/rocky85-pro";
-  "PluginSdk" -> "buildpro/rocky85-pin";
-  "plugins" -> "buildpro/rocky85-pin";
-  "plugin dev" -> "buildpro/rocky85-pdv";
-  "microservices" -> "buildpro/rocky85-bld";
-  "VantageCI" -> "buildpro/rocky85-ci";
+  "externpro" -> "buildpro/rocky-pro";
+  "PluginSdk" -> "buildpro/rocky-pin";
+  "plugins" -> "buildpro/rocky-pin";
+  "plugin dev" -> "buildpro/rocky-pdv";
+  "microservices" -> "buildpro/rocky-mdv";
+  "VantageCI" -> "buildpro/rocky-ci";
 }
