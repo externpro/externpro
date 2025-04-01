@@ -2,7 +2,7 @@
 cd "$( dirname "$0" )"
 pushd .. > /dev/null
 source ./.devcontainer/funcs.sh
-BPROIMG=${1:-rocky85-bld}
+BPROIMG=${1:-rocky-mdv}
 if [[ $(basename -s .git `git config --get remote.origin.url`) == buildpro ]]; then
   BPROTAG=`git describe --tags`
   if [ -n "$(git status --porcelain --untracked=no)" ] || [[ ${BPROTAG} == *"-g"* ]]; then
@@ -51,7 +51,7 @@ fi
 env="${env}\nDISPLAY_ENV=${display_env}"
 env="${env}\nXAUTH_ENV=${xauth_env}"
 ##############################
-# NOTE: EXTERN_DIR and GCC_VER need to match buildpro's public/rocky85-pro.dockerfile
+# NOTE: EXTERN_DIR and GCC_VER need to match buildpro's public/rocky-pro.dockerfile
 EXTERN_DIR=/opt/extern
 GCC_VER=gcc921
 urlPfx="https://isrhub.usurf.usu.edu"
