@@ -1,4 +1,4 @@
-set(buildpro_REV 25.02)
+set(buildpro_REV latest)
 include(xpfunmac)
 if(NOT DEFINED externpro_REV)
   set(externpro_REV 24.05)
