@@ -1,3 +1,12 @@
+# usage: from the .devcontainer/ directory
+# command to get a list of projects with devel packages (have TAG) that have been modified in cmake/pros.cmake since the 25.01 tag
+#  git diff 25.01 HEAD -- pros.cmake | grep "+set(xp_" | grep TAG | sed 's/+set(xp_//' | cut -d" " -f1
+# create sync scripts for all the projects that have been changed
+#  git diff 25.01 HEAD -- pros.cmake | grep "+set(xp_" | grep TAG | sed 's/+set(xp_//' | cut -d" " -f1 | xargs cmake -P cmake/sync.cmake --
+# create a specific sync script
+#  cmake -P cmake/sync.cmake -- zlib
+# create multiple sync scripts
+#  cmake -P cmake/sync.cmake -- zlib palam
 function(generateSyncScript)
   set(options XP_MODULE)
   set(reqArgs PKG BRANCH REPO TAG SHA256_Linux SHA256_win64)
