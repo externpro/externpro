@@ -3,7 +3,7 @@ function(proDeps)
   set(oneValueArgs PKG BASE BRANCH DESC DIST_DIR LICENSE REPO TAG UPSTREAM VER WEB SHA256_Linux SHA256_win64 URL_Linux URL_win64 SHA256_utres)
   set(multiValueArgs DEPS EXE_DEPS)
   cmake_parse_arguments(P "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
-  string(APPEND dot "  \"${P_PKG}\" [shape=diamond]\;\n")
+  # dot
   if(DEFINED P_DEPS OR DEFINED P_EXE_DEPS)
     foreach(dep ${P_DEPS} ${P_EXE_DEPS})
       string(APPEND dot "  \"${P_PKG}\" -> \"${dep}\"\;\n")
