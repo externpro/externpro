@@ -390,6 +390,15 @@ set(xp_node-addon-api REPO github.com/externpro/node-addon-api VER 3.0.2 XP_MODU
   DESC "Module for using N-API from C++"
   LICENSE "[MIT](https://github.com/nodejs/node-addon-api/blob/3.0.2/LICENSE.md 'MIT License')"
   )
+set(xp_palam DIST_DIR /bpvol/src/pros/palam/_bld-Linux/dist/) # override with local dist directory
+set(xp_palam # override with locally built devel package (cmake --preset=Linux; cmake --workflow --preset=Linux)
+  URL_Linux /bpvol/src/pros/palam/_bld-Linux/palam-v1.11.2.0-12-g6301562-Linux-devel.tar.xz
+  SHA256_Linux 3cc7b6462d30557a15fca5f09c622eb39fe71a600481fbc649e83671755acbfa # cmake -E sha256sum /path/to/tar.xz
+  )
+set(xp_palam REPO isrhub.usurf.usu.edu/palam/palam TAG v1.11.2.1 # override with pre-release from CI built devel package
+  SHA256_Linux 3c450e14932805ea3ac7548a430581cc77ab1a5b6f1bc78fff3ec2db0520aae3
+  SHA256_win64 41e099602d347cec719e2ea9501760fe5f251d0154cffc0f144867ba52bff4ba
+  )
 set(xp_palam REPO isrhub.usurf.usu.edu/palam/palam TAG v1.11.5.0
   BRANCH development DEPS boost eigen fftw geotrans jasper jpegxp jxrlib kakadu openssl protobuf rapidjson rapidxml wxwidgets wxx
   WEB "https://isrhub.usurf.usu.edu/palam/palam 'palam project on isrhub'"
