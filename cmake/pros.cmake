@@ -83,6 +83,14 @@ set(xp_gsoap REPO isrhub.usurf.usu.edu/internpro/gsoap TAG v2.8.97.3
   SHA256_Linux d4447bf40ea1952d013c23d328af9cd3d8244ff126b7856c1b1c96655a6a7b2f
   SHA256_win64 0faafb04dbb116bd66a5c958f10df83efccc8e5368f31fa55aed3edb139ce14e
   )
+set(xp_hdf5 REPO github.com/externpro/HDF5 TAG v1.14.6.1
+  BASE hdf5_1.14.6 BRANCH dev
+  WEB "https://www.hdfgroup.org/solutions/hdf5/" UPSTREAM "github.com/HDFGroup/hdf5"
+  DESC "Utilize the HDF5 high performance data software library and file format to manage, process, and store your heterogeneous data. HDF5 is built for fast I/O processing and storage."
+  LICENSE "[BSD-3-Clause](https://github.com/HDFGroup/hdf5/blob/develop/LICENSE 'BSD 3-Clause New or Revised License')"
+  SHA256_Linux bf21dfea10e96632a24dc1494ef273541f94b197bba17ddec0f43fb4f0480450
+  SHA256_win64 9395537d1332d423a6585cc903e3c6401367b2d76049a019a55347b055e202a5
+  )
 set(xp_jasper REPO github.com/externpro/jasper VER 1.900.1 XP_MODULE
   BASE version-1.900.1 BRANCH xp-1.900.1
   WEB "http://www.ece.uvic.ca/~frodo/jasper/" UPSTREAM "github.com/jasper-software/jasper"
