@@ -12,6 +12,9 @@ Dockerfile text eol=lf
 *.csv text eol=lf
 *.cu text eol=lf
 *.cuh text eol=lf
+*.cuhpp text eol=lf
+*.cuhpp linguist-detectable
+*.cuhpp linguist-language=C++
 *.dae text eol=lf
 *.dockerfile text eol=lf
 *.dot text eol=lf
