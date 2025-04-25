@@ -19,6 +19,7 @@ digraph GG {
   "ffmpeg4" -> "openh264";
   "ffmpeg4" -> "yasm";
   "geotiff" -> "wxwidgets";
+  "hdf5" -> "zlib";
   "libgit2" -> "libssh2";
   "librttopo" -> "geos";
   "libspatialite" -> "geos";
