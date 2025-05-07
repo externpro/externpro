@@ -154,13 +154,14 @@ set(xp_nasm REPO github.com/externpro/nasm TAG v2.14.02
   SHA256_Linux 31fb78aa856e58716b5cf36927a24824e1fc931a375b02b9c24245a5ed3e3347
   SHA256_win64 ddf6097be3ecf6e63cdcc56dbc6f063f44cf4ba04e8df73c2c6c3798c3f98428
   )
-set(xp_nvjpeg2000 REPO github.com/externpro/nvJPEG2000 TAG v0.8.0.1
+set(xp_nvjpeg2000 REPO github.com/externpro/nvJPEG2000 TAG v0.8.0.2
   BRANCH dev
   WEB "https://developer.nvidia.com/nvjpeg"
   DESC "high-performance GPU-accelerated library for decoding JPEG 2000 format images"
   LICENSE "[NVIDIA](https://docs.nvidia.com/cuda/nvjpeg2000/license.html 'NVIDIA Software License Agreement')"
-  SHA256_Linux 8ee32edd1474bc7173c03085da2ee8372a73324ba13ab1941d853a07362de92a
-  SHA256_win64 23258bd1043a4cb290439eb7b01fbec3af001e806cef4c8c75186f57bf1598d4
+  SHA256_JetPack 064099ea2c3f276a1b1ef5177c378148a2dd2344fc6ccfda1a4ceed6dcca594c
+  SHA256_Linux d172b061b29d1a1aa5ec2f83b085c1549dea739b05f2d0acf85874d8fecc2c9e
+  SHA256_win64 0d676dfe3de353949af5fe60f7e799d274bc2acae512e78de3ef2de4a81547a4
   )
 set(xp_patch REPO github.com/externpro/patch TAG v2.7
   BRANCH main
