@@ -15,7 +15,7 @@ downloadAndCompare() {
 }
 
 downloadRepo() {
-  git clone https://@P_REPO@ --bare
+  git clone https://@P_REPO@ --bare @P_PKG@.git
   tar -cJf ../@P_PKG@/@P_PKG@.tar.xz @P_PKG@.git
 }
 
