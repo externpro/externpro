@@ -43,6 +43,8 @@ set(CPACK_PACKAGE_VERSION_MAJOR ${CMAKE_PROJECT_VERSION_MAJOR})
 set(CPACK_PACKAGE_VERSION_MINOR ${CMAKE_PROJECT_VERSION_MINOR})
 set(CPACK_PACKAGE_VERSION_PATCH ${CMAKE_PROJECT_VERSION_PATCH})
 set(CPACK_PACKAGE_VERSION_TWEAK ${CMAKE_PROJECT_VERSION_TWEAK})
+# use all available CPU cores when performing parallelized operations, such as compressing the installer package
+set(CPACK_THREADS 0)
 ###############################
 # Component Install with CPack
 # https://gitlab.kitware.com/cmake/community/-/wikis/doc/cpack/Component-Install-With-CPack
@@ -52,7 +54,6 @@ foreach(cmp client plugin server test tool)
   set(CPACK_COMPONENT_${CMP}_DESCRIPTION "${CPACK_COMPONENT_${CMP}_DISPLAY_NAME}")
 endforeach()
 set(CPACK_ARCHIVE_COMPONENT_INSTALL ON)
-set(CPACK_THREADS 0)
 if(WIN32)
   set(CPACK_GENERATOR ZIP)
   if(DEFINED CPACK_COMPONENTS_ALL)
