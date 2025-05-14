@@ -416,14 +416,14 @@ set(xp_palam REPO isrhub.usurf.usu.edu/palam/palam TAG v1.11.2.1 # override with
   SHA256_Linux 3c450e14932805ea3ac7548a430581cc77ab1a5b6f1bc78fff3ec2db0520aae3
   SHA256_win64 41e099602d347cec719e2ea9501760fe5f251d0154cffc0f144867ba52bff4ba
   )
-set(xp_palam REPO isrhub.usurf.usu.edu/palam/palam TAG v1.11.5.0
+set(xp_palam REPO isrhub.usurf.usu.edu/palam/palam TAG v1.11.6.0
   BRANCH development DEPS boost eigen fftw geotrans jasper jpegxp jxrlib kakadu openssl protobuf rapidjson rapidxml wxwidgets wxx
   WEB "https://isrhub.usurf.usu.edu/palam/palam 'palam project on isrhub'"
   DESC "set of libraries (organized similar to boost) for use by any Space Dynamics Lab program"
   LICENSE "[SDL](https://isrhub.usurf.usu.edu/palam/palam/commits/development 'Copyright Space Dynamics Lab: Commits')"
-  SHA256_Linux 4a8d8c258a44186e045eac97d0e032bf530eb21e1df1d783906179e9c9bf93da
-  SHA256_win64 e0cb2e0c1664621a7c6a753e15eb3ae348c4fcf4ee6ef481e146dda808a4a640
-  SHA256_utres 502f8ed7685c1f6a215a1cba5f5765e72735849cdfb8c80de8d83ec8c38131f8
+  SHA256_Linux ee070f766235fdfbd49f01376b246728cb9943ca60b68b98213b1a8bb7a18e54
+  SHA256_win64 bed765717d70c607a04ad9996984b897ad8337a11c5065524f07beafce2f5f61
+  SHA256_utres 1a4c95fd29e29ff15ec4dabfdea91dcc6a53322379a47ff77079f4c1501d4b86
   # SUBMODULES TODO
   )
 set(xp_ng_gdp REPO isrhub.usurf.usu.edu/internpro/NG_GDP TAG v24.02
