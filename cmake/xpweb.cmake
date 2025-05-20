@@ -37,8 +37,8 @@ endfunction()
 
 function(ipwebGetNodePath)
   if(NOT DEFINED NODE_EXE)
-    xpGetPkgVar(Node EXE) # sets NODE_EXE
-    set(NODE_EXE ${NODE_EXE} PARENT_SCOPE)
+    xpGetPkgVar(nodeng EXE) # sets NODENG_EXE
+    set(NODE_EXE ${NODENG_EXE} PARENT_SCOPE)
   endif()
 endfunction()
 
