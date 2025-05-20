@@ -37,8 +37,15 @@ endfunction()
 
 function(ipwebGetNodePath)
   if(NOT DEFINED NODE_EXE)
+    xpGetPkgVar(node EXE) # sets NODE_EXE
+    set(NODE_EXE ${NODE_EXE} PARENT_SCOPE)
+  endif()
+endfunction()
+
+function(ipwebGetNodeNgPath)
+  if(NOT DEFINED NODENG_EXE)
     xpGetPkgVar(nodeng EXE) # sets NODENG_EXE
-    set(NODE_EXE ${NODENG_EXE} PARENT_SCOPE)
+    set(NODENG_EXE ${NODENG_EXE} PARENT_SCOPE)
   endif()
 endfunction()
 
@@ -441,7 +448,7 @@ function(xpwebAddBuildAngular)
   ipwebVerifyWorkingDirectory() # Can set P_WORKING_DIRECTORY
   ipwebVerifyYarnTarget() # appends YARN_TARGET to P_DEPENDS
   ipwebVerifySrcs(P_SRCS)
-  ipwebGetNodePath() # sets NODE_EXE
+  ipwebGetNodeNgPath() # sets NODENG_EXE
   ipwebCalculateDependencies() # returns: depends
   ipwebGetAngularPath() # sets ANGULAR-CLI_SCRIPT
   if(DEFINED P_ANGULAR_PROJECT)
@@ -456,7 +463,7 @@ function(xpwebAddBuildAngular)
     set(build_dir ${CMAKE_CURRENT_BINARY_DIR}/build)
     set(build_stamp ${build_dir}/index.html)
     set(commandToRun -P ${xpThisDir}/NodePath.cmake ${P_WORKING_DIRECTORY}
-      ${NODE_EXE} ${CMAKE_COMMAND} -E env BROWSERSLIST_IGNORE_OLD_DATA=True ${NODE_EXE} ${ANGULAR-CLI_SCRIPT} build ${project}
+      ${NODENG_EXE} ${CMAKE_COMMAND} -E env BROWSERSLIST_IGNORE_OLD_DATA=True ${NODENG_EXE} ${ANGULAR-CLI_SCRIPT} build ${project}
       --configuration production --output-path ${build_dir} --no-progress 2>&1
       )
   endif()
@@ -562,7 +569,7 @@ function(xpwebAddTestAngular)
   ipwebVerifyWebproDir()
   ipwebVerifyTargetName(BUILD_TARGET)
   ipwebVerifyWorkingDirectory() # Can set P_WORKING_DIRECTORY
-  ipwebGetNodePath() # sets NODE_EXE
+  ipwebGetNodeNgPath() # sets NODENG_EXE
   ipwebGetAngularPath() # sets ANGULAR-CLI_SCRIPT
   if(WIN32)
     set(unit_test_browser ChromeHeadless)
@@ -574,7 +581,7 @@ function(xpwebAddTestAngular)
   endif()
   ipwebAddTestTarget(${BUILD_TARGET})
   add_test(NAME ${BUILD_TARGET}Test
-    COMMAND ${NODE_EXE} ${ANGULAR-CLI_SCRIPT} test ${project}
+    COMMAND ${NODENG_EXE} ${ANGULAR-CLI_SCRIPT} test ${project}
       --no-watch --no-progress --browsers=${unit_test_browser} ${JS_CLIENT_COVERAGE_FLAGS}
     WORKING_DIRECTORY ${P_WORKING_DIRECTORY}
     )
