@@ -163,6 +163,15 @@ set(xp_nodeng REPO github.com/externpro/nodeng TAG v14.17.6.1
   SHA256_Linux 44e5b5c929a4b5815e1043a3e9bbf4f030dc7587376a37c3b06c8eaddbe930a9
   SHA256_win64 8b2be2989e3e27361905159e50cfbb39bb30f444f42583c61ce78ac9fc5f4030
   )
+set(xp_nodexp REPO github.com/externpro/nodexp TAG v14.17.6.1
+  BRANCH dev
+  WEB "https://nodejs.org/en/blog/release/v14.17.6/"
+  DESC "node/npm development platform and runtime executable bundled as externpro devel package to build addons"
+  LICENSE "[MIT](https://raw.githubusercontent.com/nodejs/node/v14.17.6/LICENSE 'MIT License')"
+  SHA256_JetPack a6f3a563236817b4da51cd817b6e72664d4e78a1f54300e98f09fedc7be2e4d1
+  SHA256_Linux e178ac4b379850e94842bbd7d85ab689cb28639560f5b0f178f854eb7e218aae
+  SHA256_win64 500d79f2d490c112af885ed2ec2fdb6aebe389802c6028d08f2d5e465a317838
+  )
 set(xp_nvjpeg2000 REPO github.com/externpro/nvJPEG2000 TAG v0.8.1.1
   BRANCH dev
   WEB "https://developer.nvidia.com/nvjpeg"
