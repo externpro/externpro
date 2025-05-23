@@ -164,7 +164,7 @@ set(xp_nodeng REPO github.com/externpro/nodeng TAG v14.17.6.2
   SHA256_win64 8aea9281f125cfe225a4b6dbe3d5210452b7b1b73450a77b5ef0672d78f4c30d
   )
 set(xp_nodexp REPO github.com/externpro/nodexp TAG v14.17.6.1
-  BRANCH dev
+  BRANCH dev # TRICKY: nodexp, openssl versions coordinated
   WEB "https://nodejs.org/en/blog/release/v14.17.6/"
   DESC "node/npm development platform and runtime executable bundled as externpro devel package to build addons"
   LICENSE "[MIT](https://raw.githubusercontent.com/nodejs/node/v14.17.6/LICENSE 'MIT License')"
