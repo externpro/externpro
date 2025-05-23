@@ -303,7 +303,7 @@ set(xp_libzmq REPO github.com/externpro/libzmq VER 4.3.4 XP_MODULE
   DESC "high-performance asynchronous messaging library"
   LICENSE "[MPL-2.0](http://wiki.zeromq.org/area:licensing 'Mozilla Public License 2.0')"
   )
-set(xp_node REPO github.com/externpro/node VER 14.17.6 XP_MODULE
+set(xp_node REPO github.com/externpro/node VER 14.17.6
   BASE nodejs:v14.17.6 BRANCH xp14.17.6 DEPS nasm # TRICKY: node, openssl versions coordinated
   WEB "http://nodejs.org" UPSTREAM "github.com/nodejs/node"
   DESC "platform to build scalable network applications"
