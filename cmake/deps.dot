@@ -33,7 +33,7 @@ digraph GG {
   "libzmq" -> "sodium";
   "ng_gdp" -> "boost";
   "node" -> "nasm";
-  "node-addon-api" -> "node";
+  "node-addon-api" -> "nodexp";
   "openh264" -> "yasm";
   "openssl" -> "nasm";
   "openssl" -> "opensslasm";

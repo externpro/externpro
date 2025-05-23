@@ -309,6 +309,15 @@ set(xp_node REPO github.com/externpro/node VER 14.17.6 XP_MODULE
   DESC "platform to build scalable network applications"
   LICENSE "[MIT](https://raw.githubusercontent.com/nodejs/node/v14.17.6/LICENSE 'MIT License')"
   )
+set(xp_node-addon-api REPO github.com/externpro/node-addon-api TAG v3.0.2.1
+  BASE nodejs:3.0.2 BRANCH dev DEPS nodexp
+  WEB "https://github.com/nodejs/node-addon-api" UPSTREAM "github.com/nodejs/node-addon-api"
+  DESC "Module for using N-API from C++"
+  LICENSE "[MIT](https://github.com/nodejs/node-addon-api/blob/3.0.2/LICENSE.md 'MIT License')"
+  SHA256_JetPack d91dbce0fc08fea74696281dadeb83e1fb56b42a20b4b59c5f800cc7193d59b4
+  SHA256_Linux 3bd0eba6259b0062836a39da588bfa7e630d7ace795bcb9e9d68918090cc9ade
+  SHA256_win64 09a0962f311a2d2af86ea0548908166bd4cfda63c2b8d2c83951a813fb0f0f6a
+  )
 set(xp_openh264 REPO github.com/externpro/openh264 VER 1.4.0 XP_MODULE
   BASE cisco:v1.4.0 BRANCH xp1.4.0 DEPS yasm
   DESC "a codec library which supports H.264 encoding and decoding"
@@ -418,12 +427,6 @@ set(xp_libstrophe REPO github.com/externpro/libstrophe VER 0.9.1 XP_MODULE
   WEB "http://strophe.im/libstrophe/" UPSTREAM "github.com/strophe/libstrophe"
   DESC "A simple, lightweight C library for writing XMPP client"
   LICENSE "[MIT or GPL-3.0](https://github.com/strophe/libstrophe/blob/0.9.1/LICENSE.txt 'dual licensed under MIT and GPLv3 licenses')"
-  )
-set(xp_node-addon-api REPO github.com/externpro/node-addon-api VER 3.0.2 XP_MODULE
-  BASE nodejs:3.0.2 BRANCH xp3.0.2 DEPS node
-  WEB "https://github.com/nodejs/node-addon-api" UPSTREAM "github.com/nodejs/node-addon-api"
-  DESC "Module for using N-API from C++"
-  LICENSE "[MIT](https://github.com/nodejs/node-addon-api/blob/3.0.2/LICENSE.md 'MIT License')"
   )
 set(xp_palam DIST_DIR /bpvol/src/pros/palam/_bld-Linux/dist/) # override with local dist directory
 set(xp_palam # override with locally built devel package (cmake --preset=Linux; cmake --workflow --preset=Linux)
