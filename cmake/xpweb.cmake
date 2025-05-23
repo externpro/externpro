@@ -35,10 +35,10 @@ function(ipwebVerifyWorkingDirectory)
   endif()
 endfunction()
 
-function(ipwebGetNodePath)
-  if(NOT DEFINED NODE_EXE)
-    xpGetPkgVar(node EXE) # sets NODE_EXE
-    set(NODE_EXE ${NODE_EXE} PARENT_SCOPE)
+function(ipwebGetNodeXpPath)
+  if(NOT DEFINED NODEXP_EXE)
+    xpGetPkgVar(nodexp EXE) # sets NODEXP_EXE
+    set(NODEXP_EXE ${NODEXP_EXE} PARENT_SCOPE)
   endif()
 endfunction()
 
@@ -188,7 +188,7 @@ function(xpwebAddYarnTarget)
   ipwebVerifyTargetName(YARN_TARGET)
   ipwebVerifyCMakeLists()
   ipwebVerifyWorkingDirectory() # Can set P_WORKING_DIRECTORY
-  ipwebGetNodePath() # sets NODE_EXE
+  ipwebGetNodeXpPath() # sets NODEXP_EXE
   ipwebGetYarnPath() # sets YARN_SCRIPT
   ipwebVerifyFolder() # Can set P_FOLDER
   if(TARGET ${YARN_TARGET})
@@ -199,7 +199,7 @@ function(xpwebAddYarnTarget)
   add_custom_command(OUTPUT ${build_stamp}
     COMMAND ${CMAKE_COMMAND} -E copy_if_different ${webpro_DIR}/share/yarn.lock ${P_WORKING_DIRECTORY}
     COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_BINARY_DIR}/.yarnrc ${P_WORKING_DIRECTORY}
-    COMMAND ${NODE_EXE} ${YARN_SCRIPT} install --offline --pure-lockfile --ignore-scripts
+    COMMAND ${NODEXP_EXE} ${YARN_SCRIPT} install --offline --pure-lockfile --ignore-scripts
       --mutex network 2>&1
     COMMENT "Installing ${YARN_TARGET}"
     WORKING_DIRECTORY ${P_WORKING_DIRECTORY}
@@ -284,7 +284,7 @@ function(xpwebGenerateProto)
   ipwebVerifyYarnTarget()
   file(GLOB P_PROTO_SRCS ${P_PROTO_SRCS})
   ipwebVerifySrcs(P_PROTO_SRCS)
-  ipwebGetNodePath() # sets NODE_EXE
+  ipwebGetNodeXpPath() # sets NODEXP_EXE
   if(NOT DEFINED P_PROTO_DEST)
     message(FATAL_ERROR "xpwebGenerateProto requires a destination")
   endif()
@@ -299,9 +299,9 @@ function(xpwebGenerateProto)
   set(build_stamp ${protobufJsOut} ${protobufTsOut})
   add_custom_command(OUTPUT ${build_stamp}
     COMMAND ${CMAKE_COMMAND} -E make_directory ${P_PROTO_DEST}
-    COMMAND ${NODE_EXE} ${P_WORKING_DIRECTORY}/${PROTOBUFJS-CLI_SCRIPT} --keep-case -t ${P_TARGET_FORMAT} -w commonjs
+    COMMAND ${NODEXP_EXE} ${P_WORKING_DIRECTORY}/${PROTOBUFJS-CLI_SCRIPT} --keep-case -t ${P_TARGET_FORMAT} -w commonjs
       -o ${protobufJsOut} -l eslint-disable -r ${ARGV0} ${P_PROTO_SRCS}
-    COMMAND ${NODE_EXE} ${PROTOBUFJS-CLI_PBTS_SCRIPT} -o ${protobufTsOut} ${protobufJsOut}
+    COMMAND ${NODEXP_EXE} ${PROTOBUFJS-CLI_PBTS_SCRIPT} -o ${protobufTsOut} ${protobufJsOut}
     COMMAND ${CMAKE_COMMAND} -E touch ${protobufJsOut} ${protobufTsOut}
     DEPENDS ${P_YARN_TARGET} ${P_PROTO_SRCS}
     WORKING_DIRECTORY ${P_WORKING_DIRECTORY}
@@ -379,7 +379,7 @@ function(xpwebAddBuildWebpack)
   ipwebVerifyWorkingDirectory() # Can set P_WORKING_DIRECTORY
   ipwebVerifyYarnTarget() # appends YARN_TARGET to P_DEPENDS
   ipwebVerifySrcs(P_SRCS)
-  ipwebGetNodePath() # sets NODE_EXE
+  ipwebGetNodeXpPath() # sets NODEXP_EXE
   ipwebCalculateDependencies() # returns: depends
   if(NOT DEFINED WEBPACK-CLI_SCRIPT)
     xpGetPkgVar(webpack-cli SCRIPT) # sets WEBPACK-CLI_SCRIPT
@@ -398,7 +398,7 @@ function(xpwebAddBuildWebpack)
     set(build_stamp ${P_OUTPUT_FILES})
     list(TRANSFORM build_stamp PREPEND ${build_dir}/)
     list(TRANSFORM build_stamp APPEND .js)
-    set(commandToRun ${CMAKE_COMMAND} -E env BROWSERSLIST_IGNORE_OLD_DATA=True ${NODE_EXE} ${WEBPACK-CLI_SCRIPT} --output-path ${build_dir} --env context=${CMAKE_CURRENT_SOURCE_DIR})
+    set(commandToRun ${CMAKE_COMMAND} -E env BROWSERSLIST_IGNORE_OLD_DATA=True ${NODEXP_EXE} ${WEBPACK-CLI_SCRIPT} --output-path ${build_dir} --env context=${CMAKE_CURRENT_SOURCE_DIR})
   endif()
   add_custom_command(OUTPUT ${build_stamp}
     COMMAND ${commandToRun}
@@ -418,7 +418,7 @@ function(xpwebAddBuildWebpack)
     if(NOT DEFINED P_INSTALL_NODE_DESTINATION)
       set(P_INSTALL_NODE_DESTINATION bin)
     endif()
-    install(PROGRAMS ${NODE_EXE} DESTINATION ${P_INSTALL_NODE_DESTINATION} ${component})
+    install(PROGRAMS ${NODEXP_EXE} DESTINATION ${P_INSTALL_NODE_DESTINATION} ${component})
   endif()
   ipwebAddTypescriptLibrary(${P_TEST_TOOL} FALSE)
 endfunction()
@@ -522,7 +522,7 @@ function(xpwebAddTestJasmine)
   ipwebVerifyWebproDir()
   ipwebVerifyTargetName(BUILD_TARGET)
   ipwebVerifyWorkingDirectory() # Can set P_WORKING_DIRECTORY
-  ipwebGetNodePath() # Sets NODE_EXE
+  ipwebGetNodeXpPath() # Sets NODEXP_EXE
   if(NOT DEFINED JASMINE_SCRIPT)
     xpGetPkgVar(jasmine SCRIPT) # Sets JASMINE_SCRIPT
   endif()
@@ -543,7 +543,7 @@ function(xpwebAddTestJasmine)
     list(TRANSFORM JS_SERVER_COVERAGE_FLAGS REPLACE "@BUILD_TARGET@" "${BUILD_TARGET}")
   endif()
   add_test(NAME ${BUILD_TARGET}Test
-    COMMAND ${JS_SERVER_COVERAGE_FLAGS} ${NODE_EXE} ${P_WORKING_DIRECTORY}/${TS-NODE_SCRIPT} --project ${CMAKE_CURRENT_SOURCE_DIR}/tsconfig.spec.json
+    COMMAND ${JS_SERVER_COVERAGE_FLAGS} ${NODEXP_EXE} ${P_WORKING_DIRECTORY}/${TS-NODE_SCRIPT} --project ${CMAKE_CURRENT_SOURCE_DIR}/tsconfig.spec.json
       ${JASMINE_SCRIPT} --config=${CMAKE_CURRENT_SOURCE_DIR}/jasmine.json
     WORKING_DIRECTORY ${P_WORKING_DIRECTORY}
     )
@@ -602,7 +602,7 @@ function(xpwebGenerateApiDoc)
   set(oneValueArgs FOLDER INPUT OUTPUT WORKING_DIRECTORY YARN_TARGET)
   cmake_parse_arguments(P "" "${oneValueArgs}" "" ${ARGN})
   ipwebVerifyFolder() # Can set P_FOLDER
-  ipwebGetNodePath() # sets NODE_EXE
+  ipwebGetNodeXpPath() # sets NODEXP_EXE
   ipwebVerifyWorkingDirectory() # Can set P_WORKING_DIRECTORY
   if(NOT DEFINED APIDOC_SCRIPT)
     xpGetPkgVar(Apidoc SCRIPT) # sets APIDOC_SCRIPT
@@ -616,7 +616,7 @@ function(xpwebGenerateApiDoc)
   file(GLOB_RECURSE routeSrcs ${P_INPUT}/**)
   set(build_stamp ${CMAKE_CURRENT_BINARY_DIR}/${P_OUTPUT}/index.html)
   add_custom_command(OUTPUT ${build_stamp}
-    COMMAND ${NODE_EXE} ${P_WORKING_DIRECTORY}/${APIDOC_SCRIPT} -i ${P_INPUT} -o ${CMAKE_CURRENT_BINARY_DIR}/${P_OUTPUT}
+    COMMAND ${NODEXP_EXE} ${P_WORKING_DIRECTORY}/${APIDOC_SCRIPT} -i ${P_INPUT} -o ${CMAKE_CURRENT_BINARY_DIR}/${P_OUTPUT}
     COMMAND ${CMAKE_COMMAND} -E touch ${build_stamp}
     WORKING_DIRECTORY ${P_WORKING_DIRECTORY}
     DEPENDS ${routeSrcs} ${P_YARN_TARGET}
