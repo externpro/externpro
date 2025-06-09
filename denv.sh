@@ -47,6 +47,8 @@ if [[ -f /etc/timezone ]]; then
   env="${env}\nTZ=$(head -n 1 /etc/timezone)"
 elif command -v timedatectl >/dev/null; then
   env="${env}\nTZ=$(timedatectl status | grep "zone" | sed -e 's/^[ ]*Time zone: \(.*\) (.*)$/\1/g')"
+elif [[ -f /etc/localtime ]]; then
+  env="${env}\nTZ=$(readlink /etc/localtime | sed 's#/var/db/timezone/zoneinfo/##g')"
 fi
 env="${env}\nDISPLAY_ENV=${display_env}"
 env="${env}\nXAUTH_ENV=${xauth_env}"
