@@ -21,14 +21,6 @@ set(xp_clangformat REPO github.com/llvm/llvm-project/tree/llvmorg-11.0.0/clang/t
   DESC "used to format C/C++/Java/JavaScript/JSON/Objective-C/Protobuf/C# code"
   LICENSE "[Apache-2.0](https://releases.llvm.org/11.0.0/LICENSE.TXT 'Apache License v2.0 with LLVM Exceptions, see https://clang.llvm.org/features.html#license and https://llvm.org/docs/DeveloperPolicy.html#copyright-license-and-patents')"
   )
-set(xp_criticalio REPO isrhub.usurf.usu.edu/internpro/CriticalIO TAG v2.0.02.8
-  BASE v2.0.02 BRANCH development
-  WEB "http://www.criticalio.com/"
-  DESC "pre-built (MSW-only) Fibre Channel FCA2540-XMC-FF-G by Critical I/O"
-  LICENSE "[commercial](https://www.criticalio.com/products/fiber-channel-board-products/fca2540-xmc-ff-g/ 'Fibre Channel Board Products FCA2540-XMC-FF-G')"
-  SHA256_Linux abbcbeccfede2ab2538e85aec06f59b4d288a549f3969c5e39b666b47df06bc8
-  SHA256_win64 0cf13caaaf04d55bd32ff5578eba6265579afcd287162b978a8683945eebc248
-  )
 set(xp_eigen REPO github.com/externpro/eigen VER 3.3.7 XP_MODULE
   BASE 3.3.7 BRANCH xp3.3.7
   WEB "http://eigen.tuxfamily.org" UPSTREAM "gitlab.com/libeigen/eigen.git"
@@ -40,14 +32,6 @@ set(xp_expat REPO github.com/externpro/libexpat VER 2.2.5 XP_MODULE
   WEB "https://libexpat.github.io" UPSTREAM "github.com/libexpat/libexpat"
   DESC "a stream-oriented XML parser library written in C"
   LICENSE "[MIT](https://github.com/libexpat/libexpat/blob/R_2_2_5/expat/COPYING 'MIT License')"
-  )
-set(xp_fftw REPO isrhub.usurf.usu.edu/internpro/fftw TAG v3.3.8.2
-  BASE v3.3.8 BRANCH development
-  WEB "http://www.fftw.org/ 'FFTW website'" UPSTREAM "github.com/FFTW/fftw3"
-  DESC "Fastest Fourier Transform in the West"
-  LICENSE "[commercial](http://www.fftw.org/faq/section1.html#isfftwfree 'SDL purchased commercial license from MIT 2017.09.20')"
-  SHA256_Linux 9c296f908984fda88d2bb198048ccf56d32f046cff6e60b18c675b6280552deb
-  SHA256_win64 e8d034171b2453d4c0981c268d7a39c6b3456584c94e91790a5d1ee32432a3c8
   )
 set(xp_flatbuffers REPO github.com/externpro/flatbuffers VER 2.0.6 XP_MODULE
   BASE google:v2.0.6 BRANCH xp2.0.6
@@ -74,14 +58,6 @@ set(xp_glew REPO github.com/externpro/glew VER 1.13.0 XP_MODULE
   WEB "http://glew.sourceforge.net" UPSTREAM "github.com/nigels-com/glew"
   DESC "The OpenGL Extension Wrangler Library"
   LICENSE "[MIT](https://github.com/nigels-com/glew/blob/master/LICENSE.txt 'Modified BSD, Mesa 3D (renamed X11/MIT), Khronos (renamed X11/MIT)')"
-  )
-set(xp_gsoap REPO isrhub.usurf.usu.edu/internpro/gsoap TAG v2.8.97.3
-  BASE v2.8.97 BRANCH development
-  WEB "https://www.genivia.com/products.html#gsoap 'gSOAP website'" # was http://www.cs.fsu.edu/~engelen/soap.html
-  DESC "toolkit for SOAP/XML Web services"
-  LICENSE "[commercial](https://www.genivia.com/products.html#gsoap 'SDL purchased a commercial license 2020.Q1')" # was http://www.cs.fsu.edu/~engelen/soaplicense.html
-  SHA256_Linux d4447bf40ea1952d013c23d328af9cd3d8244ff126b7856c1b1c96655a6a7b2f
-  SHA256_win64 0faafb04dbb116bd66a5c958f10df83efccc8e5368f31fa55aed3edb139ce14e
   )
 set(xp_jasper REPO github.com/externpro/jasper VER 1.900.1 XP_MODULE
   BASE version-1.900.1 BRANCH xp-1.900.1
@@ -118,14 +94,6 @@ set(xp_jxrlib REPO github.com/externpro/jxrlib VER 15.08 XP_MODULE
   WEB "https://github.com/4creators/jxrlib" UPSTREAM "github.com/c0nk/jxrlib" # TODO upstream github.com/4creators/jxrlib
   DESC "JPEG XR Image Codec reference implementation library released by Microsoft"
   LICENSE "[BSD-2-Clause](https://github.com/4creators/jxrlib/blob/master/LICENSE 'BSD 2-Clause Simplified License')"
-  )
-set(xp_kakadu REPO isrhub.usurf.usu.edu/internpro/kakadu TAG v6.1.1.4
-  BASE v6_1_1 BRANCH development
-  WEB "http://www.kakadusoftware.com/ 'kakadu website'"
-  DESC "JPEG 2000 implementation"
-  LICENSE "[commercial](https://isrhub.usurf.usu.edu/internpro/kakadu/blob/sdl_6_1_1/README.md 'purchased Kakadu Software version 6.0, Commercial 250 on 18 Sep 2007')"
-  SHA256_Linux cf26edb0b133ce6a85245ebf59e89bc0263ce1acc93d7f3fc555f241e7e9c9e7
-  SHA256_win64 311c4b20e95ffdceb0e158236e27d075ce4db952b1001fc0fe530353d54e76da
   )
 set(xp_libiconv REPO github.com/externpro/libiconv TAG v1.18.2
   BASE 1.18-eed6782 BRANCH dev
@@ -384,14 +352,6 @@ set(xp_cppzmq REPO github.com/externpro/cppzmq VER 4.7.1 XP_MODULE
   DESC "header-only C++ binding for libzmq"
   LICENSE "[MPL-2.0](http://wiki.zeromq.org/area:licensing 'Mozilla Public License 2.0')"
   )
-set(xp_dde_lib REPO isrhub.usurf.usu.edu/DDE/dde_lib TAG v0.0.0.9
-  BRANCH development DEPS boost protobuf wirehair
-  WEB "https://isrhub.usurf.usu.edu/DDE/dde_lib 'dde_lib project on isrhub'"
-  DESC "DDE: Data Dissemination Element"
-  LICENSE "[SDL](https://isrhub.usurf.usu.edu/DDE/dde_lib/commits/development 'Copyright Space Dynamics Lab: Commits')"
-  SHA256_Linux 89cd585be2403a904e8241d9b1893774e275ab020275b4e1703df819ac734cb6
-  SHA256_win64 dc1133d19be5f36fbc53a799a9a75f662259b67d5ec9d2f1b304fb34b4c7b350
-  )
 set(xp_fecpp REPO github.com/externpro/fecpp VER 0.9 XP_MODULE
   BASE v0.9 BRANCH xp0.9 DEPS boost
   WEB "http://www.randombit.net/code/fecpp/" UPSTREAM "github.com/randombit/fecpp"
@@ -428,33 +388,6 @@ set(xp_libstrophe REPO github.com/externpro/libstrophe VER 0.9.1 XP_MODULE
   DESC "A simple, lightweight C library for writing XMPP client"
   LICENSE "[MIT or GPL-3.0](https://github.com/strophe/libstrophe/blob/0.9.1/LICENSE.txt 'dual licensed under MIT and GPLv3 licenses')"
   )
-set(xp_palam DIST_DIR /bpvol/src/pros/palam/_bld-Linux/dist/) # override with local dist directory
-set(xp_palam # override with locally built devel package (cmake --preset=Linux; cmake --workflow --preset=Linux)
-  URL_Linux /bpvol/src/pros/palam/_bld-Linux/palam-v1.11.2.0-12-g6301562-Linux-devel.tar.xz
-  SHA256_Linux 3cc7b6462d30557a15fca5f09c622eb39fe71a600481fbc649e83671755acbfa # cmake -E sha256sum /path/to/tar.xz
-  )
-set(xp_palam REPO isrhub.usurf.usu.edu/palam/palam TAG v1.11.2.1 # override with pre-release from CI built devel package
-  SHA256_Linux 3c450e14932805ea3ac7548a430581cc77ab1a5b6f1bc78fff3ec2db0520aae3
-  SHA256_win64 41e099602d347cec719e2ea9501760fe5f251d0154cffc0f144867ba52bff4ba
-  )
-set(xp_palam REPO isrhub.usurf.usu.edu/palam/palam TAG v1.11.6.0
-  BRANCH development DEPS boost eigen fftw geotrans jasper jpegxp jxrlib kakadu openssl protobuf rapidjson rapidxml wxwidgets wxx
-  WEB "https://isrhub.usurf.usu.edu/palam/palam 'palam project on isrhub'"
-  DESC "set of libraries (organized similar to boost) for use by any Space Dynamics Lab program"
-  LICENSE "[SDL](https://isrhub.usurf.usu.edu/palam/palam/commits/development 'Copyright Space Dynamics Lab: Commits')"
-  SHA256_Linux ee070f766235fdfbd49f01376b246728cb9943ca60b68b98213b1a8bb7a18e54
-  SHA256_win64 bed765717d70c607a04ad9996984b897ad8337a11c5065524f07beafce2f5f61
-  SHA256_utres 1a4c95fd29e29ff15ec4dabfdea91dcc6a53322379a47ff77079f4c1501d4b86
-  # SUBMODULES TODO
-  )
-set(xp_ng_gdp REPO isrhub.usurf.usu.edu/internpro/NG_GDP TAG v24.02
-  BRANCH development DEPS boost
-  WEB "https://isrhub.usurf.usu.edu/internpro/NG_GDP 'SDL_GGDP and larger NG_GDP project on isrhub'"
-  DESC "ground side of a guaranteed delivery protocol created by Northrup Grumman"
-  LICENSE "[SDL and NG](https://isrhub.usurf.usu.edu/internpro/NG_GDP/commits/development 'Copyright Space Dynamics Lab and Northrop Grumman Private: Commits')"
-  SHA256_Linux f6356221c2111223327aa70101d1d93d7fc6a11be835a3d1ec04da9353975c97
-  SHA256_win64 0e0f3ba69faa7c902bf1a6dea13bde161b5622cfa6eb430909a67aa1f156148f
-  )
 set(xp_spatialite-tools REPO github.com/externpro/spatialite-tools TAG v5.1.0.3
   BASE 5.1.0a BRANCH dev EXE_DEPS libspatialite
   WEB "https://www.gaia-gis.it/fossil/spatialite-tools/index"
@@ -487,20 +420,4 @@ set(xp_libgit2 REPO github.com/externpro/libgit2 VER 1.3.0 XP_MODULE
   WEB "https://libgit2.github.com/" UPSTREAM "github.com/libgit2/libgit2"
   DESC "portable, pure C implementation of the Git core methods"
   LICENSE "[GPL-2.0 WITH le](https://github.com/libgit2/libgit2/blob/master/README.md#license 'GPL2 with linking exception')"
-  )
-set(xp_pluginsdk REPO isrhub.usurf.usu.edu/Vantage/PluginSdk TAG v3.5.0.4
-  BRANCH development EXE_DEPS palam
-  WEB "https://isrhub.usurf.usu.edu/Vantage/PluginSdk 'PluginSdk project on isrhub'"
-  DESC "software development kit for VANTAGE plugin development"
-  LICENSE "[SDL](https://isrhub.usurf.usu.edu/Vantage/PluginSdk/commits/development 'Copyright Space Dynamics Lab: Commits')"
-  SHA256_Linux da563b9390a7c65a5e1d14843cc35cda98f816db527fa20eba78d7e25527212c
-  SHA256_win64 f9edef0fb2c2fe793a1202cda526775908b72dfd03739d4a366d17c373dae569
-  )
-set(xp_sdvideo REPO isrhub.usurf.usu.edu/internpro/Sdvideo TAG v24.02
-  BRANCH development DEPS boost ffmpeg
-  WEB "https://isrhub.usurf.usu.edu/internpro/Sdvideo 'Sdvideo project on isrhub'"
-  DESC "MISB-compliant video encode/decode library"
-  LICENSE "[SDL](https://isrhub.usurf.usu.edu/internpro/Sdvideo/commits/development 'Copyright Space Dynamics Lab: Commits')"
-  SHA256_Linux 25ba1530f23c483ea1817266bad303665cdd43a265283d8f5c1cccda2068cf7f
-  SHA256_win64 860006e31454e0074c9ef365210d92c199e9cdc1741fe1835ecc569344e2b0bb
   )
