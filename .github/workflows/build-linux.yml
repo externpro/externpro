@@ -1,0 +1,77 @@
+name: Build Linux
+
+on:
+  workflow_call:
+    inputs:
+      email:
+        required: true
+        type: string
+
+jobs:
+  devcontainer-changed:
+    runs-on: ubuntu-latest
+    outputs:
+      docker-changed: ${{ steps.filter.outputs.docker }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            docker:
+              - '.devcontainer/**'
+
+  build-docker-image:
+    needs: devcontainer-changed
+    #if: needs.devcontainer-changed.outputs.docker-changed == 'true'
+    runs-on: ubuntu-latest
+    outputs:
+      ran: true
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Configure git
+        run: |
+          touch ~/.gitconfig
+          git config user.name ${{ github.actor }}
+          git config user.email ${{ inputs.email }}
+
+      - name: Get docker image name
+        run: |
+          echo "DOCKER_IMAGE_NAME=$(echo $(basename ${{ github.repository }})-bld | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push docker image
+        run: |
+          ./docker-compose.sh -b
+          docker tag ${{ env.DOCKER_IMAGE_NAME }}:latest ghcr.io/${{ github.repository }}/buildimage:latest
+          docker push ghcr.io/${{ github.repository }}/buildimage:latest
+          docker images
+  
+  build:
+    needs: [devcontainer-changed, build-docker-image]
+    if: ${{ needs.devcontainer-changed.outputs.docker-changed == 'false' || always() && needs.build-docker-image.result == 'success' }}
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/${{ github.repository }}/buildimage:latest
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Configure CMake
+        run: cmake --preset=Linux
