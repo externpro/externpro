@@ -13,7 +13,7 @@ jobs:
         with:
           submodules: true
 
-      - name: Configure CMake
+      - name: CMake Configure
         run: cmake --preset=Windows
 
       - name: CMake Workflow
