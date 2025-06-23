@@ -7,6 +7,9 @@ on:
         required: true
         type: string
 
+env:
+  BUILD_PRESET: Linux
+
 jobs:
   devcontainer-changed:
     runs-on: ubuntu-latest
@@ -53,8 +56,8 @@ jobs:
       - name: Build and push docker image
         run: |
           ./docker-compose.sh -b
-          docker tag ${{ env.DOCKER_IMAGE_NAME }}:latest ghcr.io/${{ github.repository }}/buildimage:latest
-          docker push ghcr.io/${{ github.repository }}/buildimage:latest
+          docker tag ${{ env.DOCKER_IMAGE_NAME }}:latest ghcr.io/${{ github.repository }}/bldimg-${BUILD_PRESET}:latest
+          docker push ghcr.io/${{ github.repository }}/bldimg-${BUILD_PRESET}:latest
           docker images
   
   build:
@@ -62,7 +65,7 @@ jobs:
     if: ${{ needs.devcontainer-changed.outputs.docker-changed == 'false' || always() && needs.build-docker-image.result == 'success' }}
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/${{ github.repository }}/buildimage:latest
+      image: ghcr.io/${{ github.repository }}/bldimg-${BUILD_PRESET}:latest
       credentials:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
@@ -76,7 +79,13 @@ jobs:
           submodules: true
 
       - name: CMake Configure
-        run: cmake --preset=Linux
+        run: cmake --preset=${BUILD_PRESET}
 
       - name: CMake Workflow
-        run: cmake --workflow --preset=Linux
+        run: cmake --workflow --preset=${BUILD_PRESET}
+
+      - name: Upload devel tarball artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: devel-tarball
+          path: _bld-${BUILD_PRESET}/${{ github.event.repository.name }}*-devel.tar.xz
