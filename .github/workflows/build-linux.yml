@@ -66,7 +66,7 @@ jobs:
     if: ${{ needs.devcontainer-changed.outputs.docker-changed == 'false' || always() && needs.build-docker-image.result == 'success' }}
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/${{ github.repository }}/${{ env.GHCR_IMAGE }}:latest
+      image: ghcr.io/${{ github.repository }}/bldimg-linux:latest
       credentials:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
