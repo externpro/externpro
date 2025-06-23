@@ -9,6 +9,7 @@ on:
 
 env:
   BUILD_PRESET: Linux
+  GHCR_IMAGE: bldimg-linux
 
 jobs:
   devcontainer-changed:
@@ -56,8 +57,8 @@ jobs:
       - name: Build and push docker image
         run: |
           ./docker-compose.sh -b
-          docker tag ${{ env.DOCKER_IMAGE_NAME }}:latest ghcr.io/${{ github.repository }}/bldimg-${BUILD_PRESET}:latest
-          docker push ghcr.io/${{ github.repository }}/bldimg-${BUILD_PRESET}:latest
+          docker tag ${{ env.DOCKER_IMAGE_NAME }}:latest ghcr.io/${{ github.repository }}/${{ env.GHCR_IMAGE }}:latest
+          docker push ghcr.io/${{ github.repository }}/${{ env.GHCR_IMAGE }}:latest
           docker images
   
   build:
@@ -65,7 +66,7 @@ jobs:
     if: ${{ needs.devcontainer-changed.outputs.docker-changed == 'false' || always() && needs.build-docker-image.result == 'success' }}
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/${{ github.repository }}/bldimg-${BUILD_PRESET}:latest
+      image: ghcr.io/${{ github.repository }}/${{ env.GHCR_IMAGE }}:latest
       credentials:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
