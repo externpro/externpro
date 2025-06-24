@@ -3,6 +3,6 @@
   "include": [
     ".devcontainer/cmake/presets/xpLinuxNinja.json",
     ".devcontainer/cmake/presets/xpJetPackNinja.json",
-    ".devcontainer/cmake/presets/xpWindowsVs2019.json"
+    ".devcontainer/cmake/presets/xpWindowsVs2022.json"
   ]
 }
