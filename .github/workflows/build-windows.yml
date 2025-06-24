@@ -3,12 +3,11 @@ name: Build Windows
 on:
   workflow_call:
 
-env:
-  CMAKE_PRESET: Windows
-
 jobs:
   build:
     runs-on: windows-2022
+    env:
+      CMAKE_PRESET: Windows
 
     steps:
       - name: Checkout repo
@@ -19,13 +18,29 @@ jobs:
           submodules: true
 
       - name: CMake Configure
-        run: cmake --preset=${CMAKE_PRESET}
+        run: cmake --preset=${{ env.CMAKE_PRESET }}
+        working-directory: ${{ github.workspace }}
 
       - name: CMake Workflow
-        run: cmake --workflow --preset=${CMAKE_PRESET}
+        id: cmake_workflow
+        shell: bash
+        run: |
+          cmake --workflow --preset=${{ env.CMAKE_PRESET }}
+          file=$(pwd)/$(ls _bld-${{ env.CMAKE_PRESET }}/${{ github.event.repository.name }}*-devel.tar.xz)
+          echo $file
+          echo "filepath=$file" >> $GITHUB_OUTPUT
+          echo "filename=$(basename $file)" >> $GITHUB_OUTPUT
+        working-directory: ${{ github.workspace }}
+
+      - name: Convert Git Bash path to Windows path
+        id: convert_path
+        shell: pwsh
+        run: |
+          $windowsPath = '${{ steps.cmake_workflow.outputs.filepath }}' -replace '^/([a-zA-Z])/', '$1:/' -replace '/', '\'
+          echo "windows_path=$windowsPath" | Out-File -FilePath $env:GITHUB_ENV -Append
 
       - name: Upload devel tarball artifact
         uses: actions/upload-artifact@v4
         with:
-          name: devel-tarball
-          path: _bld-${CMAKE_PRESET}/${{ github.event.repository.name }}*-devel.tar.xz
+          name: ${{ steps.cmake_workflow.outputs.filename }}
+          path: ${{ env.windows_path }}
