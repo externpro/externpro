@@ -8,7 +8,7 @@ on:
         type: string
 
 env:
-  BUILD_PRESET: Linux
+  CMAKE_PRESET: Linux
 
 jobs:
   devcontainer-changed:
@@ -79,13 +79,13 @@ jobs:
           submodules: true
 
       - name: CMake Configure
-        run: cmake --preset=${BUILD_PRESET}
+        run: cmake --preset=${CMAKE_PRESET}
 
       - name: CMake Workflow
-        run: cmake --workflow --preset=${BUILD_PRESET}
+        run: cmake --workflow --preset=${CMAKE_PRESET}
 
       - name: Upload devel tarball artifact
         uses: actions/upload-artifact@v4
         with:
           name: devel-tarball
-          path: _bld-${BUILD_PRESET}/${{ github.event.repository.name }}*-devel.tar.xz
+          path: _bld-${CMAKE_PRESET}/${{ github.event.repository.name }}*-devel.tar.xz
