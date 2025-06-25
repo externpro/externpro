@@ -37,10 +37,10 @@ jobs:
         shell: pwsh
         run: |
           $windowsPath = '${{ steps.find_tarball.outputs.filepath }}' -replace '^/([a-zA-Z])/', '$1:/' -replace '/', '\'
-          echo "windows_path=$windowsPath" | Out-File -FilePath $env:GITHUB_ENV -Append
+          echo "windows_path=$windowsPath" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
 
       - name: Upload devel tarball artifact
         uses: actions/upload-artifact@v4
         with:
           name: ${{ steps.find_tarball.outputs.filename }}
-          path: ${{ env.windows_path }}
+          path: ${{ steps.convert_path.outputs.windows_path }}
