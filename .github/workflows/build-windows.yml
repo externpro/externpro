@@ -19,15 +19,15 @@ jobs:
 
       - name: CMake Configure
         run: cmake --preset=${{ env.CMAKE_PRESET }}
-        working-directory: ${{ github.workspace }}
 
       - name: CMake Workflow
-        id: cmake_workflow
+        run: cmake --workflow --preset=${{ env.CMAKE_PRESET }}
+
+      - name: Find devel package tarball
+        id: find_tarball
         shell: bash
         run: |
-          cmake --workflow --preset=${{ env.CMAKE_PRESET }}
           file=$(pwd)/$(ls _bld-${{ env.CMAKE_PRESET }}/${{ github.event.repository.name }}*-devel.tar.xz)
-          echo $file
           echo "filepath=$file" >> $GITHUB_OUTPUT
           echo "filename=$(basename $file)" >> $GITHUB_OUTPUT
         working-directory: ${{ github.workspace }}
@@ -36,11 +36,11 @@ jobs:
         id: convert_path
         shell: pwsh
         run: |
-          $windowsPath = '${{ steps.cmake_workflow.outputs.filepath }}' -replace '^/([a-zA-Z])/', '$1:/' -replace '/', '\'
+          $windowsPath = '${{ steps.find_tarball.outputs.filepath }}' -replace '^/([a-zA-Z])/', '$1:/' -replace '/', '\'
           echo "windows_path=$windowsPath" | Out-File -FilePath $env:GITHUB_ENV -Append
 
       - name: Upload devel tarball artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ steps.cmake_workflow.outputs.filename }}
+          name: ${{ steps.find_tarball.outputs.filename }}
           path: ${{ env.windows_path }}
