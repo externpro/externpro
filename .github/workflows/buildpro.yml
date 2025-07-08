@@ -1,0 +1,80 @@
+name: Build docker buildpro image
+
+on:
+  workflow_call:
+    inputs:
+      img:
+        required: true
+        type: string
+
+jobs:
+  buildpro:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # fetches all history
+          fetch-tags: true # explicitly fetches tags
+          submodules: true
+
+      - name: Determine tags
+        id: tags
+        run: |
+          gtag=`git describe --tags`
+          if [ -n "$(git status --porcelain --untracked=no)" ] || [[ ${gtag} == *"-g"* ]]; then
+            gtag=latest
+          fi
+          echo "tag=$gtag" >> $GITHUB_OUTPUT
+          echo "latest=ghcr.io/${{ github.repository }}/${{ inputs.img }}:latest" >> $GITHUB_OUTPUT
+          echo "tagged=ghcr.io/${{ github.repository }}/${{ inputs.img }}:$gtag" >> $GITHUB_OUTPUT
+        working-directory: ${{ github.workspace }}
+
+      - name: Report tags
+        run: |
+          echo "latest: ${{ steps.tags.outputs.latest }}"
+          echo "tagged: ${{ steps.tags.outputs.tagged }}"
+
+      - name: Pull latest image
+        run: docker pull ${{ steps.tags.outputs.latest }}
+
+      - name: Images before build
+        run: docker images
+
+      - name: Build image
+        run: |
+          echo "img: ${{ inputs.img }}"
+          echo "tag: ${{ steps.tags.outputs.tag }}"
+          docker build \
+            --network=host \
+            --build-arg BPROTAG=${{ steps.tags.outputs.tag }} \
+            --file ${{ inputs.img }}.dockerfile \
+            --tag ${{ steps.tags.outputs.latest }} \
+            --tag ${{ steps.tags.outputs.tagged }} \
+            .
+        working-directory: ${{ github.workspace }}/public
+
+      - name: Images after build
+        run: docker images
+
+      - name: Authenticate GitHub Container Registry (ghcr)
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Push image(s)
+        run: |
+          docker push ${{ steps.tags.outputs.latest }}
+          docker push ${{ steps.tags.outputs.tagged }}
+
+      - name: Delete untagged images from ghcr
+        uses: snok/container-retention-policy@v3.0.0
+        with:
+          account: ${{ github.repository_owner }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          image-names: ${{ github.event.repository.name }}/${{ inputs.img }}
+          tag-selection: untagged
+          cut-off: 1m
+          dry-run: false
