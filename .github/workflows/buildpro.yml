@@ -39,7 +39,9 @@ jobs:
         run: docker pull ${{ steps.tags.outputs.latest }}
 
       - name: Images before build
-        run: docker images
+        run: |
+          docker images
+          docker rmi ${{ steps.tags.outputs.latest }}
 
       - name: Build image
         run: |
