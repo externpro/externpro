@@ -30,34 +30,20 @@ jobs:
           echo "tagged=ghcr.io/${{ github.repository }}/${{ inputs.img }}:$gtag" >> $GITHUB_OUTPUT
         working-directory: ${{ github.workspace }}
 
-      - name: Report tags
+      - name: Report before build
         run: |
+          echo "img: ${{ inputs.img }}"
           echo "latest: ${{ steps.tags.outputs.latest }}"
           echo "tagged: ${{ steps.tags.outputs.tagged }}"
-
-      - name: Pull latest image
-        run: docker pull ${{ steps.tags.outputs.latest }}
-
-      - name: Images before build
-        run: |
+          docker pull ${{ steps.tags.outputs.latest }}
           docker images
           docker rmi ${{ steps.tags.outputs.latest }}
 
-      - name: Build image
-        run: |
-          echo "img: ${{ inputs.img }}"
-          echo "tag: ${{ steps.tags.outputs.tag }}"
-          docker build \
-            --network=host \
-            --build-arg BPROTAG=${{ steps.tags.outputs.tag }} \
-            --file ${{ inputs.img }}.dockerfile \
-            --tag ${{ steps.tags.outputs.latest }} \
-            --tag ${{ steps.tags.outputs.tagged }} \
-            .
-        working-directory: ${{ github.workspace }}/public
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
-      - name: Images after build
-        run: docker images
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
 
       - name: Authenticate GitHub Container Registry (ghcr)
         uses: docker/login-action@v3
@@ -66,10 +52,25 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Push image(s)
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ github.workspace }}/public
+          file: ${{ github.workspace }}/public/${{ inputs.img }}.dockerfile
+          build-args: |
+            BPROTAG=${{ steps.tags.outputs.tag }}
+          tags: |
+            ${{ steps.tags.outputs.latest }}
+            ${{ steps.tags.outputs.tagged }}
+          platforms: linux/amd64,linux/arm64
+          provenance: false
+          push: true
+
+      - name: Report after build
         run: |
-          docker push ${{ steps.tags.outputs.latest }}
-          docker push ${{ steps.tags.outputs.tagged }}
+          docker pull ${{ steps.tags.outputs.latest }}
+          docker images
+          docker rmi ${{ steps.tags.outputs.latest }}
 
       - name: Delete untagged images from ghcr
         uses: snok/container-retention-policy@v3.0.0
