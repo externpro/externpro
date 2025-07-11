@@ -55,6 +55,12 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Extract metadata (tags, labels) for Docker
+        id: metadata
+        uses: docker/metadata-action@v4
+        with:
+          images: ${{ env.REGISTRY }}/${{ github.repository }}/${{ inputs.img }}
+
       - name: Build and push Docker image
         uses: docker/build-push-action@v6
         with:
@@ -62,11 +68,12 @@ jobs:
           file: ${{ github.workspace }}/public/${{ inputs.img }}.dockerfile
           build-args: |
             BPROTAG=${{ steps.tags.outputs.tag }}
+          platforms: linux/amd64,linux/arm64
+          provenance: false
+          labels: ${{ steps.metadata.outputs.labels }}
           tags: |
             ${{ steps.tags.outputs.latest }}
             ${{ steps.tags.outputs.tagged }}
-          platforms: linux/amd64,linux/arm64
-          provenance: false
           push: true
 
       - name: Report after build
