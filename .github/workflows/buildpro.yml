@@ -88,7 +88,7 @@ jobs:
         with:
           subject-name: ${{ env.REGISTRY }}/${{ github.repository }}/${{ inputs.img }}
           subject-digest: ${{ steps.push.outputs.digest }}
-          push-to-registry: true
+          push-to-registry: false
 
       - name: Report after build
         run: |
