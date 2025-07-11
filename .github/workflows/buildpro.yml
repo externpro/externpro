@@ -7,12 +7,17 @@ on:
         required: true
         type: string
 
-env:
-  REGISTRY: ghcr.io
-
 jobs:
   buildpro:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      attestations: write
+      id-token: write
+    env:
+      REGISTRY: ghcr.io
+
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -42,10 +47,10 @@ jobs:
           docker images
           docker rmi ${{ steps.tags.outputs.latest }}
 
-      - name: Set up Docker Buildx
+      - name: Set up Docker Buildx (for multi-platform builds)
         uses: docker/setup-buildx-action@v3
 
-      - name: Set up QEMU
+      - name: Set up QEMU (for emulating different CPU architectures)
         uses: docker/setup-qemu-action@v3
 
       - name: Authenticate GitHub Container Registry (ghcr)
@@ -62,6 +67,7 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ github.repository }}/${{ inputs.img }}
 
       - name: Build and push Docker image
+        id: push
         uses: docker/build-push-action@v6
         with:
           context: ${{ github.workspace }}/public
@@ -75,6 +81,14 @@ jobs:
             ${{ steps.tags.outputs.latest }}
             ${{ steps.tags.outputs.tagged }}
           push: true
+
+      - name: Attest Docker image
+        uses: actions/attest-build-provenance@v2
+        id: attest
+        with:
+          subject-name: ${{ env.REGISTRY }}/${{ github.repository }}/${{ inputs.img }}
+          subject-digest: ${{ steps.push.outputs.digest }}
+          push-to-registry: true
 
       - name: Report after build
         run: |
