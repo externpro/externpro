@@ -6,6 +6,10 @@ on:
       img:
         required: true
         type: string
+      platforms:
+        required: false
+        type: string
+        default: "local" # use platform that invokes the build
 
 jobs:
   buildpro:
@@ -74,7 +78,7 @@ jobs:
           file: ${{ github.workspace }}/public/${{ inputs.img }}.dockerfile
           build-args: |
             BPROTAG=${{ steps.tags.outputs.tag }}
-          platforms: linux/amd64,linux/arm64
+          platforms: ${{ inputs.platforms }}
           provenance: false
           labels: ${{ steps.metadata.outputs.labels }}
           tags: |
