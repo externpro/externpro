@@ -23,14 +23,15 @@ jobs:
       REGISTRY: ghcr.io
 
     steps:
-      - name: Checkout repo
+      -
+        name: Checkout repo
         uses: actions/checkout@v4
         with:
           fetch-depth: 0   # fetches all history
           fetch-tags: true # explicitly fetches tags
           submodules: true
-
-      - name: Determine tags
+      -
+        name: Determine tags
         id: tags
         run: |
           gtag=`git describe --tags`
@@ -41,8 +42,8 @@ jobs:
           echo "latest=${{ env.REGISTRY }}/${{ github.repository }}/${{ inputs.img }}:latest" >> $GITHUB_OUTPUT
           echo "tagged=${{ env.REGISTRY }}/${{ github.repository }}/${{ inputs.img }}:$gtag" >> $GITHUB_OUTPUT
         working-directory: ${{ github.workspace }}
-
-      - name: Report before build
+      -
+        name: Report before build
         run: |
           echo "img: ${{ inputs.img }}"
           echo "latest: ${{ steps.tags.outputs.latest }}"
@@ -50,27 +51,27 @@ jobs:
           docker pull ${{ steps.tags.outputs.latest }}
           docker images
           docker rmi ${{ steps.tags.outputs.latest }}
-
-      - name: Set up Docker Buildx (for multi-platform builds)
+      -
+        name: Set up Docker Buildx (for multi-platform builds)
         uses: docker/setup-buildx-action@v3
-
-      - name: Set up QEMU (for emulating different CPU architectures)
+      -
+        name: Set up QEMU (for emulating different CPU architectures)
         uses: docker/setup-qemu-action@v3
-
-      - name: Authenticate GitHub Container Registry (ghcr)
+      -
+        name: Authenticate GitHub Container Registry (ghcr)
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Extract metadata (tags, labels) for Docker
+      -
+        name: Extract metadata (tags, labels) for Docker
         id: metadata
         uses: docker/metadata-action@v4
         with:
           images: ${{ env.REGISTRY }}/${{ github.repository }}/${{ inputs.img }}
-
-      - name: Build and push Docker image
+      -
+        name: Build and push Docker image
         id: push
         uses: docker/build-push-action@v6
         with:
@@ -85,22 +86,22 @@ jobs:
             ${{ steps.tags.outputs.latest }}
             ${{ steps.tags.outputs.tagged }}
           push: true
-
-      - name: Attest Docker image
+      -
+        name: Attest Docker image
         uses: actions/attest-build-provenance@v2
         id: attest
         with:
           subject-name: ${{ env.REGISTRY }}/${{ github.repository }}/${{ inputs.img }}
           subject-digest: ${{ steps.push.outputs.digest }}
           push-to-registry: false
-
-      - name: Report after build
+      -
+        name: Report after build
         run: |
           docker pull ${{ steps.tags.outputs.latest }}
           docker images
           docker rmi ${{ steps.tags.outputs.latest }}
-
-      - name: Delete untagged images from ghcr
+      -
+        name: Delete untagged images from ghcr
         uses: snok/container-retention-policy@v3.0.0
         with:
           account: ${{ github.repository_owner }}
