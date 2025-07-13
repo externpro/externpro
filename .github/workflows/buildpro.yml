@@ -1,5 +1,4 @@
 name: Build docker buildpro image
-
 on:
   workflow_call:
     inputs:
@@ -10,7 +9,6 @@ on:
         required: false
         type: string
         default: "local" # use platform that invokes the build
-
 jobs:
   buildpro:
     runs-on: ubuntu-latest
@@ -21,7 +19,6 @@ jobs:
       id-token: write
     env:
       REGISTRY: ghcr.io
-
     steps:
       -
         name: Checkout repo

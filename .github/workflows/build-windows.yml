@@ -1,29 +1,27 @@
 name: Build Windows
-
 on:
   workflow_call:
-
 jobs:
   build:
     runs-on: windows-2022
     env:
       CMAKE_PRESET: Windows
-
     steps:
-      - name: Checkout repo
+      -
+        name: Checkout repo
         uses: actions/checkout@v4
         with:
           fetch-depth: 0   # fetches all history
           fetch-tags: true # explicitly fetches tags
           submodules: true
-
-      - name: CMake Configure
+      -
+        name: CMake Configure
         run: cmake --preset=${{ env.CMAKE_PRESET }}
-
-      - name: CMake Workflow
+      -
+        name: CMake Workflow
         run: cmake --workflow --preset=${{ env.CMAKE_PRESET }}
-
-      - name: Find devel package tarball
+      -
+        name: Find devel package tarball
         id: find_tarball
         shell: bash
         run: |
@@ -31,15 +29,15 @@ jobs:
           echo "filepath=$file" >> $GITHUB_OUTPUT
           echo "filename=$(basename $file)" >> $GITHUB_OUTPUT
         working-directory: ${{ github.workspace }}
-
-      - name: Convert Git Bash path to Windows path
+      -
+        name: Convert Git Bash path to Windows path
         id: convert_path
         shell: pwsh
         run: |
           $windowsPath = '${{ steps.find_tarball.outputs.filepath }}' -replace '^/([a-zA-Z])/', '$1:/' -replace '/', '\'
           echo "windows_path=$windowsPath" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
-
-      - name: Upload devel tarball artifact
+      -
+        name: Upload devel tarball artifact
         uses: actions/upload-artifact@v4
         with:
           name: ${{ steps.find_tarball.outputs.filename }}
