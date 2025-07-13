@@ -82,6 +82,14 @@ jobs:
         name: CMake Workflow
         run: cmake --workflow --preset=${{ env.CMAKE_PRESET }}
       -
+        name: Upload CMake logs
+        uses: actions/upload-artifact@v4
+        with:
+          name: cmake-logs
+          path: |
+            _bld-${{ env.CMAKE_PRESET }}/CMakeFiles/CMakeOutput.log
+            _bld-${{ env.CMAKE_PRESET }}/CMakeFiles/CMakeError.log
+      -
         name: Find devel package tarball
         id: find_tarball
         shell: bash
