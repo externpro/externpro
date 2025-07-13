@@ -22,7 +22,7 @@ jobs:
               - '.devcontainer/**'
   build-docker-image:
     needs: devcontainer-changed
-    #if: needs.devcontainer-changed.outputs.docker-changed == 'true'
+    if: needs.devcontainer-changed.outputs.docker-changed == 'true'
     runs-on: ubuntu-latest
     outputs:
       ran: true
