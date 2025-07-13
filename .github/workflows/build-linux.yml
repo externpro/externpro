@@ -87,6 +87,10 @@ jobs:
         shell: bash
         run: |
           file=$(pwd)/$(ls _bld-${{ env.CMAKE_PRESET }}/${{ github.event.repository.name }}*-devel.tar.xz)
+          if [[ ! -f "$file" ]]; then
+            echo "Tarball not found!" >&2
+            exit 1
+          fi
           echo "filepath=$file" >> $GITHUB_OUTPUT
           echo "filename=$(basename $file)" >> $GITHUB_OUTPUT
         working-directory: ${{ github.workspace }}
