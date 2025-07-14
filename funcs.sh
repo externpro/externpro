@@ -115,7 +115,7 @@ function defUsage
   echo " -h      display this help message"
   echo "         run the build container (no switches)"
   echo " -b      build docker image(s)"
-  echo " -x      run the cross-compile build container"
+  echo " -u      run the experimental ubuntu build container"
 }
 function defOptions
 {
@@ -127,7 +127,7 @@ function defOptions
     deinit
     exit 0
   fi
-  while getopts "bhx" opt
+  while getopts "bhu" opt
   do
     case ${opt} in
       b )
@@ -137,7 +137,7 @@ function defOptions
         deinit
         exit 0
         ;;
-      x )
+      u )
         BPROIMG=ubuntu
         buildreq
         init
