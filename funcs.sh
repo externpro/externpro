@@ -52,7 +52,7 @@ function gitcfgreq
   if [[ ! -f ~/.gitconfig ]]; then
     echo "~/.gitconfig does not exist, please create with"
     echo "  git config --global user.name \"Someone Here\""
-    echo "  git config --global user.email someonehere@sdl.usu.edu"
+    echo "  git config --global user.email someonehere@acme.org"
     echo "verify configuration with"
     echo "  git config --global --list"
     exit 1
