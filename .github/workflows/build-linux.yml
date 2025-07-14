@@ -5,9 +5,13 @@ on:
       email:
         required: true
         type: string
+      runon:
+        required: false
+        type: string
+        default: "ubuntu-latest" # runs-on value (e.g., ubuntu-latest, ubuntu-24.04-arm, etc.)
 jobs:
   devcontainer-changed:
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.runon }}
     outputs:
       docker-changed: ${{ steps.filter.outputs.docker }}
     steps:
@@ -23,7 +27,7 @@ jobs:
   build-docker-image:
     needs: devcontainer-changed
     if: needs.devcontainer-changed.outputs.docker-changed == 'true'
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.runon }}
     outputs:
       ran: true
     steps:
@@ -59,7 +63,7 @@ jobs:
   build:
     needs: [devcontainer-changed, build-docker-image]
     if: ${{ needs.devcontainer-changed.outputs.docker-changed == 'false' || always() && needs.build-docker-image.result == 'success' }}
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.runon }}
     env:
       CMAKE_PRESET: Linux
     container:
