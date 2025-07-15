@@ -9,6 +9,10 @@ on:
         required: false
         type: string
         default: "ubuntu-latest" # runs-on value (e.g., ubuntu-latest, ubuntu-24.04-arm, etc.)
+      cmake-workflow-preset:
+        required: false
+        type: string
+        default: "Linux" # CMake workflow preset to use; e.g., Linux, LinuxRelease
 jobs:
   build-docker-image:
     runs-on: ${{ inputs.runon }}
@@ -68,7 +72,7 @@ jobs:
         run: cmake --preset=${{ env.CMAKE_PRESET }}
       -
         name: CMake Workflow
-        run: cmake --workflow --preset=${{ env.CMAKE_PRESET }}
+        run: cmake --workflow --preset=${{ inputs.cmake-workflow-preset }}
       -
         name: Upload CMake logs
         uses: actions/upload-artifact@v4

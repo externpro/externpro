@@ -1,6 +1,11 @@
 name: Build Windows
 on:
   workflow_call:
+    inputs:
+      cmake-workflow-preset:
+        required: false
+        type: string
+        default: "Windows" # CMake workflow preset to use; e.g., Windows, WindowsRelease
 jobs:
   build:
     runs-on: windows-2022
@@ -19,7 +24,7 @@ jobs:
         run: cmake --preset=${{ env.CMAKE_PRESET }}
       -
         name: CMake Workflow
-        run: cmake --workflow --preset=${{ env.CMAKE_PRESET }}
+        run: cmake --workflow --preset=${{ inputs.cmake-workflow-preset }}
       -
         name: Upload CMake logs
         uses: actions/upload-artifact@v4
