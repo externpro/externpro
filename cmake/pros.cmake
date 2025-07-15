@@ -127,7 +127,6 @@ set(xp_nodeng REPO github.com/externpro/nodeng TAG v22.16.0.1
   WEB "https://nodejs.org/en/blog/release/v22.16.0/"
   DESC "node executable bundled as externpro devel package to build angular (ng) projects"
   LICENSE "[MIT](https://raw.githubusercontent.com/nodejs/node/v22.16.0/LICENSE 'MIT License')"
-  SHA256_JetPack 4489ff6ccafeab80218a9759318fcb17143e6d9c92902ac356b018090bc0d891
   SHA256_Linux 9ab6623999d426018c2e40cb50117017bb34fc0e634b950aabd86e68dbc708bf
   SHA256_win64 022887e0ddac8b8e24ed074a66337a23202b9b259302a8c8cf16fbf8b90e4b01
   )
@@ -136,7 +135,6 @@ set(xp_nodexp REPO github.com/externpro/nodexp TAG v14.17.6.1
   WEB "https://nodejs.org/en/blog/release/v14.17.6/"
   DESC "node/npm development platform and runtime executable bundled as externpro devel package to build addons"
   LICENSE "[MIT](https://raw.githubusercontent.com/nodejs/node/v14.17.6/LICENSE 'MIT License')"
-  SHA256_JetPack a6f3a563236817b4da51cd817b6e72664d4e78a1f54300e98f09fedc7be2e4d1
   SHA256_Linux e178ac4b379850e94842bbd7d85ab689cb28639560f5b0f178f854eb7e218aae
   SHA256_win64 500d79f2d490c112af885ed2ec2fdb6aebe389802c6028d08f2d5e465a317838
   )
@@ -145,7 +143,6 @@ set(xp_nvjpeg2000 REPO github.com/externpro/nvJPEG2000 TAG v0.8.1.1
   WEB "https://developer.nvidia.com/nvjpeg"
   DESC "high-performance GPU-accelerated library for decoding JPEG 2000 format images"
   LICENSE "[NVIDIA](https://docs.nvidia.com/cuda/nvjpeg2000/license.html 'NVIDIA Software License Agreement')"
-  SHA256_JetPack 9933d9515c2782a7371cb48eec85efd1bf209a6de6cff5fde41d378bfa108453
   SHA256_Linux aae48f9e42b5271335d630e064bef89d97a4a0723b468b81877e35cf9f5be525
   SHA256_win64 e08dd32554869c1cfd6add59d9a7cec4c00cd9fc74ada137fdd1b5d236711431
   )
@@ -282,7 +279,6 @@ set(xp_node-addon-api REPO github.com/externpro/node-addon-api TAG v3.0.2.1
   WEB "https://github.com/nodejs/node-addon-api" UPSTREAM "github.com/nodejs/node-addon-api"
   DESC "Module for using N-API from C++"
   LICENSE "[MIT](https://github.com/nodejs/node-addon-api/blob/3.0.2/LICENSE.md 'MIT License')"
-  SHA256_JetPack d91dbce0fc08fea74696281dadeb83e1fb56b42a20b4b59c5f800cc7193d59b4
   SHA256_Linux 3bd0eba6259b0062836a39da588bfa7e630d7ace795bcb9e9d68918090cc9ade
   SHA256_win64 09a0962f311a2d2af86ea0548908166bd4cfda63c2b8d2c83951a813fb0f0f6a
   )
