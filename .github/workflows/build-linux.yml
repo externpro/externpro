@@ -1,0 +1,114 @@
+name: Build Linux
+on:
+  workflow_call:
+    inputs:
+      email:
+        required: true
+        type: string
+      runon:
+        required: false
+        type: string
+        default: "ubuntu-latest" # runs-on value (e.g., ubuntu-latest, ubuntu-24.04-arm, etc.)
+jobs:
+  devcontainer-changed:
+    runs-on: ${{ inputs.runon }}
+    outputs:
+      docker-changed: ${{ steps.filter.outputs.docker }}
+    steps:
+      -
+        uses: actions/checkout@v4
+      -
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            docker:
+              - '.devcontainer/**'
+  build-docker-image:
+    needs: devcontainer-changed
+    #if: needs.devcontainer-changed.outputs.docker-changed == 'true'
+    runs-on: ${{ inputs.runon }}
+    outputs:
+      ran: true
+    steps:
+      -
+        name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+      -
+        name: Configure git
+        run: |
+          touch ~/.gitconfig
+          git config user.name ${{ github.actor }}
+          git config user.email ${{ inputs.email }}
+      -
+        name: Get docker image name
+        run: |
+          echo "DOCKER_IMAGE_NAME=$(echo $(basename ${{ github.repository }})-bld | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+      -
+        name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      -
+        name: Build and push docker image
+        run: |
+          ./docker-compose.sh -b
+          docker tag ${{ env.DOCKER_IMAGE_NAME }}:latest ghcr.io/${{ github.repository }}/buildimage:${{ github.sha }}
+          docker push ghcr.io/${{ github.repository }}/buildimage:${{ github.sha }}
+          docker images
+  build:
+    needs: [devcontainer-changed, build-docker-image]
+    if: ${{ needs.devcontainer-changed.outputs.docker-changed == 'false' || always() && needs.build-docker-image.result == 'success' }}
+    runs-on: ${{ inputs.runon }}
+    env:
+      CMAKE_PRESET: Linux
+    container:
+      image: ghcr.io/${{ github.repository }}/buildimage:${{ github.sha }}
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      -
+        name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # fetches all history
+          fetch-tags: true # explicitly fetches tags
+          submodules: true
+      -
+        name: CMake Configure
+        run: cmake --preset=${{ env.CMAKE_PRESET }}
+      -
+        name: CMake Workflow
+        run: cmake --workflow --preset=${{ env.CMAKE_PRESET }}
+      -
+        name: Upload CMake logs
+        uses: actions/upload-artifact@v4
+        with:
+          name: cmake-logs
+          path: |
+            _bld-${{ env.CMAKE_PRESET }}/CMakeFiles/CMakeOutput.log
+            _bld-${{ env.CMAKE_PRESET }}/CMakeFiles/CMakeError.log
+      -
+        name: Find devel package tarball
+        id: find_tarball
+        shell: bash
+        run: |
+          file=$(pwd)/$(ls _bld-${{ env.CMAKE_PRESET }}/${{ github.event.repository.name }}*-devel.tar.xz)
+          if [[ ! -f "$file" ]]; then
+            echo "Tarball not found!" >&2
+            exit 1
+          fi
+          echo "filepath=$file" >> $GITHUB_OUTPUT
+          echo "filename=$(basename $file)" >> $GITHUB_OUTPUT
+        working-directory: ${{ github.workspace }}
+      -
+        name: Upload devel tarball artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.find_tarball.outputs.filename }}
+          path: ${{ steps.find_tarball.outputs.filepath }}
