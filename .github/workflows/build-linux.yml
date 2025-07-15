@@ -31,9 +31,10 @@ jobs:
           git config user.name ${{ github.actor }}
           git config user.email ${{ inputs.email }}
       -
-        name: Get docker image name
+        name: Get docker and ghcr.io image names
         run: |
           echo "DOCKER_IMAGE_NAME=$(echo $(basename ${{ github.repository }})-bld | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+          echo "GHCRIO_IMAGE_NAME=$(echo ghcr.io/${{ github.repository }}/bldimg-${{ runner.arch }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
       -
         name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
@@ -45,8 +46,8 @@ jobs:
         name: Build and push docker image
         run: |
           ./docker-compose.sh -b
-          docker tag ${{ env.DOCKER_IMAGE_NAME }}:latest ghcr.io/${{ github.repository }}/bldimg-${{ runner.arch }}:latest
-          docker push ghcr.io/${{ github.repository }}/bldimg-${{ runner.arch }}:latest
+          docker tag ${{ env.DOCKER_IMAGE_NAME }}:latest ${{ env.GHCRIO_IMAGE_NAME }}:latest
+          docker push ${{ env.GHCRIO_IMAGE_NAME }}:latest
           docker images
   build:
     needs: build-docker-image
@@ -55,7 +56,7 @@ jobs:
     env:
       CMAKE_PRESET: Linux
     container:
-      image: ghcr.io/${{ github.repository }}/bldimg-${{ runner.arch }}:latest
+      image: ${{ env.GHCRIO_IMAGE_NAME }}:latest
       credentials:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
