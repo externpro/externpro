@@ -77,7 +77,7 @@ jobs:
         name: Upload CMake logs
         uses: actions/upload-artifact@v4
         with:
-          name: cmake-logs
+          name: cmake-logs-${{ env.CMAKE_PRESET }}-${{ runner.arch }}
           path: |
             _bld-${{ env.CMAKE_PRESET }}/CMakeFiles/CMakeConfigureLog.yaml
       -
