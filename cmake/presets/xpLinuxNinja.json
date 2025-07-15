@@ -8,8 +8,7 @@
       "condition": {
         "type": "allOf",
         "conditions": [
-          { "lhs": "${hostSystemName}", "type": "equals", "rhs": "Linux" },
-          { "lhs": "$penv{XPX}", "type": "equals", "rhs": "" }
+          { "lhs": "${hostSystemName}", "type": "equals", "rhs": "Linux" }
         ]
       }
     },
@@ -27,8 +26,7 @@
       "condition": {
         "type": "allOf",
         "conditions": [
-          { "lhs": "${hostSystemName}", "type": "equals", "rhs": "Linux" },
-          { "lhs": "$penv{XPX}", "type": "equals", "rhs": "" }
+          { "lhs": "${hostSystemName}", "type": "equals", "rhs": "Linux" }
         ]
       }
     },
@@ -62,8 +60,7 @@
       "condition": {
         "type": "allOf",
         "conditions": [
-          { "lhs": "${hostSystemName}", "type": "equals", "rhs": "Linux" },
-          { "lhs": "$penv{XPX}", "type": "equals", "rhs": "" }
+          { "lhs": "${hostSystemName}", "type": "equals", "rhs": "Linux" }
         ]
       }
     },
@@ -93,8 +90,7 @@
       "condition": {
         "type": "allOf",
         "conditions": [
-          { "lhs": "${hostSystemName}", "type": "equals", "rhs": "Linux" },
-          { "lhs": "$penv{XPX}", "type": "equals", "rhs": "" }
+          { "lhs": "${hostSystemName}", "type": "equals", "rhs": "Linux" }
         ]
       }
     },
