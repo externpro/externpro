@@ -79,8 +79,7 @@ jobs:
         with:
           name: cmake-logs
           path: |
-            _bld-${{ env.CMAKE_PRESET }}/CMakeFiles/CMakeOutput.log
-            _bld-${{ env.CMAKE_PRESET }}/CMakeFiles/CMakeError.log
+            _bld-${{ env.CMAKE_PRESET }}/CMakeFiles/CMakeConfigureLog.yaml
       -
         name: Find devel package tarball
         id: find_tarball
