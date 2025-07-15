@@ -57,8 +57,8 @@ jobs:
         name: Build and push docker image
         run: |
           ./docker-compose.sh -b
-          docker tag ${{ env.DOCKER_IMAGE_NAME }}:latest ghcr.io/${{ github.repository }}/buildimage:latest
-          docker push ghcr.io/${{ github.repository }}/buildimage:latest
+          docker tag ${{ env.DOCKER_IMAGE_NAME }}:latest ghcr.io/${{ github.repository }}/buildimage:${{ github.sha }}
+          docker push ghcr.io/${{ github.repository }}/buildimage:${{ github.sha }}
           docker images
   build:
     needs: [devcontainer-changed, build-docker-image]
@@ -67,7 +67,7 @@ jobs:
     env:
       CMAKE_PRESET: Linux
     container:
-      image: ghcr.io/${{ github.repository }}/buildimage:latest
+      image: ghcr.io/${{ github.repository }}/buildimage:${{ github.sha }}
       credentials:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
