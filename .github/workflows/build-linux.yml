@@ -10,23 +10,7 @@ on:
         type: string
         default: "ubuntu-latest" # runs-on value (e.g., ubuntu-latest, ubuntu-24.04-arm, etc.)
 jobs:
-  devcontainer-changed:
-    runs-on: ${{ inputs.runon }}
-    outputs:
-      docker-changed: ${{ steps.filter.outputs.docker }}
-    steps:
-      -
-        uses: actions/checkout@v4
-      -
-        id: filter
-        uses: dorny/paths-filter@v3
-        with:
-          filters: |
-            docker:
-              - '.devcontainer/**'
   build-docker-image:
-    needs: devcontainer-changed
-    #if: needs.devcontainer-changed.outputs.docker-changed == 'true'
     runs-on: ${{ inputs.runon }}
     outputs:
       ran: true
@@ -61,8 +45,8 @@ jobs:
           docker push ghcr.io/${{ github.repository }}/buildimage:${{ github.sha }}
           docker images
   build:
-    needs: [devcontainer-changed, build-docker-image]
-    if: ${{ needs.devcontainer-changed.outputs.docker-changed == 'false' || always() && needs.build-docker-image.result == 'success' }}
+    needs: build-docker-image
+    if: ${{ needs.build-docker-image.result == 'success' }}
     runs-on: ${{ inputs.runon }}
     env:
       CMAKE_PRESET: Linux
