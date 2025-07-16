@@ -13,6 +13,10 @@ on:
         required: false
         type: string
         default: "Linux" # CMake workflow preset to use; e.g., Linux, LinuxRelease
+    outputs:
+      artifact_name:
+        description: "Name of the uploaded artifact"
+        value: ${{ jobs.build.outputs.artifact_name }}
 jobs:
   build-docker-image:
     runs-on: ${{ inputs.runon }}
@@ -58,6 +62,8 @@ jobs:
     needs: build-docker-image
     if: ${{ needs.build-docker-image.result == 'success' }}
     runs-on: ${{ inputs.runon }}
+    outputs:
+      artifact_name: ${{ steps.find_tarball.outputs.filename }}
     env:
       CMAKE_PRESET: Linux
     container:

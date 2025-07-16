@@ -1,0 +1,177 @@
+name: Upload Release Assets
+on:
+  workflow_call:
+    inputs:
+      release_tag:
+        description: 'The tag name of the release to upload assets to'
+        required: true
+        type: string
+      artifact_pattern:
+        description: 'Pattern to match artifact files (e.g., "*.tar.xz")'
+        required: false
+        type: string
+        default: '*.tar.xz'
+      create_release:
+        description: 'Whether to create the release if it does not exist'
+        required: false
+        type: boolean
+        default: false
+      release_name:
+        description: 'Name for the release (only used if create_release is true)'
+        required: false
+        type: string
+        default: ''
+      release_body:
+        description: 'Body text for the release (only used if create_release is true)'
+        required: false
+        type: string
+        default: ''
+      prerelease:
+        description: 'Mark the release as a prerelease'
+        required: false
+        type: boolean
+        default: false
+      draft:
+        description: 'Mark the release as a draft'
+        required: false
+        type: boolean
+        default: false
+    outputs:
+      release_id:
+        description: 'The ID of the release'
+        value: ${{ jobs.upload-assets.outputs.release_id }}
+      release_url:
+        description: 'The URL of the release'
+        value: ${{ jobs.upload-assets.outputs.release_url }}
+
+jobs:
+  upload-assets:
+    runs-on: ubuntu-latest
+    outputs:
+      release_id: ${{ steps.get_release.outputs.release_id || steps.create_release.outputs.release_id }}
+      release_url: ${{ steps.get_release.outputs.release_url || steps.create_release.outputs.release_url }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Validate inputs
+        run: |
+          echo "Release tag: ${{ inputs.release_tag }}"
+          echo "Artifact pattern: ${{ inputs.artifact_pattern }}"
+          echo "Create release: ${{ inputs.create_release }}"
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: ./artifacts
+
+      - name: List downloaded artifacts
+        run: |
+          echo "Downloaded artifacts:"
+          find ./artifacts -type f \( -name "*.tar.xz" -o -name "*.zip" -o -name "*.tar.gz" -o -name "*.exe" -o -name "*.msi" -o -name "*.deb" -o -name "*.rpm" \) | sort
+
+      - name: Get existing release
+        id: get_release
+        continue-on-error: true
+        run: |
+          release_info=$(gh release view "${{ inputs.release_tag }}" --json id,url 2>/dev/null || echo "null")
+          if [ "$release_info" != "null" ]; then
+            echo "release_id=$(echo "$release_info" | jq -r '.id')" >> $GITHUB_OUTPUT
+            echo "release_url=$(echo "$release_info" | jq -r '.url')" >> $GITHUB_OUTPUT
+            echo "Release exists: ${{ inputs.release_tag }}"
+          else
+            echo "Release does not exist: ${{ inputs.release_tag }}"
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create release if needed
+        id: create_release
+        if: ${{ inputs.create_release && steps.get_release.outputs.release_id == '' }}
+        run: |
+          release_name="${{ inputs.release_name }}"
+          if [ -z "$release_name" ]; then
+            release_name="${{ inputs.release_tag }}"
+          fi
+          
+          release_body="${{ inputs.release_body }}"
+          if [ -z "$release_body" ]; then
+            release_body="Release ${{ inputs.release_tag }}"
+          fi
+          
+          flags=""
+          if [ "${{ inputs.prerelease }}" = "true" ]; then
+            flags="$flags --prerelease"
+          fi
+          if [ "${{ inputs.draft }}" = "true" ]; then
+            flags="$flags --draft"
+          fi
+          
+          release_info=$(gh release create "${{ inputs.release_tag }}" \
+            --title "$release_name" \
+            --notes "$release_body" \
+            $flags \
+            --json id,url)
+          
+          echo "release_id=$(echo "$release_info" | jq -r '.id')" >> $GITHUB_OUTPUT
+          echo "release_url=$(echo "$release_info" | jq -r '.url')" >> $GITHUB_OUTPUT
+          echo "Created release: ${{ inputs.release_tag }}"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Verify release exists
+        run: |
+          if [ -z "${{ steps.get_release.outputs.release_id }}${{ steps.create_release.outputs.release_id }}" ]; then
+            echo "Error: No release found or created for tag ${{ inputs.release_tag }}"
+            echo "Set create_release: true to automatically create the release"
+            exit 1
+          fi
+
+      - name: Upload artifacts to release
+        run: |
+          echo "Searching for artifacts matching pattern: ${{ inputs.artifact_pattern }}"
+          
+          # Find all artifact files matching the pattern
+          find ./artifacts -type f -name "${{ inputs.artifact_pattern }}" | while read -r file; do
+            if [ -f "$file" ]; then
+              filename=$(basename "$file")
+              echo "Found artifact: $filename"
+              
+              # Check if asset already exists and remove it
+              if gh release view "${{ inputs.release_tag }}" --json assets | jq -e ".assets[] | select(.name == \"$filename\")" > /dev/null 2>&1; then
+                echo "Asset $filename already exists, removing it first..."
+                gh release delete-asset "${{ inputs.release_tag }}" "$filename" --yes
+              fi
+              
+              # Upload the asset
+              gh release upload "${{ inputs.release_tag }}" "$file" --clobber
+              echo "Successfully uploaded: $filename"
+            fi
+          done
+          
+          # Also upload other common build artifacts
+          find ./artifacts -type f \( -name "*.zip" -o -name "*.tar.gz" -o -name "*.exe" -o -name "*.msi" -o -name "*.deb" -o -name "*.rpm" \) | while read -r file; do
+            if [ -f "$file" ]; then
+              filename=$(basename "$file")
+              echo "Found additional artifact: $filename"
+              
+              # Check if asset already exists and remove it
+              if gh release view "${{ inputs.release_tag }}" --json assets | jq -e ".assets[] | select(.name == \"$filename\")" > /dev/null 2>&1; then
+                echo "Asset $filename already exists, removing it first..."
+                gh release delete-asset "${{ inputs.release_tag }}" "$filename" --yes
+              fi
+              
+              # Upload the asset
+              gh release upload "${{ inputs.release_tag }}" "$file" --clobber
+              echo "Successfully uploaded: $filename"
+            fi
+          done
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: List release assets
+        run: |
+          echo "Release assets for ${{ inputs.release_tag }}:"
+          gh release view "${{ inputs.release_tag }}" --json assets | jq -r '.assets[] | "- \(.name) (\(.size) bytes)"'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
