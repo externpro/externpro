@@ -13,9 +13,6 @@ Builds the project in a Docker container on Linux systems.
 - `runon` (optional): Runner to use (default: `ubuntu-latest`)
 - `cmake-workflow-preset` (optional): CMake workflow preset (default: `Linux`)
 
-**Outputs:**
-- `artifact_name`: Name of the uploaded build artifact
-
 **Usage:**
 ```yaml
 jobs:
@@ -33,9 +30,6 @@ Builds the project on Windows systems.
 
 **Inputs:**
 - `cmake-workflow-preset` (optional): CMake workflow preset (default: `Windows`)
-
-**Outputs:**
-- `artifact_name`: Name of the uploaded build artifact
 
 **Usage:**
 ```yaml

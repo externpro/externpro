@@ -6,15 +6,9 @@ on:
         required: false
         type: string
         default: "Windows" # CMake workflow preset to use; e.g., Windows, WindowsRelease
-    outputs:
-      artifact_name:
-        description: "Name of the uploaded artifact"
-        value: ${{ jobs.build.outputs.artifact_name }}
 jobs:
   build:
     runs-on: windows-2022
-    outputs:
-      artifact_name: ${{ steps.find_tarball.outputs.filename }}
     env:
       CMAKE_PRESET: Windows
     steps:
