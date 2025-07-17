@@ -8,9 +8,8 @@ on:
         type: string
       workflow_run_url:
         description: 'URL of the workflow run to download artifacts from (e.g., https://github.com/owner/repo/actions/runs/123456789)'
-        required: false
+        required: true
         type: string
-        default: ''
       artifact_pattern:
         description: 'Pattern to match artifact files (e.g., "*.tar.xz")'
         required: false
@@ -68,7 +67,6 @@ jobs:
 
       - name: Extract run ID from URL
         id: extract_run_id
-        if: ${{ inputs.workflow_run_url != '' }}
         run: |
           run_url="${{ inputs.workflow_run_url }}"
           if [[ "$run_url" =~ /actions/runs/([0-9]+) ]]; then
@@ -80,19 +78,12 @@ jobs:
             exit 1
           fi
 
-      - name: Download artifacts from specific run
-        if: ${{ inputs.workflow_run_url != '' }}
+      - name: Download artifacts from workflow run
         run: |
           echo "Downloading artifacts from run ID: ${{ steps.extract_run_id.outputs.run_id }}"
           gh run download ${{ steps.extract_run_id.outputs.run_id }} --dir ./artifacts
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Download artifacts from current run
-        if: ${{ inputs.workflow_run_url == '' }}
-        uses: actions/download-artifact@v4
-        with:
-          path: ./artifacts
 
       - name: List downloaded artifacts
         run: |

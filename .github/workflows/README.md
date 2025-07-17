@@ -47,6 +47,7 @@ Downloads build artifacts and uploads them as GitHub release assets.
 
 **Inputs:**
 - `release_tag` (required): The tag name of the release
+- `workflow_run_url` (required): URL of the workflow run to download artifacts from (e.g., `https://github.com/owner/repo/actions/runs/123456789`)
 - `artifact_pattern` (optional): Pattern to match artifact files (default: `*.tar.xz`)
 - `create_release` (optional): Whether to create the release if it doesn't exist (default: `false`)
 - `release_name` (optional): Name for the release (only used if `create_release` is `true`)
@@ -60,6 +61,7 @@ Downloads build artifacts and uploads them as GitHub release assets.
 
 **Features:**
 - Automatically discovers and uploads all artifacts matching the specified pattern
+- Downloads artifacts from a specified workflow run
 - Supports common build artifact formats: `.tar.xz`, `.zip`, `.tar.gz`, `.exe`, `.msi`, `.deb`, `.rpm`
 - Can create releases automatically if they don't exist
 - Replaces existing assets with the same name
@@ -72,6 +74,7 @@ jobs:
     uses: ./.github/workflows/upload-release-assets.yml
     with:
       release_tag: v1.0.0
+      workflow_run_url: https://github.com/owner/repo/actions/runs/123456789
       artifact_pattern: "*.tar.xz"
       create_release: true
       release_name: "Release v1.0.0"
@@ -145,6 +148,7 @@ jobs:
     uses: ./.github/workflows/upload-release-assets.yml
     with:
       release_tag: v1.0.0
+      workflow_run_url: https://github.com/owner/repo/actions/runs/123456789
       artifact_pattern: "*.zip"  # Upload ZIP files instead
     secrets: inherit
 ```
@@ -157,6 +161,7 @@ jobs:
     uses: ./.github/workflows/upload-release-assets.yml
     with:
       release_tag: v1.0.0-beta.1
+      workflow_run_url: https://github.com/owner/repo/actions/runs/123456789
       create_release: true
       prerelease: true
       release_name: "Beta Release v1.0.0-beta.1"
