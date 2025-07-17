@@ -9,7 +9,6 @@ This directory contains GitHub Actions workflows for building and releasing the 
 Builds the project in a Docker container on Linux systems.
 
 **Inputs:**
-- `email` (required): Email for git configuration
 - `runon` (optional): Runner to use (default: `ubuntu-latest`)
 - `cmake-workflow-preset` (optional): CMake workflow preset (default: `Linux`)
 
@@ -19,7 +18,6 @@ jobs:
   build-linux:
     uses: ./.github/workflows/build-linux.yml
     with:
-      email: user@example.com
       cmake-workflow-preset: LinuxRelease
     secrets: inherit
 ```
@@ -41,7 +39,7 @@ jobs:
     secrets: inherit
 ```
 
-### 3. `upload-release-assets.yml` - Reusable Release Asset Upload Workflow
+### 3. `release-from-build.yml` - Reusable Release Asset Upload Workflow
 
 Downloads build artifacts and uploads them as GitHub release assets.
 
@@ -49,7 +47,6 @@ Downloads build artifacts and uploads them as GitHub release assets.
 - `workflow_run_url` (required): URL of the workflow run to download artifacts from (e.g., `https://github.com/owner/repo/actions/runs/123456789`)
 - `artifact_pattern` (optional): Pattern to match artifact files (default: `*.tar.xz`)
 - `release_body_template` (optional): Template for the release body (includes placeholders like `{workflow_run_url}`)
-- `draft` (optional): Mark the release as a draft (default: `false`)
 
 **Outputs:**
 - `release_id`: The ID of the release
@@ -61,7 +58,7 @@ Downloads build artifacts and uploads them as GitHub release assets.
 - Automatically detects release tag from artifact filenames (e.g., `v1.2.3` or `v1.2.3-4-g1234abc`)
 - Determines prerelease status based on tag format (tags with `-#-g<hash>` suffix are prereleases)
 - Always creates a release and fails if it already exists (strict release creation)
-- Creates draft releases when git tags are missing instead of creating tags
+- Always creates releases as drafts
 - Downloads artifacts from a specified workflow run
 - Calculates SHA256 hashes for all artifacts and includes them in alphabetically sorted release notes
 - Supports common build artifact formats: `.tar.xz`, `.zip`, `.tar.gz`, `.exe`, `.msi`, `.deb`, `.rpm`
@@ -72,29 +69,35 @@ Downloads build artifacts and uploads them as GitHub release assets.
 ```yaml
 jobs:
   upload-assets:
-    uses: ./.github/workflows/upload-release-assets.yml
+    uses: ./.github/workflows/release-from-build.yml
     with:
       workflow_run_url: https://github.com/owner/repo/actions/runs/123456789
       artifact_pattern: "*.tar.xz"
-      draft: false
     secrets: inherit
 ```
 
-### 4. `release.yml` - Complete Release Workflow
+### Repository-Specific Release Workflows
 
-A workflow for creating releases from existing build artifacts.
+Each repository should have its own `release.yml` workflow file that calls the reusable `release-from-build.yml` workflow. For example:
 
-**Triggers:**
-- Manual workflow dispatch with custom inputs
+**Example: Repository Release Workflow**
 
-**Manual Trigger Inputs:**
-- `workflow_run_url` (required): URL of the workflow run containing artifacts to upload
-- `draft` (optional): Mark as draft (default: `false`)
-
-**Workflow Steps:**
-1. Builds the project for Linux using `build-linux.yml`
-2. Builds the project for Windows using `build-windows.yml`
-3. Uploads all build artifacts as release assets using `upload-release-assets.yml`
+```yaml
+name: Release
+on:
+  workflow_dispatch:
+    inputs:
+      workflow_run_url:
+        description: 'URL of the workflow run containing artifacts to upload'
+        required: true
+        type: string
+jobs:
+  release-from-build:
+    uses: externpro/externpro/.github/workflows/release-from-build.yml@github-release
+    with:
+      workflow_run_url: ${{ github.event.inputs.workflow_run_url }}
+      artifact_pattern: "*.tar.xz"
+```
 
 ## Usage Examples
 
@@ -104,17 +107,16 @@ A workflow for creating releases from existing build artifacts.
    - Run a build workflow to generate artifacts
    - Copy the URL of the successful workflow run
    - Go to Actions tab in GitHub
-   - Select "Create Release" workflow
+   - Select the repository's "Release" workflow
    - Click "Run workflow"
    - Enter the workflow run URL
-   - Optionally set draft status
    - Click "Run workflow"
    
 The workflow will automatically:
    - Detect the version tag from artifact filenames
    - Create a release with that tag
    - Determine if it should be a prerelease based on the tag format
-   - Create a draft release if the git tag doesn't exist
+   - Always create releases as drafts
 
 ### Customizing Build Presets
 
@@ -143,26 +145,16 @@ To upload different types of artifacts:
 ```yaml
 jobs:
   upload-assets:
-    uses: ./.github/workflows/upload-release-assets.yml
+    uses: ./.github/workflows/release-from-build.yml
     with:
       workflow_run_url: https://github.com/owner/repo/actions/runs/123456789
       artifact_pattern: "*.zip"  # Upload ZIP files instead
     secrets: inherit
 ```
 
-### Creating Draft Releases
+### Prerelease Detection
 
-```yaml
-jobs:
-  upload-assets:
-    uses: ./.github/workflows/upload-release-assets.yml
-    with:
-      workflow_run_url: https://github.com/owner/repo/actions/runs/123456789
-      draft: true  # Create as draft regardless of tag existence
-    secrets: inherit
-```
-
-Note: Prerelease status is automatically determined from the tag format. Tags with `-#-g<hash>` suffix (like `v1.2.3-4-g1234abc`) are marked as prereleases.
+Note: Prerelease status is automatically determined from the tag format. Tags with `-#-g<hash>` suffix (like `v1.2.3-4-g1234abc`) are marked as prereleases. All releases are created as drafts regardless of prerelease status.
 
 ## Requirements
 

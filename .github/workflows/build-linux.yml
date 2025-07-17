@@ -2,17 +2,14 @@ name: Build Linux
 on:
   workflow_call:
     inputs:
-      email:
-        required: true
-        type: string
-      runon:
-        required: false
-        type: string
-        default: "ubuntu-latest" # runs-on value (e.g., ubuntu-latest, ubuntu-24.04-arm, etc.)
       cmake-workflow-preset:
         required: false
         type: string
         default: "Linux" # CMake workflow preset to use; e.g., Linux, LinuxRelease
+      runon:
+        required: false
+        type: string
+        default: "ubuntu-latest" # runs-on value (e.g., ubuntu-latest, ubuntu-24.04-arm, etc.)
 jobs:
   build-docker-image:
     runs-on: ${{ inputs.runon }}
@@ -30,7 +27,7 @@ jobs:
         run: |
           touch ~/.gitconfig
           git config user.name ${{ github.actor }}
-          git config user.email ${{ inputs.email }}
+          git config user.email ${{ github.actor }}@users.noreply.github.com
       -
         name: Get docker and ghcr.io image names
         id: image-names

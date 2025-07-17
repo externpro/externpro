@@ -16,7 +16,7 @@ on:
         required: false
         type: string
         default: |
-          ## What's Changed
+          ## Release Notes
 
           This release includes build artifacts from workflow run:
           {workflow_run_url}
@@ -26,11 +26,7 @@ on:
 
           ### Verification
           SHA256 checksums are provided below for artifact verification.
-      draft:
-        description: 'Mark the release as a draft'
-        required: false
-        type: boolean
-        default: false
+
     outputs:
       release_id:
         description: 'The ID of the release'
@@ -238,10 +234,8 @@ jobs:
             flags="$flags --prerelease"
           fi
           
-          # Set draft status based on tag existence or input
-          if [ "${{ steps.check_git_tag.outputs.make_draft }}" = "true" ] || [ "${{ inputs.draft }}" = "true" ]; then
-            flags="$flags --draft"
-          fi
+          # Always create draft releases
+          flags="$flags --draft"
           
           # Create the release using the file for notes
           echo "Creating release for tag: $tag"
