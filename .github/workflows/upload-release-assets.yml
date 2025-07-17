@@ -208,8 +208,9 @@ jobs:
           release_body="${{ inputs.release_body_template }}"
           release_body="${release_body//{workflow_run_url}/${{ inputs.workflow_run_url }}}"
 
-          # Append hash summary to release body
-          release_body="${release_body}"$'\n\n'"${{ steps.find_artifacts.outputs.hash_summary }}"
+          # Append hash summary to release body with proper escaping
+          hash_summary=$(echo "${{ steps.find_artifacts.outputs.hash_summary }}" | sed 's/^/    /')
+          release_body="${release_body}"$'\n\n''### Checksums\n```\n'"${hash_summary}"$'\n```'
 
           # Set flags based on release type
           flags=""
