@@ -240,10 +240,25 @@ jobs:
         run: |
           tag="${{ steps.determine_tag.outputs.tag }}"
           echo "Uploading artifacts to release: $tag"
-          for artifact in $(echo '${{ steps.find_artifacts.outputs.artifacts }}' | jq -r '.[]'); do
-            echo "Uploading artifact: $artifact"
-            gh release upload "$tag" "$artifact" --clobber
-          done
+          
+          # Read artifacts from the output, handling both JSON and plain text formats
+          if [[ "${{ steps.find_artifacts.outputs.artifacts }}" == *"["* ]]; then
+            # JSON array format
+            while IFS= read -r artifact; do
+              if [ -n "$artifact" ] && [ -f "$artifact" ]; then
+                echo "Uploading artifact: $artifact"
+                gh release upload "$tag" "$artifact" --clobber
+              fi
+            done < <(echo '${{ steps.find_artifacts.outputs.artifacts }}' | jq -r '.[]')
+          else
+            # Plain text format (one per line)
+            while IFS= read -r artifact; do
+              if [ -n "$artifact" ] && [ -f "$artifact" ]; then
+                echo "Uploading artifact: $artifact"
+                gh release upload "$tag" "$artifact" --clobber
+              fi
+            done <<< "${{ steps.find_artifacts.outputs.artifacts }}"
+          fi
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       -
