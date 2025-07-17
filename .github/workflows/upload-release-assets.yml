@@ -6,6 +6,11 @@ on:
         description: 'The tag name of the release to upload assets to'
         required: true
         type: string
+      workflow_run_url:
+        description: 'URL of the workflow run to download artifacts from (e.g., https://github.com/owner/repo/actions/runs/123456789)'
+        required: false
+        type: string
+        default: ''
       artifact_pattern:
         description: 'Pattern to match artifact files (e.g., "*.tar.xz")'
         required: false
@@ -57,10 +62,34 @@ jobs:
       - name: Validate inputs
         run: |
           echo "Release tag: ${{ inputs.release_tag }}"
+          echo "Workflow run URL: ${{ inputs.workflow_run_url }}"
           echo "Artifact pattern: ${{ inputs.artifact_pattern }}"
           echo "Create release: ${{ inputs.create_release }}"
 
-      - name: Download all artifacts
+      - name: Extract run ID from URL
+        id: extract_run_id
+        if: ${{ inputs.workflow_run_url != '' }}
+        run: |
+          run_url="${{ inputs.workflow_run_url }}"
+          if [[ "$run_url" =~ /actions/runs/([0-9]+) ]]; then
+            run_id="${BASH_REMATCH[1]}"
+            echo "run_id=$run_id" >> $GITHUB_OUTPUT
+            echo "Extracted run ID: $run_id"
+          else
+            echo "Error: Invalid workflow run URL format. Expected: https://github.com/owner/repo/actions/runs/123456789"
+            exit 1
+          fi
+
+      - name: Download artifacts from specific run
+        if: ${{ inputs.workflow_run_url != '' }}
+        run: |
+          echo "Downloading artifacts from run ID: ${{ steps.extract_run_id.outputs.run_id }}"
+          gh run download ${{ steps.extract_run_id.outputs.run_id }} --dir ./artifacts
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Download artifacts from current run
+        if: ${{ inputs.workflow_run_url == '' }}
         uses: actions/download-artifact@v4
         with:
           path: ./artifacts

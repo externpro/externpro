@@ -1,12 +1,13 @@
 name: Create Release
 on:
-  push:
-    tags:
-      - 'v*'  # Triggers on version tags like v1.0.0, v2.1.3, etc.
   workflow_dispatch:
     inputs:
       tag:
         description: 'Tag to create release for'
+        required: true
+        type: string
+      workflow_run_url:
+        description: 'URL of the workflow run containing artifacts to upload (e.g., https://github.com/owner/repo/actions/runs/123456789)'
         required: true
         type: string
       create_release:
@@ -21,44 +22,26 @@ on:
         default: false
 
 jobs:
-  # Build for Linux
-  build-linux:
-    uses: ./.github/workflows/build-linux.yml
-    with:
-      email: ${{ github.actor }}@users.noreply.github.com
-      runon: ubuntu-latest
-      cmake-workflow-preset: LinuxRelease
-    secrets: inherit
-
-  # Build for Windows
-  build-windows:
-    uses: ./.github/workflows/build-windows.yml
-    with:
-      cmake-workflow-preset: WindowsRelease
-    secrets: inherit
-
   # Upload artifacts as release assets
   upload-release-assets:
-    needs: [build-linux, build-windows]
-    if: always() && (needs.build-linux.result == 'success' || needs.build-windows.result == 'success')
+    runs-on: ubuntu-latest
     uses: ./.github/workflows/upload-release-assets.yml
     with:
-      release_tag: ${{ github.event.inputs.tag || github.ref_name }}
+      release_tag: ${{ github.event.inputs.tag }}
+      workflow_run_url: ${{ github.event.inputs.workflow_run_url }}
       artifact_pattern: "*.tar.xz"
-      create_release: ${{ github.event.inputs.create_release || true }}
-      release_name: "Release ${{ github.event.inputs.tag || github.ref_name }}"
+      create_release: ${{ github.event.inputs.create_release }}
+      release_name: "Release ${{ github.event.inputs.tag }}"
       release_body: |
         ## What's Changed
         
-        This release includes builds for:
-        - Linux (x64)
-        - Windows (x64)
+        This release includes build artifacts from workflow run:
+        ${{ github.event.inputs.workflow_run_url }}
         
         ### Download
-        - **Linux**: Download the `.tar.xz` file for Linux systems
-        - **Windows**: Download the `.tar.xz` file for Windows systems
+        - Download the appropriate `.tar.xz` file for your platform
         
-        Full Changelog: https://github.com/${{ github.repository }}/compare/v1.0.0...${{ github.event.inputs.tag || github.ref_name }}
-      prerelease: ${{ github.event.inputs.prerelease || false }}
+        Full Changelog: https://github.com/${{ github.repository }}/compare/v1.0.0...${{ github.event.inputs.tag }}
+      prerelease: ${{ github.event.inputs.prerelease }}
       draft: false
     secrets: inherit
