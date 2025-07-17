@@ -2,25 +2,15 @@ name: Create Release
 on:
   workflow_dispatch:
     inputs:
-      tag:
-        description: 'Tag to create release for'
-        required: true
-        type: string
       workflow_run_url:
         description: 'URL of the workflow run containing artifacts to upload (e.g., https://github.com/owner/repo/actions/runs/123456789)'
         required: true
         type: string
-      create_release:
-        description: 'Create release if it does not exist'
-        required: false
-        type: boolean
-        default: true
-      prerelease:
-        description: 'Mark as prerelease'
+      draft:
+        description: 'Mark as draft'
         required: false
         type: boolean
         default: false
-
 jobs:
   # Upload artifacts as release assets
   upload-release-assets:
@@ -28,23 +18,17 @@ jobs:
     secrets:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     with:
-      release_tag: ${{ github.event.inputs.tag }}
       workflow_run_url: ${{ github.event.inputs.workflow_run_url }}
       artifact_pattern: "*.tar.xz"
-      create_release: ${{ github.event.inputs.create_release }}
-      release_name: "Release ${{ github.event.inputs.tag }}"
-      release_body: |
+      release_body_template: |
         ## What's Changed
-  
+ 
         This release includes build artifacts from workflow run:
-        ${{ github.event.inputs.workflow_run_url }}
+        {workflow_run_url}
 
         ### Download
         - Download the appropriate `.tar.xz` file for your platform
  
         ### Verification
         SHA256 checksums are provided below for artifact verification.
- 
-        Full Changelog: https://github.com/${{ github.repository }}/compare/v1.0.0...${{ github.event.inputs.tag }}
-      prerelease: ${{ github.event.inputs.prerelease }}
-      draft: false
+      draft: ${{ github.event.inputs.draft }}

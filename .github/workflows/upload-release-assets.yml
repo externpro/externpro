@@ -2,10 +2,6 @@ name: Upload Release Assets
 on:
   workflow_call:
     inputs:
-      release_tag:
-        description: 'The tag name of the release to upload assets to'
-        required: true
-        type: string
       workflow_run_url:
         description: 'URL of the workflow run to download artifacts from (e.g., https://github.com/owner/repo/actions/runs/123456789)'
         required: true
@@ -15,26 +11,21 @@ on:
         required: false
         type: string
         default: '*.tar.xz'
-      create_release:
-        description: 'Whether to create the release if it does not exist'
-        required: false
-        type: boolean
-        default: false
-      release_name:
-        description: 'Name for the release (only used if create_release is true)'
+      release_body_template:
+        description: 'Template for the release body'
         required: false
         type: string
-        default: ''
-      release_body:
-        description: 'Body text for the release (only used if create_release is true)'
-        required: false
-        type: string
-        default: ''
-      prerelease:
-        description: 'Mark the release as a prerelease'
-        required: false
-        type: boolean
-        default: false
+        default: |
+          ## What's Changed
+
+          This release includes build artifacts from workflow run:
+          {workflow_run_url}
+
+          ### Download
+          - Download the appropriate `.tar.xz` file for your platform
+
+          ### Verification
+          SHA256 checksums are provided below for artifact verification.
       draft:
         description: 'Mark the release as a draft'
         required: false
@@ -47,23 +38,24 @@ on:
       release_url:
         description: 'The URL of the release'
         value: ${{ jobs.upload-assets.outputs.release_url }}
+      release_tag:
+        description: 'The tag used for the release'
+        value: ${{ jobs.upload-assets.outputs.release_tag }}
+      is_prerelease:
+        description: 'Whether the release is a prerelease'
+        value: ${{ jobs.upload-assets.outputs.is_prerelease }}
 jobs:
   upload-assets:
     runs-on: ubuntu-latest
     outputs:
-      release_id: ${{ steps.get_release.outputs.release_id || steps.create_release.outputs.release_id }}
-      release_url: ${{ steps.get_release.outputs.release_url || steps.create_release.outputs.release_url }}
+      release_id: ${{ steps.create_release.outputs.release_id }}
+      release_url: ${{ steps.create_release.outputs.release_url }}
+      release_tag: ${{ steps.determine_tag.outputs.tag }}
+      is_prerelease: ${{ steps.determine_tag.outputs.is_prerelease }}
     steps:
       -
         name: Checkout repository
         uses: actions/checkout@v4
-      -
-        name: Validate inputs
-        run: |
-          echo "Release tag: ${{ inputs.release_tag }}"
-          echo "Workflow run URL: ${{ inputs.workflow_run_url }}"
-          echo "Artifact pattern: ${{ inputs.artifact_pattern }}"
-          echo "Create release: ${{ inputs.create_release }}"
       -
         name: Extract run ID from URL
         id: extract_run_id
@@ -124,74 +116,120 @@ jobs:
             echo "EOF"
           } >> $GITHUB_OUTPUT
       -
-        name: Get existing release
-        id: get_release
-        continue-on-error: true
+        name: Determine tag from artifacts
+        id: determine_tag
         run: |
-          release_info=$(gh release view "${{ inputs.release_tag }}" --json id,url 2>/dev/null || echo "null")
-          if [ "$release_info" != "null" ]; then
-            echo "release_id=$(echo "$release_info" | jq -r '.id')" >> $GITHUB_OUTPUT
-            echo "release_url=$(echo "$release_info" | jq -r '.url')" >> $GITHUB_OUTPUT
-            echo "Release exists: ${{ inputs.release_tag }}"
+          # Extract tag from artifact filename
+          # Pattern: *-v#.#[.#[.#]][-#-g<hash>].tar.xz
+
+          # Get the first artifact filename
+          artifacts=${{ steps.find_artifacts.outputs.artifacts }}
+          first_artifact=$(echo "$artifacts" | jq -r '.[0]')
+          filename=$(basename "$first_artifact")
+          echo "Determining tag from filename: $filename"
+
+          # Extract version pattern from filename
+          if [[ "$filename" =~ -([vV][0-9]+\.[0-9]+(\.[0-9]+)?(\.[0-9]+)?(-[0-9]+-g[a-f0-9]+)?)\.tar\.xz$ ]]; then
+            version_tag="${BASH_REMATCH[1]}"
+            echo "Extracted version tag: $version_tag"
+            # Determine if this is a prerelease (has -#-g<hash> suffix)
+            if [[ "$version_tag" =~ -[0-9]+-g[a-f0-9]+$ ]]; then
+              echo "is_prerelease=true" >> $GITHUB_OUTPUT
+              echo "This is a prerelease version"
+            else
+              echo "is_prerelease=false" >> $GITHUB_OUTPUT
+              echo "This is a release version"
+            fi
+            echo "tag=$version_tag" >> $GITHUB_OUTPUT
           else
-            echo "Release does not exist: ${{ inputs.release_tag }}"
+            echo "Error: Could not determine version tag from filename: $filename"
+            echo "Expected pattern: *-v#.#[.#[.#]][-#-g<hash>].tar.xz"
+            exit 1
+          fi
+      -
+        name: Check if tag exists
+        id: check_tag
+        run: |
+          tag="${{ steps.determine_tag.outputs.tag }}"
+          echo "Checking if tag exists: $tag"
+          if gh release view "$tag" &>/dev/null; then
+            echo "Error: Release for tag $tag already exists. This workflow is configured to fail if the release already exists."
+            exit 1
+          else
+            echo "Release does not exist for tag: $tag"
           fi
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       -
-        name: Create release if needed
-        id: create_release
-        if: ${{ inputs.create_release && steps.get_release.outputs.release_id == '' }}
+        name: Check if git tag exists
+        id: check_git_tag
         run: |
-          release_name="${{ inputs.release_name }}"
-          if [ -z "$release_name" ]; then
-            release_name="${{ inputs.release_tag }}"
+          tag="${{ steps.determine_tag.outputs.tag }}"
+          echo "Checking if git tag exists: $tag"
+          if git ls-remote --tags origin "refs/tags/$tag" | grep -q "$tag"; then
+            echo "Git tag $tag exists in the repository."
+            echo "make_draft=false" >> $GITHUB_OUTPUT
+          else
+            echo "Git tag $tag does not exist in the repository. Will create a draft release."
+            echo "make_draft=true" >> $GITHUB_OUTPUT
           fi
-          release_body="${{ inputs.release_body }}"
-          if [ -z "$release_body" ]; then
-            release_body="Release ${{ inputs.release_tag }}"
-          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      -
+        name: Create release
+        id: create_release
+        run: |
+          tag="${{ steps.determine_tag.outputs.tag }}"
+          is_prerelease="${{ steps.determine_tag.outputs.is_prerelease }}"
+          release_name="$tag"
+
+          # Replace placeholders in release body template
+          release_body="${{ inputs.release_body_template }}"
+          release_body="${release_body//{workflow_run_url}/${{ inputs.workflow_run_url }}}"
+
           # Append hash summary to release body
           release_body="${release_body}"$'\n\n'"${{ steps.find_artifacts.outputs.hash_summary }}"
+
+          # Set flags based on release type
           flags=""
-          if [ "${{ inputs.prerelease }}" = "true" ]; then
+          if [ "$is_prerelease" = "true" ]; then
             flags="$flags --prerelease"
           fi
-          if [ "${{ inputs.draft }}" = "true" ]; then
+
+          # Set draft status based on tag existence or input
+          if [ "${{ steps.check_git_tag.outputs.make_draft }}" = "true" ] || [ "${{ inputs.draft }}" = "true" ]; then
             flags="$flags --draft"
           fi
-          release_info=$(gh release create "${{ inputs.release_tag }}" \
+
+          # Create the release
+          echo "Creating release for tag: $tag"
+          release_info=$(gh release create "$tag" \
             --title "$release_name" \
             --notes "$release_body" \
             $flags \
             --json id,url)
+
           echo "release_id=$(echo "$release_info" | jq -r '.id')" >> $GITHUB_OUTPUT
           echo "release_url=$(echo "$release_info" | jq -r '.url')" >> $GITHUB_OUTPUT
-          echo "Created release: ${{ inputs.release_tag }}"
+          echo "Created release: $tag"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       -
-        name: Verify release exists
-        run: |
-          if [ -z "${{ steps.get_release.outputs.release_id }}${{ steps.create_release.outputs.release_id }}" ]; then
-            echo "Error: No release found or created for tag ${{ inputs.release_tag }}"
-            echo "Set create_release: true to automatically create the release"
-            exit 1
-          fi
-      -
         name: Upload artifacts to release
         run: |
-          echo "Uploading artifacts to release: ${{ inputs.release_tag }}"
-          for artifact in ${{ steps.find_artifacts.outputs.artifacts }}; do
+          tag="${{ steps.determine_tag.outputs.tag }}"
+          echo "Uploading artifacts to release: $tag"
+          for artifact in $(echo '${{ steps.find_artifacts.outputs.artifacts }}' | jq -r '.[]'); do
             echo "Uploading artifact: $artifact"
-            gh release upload "${{ inputs.release_tag }}" "$artifact" --clobber
+            gh release upload "$tag" "$artifact" --clobber
           done
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       -
         name: List release assets
         run: |
-          echo "Release assets for ${{ inputs.release_tag }}:"
-          gh release view "${{ inputs.release_tag }}" --json assets | jq -r '.assets[] | "- \(.name) (\(.size) bytes)"'
+          tag="${{ steps.determine_tag.outputs.tag }}"
+          echo "Release assets for $tag:"
+          gh release view "$tag" --json assets | jq -r '.assets[] | "- \(.name) (\(.size) bytes)"'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
