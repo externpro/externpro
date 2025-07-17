@@ -24,8 +24,9 @@ on:
 jobs:
   # Upload artifacts as release assets
   upload-release-assets:
-    runs-on: ubuntu-latest
     uses: ./.github/workflows/upload-release-assets.yml
+    secrets:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     with:
       release_tag: ${{ github.event.inputs.tag }}
       workflow_run_url: ${{ github.event.inputs.workflow_run_url }}
@@ -47,4 +48,3 @@ jobs:
         Full Changelog: https://github.com/${{ github.repository }}/compare/v1.0.0...${{ github.event.inputs.tag }}
       prerelease: ${{ github.event.inputs.prerelease }}
       draft: false
-    secrets: inherit
