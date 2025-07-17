@@ -142,8 +142,8 @@ jobs:
             filename=$(basename "$first_artifact")
             echo "Determining tag from filename: $filename"
             
-            # Extract version pattern from filename
-            if [[ "$filename" =~ -([vV][0-9]+\.[0-9]+(\.[0-9]+)?(\.[0-9]+)?(-[0-9]+-g[a-f0-9]+)?)\.tar\.xz$ ]]; then
+            # Extract version pattern from filename (matches patterns like v22.16.0.1-19-gead5928)
+            if [[ "$filename" =~ ([vV][0-9]+\.[0-9]+(\.[0-9]+)?(\.[0-9]+)?(-[0-9]+-g[a-f0-9]+)?) ]]; then
               version_tag="${BASH_REMATCH[1]}"
               echo "Extracted version tag: $version_tag"
               
