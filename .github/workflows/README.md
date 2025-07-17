@@ -46,25 +46,25 @@ jobs:
 Downloads build artifacts and uploads them as GitHub release assets.
 
 **Inputs:**
-- `release_tag` (required): The tag name of the release
 - `workflow_run_url` (required): URL of the workflow run to download artifacts from (e.g., `https://github.com/owner/repo/actions/runs/123456789`)
 - `artifact_pattern` (optional): Pattern to match artifact files (default: `*.tar.xz`)
-- `create_release` (optional): Whether to create the release if it doesn't exist (default: `false`)
-- `release_name` (optional): Name for the release (only used if `create_release` is `true`)
-- `release_body` (optional): Body text for the release (only used if `create_release` is `true`)
-- `prerelease` (optional): Mark the release as a prerelease (default: `false`)
+- `release_body_template` (optional): Template for the release body (includes placeholders like `{workflow_run_url}`)
 - `draft` (optional): Mark the release as a draft (default: `false`)
 
 **Outputs:**
 - `release_id`: The ID of the release
 - `release_url`: The URL of the release
+- `release_tag`: The detected release tag
+- `is_prerelease`: Whether the release is marked as a prerelease
 
 **Features:**
-- Automatically discovers and uploads all artifacts matching the specified pattern
+- Automatically detects release tag from artifact filenames (e.g., `v1.2.3` or `v1.2.3-4-g1234abc`)
+- Determines prerelease status based on tag format (tags with `-#-g<hash>` suffix are prereleases)
+- Always creates a release and fails if it already exists (strict release creation)
+- Creates draft releases when git tags are missing instead of creating tags
 - Downloads artifacts from a specified workflow run
-- Calculates SHA256 hashes for all artifacts and includes them in release notes
+- Calculates SHA256 hashes for all artifacts and includes them in alphabetically sorted release notes
 - Supports common build artifact formats: `.tar.xz`, `.zip`, `.tar.gz`, `.exe`, `.msi`, `.deb`, `.rpm`
-- Can create releases automatically if they don't exist
 - Replaces existing assets with the same name
 - Provides detailed logging of upload process
 
@@ -74,27 +74,22 @@ jobs:
   upload-assets:
     uses: ./.github/workflows/upload-release-assets.yml
     with:
-      release_tag: v1.0.0
       workflow_run_url: https://github.com/owner/repo/actions/runs/123456789
       artifact_pattern: "*.tar.xz"
-      create_release: true
-      release_name: "Release v1.0.0"
-      release_body: "Release notes here"
+      draft: false
     secrets: inherit
 ```
 
 ### 4. `release.yml` - Complete Release Workflow
 
-A complete workflow that builds for both Linux and Windows, then uploads the artifacts as release assets.
+A workflow for creating releases from existing build artifacts.
 
 **Triggers:**
-- Push to tags matching `v*` (e.g., `v1.0.0`, `v2.1.3`)
 - Manual workflow dispatch with custom inputs
 
 **Manual Trigger Inputs:**
-- `tag` (required): Tag to create release for
-- `create_release` (optional): Create release if it doesn't exist (default: `true`)
-- `prerelease` (optional): Mark as prerelease (default: `false`)
+- `workflow_run_url` (required): URL of the workflow run containing artifacts to upload
+- `draft` (optional): Mark as draft (default: `false`)
 
 **Workflow Steps:**
 1. Builds the project for Linux using `build-linux.yml`
@@ -103,21 +98,23 @@ A complete workflow that builds for both Linux and Windows, then uploads the art
 
 ## Usage Examples
 
-### Creating a Release from a Tag
+### Creating a Release from Build Artifacts
 
-1. **Automatic release on tag push:**
-   ```bash
-   git tag v1.0.0
-   git push origin v1.0.0
-   ```
-   This will automatically trigger the release workflow.
-
-2. **Manual release creation:**
+**Manual release creation:**
+   - Run a build workflow to generate artifacts
+   - Copy the URL of the successful workflow run
    - Go to Actions tab in GitHub
    - Select "Create Release" workflow
    - Click "Run workflow"
-   - Enter the tag name and options
+   - Enter the workflow run URL
+   - Optionally set draft status
    - Click "Run workflow"
+   
+The workflow will automatically:
+   - Detect the version tag from artifact filenames
+   - Create a release with that tag
+   - Determine if it should be a prerelease based on the tag format
+   - Create a draft release if the git tag doesn't exist
 
 ### Customizing Build Presets
 
@@ -148,26 +145,24 @@ jobs:
   upload-assets:
     uses: ./.github/workflows/upload-release-assets.yml
     with:
-      release_tag: v1.0.0
       workflow_run_url: https://github.com/owner/repo/actions/runs/123456789
       artifact_pattern: "*.zip"  # Upload ZIP files instead
     secrets: inherit
 ```
 
-### Creating Prereleases
+### Creating Draft Releases
 
 ```yaml
 jobs:
   upload-assets:
     uses: ./.github/workflows/upload-release-assets.yml
     with:
-      release_tag: v1.0.0-beta.1
       workflow_run_url: https://github.com/owner/repo/actions/runs/123456789
-      create_release: true
-      prerelease: true
-      release_name: "Beta Release v1.0.0-beta.1"
+      draft: true  # Create as draft regardless of tag existence
     secrets: inherit
 ```
+
+Note: Prerelease status is automatically determined from the tag format. Tags with `-#-g<hash>` suffix (like `v1.2.3-4-g1234abc`) are marked as prereleases.
 
 ## Requirements
 
@@ -179,16 +174,21 @@ jobs:
 
 ### Common Issues
 
-1. **"Release not found" error:**
-   - Set `create_release: true` to automatically create the release
-   - Ensure the tag exists in the repository
+1. **"Release already exists" error:**
+   - The workflow is designed to fail if a release with the detected tag already exists
+   - Delete the existing release or use a different build with different version tags
 
-2. **"Artifact not found" error:**
+2. **"Could not determine version tag from filename" error:**
+   - Ensure artifact filenames contain version tags in the format `v#.#.#` or `v#.#.#.#`
+   - Version tags can also include git hash suffixes like `v1.2.3-4-g1234abc`
+   - Check the artifact names in the Actions tab
+
+3. **"Artifact not found" error:**
    - Check that the build workflows completed successfully
    - Verify the artifact pattern matches your build outputs
    - Check the artifact names in the Actions tab
 
-3. **Permission errors:**
+4. **Permission errors:**
    - Ensure `secrets: inherit` is used when calling reusable workflows
    - Check repository settings for Actions permissions
 
