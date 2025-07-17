@@ -119,35 +119,68 @@ jobs:
         name: Determine tag from artifacts
         id: determine_tag
         run: |
-          # Extract tag from artifact filename
-          # Pattern: *-v#.#[.#[.#]][-#-g<hash>].tar.xz
-
-          # Debug: show raw artifacts output
-          echo "Raw artifacts output:"
-          echo "${{ steps.find_artifacts.outputs.artifacts }}"
-
-          # Get the first artifact filename
-          artifacts_json='${{ steps.find_artifacts.outputs.artifacts }}'
-          first_artifact=$(echo "$artifacts_json" | jq -r '.[0]')
-          filename=$(basename "$first_artifact")
-          echo "Determining tag from filename: $filename"
-
-          # Extract version pattern from filename
-          if [[ "$filename" =~ -([vV][0-9]+\.[0-9]+(\.[0-9]+)?(\.[0-9]+)?(-[0-9]+-g[a-f0-9]+)?)\.tar\.xz$ ]]; then
-            version_tag="${BASH_REMATCH[1]}"
-            echo "Extracted version tag: $version_tag"
-            # Determine if this is a prerelease (has -#-g<hash> suffix)
-            if [[ "$version_tag" =~ -[0-9]+-g[a-f0-9]+$ ]]; then
-              echo "is_prerelease=true" >> $GITHUB_OUTPUT
-              echo "This is a prerelease version"
+          # Debug: Show all outputs from previous step
+          echo "=== Debug: find_artifacts outputs ==="
+          echo "Output names: $(compgen -A variable | grep steps_find_artifacts_outputs)"
+          echo "Artifacts output: ${{ steps.find_artifacts.outputs.artifacts }}"
+          echo "Hashes output: ${{ steps.find_artifacts.outputs.hashes }}"
+          echo "Hash summary: ${{ steps.find_artifacts.outputs.hash_summary }}"
+          
+          # Try to parse artifacts if they exist
+          if [ -n "${{ steps.find_artifacts.outputs.artifacts }}" ]; then
+            echo "Artifacts output is not empty, trying to parse..."
+            artifacts_json='${{ steps.find_artifacts.outputs.artifacts }}'
+            echo "Raw artifacts JSON: $artifacts_json"
+            
+            # Try to extract first artifact using jq
+            if command -v jq >/dev/null 2>&1; then
+              echo "jq is available, trying to parse JSON..."
+              first_artifact=$(echo "$artifacts_json" | jq -r '.[0]' 2>/dev/null || echo "jq_parse_failed")
+              echo "First artifact (jq): $first_artifact"
             else
-              echo "is_prerelease=false" >> $GITHUB_OUTPUT
-              echo "This is a release version"
+              echo "jq not available, trying basic string extraction..."
+              # Fallback to basic string extraction if jq fails
+              first_artifact=$(echo "$artifacts_json" | grep -o '"[^"]*"' | head -1 | tr -d '"')
+              echo "First artifact (fallback): $first_artifact"
             fi
-            echo "tag=$version_tag" >> $GITHUB_OUTPUT
           else
-            echo "Error: Could not determine version tag from filename: $filename"
-            echo "Expected pattern: *-v#.#[.#[.#]][-#-g<hash>].tar.xz"
+            echo "Artifacts output is empty or not set"
+            # Try to find artifacts directly in the workspace
+            echo "Searching for artifacts in workspace..."
+            find . -name "*.tar.xz" -type f | while read -r file; do
+              echo "Found file: $file"
+              first_artifact="$file"
+              break
+            done
+          fi
+
+          if [ -n "$first_artifact" ] && [ -f "$first_artifact" ]; then
+            filename=$(basename "$first_artifact")
+            echo "Determining tag from filename: $filename"
+            
+            # Extract version pattern from filename
+            if [[ "$filename" =~ -([vV][0-9]+\.[0-9]+(\.[0-9]+)?(\.[0-9]+)?(-[0-9]+-g[a-f0-9]+)?)\.tar\.xz$ ]]; then
+              version_tag="${BASH_REMATCH[1]}"
+              echo "Extracted version tag: $version_tag"
+              
+              # Determine if this is a prerelease (has -#-g<hash> suffix)
+              if [[ "$version_tag" =~ -[0-9]+-g[a-f0-9]+$ ]]; then
+                echo "is_prerelease=true" >> $GITHUB_OUTPUT
+                echo "This is a prerelease version"
+              else
+                echo "is_prerelease=false" >> $GITHUB_OUTPUT
+                echo "This is a release version"
+              fi
+              echo "tag=$version_tag" >> $GITHUB_OUTPUT
+            else
+              echo "Error: Could not determine version tag from filename: $filename"
+              echo "Expected pattern: *-v#.#[.#[.#]][-#-g<hash>].tar.xz"
+              exit 1
+            fi
+          else
+            echo "Error: No artifacts found or could not determine filename"
+            echo "Available files in workspace:"
+            find . -type f | sort
             exit 1
           fi
       -
