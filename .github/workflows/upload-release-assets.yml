@@ -122,9 +122,13 @@ jobs:
           # Extract tag from artifact filename
           # Pattern: *-v#.#[.#[.#]][-#-g<hash>].tar.xz
 
+          # Debug: show raw artifacts output
+          echo "Raw artifacts output:"
+          echo "${{ steps.find_artifacts.outputs.artifacts }}"
+
           # Get the first artifact filename
-          artifacts=${{ steps.find_artifacts.outputs.artifacts }}
-          first_artifact=$(echo "$artifacts" | jq -r '.[0]')
+          artifacts_json='${{ steps.find_artifacts.outputs.artifacts }}'
+          first_artifact=$(echo "$artifacts_json" | jq -r '.[0]')
           filename=$(basename "$first_artifact")
           echo "Determining tag from filename: $filename"
 
