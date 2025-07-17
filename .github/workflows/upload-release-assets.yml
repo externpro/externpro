@@ -47,7 +47,6 @@ on:
       release_url:
         description: 'The URL of the release'
         value: ${{ jobs.upload-assets.outputs.release_url }}
-
 jobs:
   upload-assets:
     runs-on: ubuntu-latest
@@ -55,17 +54,18 @@ jobs:
       release_id: ${{ steps.get_release.outputs.release_id || steps.create_release.outputs.release_id }}
       release_url: ${{ steps.get_release.outputs.release_url || steps.create_release.outputs.release_url }}
     steps:
-      - name: Checkout repository
+      -
+        name: Checkout repository
         uses: actions/checkout@v4
-
-      - name: Validate inputs
+      -
+        name: Validate inputs
         run: |
           echo "Release tag: ${{ inputs.release_tag }}"
           echo "Workflow run URL: ${{ inputs.workflow_run_url }}"
           echo "Artifact pattern: ${{ inputs.artifact_pattern }}"
           echo "Create release: ${{ inputs.create_release }}"
-
-      - name: Extract run ID from URL
+      -
+        name: Extract run ID from URL
         id: extract_run_id
         run: |
           run_url="${{ inputs.workflow_run_url }}"
@@ -77,27 +77,25 @@ jobs:
             echo "Error: Invalid workflow run URL format. Expected: https://github.com/owner/repo/actions/runs/123456789"
             exit 1
           fi
-
-      - name: Download artifacts from workflow run
+      -
+        name: Download artifacts from workflow run
         run: |
           echo "Downloading artifacts from run ID: ${{ steps.extract_run_id.outputs.run_id }}"
           gh run download ${{ steps.extract_run_id.outputs.run_id }} --dir ./artifacts
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Find and prepare artifacts for upload
+      -
+        name: Find and prepare artifacts for upload
         id: find_artifacts
         run: |
           echo "Finding artifacts matching pattern: ${{ inputs.artifact_pattern }}"
           artifacts=()
           hashes=()
-          
           # Find all files matching the pattern
           while IFS= read -r -d '' file; do
             if [[ -f "$file" ]]; then
               echo "Found artifact: $file"
               artifacts+=("$file")
-              
               # Calculate SHA256 hash
               hash=$(sha256sum "$file" | cut -d' ' -f1)
               filename=$(basename "$file")
@@ -105,33 +103,28 @@ jobs:
               echo "SHA256 ($filename): $hash"
             fi
           done < <(find ./artifacts -name "${{ inputs.artifact_pattern }}" -type f -print0)
-          
           if [ ${#artifacts[@]} -eq 0 ]; then
             echo "No artifacts found matching pattern: ${{ inputs.artifact_pattern }}"
             exit 1
           fi
-          
           # Convert arrays to JSON for output
           printf -v artifacts_json '%s\n' "${artifacts[@]}" | jq -R . | jq -s .
           printf -v hashes_json '%s\n' "${hashes[@]}" | jq -R . | jq -s .
-          
           echo "artifacts=$artifacts_json" >> $GITHUB_OUTPUT
           echo "hashes=$hashes_json" >> $GITHUB_OUTPUT
-          
           # Create hash summary for release notes
           hash_summary=""
           for hash_line in "${hashes[@]}"; do
             hash_summary="${hash_summary}${hash_line}"$'\n'
           done
-          
           # Use EOF delimiter to handle multiline output
           {
             echo "hash_summary<<EOF"
             echo "$hash_summary"
             echo "EOF"
           } >> $GITHUB_OUTPUT
-
-      - name: Get existing release
+      -
+        name: Get existing release
         id: get_release
         continue-on-error: true
         run: |
@@ -145,8 +138,8 @@ jobs:
           fi
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Create release if needed
+      -
+        name: Create release if needed
         id: create_release
         if: ${{ inputs.create_release && steps.get_release.outputs.release_id == '' }}
         run: |
@@ -154,15 +147,12 @@ jobs:
           if [ -z "$release_name" ]; then
             release_name="${{ inputs.release_tag }}"
           fi
-          
           release_body="${{ inputs.release_body }}"
           if [ -z "$release_body" ]; then
             release_body="Release ${{ inputs.release_tag }}"
           fi
-          
           # Append hash summary to release body
           release_body="${release_body}"$'\n\n'"${{ steps.find_artifacts.outputs.hash_summary }}"
-          
           flags=""
           if [ "${{ inputs.prerelease }}" = "true" ]; then
             flags="$flags --prerelease"
@@ -170,28 +160,26 @@ jobs:
           if [ "${{ inputs.draft }}" = "true" ]; then
             flags="$flags --draft"
           fi
-          
           release_info=$(gh release create "${{ inputs.release_tag }}" \
             --title "$release_name" \
             --notes "$release_body" \
             $flags \
             --json id,url)
-          
           echo "release_id=$(echo "$release_info" | jq -r '.id')" >> $GITHUB_OUTPUT
           echo "release_url=$(echo "$release_info" | jq -r '.url')" >> $GITHUB_OUTPUT
           echo "Created release: ${{ inputs.release_tag }}"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Verify release exists
+      -
+        name: Verify release exists
         run: |
           if [ -z "${{ steps.get_release.outputs.release_id }}${{ steps.create_release.outputs.release_id }}" ]; then
             echo "Error: No release found or created for tag ${{ inputs.release_tag }}"
             echo "Set create_release: true to automatically create the release"
             exit 1
           fi
-
-      - name: Upload artifacts to release
+      -
+        name: Upload artifacts to release
         run: |
           echo "Uploading artifacts to release: ${{ inputs.release_tag }}"
           for artifact in ${{ steps.find_artifacts.outputs.artifacts }}; do
@@ -200,8 +188,8 @@ jobs:
           done
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: List release assets
+      -
+        name: List release assets
         run: |
           echo "Release assets for ${{ inputs.release_tag }}:"
           gh release view "${{ inputs.release_tag }}" --json assets | jq -r '.assets[] | "- \(.name) (\(.size) bytes)"'
