@@ -109,6 +109,10 @@ jobs:
           printf -v artifacts_json '%s\n' "${artifacts[@]}" | jq -R . | jq -s .
           printf -v hashes_json '%s\n' "${hashes[@]}" | jq -R . | jq -s .
           
+          # Sort hashes alphabetically by filename for consistent presentation
+          sorted_hashes=()
+          readarray -t sorted_hashes < <(for hash_line in "${hashes[@]}"; do echo "$hash_line"; done | sort -k2)
+          
           # Set outputs - use environment file method for better reliability
           {
             echo "artifacts<<EOF"
@@ -118,7 +122,7 @@ jobs:
             printf '%s\n' "${hashes[@]}"
             echo "EOF"
             echo "hash_summary<<EOF"
-            printf '%s\n' "${hashes[@]}"
+            printf '%s\n' "${sorted_hashes[@]}"
             echo "EOF"
           } >> $GITHUB_OUTPUT
       -
