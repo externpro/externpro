@@ -241,18 +241,22 @@ jobs:
           
           # Create the release using the file for notes
           echo "Creating release for tag: $tag"
-          release_info=$(gh release create "$tag" \
+          gh release create "$tag" \
             --title "$release_name" \
             --notes-file "$RELEASE_NOTES_FILE" \
-            $flags \
-            --json id,url)
+            $flags
           
           # Clean up temp file
           rm -f "$RELEASE_NOTES_FILE"
           
+          # Get release info after creation
+          release_url="https://github.com/$GITHUB_REPOSITORY/releases/tag/$tag"
+          # Use the GitHub API to get the release ID
+          release_id=$(gh api repos/$GITHUB_REPOSITORY/releases/tags/$tag --jq '.id')
+          
           # Set outputs
-          echo "release_id=$(echo "$release_info" | jq -r '.id')" >> $GITHUB_OUTPUT
-          echo "release_url=$(echo "$release_info" | jq -r '.url')" >> $GITHUB_OUTPUT
+          echo "release_id=$release_id" >> $GITHUB_OUTPUT
+          echo "release_url=$release_url" >> $GITHUB_OUTPUT
           echo "Created release: $tag"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
