@@ -203,34 +203,54 @@ jobs:
           tag="${{ steps.determine_tag.outputs.tag }}"
           is_prerelease="${{ steps.determine_tag.outputs.is_prerelease }}"
           release_name="$tag"
-
-          # Replace placeholders in release body template
-          release_body="${{ inputs.release_body_template }}"
-          release_body="${release_body//{workflow_run_url}/${{ inputs.workflow_run_url }}}"
-
-          # Append hash summary to release body with proper escaping
-          hash_summary=$(echo "${{ steps.find_artifacts.outputs.hash_summary }}" | sed 's/^/    /')
-          release_body="${release_body}"$'\n\n''### Checksums\n```\n'"${hash_summary}"$'\n```'
-
+          
+          # Create a temporary file for the release notes
+          RELEASE_NOTES_FILE=$(mktemp)
+          
+          # Write base release body to file
+          cat << 'EOF' > "$RELEASE_NOTES_FILE"
+          ${{ inputs.release_body_template }}
+          EOF
+          
+          # Replace placeholders in the file
+          sed -i "s|{workflow_run_url}|${{ inputs.workflow_run_url }}|g" "$RELEASE_NOTES_FILE"
+          
+          # Append checksums section to release notes file
+          cat << 'EOF' >> "$RELEASE_NOTES_FILE"
+          
+          ### Checksums
+          ```
+          EOF
+          
+          # Add each hash on a new line
+          echo "${{ steps.find_artifacts.outputs.hash_summary }}" >> "$RELEASE_NOTES_FILE"
+          
+          # Close the code block
+          echo '```' >> "$RELEASE_NOTES_FILE"
+          
           # Set flags based on release type
           flags=""
           if [ "$is_prerelease" = "true" ]; then
             flags="$flags --prerelease"
           fi
-
+          
           # Set draft status based on tag existence or input
           if [ "${{ steps.check_git_tag.outputs.make_draft }}" = "true" ] || [ "${{ inputs.draft }}" = "true" ]; then
             flags="$flags --draft"
           fi
-
-          # Create the release
+          
+          # Create the release using the file for notes
           echo "Creating release for tag: $tag"
           release_info=$(gh release create "$tag" \
             --title "$release_name" \
-            --notes "$release_body" \
+            --notes-file "$RELEASE_NOTES_FILE" \
             $flags \
             --json id,url)
-
+          
+          # Clean up temp file
+          rm -f "$RELEASE_NOTES_FILE"
+          
+          # Set outputs
           echo "release_id=$(echo "$release_info" | jq -r '.id')" >> $GITHUB_OUTPUT
           echo "release_url=$(echo "$release_info" | jq -r '.url')" >> $GITHUB_OUTPUT
           echo "Created release: $tag"
