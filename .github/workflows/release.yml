@@ -34,13 +34,16 @@ jobs:
       release_name: "Release ${{ github.event.inputs.tag }}"
       release_body: |
         ## What's Changed
-        
+  
         This release includes build artifacts from workflow run:
         ${{ github.event.inputs.workflow_run_url }}
-        
+
         ### Download
         - Download the appropriate `.tar.xz` file for your platform
-        
+ 
+        ### Verification
+        SHA256 checksums are provided below for artifact verification.
+ 
         Full Changelog: https://github.com/${{ github.repository }}/compare/v1.0.0...${{ github.event.inputs.tag }}
       prerelease: ${{ github.event.inputs.prerelease }}
       draft: false

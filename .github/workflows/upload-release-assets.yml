@@ -85,10 +85,51 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: List downloaded artifacts
+      - name: Find and prepare artifacts for upload
+        id: find_artifacts
         run: |
-          echo "Downloaded artifacts:"
-          find ./artifacts -type f \( -name "*.tar.xz" -o -name "*.zip" -o -name "*.tar.gz" -o -name "*.exe" -o -name "*.msi" -o -name "*.deb" -o -name "*.rpm" \) | sort
+          echo "Finding artifacts matching pattern: ${{ inputs.artifact_pattern }}"
+          artifacts=()
+          hashes=()
+          
+          # Find all files matching the pattern
+          while IFS= read -r -d '' file; do
+            if [[ -f "$file" ]]; then
+              echo "Found artifact: $file"
+              artifacts+=("$file")
+              
+              # Calculate SHA256 hash
+              hash=$(sha256sum "$file" | cut -d' ' -f1)
+              filename=$(basename "$file")
+              hashes+=("$hash  $filename")
+              echo "SHA256 ($filename): $hash"
+            fi
+          done < <(find ./artifacts -name "${{ inputs.artifact_pattern }}" -type f -print0)
+          
+          if [ ${#artifacts[@]} -eq 0 ]; then
+            echo "No artifacts found matching pattern: ${{ inputs.artifact_pattern }}"
+            exit 1
+          fi
+          
+          # Convert arrays to JSON for output
+          printf -v artifacts_json '%s\n' "${artifacts[@]}" | jq -R . | jq -s .
+          printf -v hashes_json '%s\n' "${hashes[@]}" | jq -R . | jq -s .
+          
+          echo "artifacts=$artifacts_json" >> $GITHUB_OUTPUT
+          echo "hashes=$hashes_json" >> $GITHUB_OUTPUT
+          
+          # Create hash summary for release notes
+          hash_summary=""
+          for hash_line in "${hashes[@]}"; do
+            hash_summary="${hash_summary}${hash_line}"$'\n'
+          done
+          
+          # Use EOF delimiter to handle multiline output
+          {
+            echo "hash_summary<<EOF"
+            echo "$hash_summary"
+            echo "EOF"
+          } >> $GITHUB_OUTPUT
 
       - name: Get existing release
         id: get_release
@@ -118,6 +159,9 @@ jobs:
           if [ -z "$release_body" ]; then
             release_body="Release ${{ inputs.release_tag }}"
           fi
+          
+          # Append hash summary to release body
+          release_body="${release_body}"$'\n\n'"${{ steps.find_artifacts.outputs.hash_summary }}"
           
           flags=""
           if [ "${{ inputs.prerelease }}" = "true" ]; then
@@ -149,42 +193,10 @@ jobs:
 
       - name: Upload artifacts to release
         run: |
-          echo "Searching for artifacts matching pattern: ${{ inputs.artifact_pattern }}"
-          
-          # Find all artifact files matching the pattern
-          find ./artifacts -type f -name "${{ inputs.artifact_pattern }}" | while read -r file; do
-            if [ -f "$file" ]; then
-              filename=$(basename "$file")
-              echo "Found artifact: $filename"
-              
-              # Check if asset already exists and remove it
-              if gh release view "${{ inputs.release_tag }}" --json assets | jq -e ".assets[] | select(.name == \"$filename\")" > /dev/null 2>&1; then
-                echo "Asset $filename already exists, removing it first..."
-                gh release delete-asset "${{ inputs.release_tag }}" "$filename" --yes
-              fi
-              
-              # Upload the asset
-              gh release upload "${{ inputs.release_tag }}" "$file" --clobber
-              echo "Successfully uploaded: $filename"
-            fi
-          done
-          
-          # Also upload other common build artifacts
-          find ./artifacts -type f \( -name "*.zip" -o -name "*.tar.gz" -o -name "*.exe" -o -name "*.msi" -o -name "*.deb" -o -name "*.rpm" \) | while read -r file; do
-            if [ -f "$file" ]; then
-              filename=$(basename "$file")
-              echo "Found additional artifact: $filename"
-              
-              # Check if asset already exists and remove it
-              if gh release view "${{ inputs.release_tag }}" --json assets | jq -e ".assets[] | select(.name == \"$filename\")" > /dev/null 2>&1; then
-                echo "Asset $filename already exists, removing it first..."
-                gh release delete-asset "${{ inputs.release_tag }}" "$filename" --yes
-              fi
-              
-              # Upload the asset
-              gh release upload "${{ inputs.release_tag }}" "$file" --clobber
-              echo "Successfully uploaded: $filename"
-            fi
+          echo "Uploading artifacts to release: ${{ inputs.release_tag }}"
+          for artifact in ${{ steps.find_artifacts.outputs.artifacts }}; do
+            echo "Uploading artifact: $artifact"
+            gh release upload "${{ inputs.release_tag }}" "$artifact" --clobber
           done
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

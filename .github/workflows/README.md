@@ -62,6 +62,7 @@ Downloads build artifacts and uploads them as GitHub release assets.
 **Features:**
 - Automatically discovers and uploads all artifacts matching the specified pattern
 - Downloads artifacts from a specified workflow run
+- Calculates SHA256 hashes for all artifacts and includes them in release notes
 - Supports common build artifact formats: `.tar.xz`, `.zip`, `.tar.gz`, `.exe`, `.msi`, `.deb`, `.rpm`
 - Can create releases automatically if they don't exist
 - Replaces existing assets with the same name
