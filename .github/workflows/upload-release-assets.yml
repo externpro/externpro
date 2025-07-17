@@ -86,33 +86,39 @@ jobs:
           # Find all files matching the pattern
           while IFS= read -r -d '' file; do
             if [[ -f "$file" ]]; then
-              echo "Found artifact: $file"
-              artifacts+=("$file")
-              # Calculate SHA256 hash
-              hash=$(sha256sum "$file" | cut -d' ' -f1)
-              filename=$(basename "$file")
-              hashes+=("$hash  $filename")
-              echo "SHA256 ($filename): $hash"
+              # Get the actual file path (in case it's inside a directory with the same name)
+              actual_file=$(find "$(dirname "$file")" -type f -name "$(basename "$file")" -not -path "*/.*" | head -1)
+              if [[ -f "$actual_file" ]]; then
+                echo "Found artifact: $actual_file"
+                artifacts+=("$actual_file")
+                # Calculate SHA256 hash
+                hash=$(sha256sum "$actual_file" | cut -d' ' -f1)
+                filename=$(basename "$actual_file")
+                hashes+=("$hash  $filename")
+                echo "SHA256 ($filename): $hash"
+              fi
             fi
           done < <(find ./artifacts -name "${{ inputs.artifact_pattern }}" -type f -print0)
+
           if [ ${#artifacts[@]} -eq 0 ]; then
             echo "No artifacts found matching pattern: ${{ inputs.artifact_pattern }}"
             exit 1
           fi
+
           # Convert arrays to JSON for output
           printf -v artifacts_json '%s\n' "${artifacts[@]}" | jq -R . | jq -s .
           printf -v hashes_json '%s\n' "${hashes[@]}" | jq -R . | jq -s .
-          echo "artifacts=$artifacts_json" >> $GITHUB_OUTPUT
-          echo "hashes=$hashes_json" >> $GITHUB_OUTPUT
-          # Create hash summary for release notes
-          hash_summary=""
-          for hash_line in "${hashes[@]}"; do
-            hash_summary="${hash_summary}${hash_line}"$'\n'
-          done
-          # Use EOF delimiter to handle multiline output
+          
+          # Set outputs - use environment file method for better reliability
           {
+            echo "artifacts<<EOF"
+            printf '%s\n' "${artifacts[@]}"
+            echo "EOF"
+            echo "hashes<<EOF"
+            printf '%s\n' "${hashes[@]}"
+            echo "EOF"
             echo "hash_summary<<EOF"
-            echo "$hash_summary"
+            printf '%s\n' "${hashes[@]}"
             echo "EOF"
           } >> $GITHUB_OUTPUT
       -
@@ -121,38 +127,16 @@ jobs:
         run: |
           # Debug: Show all outputs from previous step
           echo "=== Debug: find_artifacts outputs ==="
-          echo "Output names: $(compgen -A variable | grep steps_find_artifacts_outputs)"
-          echo "Artifacts output: ${{ steps.find_artifacts.outputs.artifacts }}"
-          echo "Hashes output: ${{ steps.find_artifacts.outputs.hashes }}"
-          echo "Hash summary: ${{ steps.find_artifacts.outputs.hash_summary }}"
-          
-          # Try to parse artifacts if they exist
-          if [ -n "${{ steps.find_artifacts.outputs.artifacts }}" ]; then
-            echo "Artifacts output is not empty, trying to parse..."
-            artifacts_json='${{ steps.find_artifacts.outputs.artifacts }}'
-            echo "Raw artifacts JSON: $artifacts_json"
-            
-            # Try to extract first artifact using jq
-            if command -v jq >/dev/null 2>&1; then
-              echo "jq is available, trying to parse JSON..."
-              first_artifact=$(echo "$artifacts_json" | jq -r '.[0]' 2>/dev/null || echo "jq_parse_failed")
-              echo "First artifact (jq): $first_artifact"
-            else
-              echo "jq not available, trying basic string extraction..."
-              # Fallback to basic string extraction if jq fails
-              first_artifact=$(echo "$artifacts_json" | grep -o '"[^"]*"' | head -1 | tr -d '"')
-              echo "First artifact (fallback): $first_artifact"
-            fi
-          else
-            echo "Artifacts output is empty or not set"
-            # Try to find artifacts directly in the workspace
-            echo "Searching for artifacts in workspace..."
-            find . -name "*.tar.xz" -type f | while read -r file; do
-              echo "Found file: $file"
-              first_artifact="$file"
-              break
-            done
-          fi
+          echo "Artifacts:"
+          echo "${{ steps.find_artifacts.outputs.artifacts }}"
+          echo "Hashes:"
+          echo "${{ steps.find_artifacts.outputs.hashes }}"
+          echo "Hash summary:"
+          echo "${{ steps.find_artifacts.outputs.hash_summary }}"
+
+          # Get the first artifact using the output directly
+          first_artifact=$(echo "${{ steps.find_artifacts.outputs.artifacts }}" | head -1)
+          echo "First artifact: $first_artifact"
 
           if [ -n "$first_artifact" ] && [ -f "$first_artifact" ]; then
             filename=$(basename "$first_artifact")
@@ -178,7 +162,7 @@ jobs:
               exit 1
             fi
           else
-            echo "Error: No artifacts found or could not determine filename"
+            echo "Error: No valid artifacts found"
             echo "Available files in workspace:"
             find . -type f | sort
             exit 1
