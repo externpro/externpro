@@ -26,7 +26,6 @@ on:
 
           ### Verification
           SHA256 checksums are provided below for artifact verification.
-
     outputs:
       release_id:
         description: 'The ID of the release'
@@ -95,20 +94,16 @@ jobs:
               fi
             fi
           done < <(find ./artifacts -name "${{ inputs.artifact_pattern }}" -type f -print0)
-
           if [ ${#artifacts[@]} -eq 0 ]; then
             echo "No artifacts found matching pattern: ${{ inputs.artifact_pattern }}"
             exit 1
           fi
-
           # Convert arrays to JSON for output
           printf -v artifacts_json '%s\n' "${artifacts[@]}" | jq -R . | jq -s .
           printf -v hashes_json '%s\n' "${hashes[@]}" | jq -R . | jq -s .
-          
           # Sort hashes alphabetically by filename for consistent presentation
           sorted_hashes=()
           readarray -t sorted_hashes < <(for hash_line in "${hashes[@]}"; do echo "$hash_line"; done | sort -k2)
-          
           # Set outputs - use environment file method for better reliability
           {
             echo "artifacts<<EOF"
@@ -133,20 +128,16 @@ jobs:
           echo "${{ steps.find_artifacts.outputs.hashes }}"
           echo "Hash summary:"
           echo "${{ steps.find_artifacts.outputs.hash_summary }}"
-
           # Get the first artifact using the output directly
           first_artifact=$(echo "${{ steps.find_artifacts.outputs.artifacts }}" | head -1)
           echo "First artifact: $first_artifact"
-
           if [ -n "$first_artifact" ] && [ -f "$first_artifact" ]; then
             filename=$(basename "$first_artifact")
             echo "Determining tag from filename: $filename"
-            
             # Extract version pattern from filename (matches patterns like v22.16.0.1-19-gead5928)
             if [[ "$filename" =~ ([vV][0-9]+\.[0-9]+(\.[0-9]+)?(\.[0-9]+)?(-[0-9]+-g[a-f0-9]+)?) ]]; then
               version_tag="${BASH_REMATCH[1]}"
               echo "Extracted version tag: $version_tag"
-              
               # Determine if this is a prerelease (has -#-g<hash> suffix)
               if [[ "$version_tag" =~ -[0-9]+-g[a-f0-9]+$ ]]; then
                 echo "is_prerelease=true" >> $GITHUB_OUTPUT
@@ -203,59 +194,45 @@ jobs:
           tag="${{ steps.determine_tag.outputs.tag }}"
           is_prerelease="${{ steps.determine_tag.outputs.is_prerelease }}"
           release_name="$tag"
-          
           # Create a temporary file for the release notes
           RELEASE_NOTES_FILE=$(mktemp)
-          
           # Write base release body to file
           cat << 'EOF' > "$RELEASE_NOTES_FILE"
           ${{ inputs.release_body_template }}
           EOF
-          
           # Replace placeholders in the file
           sed -i "s|{workflow_run_url}|${{ inputs.workflow_run_url }}|g" "$RELEASE_NOTES_FILE"
-          
           # Append checksums section to release notes file
           cat << 'EOF' >> "$RELEASE_NOTES_FILE"
-          
           ### Checksums
           ```
           EOF
-          
           # Add each hash on a new line
           echo "${{ steps.find_artifacts.outputs.hash_summary }}" >> "$RELEASE_NOTES_FILE"
-          
           # Close the code block
           echo '```' >> "$RELEASE_NOTES_FILE"
-          
           # Set flags based on release type
           flags=""
           if [ "$is_prerelease" = "true" ]; then
             flags="$flags --prerelease"
           fi
-          
           # Always create draft releases
           flags="$flags --draft"
-          
           # Create the release using the file for notes
           echo "Creating release for tag: $tag"
           release_output=$(gh release create "$tag" \
             --title "$release_name" \
             --notes-file "$RELEASE_NOTES_FILE" \
             $flags 2>&1)
-          
           # Clean up temp file
           rm -f "$RELEASE_NOTES_FILE"
-          
           # Extract the release URL from the output
           if echo "$release_output" | grep -q "https://github.com"; then
             release_url=$(echo "$release_output" | grep -o 'https://github.com[^[:space:]]*' | head -1)
             echo "Release URL: $release_url"
-            
             # Extract the release ID from the URL
             if [[ "$release_url" =~ /releases/tag/([^/]+)$ ]]; then
               tag_or_id="${BASH_REMATCH[1]}"
-              
               # Try to get the release ID using the tag or untagged ID
               if [[ "$tag_or_id" == untagged-* ]]; then
                 # For untagged releases, we need to list all releases and find by URL
@@ -274,7 +251,6 @@ jobs:
             release_url="https://github.com/$GITHUB_REPOSITORY/releases"
             release_id="unknown"
           fi
-          
           # Set outputs
           echo "release_id=$release_id" >> $GITHUB_OUTPUT
           echo "release_url=$release_url" >> $GITHUB_OUTPUT
@@ -286,7 +262,6 @@ jobs:
         run: |
           tag="${{ steps.determine_tag.outputs.tag }}"
           echo "Uploading artifacts to release: $tag"
-          
           # Read artifacts from the output, handling both JSON and plain text formats
           if [[ "${{ steps.find_artifacts.outputs.artifacts }}" == *"["* ]]; then
             # JSON array format
