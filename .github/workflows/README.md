@@ -16,7 +16,7 @@ Builds the project in a Docker container on Linux systems.
 ```yaml
 jobs:
   build-linux:
-    uses: externpro/externpro/actions/build-linux.yml@25.04
+    uses: externpro/externpro/.github/workflows/build-linux.yml@25.04
     with:
       cmake-workflow-preset: Linux # Release and Debug
     secrets: inherit
@@ -33,7 +33,7 @@ Builds the project on Windows systems.
 ```yaml
 jobs:
   build-windows:
-    uses: externpro/externpro/actions/build-windows.yml@25.04
+    uses: externpro/externpro/.github/workflows/build-windows.yml@25.04
     with:
       cmake-workflow-preset: Windows # Release and Debug
     secrets: inherit
@@ -69,7 +69,7 @@ Downloads build artifacts and uploads them as GitHub release assets.
 ```yaml
 jobs:
   release-from-build:
-    uses: externpro/externpro/actions/release-from-build.yml@25.04
+    uses: externpro/externpro/.github/workflows/release-from-build.yml@25.04
     with:
       workflow_run_url: https://github.com/owner/repo/actions/runs/123456789
       artifact_pattern: "*.tar.xz"
@@ -93,7 +93,7 @@ on:
         type: string
 jobs:
   release-from-build:
-    uses: externpro/externpro/actions/release-from-build.yml@25.04
+    uses: externpro/externpro/.github/workflows/release-from-build.yml@25.04
     with:
       workflow_run_url: ${{ github.event.inputs.workflow_run_url }}
       artifact_pattern: "*.tar.xz"
@@ -126,14 +126,14 @@ You can customize the CMake workflow presets and Linux runner used for builds:
 ```yaml
 jobs:
   build-linux:
-    uses: externpro/externpro/actions/build-linux.yml@25.04
+    uses: externpro/externpro/.github/workflows/build-linux.yml@25.04
     with:
       cmake-workflow-preset: LinuxRelease  # Use release preset
       runon: ubuntu-24.04-arm # Use ARM64 runner
     secrets: inherit
 
   build-windows:
-    uses: externpro/externpro/actions/build-windows.yml@25.04
+    uses: externpro/externpro/.github/workflows/build-windows.yml@25.04
     with:
       cmake-workflow-preset: WindowsRelease  # Use release preset
     secrets: inherit
@@ -146,7 +146,7 @@ To upload different types of artifacts:
 ```yaml
 jobs:
   release-from-build:
-    uses: externpro/externpro/actions/release-from-build.yml@25.04
+    uses: externpro/externpro/.github/workflows/release-from-build.yml@25.04
     with:
       workflow_run_url: https://github.com/owner/repo/actions/runs/123456789
       artifact_pattern: "*.zip"  # Upload ZIP files instead
