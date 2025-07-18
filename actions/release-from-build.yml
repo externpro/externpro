@@ -1,0 +1,277 @@
+name: Upload Release Assets
+on:
+  workflow_call:
+    inputs:
+      workflow_run_url:
+        description: 'URL of the workflow run to download artifacts from (e.g., https://github.com/owner/repo/actions/runs/123456789)'
+        required: true
+        type: string
+      artifact_pattern:
+        description: 'Pattern to match artifact files (e.g., "*.tar.xz")'
+        required: false
+        type: string
+        default: '*.tar.xz'
+      release_body_template:
+        description: 'Template for the release body'
+        required: false
+        type: string
+        default: |
+          ## Release Notes
+
+          This release includes build artifacts from workflow run:
+          {workflow_run_url}
+
+          ### Download
+          - Download the appropriate `.tar.xz` file for your platform
+
+          ### Verification
+          SHA256 checksums are provided below for artifact verification.
+    outputs:
+      release_id:
+        description: 'The ID of the release'
+        value: ${{ jobs.upload-assets.outputs.release_id }}
+      release_url:
+        description: 'The URL of the release'
+        value: ${{ jobs.upload-assets.outputs.release_url }}
+      release_tag:
+        description: 'The tag used for the release'
+        value: ${{ jobs.upload-assets.outputs.release_tag }}
+      is_prerelease:
+        description: 'Whether the release is a prerelease'
+        value: ${{ jobs.upload-assets.outputs.is_prerelease }}
+jobs:
+  upload-assets:
+    runs-on: ubuntu-latest
+    outputs:
+      release_id: ${{ steps.create_release.outputs.release_id }}
+      release_url: ${{ steps.create_release.outputs.release_url }}
+      release_tag: ${{ steps.determine_tag.outputs.tag }}
+      is_prerelease: ${{ steps.determine_tag.outputs.is_prerelease }}
+    steps:
+      -
+        name: Checkout repository
+        uses: actions/checkout@v4
+      -
+        name: Extract run ID from URL
+        id: extract_run_id
+        run: |
+          run_url="${{ inputs.workflow_run_url }}"
+          if [[ "$run_url" =~ /actions/runs/([0-9]+) ]]; then
+            run_id="${BASH_REMATCH[1]}"
+            echo "run_id=$run_id" >> $GITHUB_OUTPUT
+            echo "Extracted run ID: $run_id"
+          else
+            echo "Error: Invalid workflow run URL format. Expected: https://github.com/owner/repo/actions/runs/123456789"
+            exit 1
+          fi
+      -
+        name: Download artifacts from workflow run
+        run: |
+          echo "Downloading artifacts from run ID: ${{ steps.extract_run_id.outputs.run_id }}"
+          gh run download ${{ steps.extract_run_id.outputs.run_id }} --dir ./artifacts
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      -
+        name: Find and prepare artifacts for upload
+        id: find_artifacts
+        run: |
+          echo "Finding artifacts matching pattern: ${{ inputs.artifact_pattern }}"
+          artifacts=()
+          hashes=()
+          # Find all files matching the pattern
+          while IFS= read -r -d '' file; do
+            if [[ -f "$file" ]]; then
+              # Get the actual file path (in case it's inside a directory with the same name)
+              actual_file=$(find "$(dirname "$file")" -type f -name "$(basename "$file")" -not -path "*/.*" | head -1)
+              if [[ -f "$actual_file" ]]; then
+                echo "Found artifact: $actual_file"
+                artifacts+=("$actual_file")
+                # Calculate SHA256 hash
+                hash=$(sha256sum "$actual_file" | cut -d' ' -f1)
+                filename=$(basename "$actual_file")
+                hashes+=("$hash  $filename")
+                echo "SHA256 ($filename): $hash"
+              fi
+            fi
+          done < <(find ./artifacts -name "${{ inputs.artifact_pattern }}" -type f -print0)
+          if [ ${#artifacts[@]} -eq 0 ]; then
+            echo "No artifacts found matching pattern: ${{ inputs.artifact_pattern }}"
+            exit 1
+          fi
+          # Convert arrays to JSON for output
+          printf -v artifacts_json '%s\n' "${artifacts[@]}" | jq -R . | jq -s .
+          printf -v hashes_json '%s\n' "${hashes[@]}" | jq -R . | jq -s .
+          # Sort hashes alphabetically by filename for consistent presentation
+          sorted_hashes=()
+          readarray -t sorted_hashes < <(for hash_line in "${hashes[@]}"; do echo "$hash_line"; done | sort -k2)
+          # Set outputs - use environment file method for better reliability
+          {
+            echo "artifacts<<EOF"
+            printf '%s\n' "${artifacts[@]}"
+            echo "EOF"
+            echo "hashes<<EOF"
+            printf '%s\n' "${hashes[@]}"
+            echo "EOF"
+            echo "hash_summary<<EOF"
+            printf '%s\n' "${sorted_hashes[@]}"
+            echo "EOF"
+          } >> $GITHUB_OUTPUT
+      -
+        name: Determine tag from artifacts
+        id: determine_tag
+        run: |
+          # Debug: Show all outputs from previous step
+          echo "=== Debug: find_artifacts outputs ==="
+          echo "Artifacts:"
+          echo "${{ steps.find_artifacts.outputs.artifacts }}"
+          echo "Hashes:"
+          echo "${{ steps.find_artifacts.outputs.hashes }}"
+          echo "Hash summary:"
+          echo "${{ steps.find_artifacts.outputs.hash_summary }}"
+          # Get the first artifact using the output directly
+          first_artifact=$(echo "${{ steps.find_artifacts.outputs.artifacts }}" | head -1)
+          echo "First artifact: $first_artifact"
+          if [ -n "$first_artifact" ] && [ -f "$first_artifact" ]; then
+            filename=$(basename "$first_artifact")
+            echo "Determining tag from filename: $filename"
+            # Extract version pattern from filename (matches patterns like v22.16.0.1-19-gead5928)
+            if [[ "$filename" =~ ([vV][0-9]+\.[0-9]+(\.[0-9]+)?(\.[0-9]+)?(-[0-9]+-g[a-f0-9]+)?) ]]; then
+              version_tag="${BASH_REMATCH[1]}"
+              echo "Extracted version tag: $version_tag"
+              # Determine if this is a prerelease (has -#-g<hash> suffix)
+              if [[ "$version_tag" =~ -[0-9]+-g[a-f0-9]+$ ]]; then
+                echo "is_prerelease=true" >> $GITHUB_OUTPUT
+                echo "This is a prerelease version"
+              else
+                echo "is_prerelease=false" >> $GITHUB_OUTPUT
+                echo "This is a release version"
+              fi
+              echo "tag=$version_tag" >> $GITHUB_OUTPUT
+            else
+              echo "Error: Could not determine version tag from filename: $filename"
+              echo "Expected pattern: *-v#.#[.#[.#]][-#-g<hash>].tar.xz"
+              exit 1
+            fi
+          else
+            echo "Error: No valid artifacts found"
+            echo "Available files in workspace:"
+            find . -type f | sort
+            exit 1
+          fi
+      -
+        name: Check if tag exists
+        id: check_tag
+        run: |
+          tag="${{ steps.determine_tag.outputs.tag }}"
+          echo "Checking if tag exists: $tag"
+          if gh release view "$tag" &>/dev/null; then
+            echo "Error: Release for tag $tag already exists. This workflow is configured to fail if the release already exists."
+            exit 1
+          else
+            echo "Release does not exist for tag: $tag"
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      -
+        name: Create release
+        id: create_release
+        run: |
+          tag="${{ steps.determine_tag.outputs.tag }}"
+          is_prerelease="${{ steps.determine_tag.outputs.is_prerelease }}"
+          release_name="$tag"
+          # Create a temporary file for the release notes
+          RELEASE_NOTES_FILE=$(mktemp)
+          # Write base release body to file
+          cat << 'EOF' > "$RELEASE_NOTES_FILE"
+          ${{ inputs.release_body_template }}
+          EOF
+          # Replace placeholders in the file
+          sed -i "s|{workflow_run_url}|${{ inputs.workflow_run_url }}|g" "$RELEASE_NOTES_FILE"
+          # Append checksums section to release notes file
+          cat << 'EOF' >> "$RELEASE_NOTES_FILE"
+          ### Checksums
+          ```
+          EOF
+          # Add each hash on a new line
+          echo "${{ steps.find_artifacts.outputs.hash_summary }}" >> "$RELEASE_NOTES_FILE"
+          # Close the code block
+          echo '```' >> "$RELEASE_NOTES_FILE"
+          # Set flags based on release type
+          flags=""
+          if [ "$is_prerelease" = "true" ]; then
+            flags="$flags --prerelease"
+          fi
+          # Always create draft releases
+          flags="$flags --draft"
+          # Create the release using the file for notes
+          echo "Creating release for tag: $tag"
+          release_output=$(gh release create "$tag" \
+            --title "$release_name" \
+            --notes-file "$RELEASE_NOTES_FILE" \
+            $flags 2>&1)
+          # Clean up temp file
+          rm -f "$RELEASE_NOTES_FILE"
+          # Extract the release URL from the output
+          if echo "$release_output" | grep -q "https://github.com"; then
+            release_url=$(echo "$release_output" | grep -o 'https://github.com[^[:space:]]*' | head -1)
+            echo "Release URL: $release_url"
+            # Extract the release ID from the URL
+            if [[ "$release_url" =~ /releases/tag/([^/]+)$ ]]; then
+              tag_or_id="${BASH_REMATCH[1]}"
+              # Try to get the release ID using the tag or untagged ID
+              if [[ "$tag_or_id" == untagged-* ]]; then
+                # For untagged releases, we need to list all releases and find by URL
+                echo "Handling untagged release: $tag_or_id"
+                release_id=$(gh api repos/$GITHUB_REPOSITORY/releases --jq ".[] | select(.html_url == \"$release_url\") | .id")
+              else
+                # For tagged releases, we can query directly
+                release_id=$(gh api repos/$GITHUB_REPOSITORY/releases/tags/$tag --jq '.id')
+              fi
+            else
+              echo "Warning: Could not extract tag or ID from URL: $release_url"
+              release_id="unknown"
+            fi
+          else
+            echo "Warning: Could not extract release URL from output"
+            release_url="https://github.com/$GITHUB_REPOSITORY/releases"
+            release_id="unknown"
+          fi
+          # Set outputs
+          echo "release_id=$release_id" >> $GITHUB_OUTPUT
+          echo "release_url=$release_url" >> $GITHUB_OUTPUT
+          echo "Created release: $tag"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      -
+        name: Upload artifacts to release
+        run: |
+          tag="${{ steps.determine_tag.outputs.tag }}"
+          echo "Uploading artifacts to release: $tag"
+          # Read artifacts from the output, handling both JSON and plain text formats
+          if [[ "${{ steps.find_artifacts.outputs.artifacts }}" == *"["* ]]; then
+            # JSON array format
+            while IFS= read -r artifact; do
+              if [ -n "$artifact" ] && [ -f "$artifact" ]; then
+                echo "Uploading artifact: $artifact"
+                gh release upload "$tag" "$artifact" --clobber
+              fi
+            done < <(echo '${{ steps.find_artifacts.outputs.artifacts }}' | jq -r '.[]')
+          else
+            # Plain text format (one per line)
+            while IFS= read -r artifact; do
+              if [ -n "$artifact" ] && [ -f "$artifact" ]; then
+                echo "Uploading artifact: $artifact"
+                gh release upload "$tag" "$artifact" --clobber
+              fi
+            done <<< "${{ steps.find_artifacts.outputs.artifacts }}"
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      -
+        name: List release assets
+        run: |
+          tag="${{ steps.determine_tag.outputs.tag }}"
+          echo "Release assets for $tag:"
+          gh release view "$tag" --json assets | jq -r '.assets[] | "- \(.name) (\(.size) bytes)"'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
