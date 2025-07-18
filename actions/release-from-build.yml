@@ -173,21 +173,6 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       -
-        name: Check if git tag exists
-        id: check_git_tag
-        run: |
-          tag="${{ steps.determine_tag.outputs.tag }}"
-          echo "Checking if git tag exists: $tag"
-          if git ls-remote --tags origin "refs/tags/$tag" | grep -q "$tag"; then
-            echo "Git tag $tag exists in the repository."
-            echo "make_draft=false" >> $GITHUB_OUTPUT
-          else
-            echo "Git tag $tag does not exist in the repository. Will create a draft release."
-            echo "make_draft=true" >> $GITHUB_OUTPUT
-          fi
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      -
         name: Create release
         id: create_release
         run: |
