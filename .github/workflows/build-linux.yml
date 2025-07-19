@@ -89,6 +89,7 @@ jobs:
       -
         name: Find devel package tarball
         id: find_tarball
+        if: ${{ inputs.cmake-workflow-preset != 'LinuxReleaseNoInstall' }}
         shell: bash
         run: |
           file=$(pwd)/$(ls _bld-${{ env.CMAKE_PRESET }}/${{ github.event.repository.name }}*-devel.tar.xz)
@@ -101,6 +102,7 @@ jobs:
         working-directory: ${{ github.workspace }}
       -
         name: Upload devel tarball artifact
+        if: ${{ inputs.cmake-workflow-preset != 'LinuxReleaseNoInstall' }}
         uses: actions/upload-artifact@v4
         with:
           name: ${{ steps.find_tarball.outputs.filename }}
