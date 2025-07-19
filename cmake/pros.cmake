@@ -131,13 +131,14 @@ set(xp_nodeng REPO github.com/externpro/nodeng TAG v22.16.0.2
   SHA256_Linux d4f43ae8ece2e89cc06997e4bf3c78cee875c1886b3abda077ab620c501e475a
   SHA256_win64 6317f9bef1d1c53827214dad6a013ea46e3035853cf4beda026d9138c817fdad
   )
-set(xp_nodexp REPO github.com/externpro/nodexp TAG v14.17.6.1
+set(xp_nodexp REPO github.com/externpro/nodexp TAG v14.17.6.2
   BRANCH dev # TRICKY: nodexp, openssl versions coordinated
   WEB "https://nodejs.org/en/blog/release/v14.17.6/"
   DESC "node/npm development platform and runtime executable bundled as externpro devel package to build addons"
   LICENSE "[MIT](https://raw.githubusercontent.com/nodejs/node/v14.17.6/LICENSE 'MIT License')"
-  SHA256_Linux e178ac4b379850e94842bbd7d85ab689cb28639560f5b0f178f854eb7e218aae
-  SHA256_win64 500d79f2d490c112af885ed2ec2fdb6aebe389802c6028d08f2d5e465a317838
+  SHA256_Linux-arm64 d1ff834c4f909652e7e7b7a9af000fbfdbbe137d833cbe638edf04290e60c3f2
+  SHA256_Linux 6df479d0c832d46686401fbc4f575a8c3e93812490ef862c73310088dc9ff5e0
+  SHA256_win64 43cdceaf386ccbf70d1e9cbe1ceeb76b90c0c30eac84f804dc9f2a333d028681
   )
 set(xp_nvjpeg2000 REPO github.com/externpro/nvJPEG2000 TAG v0.8.1.2
   BRANCH dev
