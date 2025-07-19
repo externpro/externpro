@@ -35,6 +35,7 @@ jobs:
       -
         name: Find devel package tarball
         id: find_tarball
+        if: ${{ inputs.cmake-workflow-preset != 'WindowsReleaseNoInstall' }}
         shell: bash
         run: |
           file=$(pwd)/$(ls _bld-${{ env.CMAKE_PRESET }}/${{ github.event.repository.name }}*-devel.tar.xz)
@@ -48,12 +49,14 @@ jobs:
       -
         name: Convert Git Bash path to Windows path
         id: convert_path
+        if: ${{ inputs.cmake-workflow-preset != 'WindowsReleaseNoInstall' }}
         shell: pwsh
         run: |
           $windowsPath = '${{ steps.find_tarball.outputs.filepath }}' -replace '^/([a-zA-Z])/', '$1:/' -replace '/', '\'
           echo "windows_path=$windowsPath" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
       -
         name: Upload devel tarball artifact
+        if: ${{ inputs.cmake-workflow-preset != 'WindowsReleaseNoInstall' }}
         uses: actions/upload-artifact@v4
         with:
           name: ${{ steps.find_tarball.outputs.filename }}
