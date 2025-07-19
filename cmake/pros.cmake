@@ -139,13 +139,14 @@ set(xp_nodexp REPO github.com/externpro/nodexp TAG v14.17.6.1
   SHA256_Linux e178ac4b379850e94842bbd7d85ab689cb28639560f5b0f178f854eb7e218aae
   SHA256_win64 500d79f2d490c112af885ed2ec2fdb6aebe389802c6028d08f2d5e465a317838
   )
-set(xp_nvjpeg2000 REPO github.com/externpro/nvJPEG2000 TAG v0.8.1.1
+set(xp_nvjpeg2000 REPO github.com/externpro/nvJPEG2000 TAG v0.8.1.2
   BRANCH dev
   WEB "https://developer.nvidia.com/nvjpeg"
   DESC "high-performance GPU-accelerated library for decoding JPEG 2000 format images"
   LICENSE "[NVIDIA](https://docs.nvidia.com/cuda/nvjpeg2000/license.html 'NVIDIA Software License Agreement')"
-  SHA256_Linux aae48f9e42b5271335d630e064bef89d97a4a0723b468b81877e35cf9f5be525
-  SHA256_win64 e08dd32554869c1cfd6add59d9a7cec4c00cd9fc74ada137fdd1b5d236711431
+  SHA256_Linux-arm64 1d245c836c0eda10065dbb689a17dbd8f3370c5db8024738ae042b033a5d8071
+  SHA256_Linux 966664bd491bf214cb9730e771690f61da3b53a92809ed8d03f27f042bc021b2
+  SHA256_win64 f31707f118db7d4e673ac29bcf809412c6378cbd5fd5513b9534d0ce2559830f
   )
 set(xp_patch REPO github.com/externpro/patch TAG v2.7.6.1
   BRANCH dev
