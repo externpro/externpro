@@ -33,9 +33,10 @@ jobs:
         id: image-names
         run: |
           REPO_NAME=$(echo $(basename ${{ github.repository }}) | tr '[:upper:]' '[:lower:]')
+          ORG_REPO_NAME=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')
           ARCH_NAME=$(echo '${{ runner.arch }}' | tr '[:upper:]' '[:lower:]')
           echo "docker_image_name=${REPO_NAME}-bld" >> $GITHUB_OUTPUT
-          echo "ghcrio_image_name=ghcr.io/${{ github.repository }}/bldimg-${ARCH_NAME}" >> $GITHUB_OUTPUT
+          echo "ghcrio_image_name=ghcr.io/${ORG_REPO_NAME}/bldimg-${ARCH_NAME}" >> $GITHUB_OUTPUT
           echo "delete_image_name=${REPO_NAME}/bldimg-${ARCH_NAME}" >> $GITHUB_OUTPUT
       -
         name: Log in to GitHub Container Registry
