@@ -147,13 +147,14 @@ set(xp_nvjpeg2000 REPO github.com/externpro/nvJPEG2000 TAG v0.8.1.1
   SHA256_Linux aae48f9e42b5271335d630e064bef89d97a4a0723b468b81877e35cf9f5be525
   SHA256_win64 e08dd32554869c1cfd6add59d9a7cec4c00cd9fc74ada137fdd1b5d236711431
   )
-set(xp_patch REPO github.com/externpro/patch TAG v2.7
-  BRANCH main
+set(xp_patch REPO github.com/externpro/patch TAG v2.7.6.1
+  BRANCH dev
   WEB "https://savannah.gnu.org/projects/patch/" UPSTREAM "git.savannah.gnu.org/cgit/patch.git"
   DESC "takes a patch file containing a difference listing produced by the diff program and applies those differences to one or more original files, producing patched versions"
   LICENSE "[GPL-3.0](https://savannah.gnu.org/projects/patch/ 'GNU General Public License v3 or later')"
-  SHA256_Linux b72b6b36acd65f6dc66e988a2edbbf483377c69d9fdf1f2537f3ec474f345196
-  SHA256_win64 0e7852bd14863f7e1f5ac29a29dba83d75d92963e2f4c4bb7628397a2bf96e63
+  SHA256_Linux-arm64 fccd4cfbc3738f9bf191a908435026120dc050bdb5b7ad1758cf97e343557675
+  SHA256_Linux f5daf4f8faae6b5599e46b72b31283af0c040e62f7df5750d2ae655cf3b7ab61
+  SHA256_win64 3277e58f805f29d99699dcc2a536bb9a9034fc006661d26565afe1998c4e91af
   )
 set(xp_rapidjson REPO github.com/externpro/rapidjson VER 1.1.0 XP_MODULE
   BASE Tencent:v1.1.0 BRANCH xp1.1.0
