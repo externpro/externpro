@@ -114,13 +114,14 @@ set(xp_luabridge REPO github.com/vinniefalco/LuaBridge/tree/2.5 VER 2.5
   DESC "a lightweight, dependency-free library for binding Lua to C++ [submodule of: _lua_]"
   LICENSE "[MIT](https://github.com/vinniefalco/LuaBridge/#official-repository 'MIT License')"
   )
-set(xp_nasm REPO github.com/externpro/nasm TAG v2.14.02
-  BRANCH main
+set(xp_nasm REPO github.com/externpro/nasm TAG v2.14.02.1
+  BRANCH dev
   WEB "https://www.nasm.us/"
   DESC "The Netwide Assembler - an 80x86 and x86-64 assembler (MSW-only)"
   LICENSE "[BSD-2-Clause](https://www.nasm.us/ 'BSD 2-Clause Simplified License')"
-  SHA256_Linux 31fb78aa856e58716b5cf36927a24824e1fc931a375b02b9c24245a5ed3e3347
-  SHA256_win64 ddf6097be3ecf6e63cdcc56dbc6f063f44cf4ba04e8df73c2c6c3798c3f98428
+  SHA256_Linux-arm64 f1c934bbdef48c31b8ca5dbf53bc6798ad2788414fbcb7865bd63bacc915293f
+  SHA256_Linux 3b452814ca0a2c53edffd15b5801fb1778ddfba115804c21ef03e71c31c4965b
+  SHA256_win64 b9ec621141b54f4d04948d039901e92ff4712792a133780e1c6ffb4e347b6646
   )
 set(xp_nodeng REPO github.com/externpro/nodeng TAG v22.16.0.2
   BRANCH dev
