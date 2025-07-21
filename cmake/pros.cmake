@@ -279,13 +279,14 @@ set(xp_node REPO github.com/externpro/node VER 14.17.6
   DESC "platform to build scalable network applications"
   LICENSE "[MIT](https://raw.githubusercontent.com/nodejs/node/v14.17.6/LICENSE 'MIT License')"
   )
-set(xp_node-addon-api REPO github.com/externpro/node-addon-api TAG v3.0.2.1
+set(xp_node-addon-api REPO github.com/externpro/node-addon-api TAG v3.0.2.2
   BASE nodejs:3.0.2 BRANCH dev DEPS nodexp
   WEB "https://github.com/nodejs/node-addon-api" UPSTREAM "github.com/nodejs/node-addon-api"
   DESC "Module for using N-API from C++"
   LICENSE "[MIT](https://github.com/nodejs/node-addon-api/blob/3.0.2/LICENSE.md 'MIT License')"
-  SHA256_Linux 3bd0eba6259b0062836a39da588bfa7e630d7ace795bcb9e9d68918090cc9ade
-  SHA256_win64 09a0962f311a2d2af86ea0548908166bd4cfda63c2b8d2c83951a813fb0f0f6a
+  SHA256_Linux-arm64 0d132c932515edd6d758a90f7426804c7a5eb8379b68bd44a12a43cddfe0e254
+  SHA256_Linux 685a10b6ee38c672de16ca4917007412c43a5fe69f16cdd6c4fbc90feb7aac48
+  SHA256_win64 714ff5682ebef712197d172d98684d5f7a269d6e061c7bc5474ddb36806bd219
   )
 set(xp_openh264 REPO github.com/externpro/openh264 VER 1.4.0 XP_MODULE
   BASE cisco:v1.4.0 BRANCH xp1.4.0 DEPS yasm
