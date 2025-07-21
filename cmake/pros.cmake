@@ -273,12 +273,6 @@ set(xp_libzmq REPO github.com/externpro/libzmq VER 4.3.4 XP_MODULE
   DESC "high-performance asynchronous messaging library"
   LICENSE "[MPL-2.0](http://wiki.zeromq.org/area:licensing 'Mozilla Public License 2.0')"
   )
-set(xp_node REPO github.com/externpro/node VER 14.17.6
-  BASE nodejs:v14.17.6 BRANCH xp14.17.6 DEPS nasm # TRICKY: node, openssl versions coordinated
-  WEB "http://nodejs.org" UPSTREAM "github.com/nodejs/node"
-  DESC "platform to build scalable network applications"
-  LICENSE "[MIT](https://raw.githubusercontent.com/nodejs/node/v14.17.6/LICENSE 'MIT License')"
-  )
 set(xp_node-addon-api REPO github.com/externpro/node-addon-api TAG v3.0.2.2
   BASE nodejs:3.0.2 BRANCH dev DEPS nodexp
   WEB "https://github.com/nodejs/node-addon-api" UPSTREAM "github.com/nodejs/node-addon-api"
@@ -295,13 +289,13 @@ set(xp_openh264 REPO github.com/externpro/openh264 VER 1.4.0 XP_MODULE
   LICENSE "[BSD-2-Clause](http://www.openh264.org/faq.html 'BSD 2-Clause Simplified License')"
   )
 set(xp_openssl REPO github.com/externpro/openssl VER 1.1.1l XP_MODULE
-  BASE openssl:OpenSSL_1_1_1l BRANCH xp_1_1_1l DEPS nasm opensslasm # TRICKY: node, openssl versions coordinated
+  BASE openssl:OpenSSL_1_1_1l BRANCH xp_1_1_1l DEPS nasm opensslasm # TRICKY: nodexp, openssl versions coordinated
   WEB "http://www.openssl.org/" UPSTREAM "github.com/openssl/openssl"
   DESC "Cryptography and SSL/TLS Toolkit"
   LICENSE "[BSD-style](http://www.openssl.org/source/license.html 'dual OpenSSL and SSLeay License: both are BSD-style licenses')"
   )
 set(xp_opensslasm REPO github.com/externpro/opensslasm VER 1.1.1l
-  WEB "https://github.com/externpro/node/tree/v14.17.6/deps/openssl/config/archs" # TRICKY: node, openssl versions coordinated
+  WEB "https://github.com/externpro-archive/node/tree/v14.17.6/deps/openssl/config/archs" # TRICKY: node, openssl versions coordinated
   DESC "openssl assembly, copied from node (deps/openssl/config/archs/) [submodule of: _openssl_]"
   LICENSE "[BSD-style](http://www.openssl.org/source/license.html 'dual OpenSSL and SSLeay License: both are BSD-style licenses')"
   )
