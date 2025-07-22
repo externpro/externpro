@@ -135,14 +135,14 @@ set(xp_nodeng REPO github.com/externpro/nodeng TAG v22.16.0.2-2-ge210ba4 # overr
   SHA256_Linux 0abd6e07dcc94bb2809dd903cbd2b1a60ffe8bed3c8fda532751c6c73f833966
   SHA256_win64 88b003f7d3d60f090a7ec30f77e8c0174caedf9eec670a74018d7c5d7ba26d5f
   )
-set(xp_nodeng REPO github.com/externpro/nodeng TAG v22.16.0.2
+set(xp_nodeng REPO github.com/externpro/nodeng TAG v22.17.1.1
   BRANCH dev
   WEB "https://nodejs.org/en/blog/release/v22.16.0/"
   DESC "node executable bundled as externpro devel package to build angular (ng) projects"
   LICENSE "[MIT](https://raw.githubusercontent.com/nodejs/node/v22.16.0/LICENSE 'MIT License')"
-  SHA256_Linux-arm64 00ed699ec6cf4d3d93d0e7a902603cfa6e769b23bb82daef01c980f1ffd4693e
-  SHA256_Linux d4f43ae8ece2e89cc06997e4bf3c78cee875c1886b3abda077ab620c501e475a
-  SHA256_win64 6317f9bef1d1c53827214dad6a013ea46e3035853cf4beda026d9138c817fdad
+  SHA256_Linux-arm64 9ffae5907cf2f82398080091192ce0e5c2e0d1f5fede36d0d667373c6ca7b338
+  SHA256_Linux ef5afe93d5f53bff89ed7bb3055895a4d5dba3134524cb709beb978d552eaf9a
+  SHA256_win64 78d9838fc44437acdf43344bb9acea43e823a72e5cadc625cfc38079ef02721f
   )
 set(xp_nodexp REPO github.com/externpro/nodexp TAG v14.17.6.2
   BRANCH dev # TRICKY: nodexp, openssl versions coordinated
