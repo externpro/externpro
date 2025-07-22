@@ -39,13 +39,14 @@ set(xp_flatbuffers REPO github.com/externpro/flatbuffers VER 2.0.6 XP_MODULE
   DESC "efficient cross platform serialization library"
   LICENSE "[Apache-2.0](https://github.com/google/flatbuffers/blob/v2.0.6/LICENSE.txt 'Apache License, Version 2.0')"
   )
-set(xp_geos REPO github.com/externpro/geos TAG v3.13.0.1
+set(xp_geos REPO github.com/externpro/geos TAG v3.13.0.3
   BASE 3.13.0 BRANCH dev
   WEB "https://libgeos.org" UPSTREAM "github.com/libgeos/geos"
   DESC "C/C++ library for computational geometry with a focus on algorithms used in geographic information systems (GIS) software"
   LICENSE "[LPGL-2.1](https://trac.osgeo.org/geos/ 'LGPL version 2.1')"
-  SHA256_Linux a2a077d7e4731f0e4d37a4895e71531e2229acad3160236a7cde04ffb4e3dee1
-  SHA256_win64 b48fbbe84b32372a5effbaed7555bf87f308dd061d7bc0ced73c724f9deff560
+  SHA256_Linux-arm64 81304bc9fd0332cb0806d8e87fb076d2a08f7b3701b22f10fbec148c6271fbbe
+  SHA256_Linux 5cf8633aed023f40f11011e2b3782fe6fa74f7e7b79ec2067c61eb4760670ea1
+  SHA256_win64 171b4c1488fbaf603a1f999aabfed414f4e15475f108fd786e823fa20dc416e9
   )
 set(xp_geotrans REPO github.com/externpro/geotranz VER 2.4.2 XP_MODULE
   BASE v2.4.2 BRANCH xp2.4.2
