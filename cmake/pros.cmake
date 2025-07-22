@@ -265,13 +265,14 @@ set(xp_librttopo REPO github.com/externpro/librttopo TAG v1.1.0.2
   SHA256_Linux 2f07057f48b83d68c3560d8563b4883558366e3d65a21b6bfe8a1172176fdd7b
   SHA256_win64 3512bfe99eaf540c091c667ac20f6ecdfee1d17d0f2601206952c1d1fb9f4abe
   )
-set(xp_libspatialite REPO github.com/externpro/libspatialite TAG v5.1.0.3
+set(xp_libspatialite REPO github.com/externpro/libspatialite TAG v5.1.0.4
   BASE 5.1.0 BRANCH dev DEPS geos libiconv sqlite3 zlib
   WEB "https://www.gaia-gis.it/fossil/libspatialite/home"
   DESC "extends capabilities of SQLite, enabling ti to handle spatial data and perform spatial queries"
   LICENSE "[MPL-1.1](https://www.gaia-gis.it/fossil/libspatialite/home 'MPL tri-license: choose MPL-1.1, GPL-2.0-or-later, LGPL-2.1-or-later')"
-  SHA256_Linux 52e162824c9b271328931a923f81ae99705adbe0c6112e82ba4e77ea8024b858
-  SHA256_win64 243f02109e669d86a6337ca15bd28a39ae458d459f2883920032ee4bd3ac35b0
+  SHA256_Linux-arm64 ef0c3e462ded36ae5445aced34cc107808e1a821789e034ab7aaf6c780f368bb
+  SHA256_Linux 44e73d86b54dff96037c63febbe9027f601e0498891c027ad8fd3473ab8fc374
+  SHA256_win64 0ea69c642145d85005d74d426bae09f5dcf1c32dfd7b620543d1f8a806c456c1
   )
 set(xp_libzmq REPO github.com/externpro/libzmq VER 4.3.4 XP_MODULE
   BASE zeromq:v4.3.4 BRANCH xp4.3.4 DEPS sodium
