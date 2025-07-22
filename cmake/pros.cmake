@@ -391,13 +391,14 @@ set(xp_libstrophe REPO github.com/externpro/libstrophe VER 0.9.1 XP_MODULE
   DESC "A simple, lightweight C library for writing XMPP client"
   LICENSE "[MIT or GPL-3.0](https://github.com/strophe/libstrophe/blob/0.9.1/LICENSE.txt 'dual licensed under MIT and GPLv3 licenses')"
   )
-set(xp_spatialite-tools REPO github.com/externpro/spatialite-tools TAG v5.1.0.3
+set(xp_spatialite-tools REPO github.com/externpro/spatialite-tools TAG v5.1.0.4
   BASE 5.1.0a BRANCH dev EXE_DEPS libspatialite
   WEB "https://www.gaia-gis.it/fossil/spatialite-tools/index"
   DESC "collection of open source Command Line Interface (CLI) tools supporting SpatiaLite"
   LICENSE "[GPL-3.0](https://www.gaia-gis.it/fossil/spatialite-tools/index 'GPL-3.0-or-later')"
-  SHA256_Linux 6b4d8f7090f7f0aa23ed13abc5c5bdae3bbee3605ec5243ff2b082d21c76dc1e
-  SHA256_win64 86f35b3b25d428799aa2ed56bb69f754d4f8f4bc392487564ff4b0ea85198b22
+  SHA256_Linux-arm64 4c1a589c5c6113f6eb25ea09d9b103d7610cd8c0d03d2899305a7e110d5f967a
+  SHA256_Linux 9ecde69e78faf645b553322ae80e9dca4fc9d0b7b1fb5587820a8e2d1c332354
+  SHA256_win64 552b068b642de56037fd1cfd5418154ea680ca6c64e22a7aa5fbd14aa3ccfbdd
   )
 set(xp_wxinclude REPO github.com/externpro/wxInclude VER 1.0 XP_MODULE
   BASE v1.0 BRANCH rel EXE_DEPS boost
