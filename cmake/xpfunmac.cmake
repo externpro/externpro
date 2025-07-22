@@ -203,7 +203,7 @@ function(ipDownload)
   endif()
   if(NOT TARGET download_${fn})
     add_custom_target(download_${fn} ALL)
-    add_custom_command(TARGET download_${fn}
+    add_custom_command(TARGET download_${fn} POST_BUILD
       COMMAND ${CMAKE_COMMAND} -Dpkg_url:STRING="${P_DLURL}" -Dpkg_md5:STRING=${P_DLMD5}
         -Dpkg_dir:STRING=${pkgPath}
         -P ${MODULES_DIR}/cmsdownload.cmake
