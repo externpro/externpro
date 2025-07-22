@@ -184,13 +184,14 @@ set(xp_sodium REPO github.com/externpro/libsodium VER 21.11.18 XP_MODULE
   DESC "library for encryption, decryption, signatures, password hashing and more"
   LICENSE "[ISC](https://doc.libsodium.org/#license 'Internet Systems Consortium License, functionally equivalent to simplified BSD and MIT licenses')"
   )
-set(xp_sqlite3 REPO github.com/externpro/SQLite3 TAG v3.37.2.2
+set(xp_sqlite3 REPO github.com/externpro/SQLite3 TAG v3.37.2.3
   BASE 3.37.2 BRANCH dev
   WEB "https://www.sqlite.org/index.html 'SQLite website'" UPSTREAM "github.com/azadkuh/sqlite-amalgamation"
   DESC "C-language library that implements a small, fast, self-contained, high-reliability, full-featured, SQL database engine"
   LICENSE "[public domain](https://www.sqlite.org/copyright.html 'open-source, not open-contribution')"
-  SHA256_Linux 4c48a644147936e5df118427308b177a9f8c276b58216b7aff4dee810b958a1f
-  SHA256_win64 58d4f6b1997edaa532cdb0c9c9de287f898a69b8eeb0bc86cb4e73642d764191
+  SHA256_Linux-arm64 561a676ca69383becfa0903c5196aa626c9b0483c35596f5e17761720e5d6163
+  SHA256_Linux 213f15f0b201948435ffaaf8000c0a866074f0de0eeaa3df738341066f1fd32c
+  SHA256_win64 2fe7adcf44d13c19812e275473031dfa404301571ed9b48474235a6102150173
   )
 set(xp_wirehair REPO github.com/externpro/wirehair VER 21.07.31 XP_MODULE
   BASE catid:6d84fad40cbbbb29d4eb91204750ddffe0dcacfe BRANCH xp21.07.31
