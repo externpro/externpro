@@ -125,6 +125,16 @@ set(xp_nasm REPO github.com/externpro/nasm TAG v2.14.02.1
   SHA256_Linux 3b452814ca0a2c53edffd15b5801fb1778ddfba115804c21ef03e71c31c4965b
   SHA256_win64 b9ec621141b54f4d04948d039901e92ff4712792a133780e1c6ffb4e347b6646
   )
+set(xp_nodeng DIST_DIR /bpvol/src/pros/nodeng/_bld-Linux/dist/) # override with local dist directory
+set(xp_nodeng # override with locally built devel package (cmake --preset=Linux; cmake --workflow --preset=LinuxRelease)
+  URL_Linux-arm64 /bpvol/src/pros/nodeng/_bld-Linux/nodeng-v22.16.0.2-dr-Linux-arm64-devel.tar.xz
+  SHA256_Linux-arm64 be77536fdc26105651e7920d2b993e48ad8f972591e27e20b73c9154ac9bdd7d
+  )
+set(xp_nodeng REPO github.com/externpro/nodeng TAG v22.16.0.2-2-ge210ba4 # override with pre-release from CI built devel package
+  SHA256_Linux-arm64 c29d0219f7e6dfb048df7e945013f48d1e0899c0e300400ff96c0b1f8d7ac2fe
+  SHA256_Linux 0abd6e07dcc94bb2809dd903cbd2b1a60ffe8bed3c8fda532751c6c73f833966
+  SHA256_win64 88b003f7d3d60f090a7ec30f77e8c0174caedf9eec670a74018d7c5d7ba26d5f
+  )
 set(xp_nodeng REPO github.com/externpro/nodeng TAG v22.16.0.2
   BRANCH dev
   WEB "https://nodejs.org/en/blog/release/v22.16.0/"
