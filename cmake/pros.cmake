@@ -254,13 +254,14 @@ set(xp_hdf5 REPO github.com/externpro/HDF5 TAG v1.14.6.2
   SHA256_Linux 8db374f4e009a2bc1c404337ebf589af149182c635ec4262576a432b4496a053
   SHA256_win64 8e1f4ea33c57420036aa2506304dc4c8c71770def0dccb51a89142b7e03ab5b6
   )
-set(xp_librttopo REPO github.com/externpro/librttopo TAG v1.1.0.1
+set(xp_librttopo REPO github.com/externpro/librttopo TAG v1.1.0.2
   BASE librttopo-1.1.0 BRANCH dev DEPS geos
   WEB "https://git.osgeo.org/gitea/rttopo/librttopo" UPSTREAM "github.com/CGX-GROUP/librttopo"
   DESC "RT Topology Library exposes an API to create and manage standard topologies using user-provided data stores"
   LICENSE "[GPL-2.0](https://github.com/CGX-GROUP/librttopo/blob/master/COPYING 'GNU General Public License v2.0 or later')"
-  SHA256_Linux ce59d0a74f415ea35f5aa83e7382cd81d8abb131f29d8a6c2c0346b78271a027
-  SHA256_win64 59a251d2f869b99f874a0dba242ec2af3bb69e7f672659da5d7ff337b654b4fe
+  SHA256_Linux-arm64 d5c0c9f7a60953aef4f5913988f0f7809b11816ebe8ece8ead5df18322eca87e
+  SHA256_Linux 2f07057f48b83d68c3560d8563b4883558366e3d65a21b6bfe8a1172176fdd7b
+  SHA256_win64 3512bfe99eaf540c091c667ac20f6ecdfee1d17d0f2601206952c1d1fb9f4abe
   )
 set(xp_libspatialite REPO github.com/externpro/libspatialite TAG v5.1.0.3
   BASE 5.1.0 BRANCH dev DEPS geos libiconv sqlite3 zlib
