@@ -298,6 +298,16 @@ macro(proSetStageDir) # NOTE: called by cmake-generated xpbase/pro/build.cmake f
   endif()
   if(NOT DEFINED CPACK_GENERATOR)
     set(CPACK_GENERATOR TXZ)
+    if(TRUE) # match xpPackageDevel() devel package
+      set(CMAKE_INSTALL_DEFAULT_COMPONENT_NAME devel)
+      set(CPACK_ARCHIVE_COMPONENT_INSTALL ON)
+      list(APPEND CPACK_COMPONENTS_ALL devel)
+      set(CPACK_COMPONENT_INCLUDE_TOPLEVEL_DIRECTORY ON)
+      unset(CPACK_PACKAGING_INSTALL_PREFIX)
+      if(CMAKE_SYSTEM_PROCESSOR MATCHES "^(aarch64|arm64|ARM64)$")
+        set(CPACK_PACKAGE_FILE_NAME "${CMAKE_PROJECT_NAME}-${CPACK_PACKAGE_VERSION}-${CMAKE_SYSTEM_NAME}-arm64")
+      endif()
+    endif()
     if(DEFINED XP_INSTALL_INFO)
       set(XP_INSTALL_INFO
         "${XP_INSTALL_INFO}\\n tar -xf /path/to/${CMAKE_PROJECT_NAME}*.tar.xz --directory=/path/to/install/"
