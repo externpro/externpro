@@ -1,7 +1,7 @@
 ########################################
 # macpro.cmake
 #  mac = macros
-#  pro = meant for internal use by externpro
+#  pro = meant for internal use by exdlpro
 # macros should begin with pro prefix
 
 macro(proInit) # NOTE: called by top-level CMakeLists.txt
@@ -325,7 +325,7 @@ macro(proSetStageDir) # NOTE: called by cmake-generated xpbase/pro/build.cmake f
     ${STAGE_DIR}/share/cmake/Find${CMAKE_PROJECT_NAME}.cmake
     @ONLY NEWLINE_STYLE LF
     )
-  if(${CMAKE_PROJECT_NAME} STREQUAL externpro)
+  if(${CMAKE_PROJECT_NAME} STREQUAL exdlpro)
     configure_file(${MODULES_DIR}/xpopts.cmake.in
       ${STAGE_DIR}/share/cmake/xpopts.cmake
       @ONLY NEWLINE_STYLE LF
