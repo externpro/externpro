@@ -1,9 +1,5 @@
 set(buildpro_REV 25.04)
 include(xpfunmac)
-if(NOT DEFINED externpro_REV)
-  set(externpro_REV 24.05)
-endif()
-find_package(externpro REQUIRED) # github.com/smanders/externpro
 if(NOT DEFINED XP_SANITIZER)
   set(XP_SANITIZER "ASAN")
 endif()
