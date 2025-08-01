@@ -32,7 +32,9 @@ else
   display_num=$(echo ${display_screen} | cut -d. -f1)
   magic_cookie=$(xauth list ${DISPLAY} | awk '{print $3}')
   xauth_file=/tmp/.X11-unix/docker.xauth
-  docker_host=$(ip -4 addr show docker0 | grep -Po 'inet \K[\d.]+')
+  if ! ip a show docker0 >/dev/null 2>&1 || ! docker_host=$(ip -4 addr show docker0 2>/dev/null | grep -o 'inet [0-9.]*' | cut -d' ' -f2); then
+    docker_host=host.docker.internal
+  fi
   touch ${xauth_file}
   xauth -f ${xauth_file} add ${docker_host}:${display_num} . ${magic_cookie}
   display_env=${docker_host}:${display_screen}
