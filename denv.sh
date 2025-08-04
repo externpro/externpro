@@ -28,17 +28,39 @@ if [[ -z "${display_host}" ]]; then
 elif [[ "${display_host}" == "localhost" ]]; then
   echo "NOTE: X11UseLocalhost should be no in /etc/ssh/sshd_config or /etc/centrifydc/ssh/sshd_config"
 else
+  # determine DISPLAY environment variable
   display_screen=$(echo $DISPLAY | cut -d: -f2)
   display_num=$(echo ${display_screen} | cut -d. -f1)
-  magic_cookie=$(xauth list ${DISPLAY} | awk '{print $3}')
-  xauth_file=/tmp/.X11-unix/docker.xauth
   if ! ip a show docker0 >/dev/null 2>&1 || ! docker_host=$(ip -4 addr show docker0 2>/dev/null | grep -o 'inet [0-9.]*' | cut -d' ' -f2); then
     docker_host=host.docker.internal
   fi
-  touch ${xauth_file}
-  xauth -f ${xauth_file} add ${docker_host}:${display_num} . ${magic_cookie}
   display_env=${docker_host}:${display_screen}
-  xauth_env=${xauth_file}
+  # determine XAUTHORITY environment variable
+  magic_cookie=$(xauth list ${DISPLAY} 2>/dev/null | awk '{print $3}')
+  if [ -z "${magic_cookie}" ]; then
+    alt_display=$(xauth list 2>/dev/null | grep -m 1 '\.local:0\s' | awk '{print $1}')
+    if [ -n "${alt_display}" ]; then
+      magic_cookie=$(xauth list "${alt_display}" 2>/dev/null | awk '{print $3}')
+    fi
+  fi
+  if [ -n "${magic_cookie}" ]; then
+    xauth_file=/tmp/.X11-unix/docker.xauth
+    touch ${xauth_file}
+    chmod 600 ${xauth_file}
+    # Ensure display_num is a valid number, default to 0 if not
+    if ! [[ "${display_num}" =~ ^[0-9]+$ ]]; then
+      display_num=0
+    fi
+    # Try different display formats if the first attempt fails
+    for display_format in "${docker_host}:${display_num}" "${docker_host}/unix:${display_num}" ":${display_num}"; do
+      if xauth -f "${xauth_file}" add "${display_format}" . "${magic_cookie}" 2>/dev/null; then
+        break # Successfully added xauth entry
+      fi
+    done || echo "Warning: Failed to add xauth entry for ${docker_host}:${display_num}" >&2
+    xauth_env=${xauth_file}
+  else
+    xauth_env=
+  fi
 fi
 env="BPROIMG=${BPROIMG}"
 env="${env}\nBPROTAG=${BPROTAG}"
