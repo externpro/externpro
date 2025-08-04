@@ -12,7 +12,7 @@ x-bld: &bld-alias
   volumes:
     - .:/bpvol/${COMPOSE_PROJECT_NAME}
     - ..:/bpvol/workspace
-    - /tmp/.X11-unix:/tmp/.X11-unix
+    - /tmp/.X11-unix:/tmp/.X11-unix # mount X11 socket directory
     - ~/.ssh:/home/${USER}/.ssh
     - ~/.gitconfig:/home/${USER}/.gitconfig
 x-all-build-args: &all-build-args-alias
