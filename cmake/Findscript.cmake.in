@@ -10,12 +10,7 @@ xpGetCompilerPrefix(COMPILER)
 xpGetNumBits(BITS)
 # projects using @CMAKE_PROJECT_NAME@: set(@CMAKE_PROJECT_NAME@_REV `git describe --tags`)
 set(@CMAKE_PROJECT_NAME@_SIG ${@CMAKE_PROJECT_NAME@_REV}-${COMPILER}-${BITS})
-# TRICKY: match what is done in cmake's Modules/CPack.cmake, setting CPACK_SYSTEM_NAME
-if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
-  set(XP_SYSTEM_NAME win${BITS})
-else()
-  set(XP_SYSTEM_NAME ${CMAKE_SYSTEM_NAME})
-endif()
+xpGetSysName(XP_SYSTEM_NAME)
 set(XP_DEV_BUILD_NAME "@CMAKE_PROJECT_NAME@_${@CMAKE_PROJECT_NAME@_SIG}")
 set(XP_INSTALLED_NAME "@CMAKE_PROJECT_NAME@-${@CMAKE_PROJECT_NAME@_SIG}-${XP_SYSTEM_NAME}")
 # NOTE: environment variable setting examples:
