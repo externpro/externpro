@@ -308,17 +308,6 @@ macro(proSetStageDir) # NOTE: called by cmake-generated xpbase/pro/build.cmake f
         set(CPACK_PACKAGE_FILE_NAME "${CMAKE_PROJECT_NAME}-${CPACK_PACKAGE_VERSION}-${CMAKE_SYSTEM_NAME}-arm64")
       endif()
     endif()
-    if(DEFINED XP_INSTALL_INFO)
-      set(XP_INSTALL_INFO
-        "${XP_INSTALL_INFO}\\n tar -xf /path/to/${CMAKE_PROJECT_NAME}*.tar.xz --directory=/path/to/install/"
-        )
-      set(XP_INSTALL_INFO
-        "${XP_INSTALL_INFO}\\n ** or set extern_DIR in ENV for automatic download and extraction"
-        )
-    endif()
-  endif()
-  if(DEFINED XP_INSTALL_INFO)
-    set(XP_INSTALL_INFO "\".\\n ${XP_INSTALL_INFO}\\n\"")
   endif()
   # configure_file to STAGE_DIR, set CMAKE_DIR
   configure_file(${MODULES_DIR}/Findscript.cmake.in

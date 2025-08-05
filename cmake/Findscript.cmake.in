@@ -36,34 +36,7 @@ find_path(@CMAKE_PROJECT_NAME@_DIR
   DOC "@CMAKE_PROJECT_NAME@ directory"
   )
 if(NOT @CMAKE_PROJECT_NAME@_DIR)
-  if(EXISTS $ENV{extern_DIR})
-    set(archive_name "${XP_INSTALLED_NAME}.tar.xz")
-    message(STATUS "${XP_INSTALLED_NAME} not found.")
-    message(STATUS "Attempting download of ${archive_name} ...")
-    file(DOWNLOAD @XP_DOWNLOAD_URL@/${@CMAKE_PROJECT_NAME@_REV}/${archive_name}
-      $ENV{extern_DIR}/${archive_name}
-      )
-    message(STATUS "Attempting extraction of ${archive_name} ...")
-    file(ARCHIVE_EXTRACT
-      INPUT $ENV{extern_DIR}/${archive_name}
-      DESTINATION $ENV{extern_DIR}
-      )
-    message(STATUS "Attempting to remove ${archive_name}")
-    file(REMOVE $ENV{extern_DIR}/${archive_name})
-    if(EXISTS $ENV{extern_DIR}/${XP_INSTALLED_NAME})
-      set(@CMAKE_PROJECT_NAME@_DIR $ENV{extern_DIR}/${XP_INSTALLED_NAME})
-    else()
-      message(AUTHOR_WARNING "Automatic download and extraction failed. Verify @XP_DOWNLOAD_URL@/${@CMAKE_PROJECT_NAME@_REV}/${archive_name} exists and can be accessed.")
-    endif()
-  endif()
-endif()
-if(NOT @CMAKE_PROJECT_NAME@_DIR)
-  set(@CMAKE_PROJECT_NAME@_INSTALL_INFO @XP_INSTALL_INFO@) # @CMAKE_PROJECT_NAME@ can set(XP_INSTALL_INFO) to define this
-  if(DEFINED @CMAKE_PROJECT_NAME@_INSTALLER_LOCATION) # defined by project using @CMAKE_PROJECT_NAME@
-    message(FATAL_ERROR "@CMAKE_PROJECT_NAME@ ${@CMAKE_PROJECT_NAME@_SIG} not found.\n${@CMAKE_PROJECT_NAME@_INSTALLER_LOCATION}")
-  else()
-    message(FATAL_ERROR "@CMAKE_PROJECT_NAME@ ${@CMAKE_PROJECT_NAME@_SIG} not found${@CMAKE_PROJECT_NAME@_INSTALL_INFO}")
-  endif()
+  message(STATUS "@CMAKE_PROJECT_NAME@ ${@CMAKE_PROJECT_NAME@_SIG} not installed")
 else()
   message(STATUS "Found @CMAKE_PROJECT_NAME@: ${@CMAKE_PROJECT_NAME@_DIR}")
   set(moduleDir ${@CMAKE_PROJECT_NAME@_DIR}/share/cmake)
