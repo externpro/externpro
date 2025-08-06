@@ -320,7 +320,7 @@ macro(proSetStageDir) # NOTE: called by cmake-generated xpbase/pro/build.cmake f
       @ONLY NEWLINE_STYLE LF
       )
     set(CMAKE_DIR ${STAGE_DIR}/share/cmake)
-  elseif(DEFINED externpro_DIR)
-    set(CMAKE_DIR ${externpro_DIR}/share/cmake)
+  elseif(DEFINED exdlpro_DIR)
+    set(CMAKE_DIR ${exdlpro_DIR}/share/cmake)
   endif()
 endmacro()
