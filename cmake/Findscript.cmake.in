@@ -30,11 +30,10 @@ find_path(@CMAKE_PROJECT_NAME@_DIR
     "C:/dev/extern/${XP_INSTALLED_NAME}"
   DOC "@CMAKE_PROJECT_NAME@ directory"
   )
-if(NOT @CMAKE_PROJECT_NAME@_DIR)
-  message(STATUS "@CMAKE_PROJECT_NAME@ ${@CMAKE_PROJECT_NAME@_SIG} not installed")
-else()
-  message(STATUS "Found @CMAKE_PROJECT_NAME@: ${@CMAKE_PROJECT_NAME@_DIR}")
-  list(APPEND XP_MODULE_PATH ${@CMAKE_PROJECT_NAME@_DIR}/share/cmake)
+if(@CMAKE_PROJECT_NAME@_DIR)
+  if(EXISTS ${@CMAKE_PROJECT_NAME@_DIR}/share/cmake/xpuse-@CMAKE_PROJECT_NAME@-config.cmake)
+    include(${@CMAKE_PROJECT_NAME@_DIR}/share/cmake/xpuse-@CMAKE_PROJECT_NAME@-config.cmake)
+  endif()
   if(COMMAND xpCheckInstall)
     xpCheckInstall(@CMAKE_PROJECT_NAME@)
   endif()

@@ -307,6 +307,17 @@ macro(proSetStageDir) # NOTE: called by cmake-generated xpbase/pro/build.cmake f
       if(CMAKE_SYSTEM_PROCESSOR MATCHES "^(aarch64|arm64|ARM64)$")
         set(CPACK_PACKAGE_FILE_NAME "${CMAKE_PROJECT_NAME}-${CPACK_PACKAGE_VERSION}-${CMAKE_SYSTEM_NAME}-arm64")
       endif()
+      string(TOUPPER ${CMAKE_PROJECT_NAME} PRJ)
+      string(TOLOWER ${CMAKE_PROJECT_NAME} NAME)
+      set(VER ${CPACK_PACKAGE_VERSION})
+      string(JOIN "\n" EXT1
+        "get_filename_component(moduleDir \${CMAKE_CURRENT_LIST_DIR} ABSOLUTE)"
+        "list(APPEND XP_MODULE_PATH \${moduleDir})"
+        "list(APPEND reqVars XP_MODULE_PATH)"
+        ""
+        )
+      set(xpuseFile ${STAGE_DIR}/share/cmake/xpuse-${CMAKE_PROJECT_NAME}-config.cmake)
+      configure_file(${MODULES_DIR}/xpuse.cmake.in ${xpuseFile} @ONLY NEWLINE_STYLE LF)
     endif()
   endif()
   # configure_file to STAGE_DIR, set CMAKE_DIR
