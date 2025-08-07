@@ -1,11 +1,11 @@
-set(xp_exdlpro REPO github.com/externpro/exdlpro TAG v25.01-7-g242f19f
+set(xp_exdlpro REPO github.com/externpro/exdlpro TAG v25.02
   BRANCH dev
   WEB "https://github.com/externpro/exdlpro"
   DESC "build external projects with cmake"
   LICENSE "[MIT](https://github.com/externpro/exdlpro/blob/dev/LICENSE 'MIT License')"
-  SHA256_Linux-arm64 de8a2ff523cddcf1a6af96934e48688a13321842aa1ebfc15c8e3ef6d0c6f6a0
-  SHA256_Linux 3986c5ef237d3611e5f473ed2c3133eaf30043366632055060f91170a9a95dce
-  SHA256_win64 4336dc517156930bf9a0c6da2dbf05cc3d73bfb6bbe143dd561343082123f4a6
+  SHA256_Linux-arm64 d6c4a8cc47018212d9f15effe1323078344bb444612ef4642805862e2e673433
+  SHA256_Linux 55e5b4b1c70882f3090026710f5a15ac4b6008cf196a041f66a1651debf3a036
+  SHA256_win64 a4934d1eedddb282cc8e4ec490155df7d5ebd0deae7fc7b7c55877032a4f6676
   )
 set(xp_apr REPO github.com/externpro/apr VER 1.5.2 XP_MODULE
   BASE apache:1.5.2 BRANCH xp1.5.2
