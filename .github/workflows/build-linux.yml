@@ -5,11 +5,13 @@ on:
       cmake-workflow-preset:
         required: false
         type: string
-        default: "Linux" # CMake workflow preset to use; e.g., Linux, LinuxRelease
+        description: 'CMake workflow preset to use; e.g. Linux, LinuxRelease, LinuxReleaseNoInstall'
+        default: "Linux"
       runon:
         required: false
         type: string
-        default: "ubuntu-latest" # runs-on value (e.g., ubuntu-latest, ubuntu-24.04-arm, etc.)
+        description: 'runs-on value (e.g., ubuntu-latest, ubuntu-24.04-arm, etc.)'
+        default: "ubuntu-latest"
 jobs:
   build-docker-image:
     runs-on: ${{ inputs.runon }}

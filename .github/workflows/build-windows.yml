@@ -5,7 +5,8 @@ on:
       cmake-workflow-preset:
         required: false
         type: string
-        default: "Windows" # CMake workflow preset to use; e.g., Windows, WindowsRelease
+        description: 'CMake workflow preset to use; e.g. Windows, WindowsRelease, WindowsReleaseNoInstall'
+        default: "Windows"
 jobs:
   build:
     runs-on: windows-2022
