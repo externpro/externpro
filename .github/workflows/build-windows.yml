@@ -33,14 +33,14 @@ jobs:
           path: |
             _bld-${{ env.CMAKE_PRESET }}/CMakeFiles/CMakeConfigureLog.yaml
       -
-        name: Find devel package tarball
-        id: find_tarball
+        name: Find package
+        id: find_package
         if: ${{ inputs.cmake-workflow-preset != 'WindowsReleaseNoInstall' }}
         shell: bash
         run: |
           file=$(pwd)/$(ls _bld-${{ env.CMAKE_PRESET }}/${{ github.event.repository.name }}*-devel.tar.xz)
           if [[ ! -f "$file" ]]; then
-            echo "Tarball not found!" >&2
+            echo "Package not found!" >&2
             exit 1
           fi
           echo "filepath=$file" >> $GITHUB_OUTPUT
@@ -52,12 +52,12 @@ jobs:
         if: ${{ inputs.cmake-workflow-preset != 'WindowsReleaseNoInstall' }}
         shell: pwsh
         run: |
-          $windowsPath = '${{ steps.find_tarball.outputs.filepath }}' -replace '^/([a-zA-Z])/', '$1:/' -replace '/', '\'
+          $windowsPath = '${{ steps.find_package.outputs.filepath }}' -replace '^/([a-zA-Z])/', '$1:/' -replace '/', '\'
           echo "windows_path=$windowsPath" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
       -
-        name: Upload devel tarball artifact
+        name: Upload package artifact
         if: ${{ inputs.cmake-workflow-preset != 'WindowsReleaseNoInstall' }}
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ steps.find_tarball.outputs.filename }}
+          name: ${{ steps.find_package.outputs.filename }}
           path: ${{ steps.convert_path.outputs.windows_path }}

@@ -87,26 +87,26 @@ jobs:
           path: |
             _bld-${{ env.CMAKE_PRESET }}/CMakeFiles/CMakeConfigureLog.yaml
       -
-        name: Find devel package tarball
-        id: find_tarball
+        name: Find package
+        id: find_package
         if: ${{ inputs.cmake-workflow-preset != 'LinuxReleaseNoInstall' }}
         shell: bash
         run: |
           file=$(pwd)/$(ls _bld-${{ env.CMAKE_PRESET }}/${{ github.event.repository.name }}*-devel.tar.xz)
           if [[ ! -f "$file" ]]; then
-            echo "Tarball not found!" >&2
+            echo "Package not found!" >&2
             exit 1
           fi
           echo "filepath=$file" >> $GITHUB_OUTPUT
           echo "filename=$(basename $file)" >> $GITHUB_OUTPUT
         working-directory: ${{ github.workspace }}
       -
-        name: Upload devel tarball artifact
+        name: Upload package artifact
         if: ${{ inputs.cmake-workflow-preset != 'LinuxReleaseNoInstall' }}
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ steps.find_tarball.outputs.filename }}
-          path: ${{ steps.find_tarball.outputs.filepath }}
+          name: ${{ steps.find_package.outputs.filename }}
+          path: ${{ steps.find_package.outputs.filepath }}
   clean-up:
     needs: [build-docker-image, build]
     if: ${{ needs.build.result == 'success' }}
