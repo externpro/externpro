@@ -123,7 +123,7 @@ jobs:
         name: Delete untagged images from ghcr
         uses: snok/container-retention-policy@v3.0.0
         with:
-          account: ${{ github.repository_owner }}
+          account: ${{ github.actor == github.repository_owner && 'user' || github.repository_owner }}
           token: ${{ secrets.GITHUB_TOKEN }}
           image-names: ${{ needs.build-docker-image.outputs.delete_image_name }}
           tag-selection: untagged
