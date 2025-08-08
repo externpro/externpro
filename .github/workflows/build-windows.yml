@@ -2,6 +2,11 @@ name: Build Windows
 on:
   workflow_call:
     inputs:
+      artifact-pattern:
+        required: false
+        type: string
+        description: 'Pattern to search for artifact file'
+        default: '${{ github.event.repository.name }}-*-devel.tar.xz'
       cmake-workflow-preset:
         required: false
         type: string
@@ -39,7 +44,7 @@ jobs:
         if: ${{ inputs.cmake-workflow-preset != 'WindowsReleaseNoInstall' }}
         shell: bash
         run: |
-          file=$(pwd)/$(ls _bld-${{ env.CMAKE_PRESET }}/${{ github.event.repository.name }}*-devel.tar.xz)
+          file=$(pwd)/$(ls _bld-${{ env.CMAKE_PRESET }}/${{ inputs.artifact-pattern }})
           if [[ ! -f "$file" ]]; then
             echo "Package not found!" >&2
             exit 1
