@@ -9,6 +9,7 @@ This directory contains reusable GitHub Actions for building and releasing the p
 Builds the project in a Docker container on Linux systems.
 
 **Inputs:**
+- `artifact-pattern` (optional): Pattern to search for artifact files (default: `[repository-name]-*-devel.tar.xz`)
 - `cmake-workflow-preset` (optional): CMake workflow preset (default: `Linux`)
 - `runon` (optional): Runner to use (default: `ubuntu-latest`)
 
@@ -27,6 +28,7 @@ jobs:
 Builds the project on Windows systems.
 
 **Inputs:**
+- `artifact-pattern` (optional): Pattern to search for artifact files (default: `[repository-name]-*-devel.tar.xz`)
 - `cmake-workflow-preset` (optional): CMake workflow preset (default: `Windows`)
 
 **Usage:**
@@ -143,6 +145,19 @@ jobs:
 
 To upload different types of artifacts:
 
+build.yml
+```yaml
+jobs:
+  linux:
+    uses: externpro/externpro/.github/workflows/build-linux.yml@25.05
+    with:
+      artifact-pattern: "${{ github.event.repository.name }}-*.zip"
+      cmake-workflow-preset: LinuxRelease
+      runon: ubuntu-latest
+    secrets: inherit
+```
+
+release.yml
 ```yaml
 jobs:
   release-from-build:
