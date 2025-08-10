@@ -65,10 +65,6 @@ jobs:
     needs: build-docker-image
     if: ${{ needs.build-docker-image.result == 'success' }}
     runs-on: ${{ inputs.runon }}
-    permissions:
-      contents: read
-      attestations: write
-      id-token: write
     env:
       CMAKE_PRESET: Linux
     container:
@@ -113,17 +109,11 @@ jobs:
         working-directory: ${{ github.workspace }}
       -
         name: Upload package artifact
-        id: upload_package
         if: ${{ inputs.cmake-workflow-preset != 'LinuxReleaseNoInstall' }}
         uses: actions/upload-artifact@v4
         with:
           name: ${{ steps.find_package.outputs.filename }}
           path: ${{ steps.find_package.outputs.filepath }}
-      -
-        uses: actions/attest-build-provenance@v2
-        with:
-          subject-name: ${{ steps.find_package.outputs.filename }}
-          subject-digest: sha256:${{ steps.upload_package.outputs.artifact-digest }}
   clean-up:
     needs: [build-docker-image, build]
     if: ${{ needs.build.result == 'success' }}

@@ -15,10 +15,6 @@ on:
 jobs:
   build:
     runs-on: windows-2022
-    permissions:
-      contents: read
-      attestations: write
-      id-token: write
     env:
       CMAKE_PRESET: Windows
     steps:
@@ -66,14 +62,8 @@ jobs:
           echo "windows_path=$windowsPath" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
       -
         name: Upload package artifact
-        id: upload_package
         if: ${{ inputs.cmake-workflow-preset != 'WindowsReleaseNoInstall' }}
         uses: actions/upload-artifact@v4
         with:
           name: ${{ steps.find_package.outputs.filename }}
           path: ${{ steps.convert_path.outputs.windows_path }}
-      -
-        uses: actions/attest-build-provenance@v2
-        with:
-          subject-name: ${{ steps.find_package.outputs.filename }}
-          subject-digest: sha256:${{ steps.upload_package.outputs.artifact-digest }}
