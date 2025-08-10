@@ -61,7 +61,7 @@ NOTE: Requires [WiX Toolset](http://wixtoolset.org/) to be installed (currently 
 ### Linux
 `make -j4 package`
 
-NOTE: Requires rpm-build to be installed (for example: `dnf install rpm-build`). The buildpro/public/rocky-[mdv|pin|pdv] docker images have rpm-build installed.
+NOTE: Requires rpm-build to be installed (for example: `dnf install rpm-build`). The buildpro/public/rocky-pro docker image has rpm-build installed.
 
 ## Installing Packages
 
