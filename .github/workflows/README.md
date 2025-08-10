@@ -43,7 +43,15 @@ jobs:
 
 ### 3. `release-from-build.yml` - Reusable Release Asset Upload Action
 
-Downloads build artifacts and uploads them as GitHub release assets.
+Downloads build artifacts and uploads them as GitHub release assets. This workflow also generates SLSA build provenance attestations for the artifacts.
+
+**Required Permissions:**
+```yaml
+permissions:
+  contents: write     # Required for creating releases and uploading assets
+  id-token: write     # Required for OIDC token generation
+  attestations: write # Required for uploading attestations
+```
 
 **Inputs:**
 - `workflow_run_url` (required): URL of the workflow run to download artifacts from (e.g., `https://github.com/owner/repo/actions/runs/123456789`)

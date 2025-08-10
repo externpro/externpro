@@ -1,4 +1,9 @@
 name: Upload Release Assets
+# This reusable workflow requires the following permissions to be set by the caller:
+# permissions:
+#   contents: write     # Required for creating releases and uploading assets
+#   id-token: write     # Required for OIDC token generation
+#   attestations: write # Required for uploading attestations
 on:
   workflow_call:
     inputs:
@@ -42,6 +47,7 @@ on:
 jobs:
   upload-assets:
     runs-on: ubuntu-latest
+    # Note: Permissions must be set by the caller workflow
     outputs:
       release_id: ${{ steps.create_release.outputs.release_id }}
       release_url: ${{ steps.create_release.outputs.release_url }}
@@ -98,6 +104,16 @@ jobs:
             echo "No artifacts found matching pattern: ${{ inputs.artifact_pattern }}"
             exit 1
           fi
+          # Create a checksums file in the artifacts directory
+          checksums_file="./artifacts/checksums.txt"
+          printf '%s\n' "${hashes[@]}" > "$checksums_file"
+          echo "Checksums file created at: $checksums_file"
+          echo "Checksums file contents:"
+          cat "$checksums_file"
+          # Output artifacts, hashes, and checksums file path for next steps
+          echo "artifacts=${artifacts[*]}" >> $GITHUB_OUTPUT
+          echo "hashes=${hashes[*]}" >> $GITHUB_OUTPUT
+          echo "checksums_file=$checksums_file" >> $GITHUB_OUTPUT
           # Convert arrays to JSON for output
           printf -v artifacts_json '%s\n' "${artifacts[@]}" | jq -R . | jq -s .
           printf -v hashes_json '%s\n' "${hashes[@]}" | jq -R . | jq -s .
@@ -158,6 +174,12 @@ jobs:
             find . -type f | sort
             exit 1
           fi
+      - name: Attest artifacts
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-name: ${{ github.repository }}@${{ steps.determine_tag.outputs.tag }}
+          subject-checksums: ${{ steps.find_artifacts.outputs.checksums_file }}
+          push-to-registry: false
       -
         name: Check if tag exists
         id: check_tag
@@ -175,6 +197,8 @@ jobs:
       -
         name: Create release
         id: create_release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           tag="${{ steps.determine_tag.outputs.tag }}"
           is_prerelease="${{ steps.determine_tag.outputs.is_prerelease }}"
@@ -184,9 +208,23 @@ jobs:
           # Write base release body to file
           cat << 'EOF' > "$RELEASE_NOTES_FILE"
           ${{ inputs.release_body_template }}
+
+          ### Build Provenance
+          This release includes SLSA build provenance attestations, which provide verifiable information about how these artifacts were built.
+
+          **Release Workflow Run:** https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+          You can find the attestations in the "Attestations" section of the release workflow run linked above.
+
+          To verify the attestations, you can use the GitHub CLI:
+          ```bash
+          gh attestation verify --repo ${{ github.repository }} --signer-repo {signer_repo} <artifact-filename>
+          ```
           EOF
           # Replace placeholders in the file
+          # Use the hardcoded repository where this workflow is defined as the signer
           sed -i "s|{workflow_run_url}|${{ inputs.workflow_run_url }}|g" "$RELEASE_NOTES_FILE"
+          sed -i "s|{signer_repo}|externpro/externpro|g" "$RELEASE_NOTES_FILE"
           # Append checksums section to release notes file
           cat << 'EOF' >> "$RELEASE_NOTES_FILE"
           ### Checksums
@@ -240,8 +278,6 @@ jobs:
           echo "release_id=$release_id" >> $GITHUB_OUTPUT
           echo "release_url=$release_url" >> $GITHUB_OUTPUT
           echo "Created release: $tag"
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       -
         name: Upload artifacts to release
         run: |
