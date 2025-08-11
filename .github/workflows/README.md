@@ -83,6 +83,10 @@ jobs:
     with:
       workflow_run_url: https://github.com/owner/repo/actions/runs/123456789
       artifact_pattern: "*.tar.xz"
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
     secrets: inherit
 ```
 
@@ -107,6 +111,10 @@ jobs:
     with:
       workflow_run_url: ${{ github.event.inputs.workflow_run_url }}
       artifact_pattern: "*.tar.xz"
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
     secrets: inherit
 ```
 
@@ -173,6 +181,10 @@ jobs:
     with:
       workflow_run_url: https://github.com/owner/repo/actions/runs/123456789
       artifact_pattern: "*.zip"  # Upload ZIP files instead
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
     secrets: inherit
 ```
 
