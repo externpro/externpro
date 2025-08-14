@@ -1937,7 +1937,7 @@ macro(xpPackageDevel)
   include(CPack)
   string(TOUPPER ${CMAKE_PROJECT_NAME} PRJ)
   string(TOLOWER ${CMAKE_PROJECT_NAME} NAME)
-  set(VER ${gitDescribe})
+  set(VER ${CPACK_PACKAGE_VERSION})
   if(DEFINED P_DEPS)
     list(JOIN P_DEPS " " deps) # list to string with spaces
     set(FIND_DEPS "xpFindPkg(PKGS ${deps}) # dependencies\n")
