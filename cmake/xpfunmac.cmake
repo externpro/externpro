@@ -1921,20 +1921,22 @@ function(xpGetVersionString verString)
 endfunction()
 
 macro(xpPackageDevel)
+  # NOTE: if repository name doesn't match CMAKE_PROJECT_NAME (case sensitive),
+  # set(CPACK_PACKAGE_NAME repositoryName) # before calling xpPackageDevel()
   set(oneValueArgs EXE EXE_PATH TARGETS_FILE)
   set(multiValueArgs DEPS LIBRARIES)
   cmake_parse_arguments(P "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
   set(CMAKE_INSTALL_DEFAULT_COMPONENT_NAME devel)
   set(CPACK_ARCHIVE_COMPONENT_INSTALL ON)
   list(APPEND CPACK_COMPONENTS_ALL devel)
-  xpGetVersionString(CPACK_PACKAGE_VERSION)
+  xpGetVersionString(CPACK_PACKAGE_VERSION) # override CPACK_PACKAGE_VERSION
   set(CPACK_COMPONENT_INCLUDE_TOPLEVEL_DIRECTORY ON)
   unset(CPACK_PACKAGING_INSTALL_PREFIX)
   set(CPACK_GENERATOR TXZ)
   if(CMAKE_SYSTEM_PROCESSOR MATCHES "^(aarch64|arm64|ARM64)$")
-    set(CPACK_PACKAGE_FILE_NAME "${CMAKE_PROJECT_NAME}-${CPACK_PACKAGE_VERSION}-${CMAKE_SYSTEM_NAME}-arm64")
+    set(CPACK_SYSTEM_NAME "${CMAKE_SYSTEM_NAME}-arm64") # override CPACK_SYSTEM_NAME
   endif()
-  include(CPack)
+  include(CPack) # CPACK_PACKAGE_FILE_NAME is ${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}-${CPACK_SYSTEM_NAME}
   string(TOUPPER ${CMAKE_PROJECT_NAME} PRJ)
   string(TOLOWER ${CMAKE_PROJECT_NAME} NAME)
   set(VER ${CPACK_PACKAGE_VERSION})
