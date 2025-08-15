@@ -1,0 +1,84 @@
+# How-to: modify a project to build with externpro
+
+... and utilize externpro cmake, docker build images, and github actions shared workflows to create devel packages
+
+1. attempt to find project on github, then fork or start a new project on github
+   * there is no requirement to use the externpro organization, projects can be hosted anywhere
+1. add externpro repository as a git submodule
+   ```bash
+   git submodule add https://github.com/externpro/externpro .devcontainer
+   ```
+1. add docker-compose links
+   ```bash
+   ln -s .devcontainer/compose.pro.sh docker-compose.sh
+   ln -s .devcontainer/compose.bld.yml docker-compose.yml
+   ```
+1. add CMakePresets
+   ```bash
+   cp .devcontainer/cmake/presets/CMakePresets* .
+   ```
+1. create or modify `.gitignore` with externpro ignores
+   ```
+   # externpro
+   .env
+   _bld*/
+   docker-compose.override.yml
+   ```
+1. consider updating the default branch name to `dev` if it is not already
+1. possibly modify CMakePresetsBase.json
+   * add a `cacheVariables` section to set variables
+     * `XP_INSTALL_CMAKEDIR` is a common one I add... and then modify CMakeLists.txt to use it in determining whether the project is being built via externpro cmake or not
+   ```diff
+   diff --git a/CMakePresetsBase.json b/CMakePresetsBase.json
+   index 09653d8a..65047105 100644
+   --- a/CMakePresetsBase.json
+   +++ b/CMakePresetsBase.json
+   @@ -4,7 +4,10 @@
+         {
+          "name": "config-base",
+          "hidden": true,
+   -      "binaryDir": "${sourceDir}/_bld-${presetName}"
+   +      "binaryDir": "${sourceDir}/_bld-${presetName}",
+   +      "cacheVariables": {
+   +        "XP_INSTALL_CMAKEDIR": "share/cmake"
+   +      }
+        }
+      ]
+    }
+   ```
+1. modify root CMakeLists.txt (and possibly other cmake files depending on where things are)
+   * consider if `cmake_minimum_required` should be modified
+   * before the `project()` call...
+     ```cmake
+     list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/.devcontainer/cmake)
+     include(preproject)
+     project(foo)
+     ```
+     * append to `CMAKE_MODULE_PATH` -- to find cmake functions from externpro
+     * call `include(preproject)` -- to set `CMAKE_INSTALL_PREFIX` (and possibly anything else determined to be needed before the `project()` call) https://github.com/externpro/externpro/blob/main/cmake/preproject.cmake
+   * possibly modify the `project()` call...
+     * if the existing cmake `project()` call has a `VERSION` argument, consider using it to version an externpro release (if a project uses the first 3 digits of a version number then use the fourth digit to version an externpro release so it's obvious which version of the upstream project is being used)
+     * `xpPackageDevel()` (more specifically `xpGetVersionString()`) uses `git describe --tags` to get the version string (and possibly a 'dirtyrepo' marker if the repository is 'dirty'), so the `VERSION` doesn't have to be specified in `project()` if it's not already specified there in existing cmake
+   * set preprocessor, compiler, linker flags by including `flags.cmake` so all externpro-built projects are built with a common set of flags https://github.com/externpro/externpro/blob/main/cmake/flags.cmake
+     ```cmake
+     include(flags)
+     ```
+   * setup for and call `xpPackageDevel()`...
+     * the extraction of a devel package happens by calling `xpFindPkg()`, which calls `ipGetPrefixPath()`, which assumes the `PKG_NAME` is the same as the repository name (https://github.com/externpro/externpro/blob/25.05/cmake/xpfunmac.cmake#L1356)
+     * so in the creation of the devel package, if the `project()` name (which becomes `CMAKE_PROJECT_NAME`) doesn't match the repository name, then
+       ```cmake
+       set(CPACK_PACKAGE_NAME "<repository-name>") # before calling `xpPackageDevel()`
+       ```
+   * conditionally set `install()` arguments `COMPONENT` and `NAMESPACE` if project is externpro-built, for example:
+     ```cmake
+     if(DEFINED XP_INSTALL_CMAKEDIR) # externpro-built
+       set(XP_COMPONENT "devel") # why they are referred to as `devel` packages
+       set(XP_NAMESPACE "xpro::") # helps distinguish an externpro-built package from a non-externpro-built package
+     else() # whatever these values are in pre-existing cmake
+       set(XP_COMPONENT "bar")
+       set(XP_NAMESPACE "foo::")
+     endif()
+     ```
+     or perhaps instead of `XP_[COMPONENT|NAMESPACE]`... use variable names to match the existing project variable naming
+   * consider some way of disabling the `install()` of `pkgconfig` related files, as there is no need for them in externpro devel packages
+1. add github actions workflows from externpro
