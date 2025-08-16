@@ -1,4 +1,4 @@
-name: Build Windows
+name: Build macOS
 on:
   workflow_call:
     inputs:
@@ -10,13 +10,13 @@ on:
       cmake-workflow-preset:
         required: false
         type: string
-        description: 'CMake workflow preset to use; e.g. Windows, WindowsRelease, WindowsReleaseNoInstall'
-        default: "Windows"
+        description: 'CMake workflow preset to use; e.g. Darwin, DarwinRelease, DarwinReleaseNoInstall'
+        default: "Darwin"
 jobs:
   build:
-    runs-on: windows-2022
+    runs-on: macos-15
     env:
-      CMAKE_PRESET: Windows
+      CMAKE_PRESET: Darwin
     steps:
       -
         name: Checkout repo
@@ -41,7 +41,7 @@ jobs:
       -
         name: Find package
         id: find_package
-        if: ${{ inputs.cmake-workflow-preset != 'WindowsReleaseNoInstall' }}
+        if: ${{ inputs.cmake-workflow-preset != 'DarwinReleaseNoInstall' }}
         shell: bash
         run: |
           file=$(pwd)/$(ls _bld-${{ env.CMAKE_PRESET }}/${{ inputs.artifact-pattern }})
@@ -53,17 +53,9 @@ jobs:
           echo "filename=$(basename $file)" >> $GITHUB_OUTPUT
         working-directory: ${{ github.workspace }}
       -
-        name: Convert Git Bash path to Windows path
-        id: convert_path
-        if: ${{ inputs.cmake-workflow-preset != 'WindowsReleaseNoInstall' }}
-        shell: pwsh
-        run: |
-          $windowsPath = '${{ steps.find_package.outputs.filepath }}' -replace '^/([a-zA-Z])/', '$1:/' -replace '/', '\'
-          echo "windows_path=$windowsPath" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
-      -
         name: Upload package artifact
-        if: ${{ inputs.cmake-workflow-preset != 'WindowsReleaseNoInstall' }}
+        if: ${{ inputs.cmake-workflow-preset != 'DarwinReleaseNoInstall' }}
         uses: actions/upload-artifact@v4
         with:
           name: ${{ steps.find_package.outputs.filename }}
-          path: ${{ steps.convert_path.outputs.windows_path }}
+          path: ${{ steps.find_package.outputs.filepath }}
