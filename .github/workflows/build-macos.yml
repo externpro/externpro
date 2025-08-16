@@ -1,0 +1,69 @@
+name: Build Windows
+on:
+  workflow_call:
+    inputs:
+      artifact-pattern:
+        required: false
+        type: string
+        description: 'Pattern to search for artifact file'
+        default: '${{ github.event.repository.name }}-*-devel.tar.xz'
+      cmake-workflow-preset:
+        required: false
+        type: string
+        description: 'CMake workflow preset to use; e.g. Windows, WindowsRelease, WindowsReleaseNoInstall'
+        default: "Windows"
+jobs:
+  build:
+    runs-on: windows-2022
+    env:
+      CMAKE_PRESET: Windows
+    steps:
+      -
+        name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # fetches all history
+          fetch-tags: true # explicitly fetches tags
+          submodules: true
+      -
+        name: CMake Configure
+        run: cmake --preset=${{ env.CMAKE_PRESET }}
+      -
+        name: CMake Workflow
+        run: cmake --workflow --preset=${{ inputs.cmake-workflow-preset }}
+      -
+        name: Upload CMake logs
+        uses: actions/upload-artifact@v4
+        with:
+          name: cmake-logs-${{ env.CMAKE_PRESET }}-${{ runner.arch }}
+          path: |
+            _bld-${{ env.CMAKE_PRESET }}/CMakeFiles/CMakeConfigureLog.yaml
+      -
+        name: Find package
+        id: find_package
+        if: ${{ inputs.cmake-workflow-preset != 'WindowsReleaseNoInstall' }}
+        shell: bash
+        run: |
+          file=$(pwd)/$(ls _bld-${{ env.CMAKE_PRESET }}/${{ inputs.artifact-pattern }})
+          if [[ ! -f "$file" ]]; then
+            echo "Package not found!" >&2
+            exit 1
+          fi
+          echo "filepath=$file" >> $GITHUB_OUTPUT
+          echo "filename=$(basename $file)" >> $GITHUB_OUTPUT
+        working-directory: ${{ github.workspace }}
+      -
+        name: Convert Git Bash path to Windows path
+        id: convert_path
+        if: ${{ inputs.cmake-workflow-preset != 'WindowsReleaseNoInstall' }}
+        shell: pwsh
+        run: |
+          $windowsPath = '${{ steps.find_package.outputs.filepath }}' -replace '^/([a-zA-Z])/', '$1:/' -replace '/', '\'
+          echo "windows_path=$windowsPath" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+      -
+        name: Upload package artifact
+        if: ${{ inputs.cmake-workflow-preset != 'WindowsReleaseNoInstall' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.find_package.outputs.filename }}
+          path: ${{ steps.convert_path.outputs.windows_path }}
