@@ -1,0 +1,176 @@
+{
+  "version": 8,
+  "include": ["../../../CMakePresetsBase.json"],
+  "configurePresets": [
+    {
+      "name": "isDarwin",
+      "hidden": true,
+      "condition": {
+        "type": "allOf",
+        "conditions": [
+          { "lhs": "${hostSystemName}", "type": "equals", "rhs": "Darwin" }
+        ]
+      }
+    },
+    {
+      "name": "Darwin",
+      "displayName": "configure Darwin Ninja",
+      "inherits": ["config-base", "isDarwin"],
+      "generator": "Ninja Multi-Config"
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "isDarwin",
+      "hidden": true,
+      "condition": {
+        "type": "allOf",
+        "conditions": [
+          { "lhs": "${hostSystemName}", "type": "equals", "rhs": "Darwin" }
+        ]
+      }
+    },
+    {
+      "name": "DarwinDebug",
+      "displayName": "build Darwin Debug",
+      "inherits": ["isDarwin"],
+      "configurePreset": "Darwin",
+      "configuration": "Debug"
+    },
+    {
+      "name": "DarwinRelease",
+      "displayName": "build Darwin Release",
+      "inherits": ["isDarwin"],
+      "targets": ["all", "install"],
+      "configurePreset": "Darwin",
+      "configuration": "Release"
+    },
+    {
+      "name": "DarwinReleaseNoInstall",
+      "displayName": "build Darwin Release, no install",
+      "inherits": ["isDarwin"],
+      "configurePreset": "Darwin",
+      "configuration": "Release"
+    }
+  ],
+  "testPresets": [
+    {
+      "name": "isDarwin",
+      "hidden": true,
+      "condition": {
+        "type": "allOf",
+        "conditions": [
+          { "lhs": "${hostSystemName}", "type": "equals", "rhs": "Darwin" }
+        ]
+      }
+    },
+    {
+      "name": "DarwinDebug",
+      "displayName": "test Darwin Debug",
+      "inherits": ["isDarwin"],
+      "configurePreset": "Darwin",
+      "configuration": "Debug",
+      "output": { "outputOnFailure": true },
+      "execution": { "noTestsAction": "ignore", "stopOnFailure": false }
+    },
+    {
+      "name": "DarwinRelease",
+      "displayName": "test Darwin Release",
+      "inherits": ["isDarwin"],
+      "configurePreset": "Darwin",
+      "configuration": "Release",
+      "output": { "outputOnFailure": true },
+      "execution": { "noTestsAction": "ignore", "stopOnFailure": false }
+    }
+  ],
+  "packagePresets": [
+    {
+      "name": "isDarwin",
+      "hidden": true,
+      "condition": {
+        "type": "allOf",
+        "conditions": [
+          { "lhs": "${hostSystemName}", "type": "equals", "rhs": "Darwin" }
+        ]
+      }
+    },
+    {
+      "name": "Darwin",
+      "displayName": "package Darwin",
+      "inherits": ["isDarwin"],
+      "configurePreset": "Darwin",
+      "configurations": ["Debug", "Release"]
+    },
+    {
+      "name": "DarwinRelease",
+      "displayName": "package Darwin Release",
+      "inherits": ["isDarwin"],
+      "configurePreset": "Darwin",
+      "configurations": ["Release"]
+    }
+  ],
+  "workflowPresets": [
+    {
+      "name": "Darwin",
+      "displayName": "workflow Darwin",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "Darwin"
+        },
+        {
+          "type": "build",
+          "name": "DarwinDebug"
+        },
+        {
+          "type": "build",
+          "name": "DarwinRelease"
+        },
+        {
+          "type": "test",
+          "name": "DarwinDebug"
+        },
+        {
+          "type": "test",
+          "name": "DarwinRelease"
+        },
+        {
+          "type": "package",
+          "name": "Darwin"
+        }
+      ]
+    },
+    {
+      "name": "DarwinRelease",
+      "displayName": "workflow Darwin Release",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "Darwin"
+        },
+        {
+          "type": "build",
+          "name": "DarwinRelease"
+        },
+        {
+          "type": "package",
+          "name": "DarwinRelease"
+        }
+      ]
+    },
+    {
+      "name": "DarwinReleaseNoInstall",
+      "displayName": "workflow Darwin Release, no install",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "Darwin"
+        },
+        {
+          "type": "build",
+          "name": "DarwinReleaseNoInstall"
+        }
+      ]
+    }
+  ]
+}
