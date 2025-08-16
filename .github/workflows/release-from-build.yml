@@ -127,17 +127,20 @@ jobs:
             # Extract platform from filename pattern: <name>-v#.#.#.#-g<hash>-<platform>.<ext>
             # or <name>-v#.#.#.#-<platform>.<ext>
             platform=""
-            # Simple platform detection based on filename patterns
-            if [[ "$filename" =~ [Ww]in ]]; then
+            # Platform detection based on filename patterns - check most specific patterns first
+            if [[ "$filename" =~ -[dD]arwin-[aA][rR][mM]64- ]]; then
+                platform="Darwin-arm64"
+            elif [[ "$filename" =~ -[dD]arwin- ]]; then
+                platform="Darwin"
+            elif [[ "$filename" =~ -[wW]in64- ]]; then
                 platform="win64"
-            elif [[ "$filename" =~ [Mm]ac ]]; then
-                platform="macos"
-            elif [[ "$filename" =~ [Aa]rm64 || "$filename" =~ [Aa][Aa][Rr][Mm]64 ]]; then
+            elif [[ "$filename" =~ -[lL]inux-[aA][rR][mM]64- ]]; then
                 platform="Linux-arm64"
-            elif [[ "$filename" =~ [Ll]inux ]]; then
+            elif [[ "$filename" =~ -[lL]inux- ]]; then
                 platform="Linux"
             else
                 platform="unknown"
+                echo "WARNING: Could not detect platform for file: $filename"
             fi
             # Format: SHA256_platform hash
             formatted_hashes+=("SHA256_$platform $hash_value")
