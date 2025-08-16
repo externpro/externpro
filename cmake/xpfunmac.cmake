@@ -792,9 +792,9 @@ function(xpGetCompilerPrefix _ret)
       "gcc${digits}"
       prefix ${compilerVersion}
       )
-  elseif(${CMAKE_CXX_COMPILER_ID} MATCHES "Clang") # LLVM/Apple Clang (clang.llvm.org)
+  elseif(${CMAKE_C_COMPILER_ID} MATCHES "Clang") # LLVM/Apple Clang (clang.llvm.org)
     if(${CMAKE_SYSTEM_NAME} STREQUAL Darwin)
-      execute_process(COMMAND ${CMAKE_CXX_COMPILER} ${CMAKE_CXX_COMPILER_ARG1} -dumpversion
+      execute_process(COMMAND ${CMAKE_C_COMPILER} ${CMAKE_C_COMPILER_ARG1} -dumpversion
         OUTPUT_VARIABLE CLANG_VERSION
         OUTPUT_STRIP_TRAILING_WHITESPACE
         )
@@ -805,11 +805,11 @@ function(xpGetCompilerPrefix _ret)
     else()
       string(REGEX REPLACE "([0-9]+)\\.([0-9]+)(\\.[0-9]+)?"
         "clang\\1\\2" # match boost naming
-        prefix ${CMAKE_CXX_COMPILER_VERSION}
+        prefix ${CMAKE_C_COMPILER_VERSION}
         )
     endif()
   else()
-    message(SEND_ERROR "xpfunmac.cmake: compiler support lacking: ${CMAKE_CXX_COMPILER_ID}")
+    message(SEND_ERROR "xpfunmac.cmake: compiler support lacking: ${CMAKE_C_COMPILER_ID}")
   endif()
   set(${_ret} ${prefix} PARENT_SCOPE)
 endfunction()
