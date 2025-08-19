@@ -115,7 +115,7 @@ set(xp_jxrlib REPO github.com/externpro/jxrlib VER 15.08 XP_MODULE
   LICENSE "[BSD-2-Clause](https://github.com/4creators/jxrlib/blob/master/LICENSE 'BSD 2-Clause Simplified License')"
   )
 set(xp_libiconv REPO github.com/externpro/libiconv TAG v1.18.3
-  BASE 1.18-eed6782 BRANCH dev
+  BASE v0 BRANCH dev
   WEB "https://www.gnu.org/software/libiconv/" UPSTREAM "github.com/pffang/libiconv-for-Windows/releases/tag/1.18-eed6782"
   DESC "character set conversion library"
   LICENSE "[LGPL-2.1](https://savannah.gnu.org/projects/libiconv/ 'LGPL version 2.1')"
@@ -135,7 +135,7 @@ set(xp_luabridge REPO github.com/vinniefalco/LuaBridge/tree/2.5 VER 2.5
   LICENSE "[MIT](https://github.com/vinniefalco/LuaBridge/#official-repository 'MIT License')"
   )
 set(xp_nasm REPO github.com/externpro/nasm TAG v2.14.02.1
-  BRANCH dev
+  BASE v0 BRANCH dev
   WEB "https://www.nasm.us/"
   DESC "The Netwide Assembler - an 80x86 and x86-64 assembler (MSW-only)"
   LICENSE "[BSD-2-Clause](https://www.nasm.us/ 'BSD 2-Clause Simplified License')"
@@ -154,7 +154,7 @@ set(xp_nodeng REPO github.com/externpro/nodeng TAG v22.16.0.2-2-ge210ba4 # overr
   SHA256_win64 88b003f7d3d60f090a7ec30f77e8c0174caedf9eec670a74018d7c5d7ba26d5f
   )
 set(xp_nodeng REPO github.com/externpro/nodeng TAG v22.18.0.2
-  BRANCH dev
+  BASE v0 BRANCH dev
   WEB "https://nodejs.org/en/blog/release/v22.18.0/"
   DESC "node executable bundled as externpro devel package to build angular (ng) projects"
   LICENSE "[MIT](https://raw.githubusercontent.com/nodejs/node/v22.18.0/LICENSE 'MIT License')"
@@ -163,7 +163,7 @@ set(xp_nodeng REPO github.com/externpro/nodeng TAG v22.18.0.2
   SHA256_win64 b84be97affa306c6ac8e82d5b016f04bb501a7f99cc8d1fb9208fdbe26edbab5
   )
 set(xp_nodexp REPO github.com/externpro/nodexp TAG v14.17.6.2
-  BRANCH dev # TRICKY: nodexp, openssl versions coordinated
+  BASE v0 BRANCH dev # TRICKY: nodexp, openssl versions coordinated
   WEB "https://nodejs.org/en/blog/release/v14.17.6/"
   DESC "node/npm development platform and runtime executable bundled as externpro devel package to build addons"
   LICENSE "[MIT](https://raw.githubusercontent.com/nodejs/node/v14.17.6/LICENSE 'MIT License')"
@@ -172,7 +172,7 @@ set(xp_nodexp REPO github.com/externpro/nodexp TAG v14.17.6.2
   SHA256_win64 43cdceaf386ccbf70d1e9cbe1ceeb76b90c0c30eac84f804dc9f2a333d028681
   )
 set(xp_nvjpeg2000 REPO github.com/externpro/nvJPEG2000 TAG v0.8.1.2
-  BRANCH dev
+  BASE v0 BRANCH dev
   WEB "https://developer.nvidia.com/nvjpeg"
   DESC "high-performance GPU-accelerated library for decoding JPEG 2000 format images"
   LICENSE "[NVIDIA](https://docs.nvidia.com/cuda/nvjpeg2000/license.html 'NVIDIA Software License Agreement')"
@@ -181,7 +181,7 @@ set(xp_nvjpeg2000 REPO github.com/externpro/nvJPEG2000 TAG v0.8.1.2
   SHA256_win64 f31707f118db7d4e673ac29bcf809412c6378cbd5fd5513b9534d0ce2559830f
   )
 set(xp_patch REPO github.com/externpro/patch TAG v2.7.6.1
-  BRANCH dev
+  BASE v0 BRANCH dev
   WEB "https://savannah.gnu.org/projects/patch/" UPSTREAM "git.savannah.gnu.org/cgit/patch.git"
   DESC "takes a patch file containing a difference listing produced by the diff program and applies those differences to one or more original files, producing patched versions"
   LICENSE "[GPL-3.0](https://savannah.gnu.org/projects/patch/ 'GNU General Public License v3 or later')"
