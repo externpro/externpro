@@ -37,7 +37,7 @@ else
   display_env=${docker_host}:${display_screen}
   # determine XAUTHORITY environment variable
   magic_cookie=$(xauth list ${DISPLAY} 2>/dev/null | awk '{print $3}')
-  if [ FALSE && -z "${magic_cookie}" ]; then
+  if false && [ -z "${magic_cookie}" ]; then
     alt_display=$(xauth list 2>/dev/null | grep -m 1 '\.local:0\s' | awk '{print $1}')
     if [ -n "${alt_display}" ]; then
       magic_cookie=$(xauth list "${alt_display}" 2>/dev/null | awk '{print $3}')
