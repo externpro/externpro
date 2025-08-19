@@ -12,9 +12,9 @@ function(proDeps)
   set(dot "${dot}" PARENT_SCOPE)
   # README project
   if(DEFINED P_WEB)
-    string(APPEND rme "|[${P_PKG}](${P_WEB})")
+    string(APPEND rme "|<a id='${P_PKG}' />[${P_PKG}](${P_WEB})")
   else()
-    string(APPEND rme "|${P_PKG}")
+    string(APPEND rme "|<a id='${P_PKG}' />${P_PKG}")
   endif()
   # README license
   if(DEFINED P_LICENSE)
