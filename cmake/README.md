@@ -70,3 +70,5 @@
 |<a id='zmqpp' />[zmqpp](https://zeromq.github.io/zmqpp/)|[MPL-2.0](https://github.com/zeromq/zmqpp/blob/develop/LICENSE 'Mozilla Public License 2.0')|high-level binding for libzmq [deps: _libzmq_]|21.07.09|[repo](https://github.com/externpro/zmqpp 'github.com/externpro/zmqpp') [upstream](https://github.com/zeromq/zmqpp 'github.com/zeromq/zmqpp')|[diff](https://github.com/externpro/zmqpp/compare/zeromq:ba4230d5d03d29ced9ca788e3bd1095477db08ae...xp21.07.09 'github.com/externpro/zmqpp/compare/zeromq:ba4230d5d03d29ced9ca788e3bd1095477db08ae...xp21.07.09')|
 
 ![deps](deps.png 'dependencies')
+
+[How-to: modify a project to build with externpro](pros.md)

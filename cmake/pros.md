@@ -8,6 +8,9 @@
    ```bash
    git submodule add https://github.com/externpro/externpro .devcontainer
    ```
+   * you may need to consider removing an existing `.devcontainer/` directory
+   * examples
+      * [hdf5](https://github.com/externpro/externpro/blob/main/cmake/README.md#hdf5)
 1. add docker-compose links
    ```bash
    ln -s .devcontainer/compose.pro.sh docker-compose.sh
@@ -81,4 +84,41 @@
      ```
      or perhaps instead of `XP_[COMPONENT|NAMESPACE]`... use variable names to match the existing project variable naming
    * consider some way of disabling the `install()` of `pkgconfig` related files, as there is no need for them in externpro devel packages
-1. add github actions workflows from externpro
+1. GitHub Actions workflows
+   * add GitHub Actions workflows from externpro
+      ```bash
+      mkdir -p .github/workflows
+      cp .devcontainer/.github/wf-templates/xp*.yml .github/workflows/
+      ```
+   * consider modifying `.github/workflows/xpbuild.yml`'s `cmake-workflow-preset` to be `[Linux|Windows]Release` if the project doesn't need to build a `Debug` version of a library (for example, the project only builds an executable or a header-only library)
+   * you may need to disable or modify the trigger of existing "upstream" GitHub Actions workflows
+      * examples:
+        [fmt](https://github.com/externpro/externpro/blob/main/cmake/README.md#fmt)
+        [geos](https://github.com/externpro/externpro/blob/main/cmake/README.md#geos)
+        [hdf5](https://github.com/externpro/externpro/blob/main/cmake/README.md#hdf5)
+
+projects that modify existing cmake
+* [fmt](https://github.com/externpro/externpro/blob/main/cmake/README.md#fmt)
+* [geos](https://github.com/externpro/externpro/blob/main/cmake/README.md#geos)
+* [hdf5](https://github.com/externpro/externpro/blob/main/cmake/README.md#hdf5)
+* [sqlite3](https://github.com/externpro/externpro/blob/main/cmake/README.md#sqlite3)
+* [zlib](https://github.com/externpro/externpro/blob/main/cmake/README.md#zlib)
+
+projects that introduce cmake
+* [node-addon-api](https://github.com/externpro/externpro/blob/main/cmake/README.md#node-addon-api)
+
+projects that add cmake to replace autotools/configure/make
+* [librttopo](https://github.com/externpro/externpro/blob/main/cmake/README.md#librttopo)
+* [libspatialite](https://github.com/externpro/externpro/blob/main/cmake/README.md#libspatialite)
+* [spatialite-tools](https://github.com/externpro/externpro/blob/main/cmake/README.md#spatialite-tools)
+
+projects that add cmake and repackage binaries built elsewhere
+* [libiconv](https://github.com/externpro/externpro/blob/main/cmake/README.md#libiconv)
+* [nasm](https://github.com/externpro/externpro/blob/main/cmake/README.md#nasm)
+* [nodeng](https://github.com/externpro/externpro/blob/main/cmake/README.md#nodeng)
+* [nodexp](https://github.com/externpro/externpro/blob/main/cmake/README.md#nodexp)
+* [nvjpeg2000](https://github.com/externpro/externpro/blob/main/cmake/README.md#nvjpeg2000)
+* [patch](https://github.com/externpro/externpro/blob/main/cmake/README.md#patch) on Windows
+
+projects that add cmake but use existing build system
+* [patch](https://github.com/externpro/externpro/blob/main/cmake/README.md#patch) on Linux
