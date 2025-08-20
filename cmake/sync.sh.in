@@ -28,6 +28,7 @@ popd
 @moreCowbell@
 downloadAndCompare @P_PKG@-@P_TAG@-win64-devel.tar.xz @P_SHA256_win64@
 downloadAndCompare @P_PKG@-@P_TAG@-Linux-devel.tar.xz @P_SHA256_Linux@
+downloadAndCompare @P_PKG@-@P_TAG@-Linux-arm64-devel.tar.xz @P_SHA256_Linux-arm64@
 tar -cJf @P_PKG@__@P_TAG@.tar.xz @P_PKG@
 
 rm -rf @P_PKG@
