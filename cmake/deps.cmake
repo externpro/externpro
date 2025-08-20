@@ -1,6 +1,8 @@
 function(proDeps)
   set(options XP_MODULE)
-  set(oneValueArgs PKG BASE BRANCH DESC DIST_DIR LICENSE REPO TAG UPSTREAM VER WEB SHA256_Linux SHA256_Linux-arm64 SHA256_win64 URL_Linux URL_Linux-arm64 URL_win64 SHA256_utres)
+  set(oneValueArgs PKG BASE BRANCH DESC DIST_DIR LICENSE REPO TAG UPSTREAM VER WEB)
+  list(APPEND oneValueArgs SHA256_Linux SHA256_Linux-arm64 SHA256_win64)
+  list(APPEND oneValueArgs URL_Linux URL_Linux-arm64 URL_win64 SHA256_utres)
   set(multiValueArgs DEPS EXE_DEPS)
   cmake_parse_arguments(P "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
   # dot
