@@ -792,6 +792,22 @@ function(xpGetCompilerPrefix _ret)
       "gcc${digits}"
       prefix ${compilerVersion}
       )
+  elseif(${CMAKE_CXX_COMPILER_ID} MATCHES "Clang") # LLVM/Apple Clang (clang.llvm.org)
+    if(${CMAKE_SYSTEM_NAME} STREQUAL Darwin)
+      execute_process(COMMAND ${CMAKE_CXX_COMPILER} ${CMAKE_CXX_COMPILER_ARG1} -dumpversion
+        OUTPUT_VARIABLE CLANG_VERSION
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        )
+      string(REGEX REPLACE "([0-9]+)\\.([0-9]+)(\\.[0-9]+)?"
+        "clang-darwin\\1\\2" # match boost naming
+        prefix ${CLANG_VERSION}
+        )
+    else()
+      string(REGEX REPLACE "([0-9]+)\\.([0-9]+)(\\.[0-9]+)?"
+        "clang\\1\\2" # match boost naming
+        prefix ${CMAKE_CXX_COMPILER_VERSION}
+        )
+    endif()
   elseif(${CMAKE_C_COMPILER_ID} MATCHES "Clang") # LLVM/Apple Clang (clang.llvm.org)
     if(${CMAKE_SYSTEM_NAME} STREQUAL Darwin)
       execute_process(COMMAND ${CMAKE_C_COMPILER} ${CMAKE_C_COMPILER_ARG1} -dumpversion
