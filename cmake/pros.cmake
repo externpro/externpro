@@ -48,15 +48,15 @@ set(xp_flatbuffers REPO github.com/externpro/flatbuffers VER 2.0.6 XP_MODULE
   DESC "efficient cross platform serialization library"
   LICENSE "[Apache-2.0](https://github.com/google/flatbuffers/blob/v2.0.6/LICENSE.txt 'Apache License, Version 2.0')"
   )
-set(xp_fmt REPO github.com/externpro/fmt TAG v11.2.0.2
+set(xp_fmt REPO github.com/externpro/fmt TAG v11.2.0.3
   BASE 11.2.0 BRANCH dev
   WEB "https://fmt.dev" UPSTREAM "github.com/fmtlib/fmt"
   DESC "fmtlib: a modern formatting library"
   LICENSE "[MIT](https://github.com/externpro/fmt/blob/master/LICENSE 'MIT License')"
-  SHA256_Darwin-arm64 cc3e507acd92a84099b6562f721285f037cd86ad7b3710ae143e1e020d43c86c
-  SHA256_Linux-arm64 806210f00287d2233e47000bb6ce34396a7c083229580d5f37e3a21fd68468ed
-  SHA256_Linux d0ffc559a03e397633e41c2263c2986a3c184cc51b7aceae23bdaf34f9d5d2cd
-  SHA256_win64 c0e258a44d6b326bd7f53574b89dc1d679b7e502cdc3c0b3e5257d045c77dc2a
+  SHA256_Darwin-arm64 621c03453353b883c102c946c67602b01ff1e320b75b646643b9a64d4c8dc0d7
+  SHA256_Linux-arm64 95576eb85a11717e6b120600817487db351db136b403b269b334ec24aec5decd
+  SHA256_Linux f4f65488036cfb48763ac89cc3c92b3182d043e74ad962cb094005bd202ff123
+  SHA256_win64 524a02569353895cf30cbb2c8cd1a81585afb04a6a5cf695234cbb6498df777d
   )
 set(xp_geos REPO github.com/externpro/geos TAG v3.13.0.3
   BASE 3.13.0 BRANCH dev
