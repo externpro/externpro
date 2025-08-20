@@ -101,6 +101,7 @@ projects that modify existing cmake
 * [fmt](https://github.com/externpro/externpro/blob/main/cmake/README.md#fmt)
 * [geos](https://github.com/externpro/externpro/blob/main/cmake/README.md#geos)
 * [hdf5](https://github.com/externpro/externpro/blob/main/cmake/README.md#hdf5)
+* [spdlog](https://github.com/externpro/externpro/blob/main/cmake/README.md#spdlog)
 * [sqlite3](https://github.com/externpro/externpro/blob/main/cmake/README.md#sqlite3)
 * [zlib](https://github.com/externpro/externpro/blob/main/cmake/README.md#zlib)
 

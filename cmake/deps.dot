@@ -34,6 +34,7 @@ digraph GG {
   "openssl" -> "opensslasm";
   "protobuf" -> "zlib";
   "spatialite-tools" -> "libspatialite";
+  "spdlog" -> "fmt";
   "wxinclude" -> "boost";
   "wxx" -> "wxwidgets";
   "zmqpp" -> "libzmq";
