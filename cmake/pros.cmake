@@ -79,6 +79,16 @@ set(xp_glew REPO github.com/externpro/glew VER 1.13.0 XP_MODULE
   DESC "The OpenGL Extension Wrangler Library"
   LICENSE "[MIT](https://github.com/nigels-com/glew/blob/master/LICENSE.txt 'Modified BSD, Mesa 3D (renamed X11/MIT), Khronos (renamed X11/MIT)')"
   )
+set(xp_googletest REPO github.com/externpro/googletest TAG v1.16.0.1
+  BASE v1.16.0 BRANCH dev
+  WEB "https://google.github.io/googletest/" UPSTREAM "github.com/google/googletest"
+  DESC "GoogleTest - Google Testing and Mocking Framework"
+  LICENSE "[BSD-3-Clause](https://github.com/google/googletest/blob/master/LICENSE 'BSD 3-Clause New or Revised License')"
+  SHA256_Darwin-arm64 43e5f07d68aef4d6f0f981d054e77bbe099214c22cc14fd3543c14a27808c01a
+  SHA256_Linux-arm64 23787bd9536a33003ad84cb756899ed4ac6e6ef287c66f50b7bc57433f929ed6
+  SHA256_Linux 9ca3f35c60306fbcd14038772b0cce5fd3e81c371beebf5472ae80a33887a431
+  SHA256_win64 479ab2c6dd7bccabe2c41cad27399d441d32667c563a1428f8fd154072bb8858
+  )
 set(xp_jasper REPO github.com/externpro/jasper VER 1.900.1 XP_MODULE
   BASE version-1.900.1 BRANCH xp-1.900.1
   WEB "http://www.ece.uvic.ca/~frodo/jasper/" UPSTREAM "github.com/jasper-software/jasper"
