@@ -13,6 +13,16 @@ set(xp_apr REPO github.com/externpro/apr VER 1.5.2 XP_MODULE
   DESC "Apache Portable Runtime project"
   LICENSE "[Apache-2.0](http://www.apache.org/licenses/LICENSE-2.0.html 'Apache License, Version 2.0')"
   )
+set(xp_argon2 REPO github.com/externpro/argon2 TAG v20210625.1
+  BASE 20210625 BRANCH dev
+  WEB "https://www.password-hashing.net" UPSTREAM "github.com/P-H-C/phc-winner-argon2"
+  DESC "The reference C implementation of the Argon2, the password-hashing function that won the Password Hashing Competition (PHC)"
+  LICENSE "[CC0-1.0 or Apache-2.0](https://github.com/P-H-C/phc-winner-argon2/blob/master/LICENSE 'dual licensed under Creative Commons Zero v1.0 Universal and Apache License, Version 2.0')"
+  SHA256_Darwin-arm64 1682cf01eb81cd6131dd47f9d4e7799b594882bda5f1f034cd52939134c2d03a
+  SHA256_Linux-arm64 55587523e38ac32ad52500f0c374505f16caec80c92c231ab1e8b7ed432ee2d3
+  SHA256_Linux ea7a773da6aca9ec9766e6a1ae680b9375c068375bb2fdaee959745a4190a69c
+  SHA256_win64 fa649f8c8975985f9714f11c500aef67468fc66801611aa067bbb489e9814da2
+  )
 set(xp_bzip2 REPO github.com/externpro/bzip2 VER 1.0.6 XP_MODULE
   BASE v1.0.6 BRANCH xp1.0.6
   WEB "http://www.bzip.org" UPSTREAM "github.com/LuaDist/bzip2" # TODO upstream github.com/opencor/bzip2
