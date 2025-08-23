@@ -108,6 +108,7 @@ projects that modify existing cmake
 * [zlib](https://github.com/externpro/externpro/blob/main/cmake/README.md#zlib)
 
 projects that introduce cmake
+* [argon2](https://github.com/externpro/externpro/blob/main/cmake/README.md#argon2)
 * [node-addon-api](https://github.com/externpro/externpro/blob/main/cmake/README.md#node-addon-api)
 
 projects that add cmake to replace autotools/configure/make
