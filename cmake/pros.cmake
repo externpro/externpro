@@ -164,6 +164,16 @@ set(xp_nasm REPO github.com/externpro/nasm TAG v2.14.02.1
   SHA256_Linux 3b452814ca0a2c53edffd15b5801fb1778ddfba115804c21ef03e71c31c4965b
   SHA256_win64 b9ec621141b54f4d04948d039901e92ff4712792a133780e1c6ffb4e347b6646
   )
+set(xp_nlohmann_json REPO github.com/externpro/nlohmann_json TAG v3.12.0.1
+  BASE v3.12.0 BRANCH dev
+  WEB "https://json.nlohmann.me" UPSTREAM "github.com/nlohmann/json"
+  DESC "JSON for Modern C++"
+  LICENSE "[MIT](https://github.com/nlohmann/json/blob/develop/LICENSE.MIT 'MIT License')"
+  SHA256_Darwin-arm64 b5631660b006ccc13f282be4c30f41ddf18ed0f2ab6c56b9c7176377dd51a472
+  SHA256_Linux-arm64 be2efc38fd6585c4b50ec8878fe411bc6c443c13d2e60f5192236abf8931703d
+  SHA256_Linux 4960bad21fc64c0e05af8879421f1b60c6a5af965e4690641eb9b793474678eb
+  SHA256_win64 cbcc1cdb845dda2e5f26d73d77cd66206b28cba03bc22b6dbb43b567d759b528
+  )
 set(xp_nodeng DIST_DIR /bpvol/src/pros/nodeng/_bld-Linux/dist/) # override with local dist directory
 set(xp_nodeng # override with locally built devel package (cmake --preset=Linux; cmake --workflow --preset=LinuxRelease)
   URL_Linux-arm64 /bpvol/src/pros/nodeng/_bld-Linux/nodeng-v22.16.0.2-dr-Linux-arm64-devel.tar.xz
