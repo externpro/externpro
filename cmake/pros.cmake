@@ -23,11 +23,15 @@ set(xp_argon2 REPO github.com/externpro/argon2 TAG v20210625.1
   SHA256_Linux ea7a773da6aca9ec9766e6a1ae680b9375c068375bb2fdaee959745a4190a69c
   SHA256_win64 fa649f8c8975985f9714f11c500aef67468fc66801611aa067bbb489e9814da2
   )
-set(xp_bzip2 REPO github.com/externpro/bzip2 VER 1.0.6 XP_MODULE
-  BASE v1.0.6 BRANCH xp1.0.6
-  WEB "http://www.bzip.org" UPSTREAM "github.com/LuaDist/bzip2" # TODO upstream github.com/opencor/bzip2
+set(xp_bzip2 REPO github.com/externpro/bzip2 TAG v1.0.8.1
+  BASE bzip2-1.0.8 BRANCH dev
+  WEB "https://sourceware.org/bzip2/" UPSTREAM "github.com/opencor/bzip2"
   DESC "lossless block-sorting data compression library"
   LICENSE "[bzip2-1.0.6](https://spdx.org/licenses/bzip2-1.0.6.html 'BSD-like, modified zlib license')"
+  SHA256_Darwin-arm64 7ddbbcfeb6aefe819786acdf52741a131a65468ed900040c5963956f8e5384e9
+  SHA256_Linux-arm64 263ec6667da967bdee0e850bc198fd850a838e569d7c9fe8872c0e806d216e78
+  SHA256_Linux b85946ff61e0401414b1c6f58bafbcc4d1ac9ef667ac3f588c8a425c724210de
+  SHA256_win64 6135fc94fc98d5a4e502685d02be0993702cdadd0e3fa070d578cf6255e23104
   )
 set(xp_cares REPO github.com/externpro/c-ares VER 1.18.1 XP_MODULE
   BASE c-ares:cares-1_18_1 BRANCH xp-1_18_1
