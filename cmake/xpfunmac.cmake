@@ -2533,7 +2533,7 @@ macro(xpCommonFlags)
         # NOTE: these are the only flags we modify in common (including externpro-built projects), for now
         )
     endif()
-  elseif((CMAKE_C_COMPILER_ID STREQUAL GNU) OR (CMAKE_CXX_COMPILER_ID STREQUAL GNU) OR ${CMAKE_CXX_COMPILER_ID} MATCHES "Clang")
+  elseif((CMAKE_C_COMPILER_ID STREQUAL GNU) OR (CMAKE_CXX_COMPILER_ID STREQUAL GNU) OR (${CMAKE_C_COMPILER_ID} MATCHES "Clang") OR (${CMAKE_CXX_COMPILER_ID} MATCHES "Clang"))
     if(CMAKE_BUILD_TYPE STREQUAL Debug)
       add_definitions(-D_DEBUG)
     endif()
