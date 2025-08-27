@@ -2566,7 +2566,7 @@ macro(xpCommonFlags)
       endif() # CMAKE_SYSTEM_NAME (Darwin)
     endif()
     # C++
-    if((CMAKE_CXX_COMPILER_ID STREQUAL GNU) OR ${CMAKE_CXX_COMPILER_ID} MATCHES "Clang")
+    if(DEFINED CMAKE_CXX_COMPILER)
       include(CheckCXXCompilerFlag)
       if(${CMAKE_CXX_COMPILER_ID} MATCHES "Clang")
         check_cxx_compiler_flag("-stdlib=libc++" has_libcxx)
