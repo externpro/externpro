@@ -1,0 +1,67 @@
+{
+  "version": 8,
+  "include": ["../../../CMakePresetsBase.json"],
+  "configurePresets": [
+    {
+      "name": "isLinux",
+      "hidden": true,
+      "condition": { "lhs": "${hostSystemName}", "type": "equals", "rhs": "Linux" }
+    },
+    {
+      "name": "Linux",
+      "displayName": "config Linux Release Makefiles",
+      "inherits": ["config-base", "isLinux"],
+      "generator": "Unix Makefiles",
+      "cacheVariables": { "CMAKE_BUILD_TYPE": "Release" }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "isLinux",
+      "hidden": true,
+      "condition": { "lhs": "${hostSystemName}", "type": "equals", "rhs": "Linux" }
+    },
+    {
+      "name": "LinuxRelease",
+      "displayName": "build Linux Release",
+      "inherits": ["isLinux"],
+      "jobs": 8,
+      "configurePreset": "Linux",
+      "configuration": "Release"
+    }
+  ],
+  "packagePresets": [
+    {
+      "name": "isLinux",
+      "hidden": true,
+      "condition": { "lhs": "${hostSystemName}", "type": "equals", "rhs": "Linux" }
+    },
+    {
+      "name": "Linux",
+      "displayName": "package Linux",
+      "inherits": ["isLinux"],
+      "configurePreset": "Linux",
+      "configurations": ["Release"]
+    }
+  ],
+  "workflowPresets": [
+    {
+      "name": "Linux",
+      "displayName": "workflow Linux",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "Linux"
+        },
+        {
+          "type": "build",
+          "name": "LinuxRelease"
+        },
+        {
+          "type": "package",
+          "name": "Linux"
+        }
+      ]
+    }
+  ]
+}
