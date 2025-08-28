@@ -3,63 +3,63 @@
   "include": ["../../../CMakePresetsBase.json"],
   "configurePresets": [
     {
-      "name": "isLinux",
+      "name": "isDarwin",
       "hidden": true,
-      "condition": { "lhs": "${hostSystemName}", "type": "equals", "rhs": "Linux" }
+      "condition": { "lhs": "${hostSystemName}", "type": "equals", "rhs": "Darwin" }
     },
     {
-      "name": "Linux",
-      "displayName": "config Linux Release Makefiles",
-      "inherits": ["config-base", "isLinux"],
+      "name": "Darwin",
+      "displayName": "config Darwin Release Makefiles",
+      "inherits": ["config-base", "isDarwin"],
       "generator": "Unix Makefiles",
       "cacheVariables": { "CMAKE_BUILD_TYPE": "Release" }
     }
   ],
   "buildPresets": [
     {
-      "name": "isLinux",
+      "name": "isDarwin",
       "hidden": true,
-      "condition": { "lhs": "${hostSystemName}", "type": "equals", "rhs": "Linux" }
+      "condition": { "lhs": "${hostSystemName}", "type": "equals", "rhs": "Darwin" }
     },
     {
-      "name": "LinuxRelease",
-      "displayName": "build Linux Release",
-      "inherits": ["isLinux"],
+      "name": "DarwinRelease",
+      "displayName": "build Darwin Release",
+      "inherits": ["isDarwin"],
       "jobs": 8,
-      "configurePreset": "Linux",
+      "configurePreset": "Darwin",
       "configuration": "Release"
     }
   ],
   "packagePresets": [
     {
-      "name": "isLinux",
+      "name": "isDarwin",
       "hidden": true,
-      "condition": { "lhs": "${hostSystemName}", "type": "equals", "rhs": "Linux" }
+      "condition": { "lhs": "${hostSystemName}", "type": "equals", "rhs": "Darwin" }
     },
     {
-      "name": "Linux",
-      "displayName": "package Linux",
-      "inherits": ["isLinux"],
-      "configurePreset": "Linux",
+      "name": "Darwin",
+      "displayName": "package Darwin",
+      "inherits": ["isDarwin"],
+      "configurePreset": "Darwin",
       "configurations": ["Release"]
     }
   ],
   "workflowPresets": [
     {
-      "name": "Linux",
-      "displayName": "workflow Linux",
+      "name": "Darwin",
+      "displayName": "workflow Darwin",
       "steps": [
         {
           "type": "configure",
-          "name": "Linux"
+          "name": "Darwin"
         },
         {
           "type": "build",
-          "name": "LinuxRelease"
+          "name": "DarwinRelease"
         },
         {
           "type": "package",
-          "name": "Linux"
+          "name": "Darwin"
         }
       ]
     }
