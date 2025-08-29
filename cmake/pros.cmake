@@ -282,15 +282,15 @@ set(xp_yasm REPO github.com/externpro/yasm VER 1.3.0
   DESC "assembler and disassembler for the Intel x86 architecture"
   LICENSE "[BSD-2-Clause](https://github.com/yasm/yasm/blob/v1.3.0/COPYING 'BSD 2-Clause Simplified License')"
   )
-set(xp_zlib REPO github.com/externpro/zlib TAG v1.2.8.4
-  BASE v1.2.8 BRANCH dev
+set(xp_zlib REPO github.com/externpro/zlib TAG v1.3.1.1
+  BASE v1.3.1 BRANCH dev
   WEB "https://zlib.net 'zlib website'" UPSTREAM "github.com/madler/zlib"
   DESC "compression library"
   LICENSE "[permissive](https://zlib.net/zlib_license.html 'zlib/libpng license, see https://en.wikipedia.org/wiki/Zlib_License')"
-  SHA256_Darwin-arm64 beb3407fd886dafdd7bb034800598fbbf3967377090551a4eeb5d86e7cefe445
-  SHA256_Linux-arm64 19dcfdbeb4eaa8e89eabdb7a7f20731733c3abf49c59f22441faf5c9939faa72
-  SHA256_Linux 198eec0af13e6b8cb5e5636d2652bb5818853219f5e0a6f44c6295e27be30a96
-  SHA256_win64 ef23e0c66b6f515aa317b349c741a61f5e2c27f87f9dd9043088ed3674e4ab8f
+  SHA256_Darwin-arm64 abf7c8fb138a222999b3ea40c20520dd9411c5bbbd75183cd479b6452bb2f127
+  SHA256_Linux-arm64 b2acb61a5fd45f17e1ae75d28550260d6fd8454c600b20abb5f59eb5471555b5
+  SHA256_Linux c6b382c1586f8820e04fd1e298086e391797f54e6369d770e9256b51c35a58d7
+  SHA256_win64 41bd417795e6349e0cb71c6097d2c71ef1e30d274d0be0f1311e891e1f105749
   )
 ### depend on previous group
 set(xp_boost VER 1.76.0 XP_MODULE
