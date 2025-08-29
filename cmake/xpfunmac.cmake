@@ -506,7 +506,7 @@ function(ipAddProject XP_TARGET)
     if(WIN32)
       ExternalProject_Add_Step(${XP_TARGET} bugworkaround
         # work around a cmake bug: run cmake again for changes to
-        # CMAKE_CONFIGURATION_TYPES to take effect (see modules/flags.cmake)
+        # CMAKE_CONFIGURATION_TYPES to take effect (see xpCommonFlags)
         COMMAND ${CMAKE_COMMAND} <BINARY_DIR>
         DEPENDEES configure DEPENDERS build #INDEPENDENT TRUE
         )
@@ -953,7 +953,7 @@ function(xpStringRemoveIfExists removeFrom str)
 endfunction()
 
 function(xpGetConfigureFlags cpprefix _ret)
-  include(${MODULES_DIR}/flags.cmake) # populates CMAKE_*_FLAGS
+  include(${MODULES_DIR}/xpflags.cmake) # populates CMAKE_*_FLAGS
   if(XP_BUILD_VERBOSE AND XP_FLAGS_VERBOSE)
     message(STATUS "  CMAKE_CXX_FLAGS: ${CMAKE_CXX_FLAGS}")
     message(STATUS "  CMAKE_C_FLAGS: ${CMAKE_C_FLAGS}")
