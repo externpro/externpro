@@ -6,6 +6,7 @@
   "settings": {
     "terminal.integrated.shell.linux": "/bin/bash"
   },
+  "postStartCommand": "git config --global --add safe.directory ${containerWorkspaceFolder}",
   "extensions": [
     "ms-vscode.cpptools",
     "ms-vscode.cmake-tools",
