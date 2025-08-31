@@ -56,11 +56,15 @@ set(xp_expat REPO github.com/externpro/libexpat VER 2.2.5 XP_MODULE
   DESC "a stream-oriented XML parser library written in C"
   LICENSE "[MIT](https://github.com/libexpat/libexpat/blob/R_2_2_5/expat/COPYING 'MIT License')"
   )
-set(xp_flatbuffers REPO github.com/externpro/flatbuffers VER 2.0.6 XP_MODULE
-  BASE google:v2.0.6 BRANCH xp2.0.6
+set(xp_flatbuffers REPO github.com/externpro/flatbuffers TAG v25.2.10.1
+  BASE v25.2.10 BRANCH dev
   WEB "http://google.github.io/flatbuffers/" UPSTREAM "github.com/google/flatbuffers"
   DESC "efficient cross platform serialization library"
-  LICENSE "[Apache-2.0](https://github.com/google/flatbuffers/blob/v2.0.6/LICENSE.txt 'Apache License, Version 2.0')"
+  LICENSE "[Apache-2.0](https://github.com/google/flatbuffers/blob/v25.2.10/LICENSE 'Apache License, Version 2.0')"
+  SHA256_Darwin-arm64 16bacbf0607ff852a8c6d5d13464d73eb377db2e792cc68b63806b580f5120ec
+  SHA256_Linux-arm64 8f77592551594a04ee8d2f85cf9164ad1c39ffed3bf3f9dba82cadaec82271b2
+  SHA256_Linux 952061515c851ce9c89500a7311a72d7d7494627dc52f588a66df76d386adf5e
+  SHA256_win64 650f5866d26ad36f06166b18f371dd46c76ee2c68dd7f094fcefb77d347d60a8
   )
 set(xp_fmt REPO github.com/externpro/fmt TAG v11.2.0.3
   BASE 11.2.0 BRANCH dev
