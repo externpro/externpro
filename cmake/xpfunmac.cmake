@@ -2467,7 +2467,6 @@ function(xpSetPostfix)
 endfunction()
 
 macro(xpCommonFlags)
-  include(${xpThisDir}/pros.cmake) # xp_<project> lists
   if(NOT DEFINED CMAKE_C_COMPILER_ID)
     set(CMAKE_C_COMPILER_ID NOTDEFINED)
   endif()
