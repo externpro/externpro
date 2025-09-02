@@ -6,7 +6,7 @@ digraph GG {
   "azmq" -> "libzmq";
   "boost" -> "bzip2";
   "boost" -> "zlib";
-  "ceres" -> "eigen";
+  "ceres-solver" -> "eigen";
   "cppzmq" -> "libzmq";
   "curl" -> "cares";
   "curl" -> "libssh2";

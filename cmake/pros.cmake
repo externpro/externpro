@@ -308,11 +308,15 @@ set(xp_boost VER 1.76.0 XP_MODULE
   LICENSE "[BSL-1.0](http://www.boost.org/users/license.html 'Boost Software License')"
   # SUBMODULES beast dll gil graph boost_install interprocess program_options regex units # TODO
   )
-set(xp_ceres REPO github.com/externpro/ceres-solver VER 1.14.0 XP_MODULE
-  BASE ceres-solver:1.14.0 BRANCH xp1.14.0 DEPS eigen
+set(xp_ceres-solver REPO github.com/externpro/ceres-solver TAG v2.2.0.1
+  BASE 2.2.0 BRANCH dev DEPS eigen
   WEB "http://ceres-solver.org" UPSTREAM "github.com/ceres-solver/ceres-solver"
   DESC "C++ library for modeling and solving large, complicated optimization problems"
   LICENSE "[BSD-3-Clause](http://ceres-solver.org/license.html 'BSD 3-Clause New or Revised License')"
+  SHA256_Darwin-arm64 691687936241f7c99bde436b861ecedca5c716b9aac13bf91d28d49ab95f1d55
+  SHA256_Linux-arm64 49402f864e3e7674433e21c7a97176d81da76fdd5dcc9f3331fb5f42cc541e10
+  SHA256_Linux 13650571975f4acbcc8387b03350633795524a8d6ea38f2c3ea28fddf9f2b35c
+  SHA256_win64 bd006502925dcb900e76f4369a2e02c80ad216fa08a8d94a76503b07ffcfddf6
   )
 set(xp_geotiff REPO github.com/externpro/libgeotiff VER 1.2.4 XP_MODULE
   BASE v1.2.4 BRANCH xp1.2.4 DEPS wxwidgets
