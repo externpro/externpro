@@ -308,15 +308,15 @@ set(xp_boost VER 1.76.0 XP_MODULE
   LICENSE "[BSL-1.0](http://www.boost.org/users/license.html 'Boost Software License')"
   # SUBMODULES beast dll gil graph boost_install interprocess program_options regex units # TODO
   )
-set(xp_ceres-solver REPO github.com/externpro/ceres-solver TAG v2.2.0.1
+set(xp_ceres-solver REPO github.com/externpro/ceres-solver TAG v2.2.0.2
   BASE 2.2.0 BRANCH dev DEPS eigen
   WEB "http://ceres-solver.org" UPSTREAM "github.com/ceres-solver/ceres-solver"
   DESC "C++ library for modeling and solving large, complicated optimization problems"
   LICENSE "[BSD-3-Clause](http://ceres-solver.org/license.html 'BSD 3-Clause New or Revised License')"
-  SHA256_Darwin-arm64 691687936241f7c99bde436b861ecedca5c716b9aac13bf91d28d49ab95f1d55
-  SHA256_Linux-arm64 49402f864e3e7674433e21c7a97176d81da76fdd5dcc9f3331fb5f42cc541e10
-  SHA256_Linux 13650571975f4acbcc8387b03350633795524a8d6ea38f2c3ea28fddf9f2b35c
-  SHA256_win64 bd006502925dcb900e76f4369a2e02c80ad216fa08a8d94a76503b07ffcfddf6
+  SHA256_Darwin-arm64 a34baea1b11de9550e21e0f0b7524961dd74b7a17369d7be18e64048a1d973c1
+  SHA256_Linux-arm64 06b6429c573e3b3266794c4ceac5501e8a1c0ffa3d430fce11bb9df39b8701f2
+  SHA256_Linux 7497798658fa914227d81f7b409705aa143f4ed2b3ee028e74f4894566807703
+  SHA256_win64 ccb00129f23e457b92435ca95f09fb56b25f29275eb750b8c722c7d9db21da40
   )
 set(xp_geotiff REPO github.com/externpro/libgeotiff VER 1.2.4 XP_MODULE
   BASE v1.2.4 BRANCH xp1.2.4 DEPS wxwidgets
