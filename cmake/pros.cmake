@@ -44,11 +44,15 @@ set(xp_clangformat REPO github.com/llvm/llvm-project/tree/llvmorg-11.0.0/clang/t
   DESC "used to format C/C++/Java/JavaScript/JSON/Objective-C/Protobuf/C# code"
   LICENSE "[Apache-2.0](https://releases.llvm.org/11.0.0/LICENSE.TXT 'Apache License v2.0 with LLVM Exceptions, see https://clang.llvm.org/features.html#license and https://llvm.org/docs/DeveloperPolicy.html#copyright-license-and-patents')"
   )
-set(xp_eigen REPO github.com/externpro/eigen VER 3.3.7 XP_MODULE
-  BASE 3.3.7 BRANCH xp3.3.7
+set(xp_eigen REPO github.com/externpro/eigen TAG v3.4.0.1
+  BASE 3.4.0 BRANCH dev
   WEB "http://eigen.tuxfamily.org" UPSTREAM "gitlab.com/libeigen/eigen.git"
   DESC "C++ template library for linear algebra"
   LICENSE "[MPL-2.0](http://eigen.tuxfamily.org/index.php?title=Main_Page#License 'Mozilla Public License 2.0')"
+  SHA256_Darwin-arm64 28d72a94b2c5c4ef2786c2847c1d69d7e9d3c52d080b15339a2d93edcffa36c7
+  SHA256_Linux-arm64 235f7a351de94000ad7e2b46fe8f1f503c86ffb573d40a5d27377964d374299f
+  SHA256_Linux 78a03eb8d1b3b6161b3d2de440172e456a13723cc9ae4730df5933589167f46e
+  SHA256_win64 9bec874c71af9d899e0ab68f470d1ed2208004178a400ea04babe803358995cf
   )
 set(xp_expat REPO github.com/externpro/libexpat VER 2.2.5 XP_MODULE
   BASE libexpat:R_2_2_5 BRANCH xp2.2.5
