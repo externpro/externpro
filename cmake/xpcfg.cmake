@@ -358,3 +358,63 @@ macro(xpcfgTargetCpu var)
     OUTPUT_STRIP_TRAILING_WHITESPACE ERROR_QUIET
     )
 endmacro()
+
+function(xpcfgDotinFile in out)
+  cmake_path(GET out FILENAME outFilename)
+  cmake_path(GET in FILENAME inFilename)
+  set(outContent "/* ${outFilename}.  Generated from ${inFilename} by configure.cmake. */\n")
+  # handle relative paths by prepending with ${CMAKE_CURRENT_SOURCE_DIR} if needed
+  if(NOT IS_ABSOLUTE "${in}")
+    set(in "${CMAKE_CURRENT_SOURCE_DIR}/${in}")
+  endif()
+  # handle relative paths by prepending with ${CMAKE_CURRENT_BINARY_DIR} if needed
+  if(NOT IS_ABSOLUTE "${out}")
+    set(out "${CMAKE_CURRENT_BINARY_DIR}/${out}")
+  endif()
+  # read the input file
+  file(READ "${in}" inContent)
+  # replace any semicolons with a unique placeholder
+  string(REPLACE ";" "$<SEMICOLON>" inContent "${inContent}")
+  # split the content into lines
+  string(REPLACE "\n" ";" lines "${inContent}")
+  # initialize variables
+  set(prevUndef "")
+  # process each line
+  foreach(line IN LISTS lines)
+    if(prevUndef)
+      # extract both the indentation after # and the symbol name
+      string(REGEX REPLACE "^#([ \t]*)undef[ \t]+([A-Za-z_][A-Za-z0-9_]*).*$" "\\1;\\2" result "${prevUndef}")
+      list(GET result 0 indent)
+      list(GET result 1 symbol)
+      if(DEFINED DEFINE_${symbol}) # check if there is a matching DEFINE_ variable
+        # replace the #undef with #@DEFINE_*@, where * is the symbol name
+        set(outContent "${outContent}#${indent}${DEFINE_${symbol}} ${symbol}\n")
+      # see cmakedefine vs cmakedefine01
+      # https://cmake.org/cmake/help/latest/command/configure_file.html#transformations
+      elseif(DEFINED ${symbol} AND ("${${symbol}}" STREQUAL "1" OR "${${symbol}}" STREQUAL "TRUE"))
+        set(outContent "${outContent}#${indent}cmakedefine01 ${symbol}\n")
+      elseif(DEFINED ${symbol} AND ("${${symbol}}" STREQUAL "0" OR "${${symbol}}" STREQUAL "FALSE"))
+        set(outContent "${outContent}#${indent}cmakedefine ${symbol}\n")
+      elseif(DEFINED ${symbol})
+        set(outContent "${outContent}#${indent}cmakedefine ${symbol} ${${symbol}}\n")
+      else()
+        # if we get here, either no match or invalid symbol after #undef
+        set(outContent "${outContent}${prevUndef}\n")
+      endif()
+      set(prevUndef "")
+    endif()
+    # check if this line begins with a # and is followed by undef and a symbol name
+    if(line MATCHES "^#[ \t]*undef[ \t]+([A-Za-z_][A-Za-z0-9_]*)")
+      set(prevUndef "${line}")
+    else()
+      set(prevUndef "")
+      string(REPLACE "$<SEMICOLON>" ";" line "${line}")
+      set(outContent "${outContent}${line}\n")
+    endif()
+  endforeach()
+  string(REGEX REPLACE "[\r\n]$" "" outContent "${outContent}") # remove final newline
+  cmake_path(GET in STEM inStem)
+  set(cmakeDotin "${CMAKE_CURRENT_BINARY_DIR}/${inStem}.cmake.in")
+  file(WRITE "${cmakeDotin}" "${outContent}")
+  configure_file("${cmakeDotin}" "${out}")
+endfunction()
