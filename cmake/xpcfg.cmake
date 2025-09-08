@@ -3,6 +3,7 @@ include(CheckCSourceRuns)
 include(CheckFunctionExists)
 include(CheckIncludeFile)
 include(CheckLibraryExists)
+include(CheckStructHasMember)
 include(CheckSymbolExists)
 include(CheckTypeSize)
 include(CMakePushCheckState)
@@ -22,29 +23,43 @@ function(xpcfgSetDefineList)
   endforeach()
 endfunction()
 
+function(xpcfgSet01 var boolVar)
+  if(${boolVar})
+    set(${var} 1 PARENT_SCOPE)
+  else()
+    set(${var} 0 PARENT_SCOPE)
+  endif()
+endfunction()
+
 macro(xpcfgCheckIncludeFile incfile var)
   check_include_file("${incfile}" ${var})
-  xpcfgSetDefine(${var} 1)
   if(${var})
-    list(APPEND XP_INCLUDES ${incfile})
+    list(APPEND XP_INCLUDE_LIST ${incfile})
+    string(APPEND XP_INCLUDES "#include <${incfile}>\n")
   endif(${var})
 endmacro()
 
 macro(xpcfgCheckSymFnExists func var)
-  check_symbol_exists("${func}" "${XP_INCLUDES}" ${var})
+  check_symbol_exists("${func}" "${XP_INCLUDE_LIST}" ${var})
   if(NOT ${var})
     unset(${var} CACHE)
     check_function_exists("${func}" ${var})
   endif()
-  xpcfgSetDefine(${var} 1)
+endmacro()
+
+macro(xpcfgCheckSymExistsInHdr sym hdr var)
+  check_symbol_exists("${sym}" "${hdr}" ${var})
 endmacro()
 
 macro(xpcfgCheckLibraryExists lib symbol var)
-  check_library_exists("${lib};${FOO_SYSTEM_LIBS}" ${symbol} "${CMAKE_LIBRARY_PATH}" ${var})
-  xpcfgSetDefine(${var} 1)
+  check_library_exists("${lib};${XP_SYSTEM_LIBS}" ${symbol} "${CMAKE_LIBRARY_PATH}" ${var})
   if(${var})
-    set(FOO_SYSTEM_LIBS ${lib} ${FOO_SYSTEM_LIBS})
+    set(XP_SYSTEM_LIBS ${lib} ${XP_SYSTEM_LIBS})
   endif(${var})
+endmacro()
+
+macro(xpcfgCheckStructHasMember struct member header variable)
+  check_struct_has_member("${struct}" "${member}" "${header}" ${variable})
 endmacro()
 
 macro(xpcfgCheckTypeSize)
@@ -65,6 +80,13 @@ macro(xpcfgLtObjdir var)
   endif()
 endmacro()
 
+macro(xpcfgHugeFileSupport)
+  # enabling huge-file support (64 bit file pointers)
+  set(_FILE_OFFSET_BITS 64)
+  set(_LARGEFILE_SOURCE 1)
+  set(_LARGE_FILE 1)
+endmacro()
+
 macro(xpcfgStdcHeaders var)
   ########################################
   # Define to 1 if you have the ANSI C header files.
@@ -83,16 +105,8 @@ int main()
   xpcfgSetDefine(${var} 1)
 endmacro(xpcfgStdcHeaders)
 
-macro(xpcfgHugeFileSupport)
-  # enabling huge-file support (64 bit file pointers)
-  set(_FILE_OFFSET_BITS 64)
-  set(_LARGEFILE_SOURCE 1)
-  set(_LARGE_FILE 1)
-endmacro()
-
-macro(xpcfgConst)
-  ########################################
-  # Define to empty if `const' does not conform to ANSI C.
+macro(xpcfgConst var)
+  # Define to empty if 'const' does not conform to ANSI C.
   check_c_source_compiles("
 int main()
 {
@@ -150,8 +164,10 @@ int main()
 }
 "   ANSI_CONST
     )
-  if(NOT ANSI_CONST)
-    set(const /**/)
+  if(ANSI_CONST)
+    set(${var} 0) # cmakedefine
+  else()
+    set(${var} /**/)
   endif()
 endmacro(xpcfgConst)
 
