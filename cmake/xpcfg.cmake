@@ -240,6 +240,116 @@ int main()
   endif()
 endmacro()
 
+macro(xpcfgGaiAddrconfig var)
+  # Define if getaddrinfo accepts the AI_ADDRCONFIG flag
+  check_c_source_compiles("
+${XP_INCLUDES}
+int main(int argc, char **argv)
+{
+  struct addrinfo hints, *ai;
+  memset(&hints, 0, sizeof(hints));
+  hints.ai_family = AF_UNSPEC;
+  hints.ai_socktype = SOCK_STREAM;
+  hints.ai_flags = AI_ADDRCONFIG;
+  return getaddrinfo(\"localhost\", NULL, &hints, &ai) != 0;
+}
+"   ${var}
+    )
+endmacro()
+
+macro(xpcfgGetaddrinfo var)
+  # Define to 1 if getaddrinfo exists and works well enough
+  check_c_source_compiles("
+${XP_INCLUDES}
+int main(void)
+{
+  struct addrinfo hints;
+  struct addrinfo *ai = 0;
+  int error;
+  memset(&hints, 0, sizeof(hints));
+  hints.ai_flags = AI_NUMERICHOST;
+  hints.ai_family = AF_UNSPEC;
+  hints.ai_socktype = SOCK_STREAM;
+  error = getaddrinfo(\"127.0.0.1\", NULL, &hints, &ai);
+  if(error || !ai || ai->ai_addr->sa_family != AF_INET)
+    exit(1); /* fail */
+  exit(0);
+}
+"   ${var}
+    )
+endmacro()
+
+macro(xpcfgInetAddr var)
+  check_c_source_compiles("
+${XP_INCLUDES}
+int main(void)
+{
+  inet_addr(\"127.0.0.1\");
+  ;
+  return 0;
+}
+"   ${var}
+    )
+endmacro()
+
+macro(xpcfgInetNetwork var)
+  check_c_source_compiles("
+${XP_INCLUDES}
+int main(void)
+{
+  inet_network(\"127.0.0.1\");
+  ;
+  return 0;
+}
+"   ${var}
+    )
+endmacro()
+
+macro(xpcfgUnionSemun var)
+  check_c_source_compiles("
+${XP_INCLUDES}
+int main(void)
+{
+  union semun arg;
+  semctl(0,0,0,arg);
+  ;
+  return 0;
+}
+"   ${var}
+    )
+endmacro()
+
+macro(xpcfgSctp var)
+  check_c_source_compiles("
+${XP_INCLUDES}
+int main(void)
+{
+  int s, opt = 1;
+  if ((s = socket(AF_INET, SOCK_STREAM, IPPROTO_SCTP)) < 0)
+    exit(1);
+  if (setsockopt(s, IPPROTO_SCTP, SCTP_NODELAY, &opt, sizeof(int)) < 0)
+    exit(2);
+  exit(0);
+}
+"   ${var}
+    )
+endmacro()
+
+macro(xpcfgInt64C var)
+  check_c_source_compiles("
+${XP_INCLUDES}
+int main(void)
+{
+#ifdef INT64_C
+  return 0;
+#else
+  return 1;
+#endif
+}
+"   ${var}
+    )
+endmacro()
+
 macro(xpcfgTargetCpu var)
   ####################
   # exporting the TARGET_CPU string
