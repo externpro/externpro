@@ -247,6 +247,15 @@ int main()
   endif()
 endmacro()
 
+macro(xpcfgTargetCpu var)
+  ####################
+  # exporting the TARGET_CPU string
+  execute_process(COMMAND ${CMAKE_C_COMPILER} -dumpmachine
+    OUTPUT_VARIABLE ${var}
+    OUTPUT_STRIP_TRAILING_WHITESPACE ERROR_QUIET
+    )
+endmacro()
+
 # called from: apr/configure.cmake
 macro(xpcfgGaiAddrconfig var)
   # Define if getaddrinfo accepts the AI_ADDRCONFIG flag
@@ -1234,15 +1243,6 @@ int main(void) {
   message(STATUS "strerror_r returns int: ${${var}}") # TODO remove
   cmake_pop_check_state()
 endmacro(xpcfgStrerrorRReturnType)
-
-macro(xpcfgTargetCpu var)
-  ####################
-  # exporting the TARGET_CPU string
-  execute_process(COMMAND ${CMAKE_C_COMPILER} -dumpmachine
-    OUTPUT_VARIABLE ${var}
-    OUTPUT_STRIP_TRAILING_WHITESPACE ERROR_QUIET
-    )
-endmacro()
 
 # called from: apr/configure.cmake
 function(xpcfgDotinFile in out)
