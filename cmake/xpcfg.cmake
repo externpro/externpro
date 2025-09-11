@@ -23,6 +23,7 @@ function(xpcfgSetDefineList)
   endforeach()
 endfunction()
 
+# called from: apr/configure.cmake
 function(xpcfgSet01 var boolVar)
   if(${boolVar})
     set(${var} 1 PARENT_SCOPE)
@@ -31,6 +32,7 @@ function(xpcfgSet01 var boolVar)
   endif()
 endfunction()
 
+# called from: apr/configure.cmake
 macro(xpcfgCheckIncludeFile incfile var)
   check_include_file("${incfile}" ${var})
   if(${var})
@@ -39,6 +41,7 @@ macro(xpcfgCheckIncludeFile incfile var)
   endif(${var})
 endmacro()
 
+# called from: apr/configure.cmake
 macro(xpcfgCheckSymFnExists func var)
   check_symbol_exists("${func}" "${XP_INCLUDE_LIST}" ${var})
   if(NOT ${var})
@@ -47,10 +50,12 @@ macro(xpcfgCheckSymFnExists func var)
   endif()
 endmacro()
 
+# called from: apr/configure.cmake
 macro(xpcfgCheckSymExistsInHdr sym hdr var)
   check_symbol_exists("${sym}" "${hdr}" ${var})
 endmacro()
 
+# called from: apr/configure.cmake
 macro(xpcfgCheckLibraryExists lib symbol var)
   check_library_exists("${lib};${XP_SYSTEM_LIBS}" ${symbol} "${CMAKE_LIBRARY_PATH}" ${var})
   if(${var})
@@ -58,6 +63,7 @@ macro(xpcfgCheckLibraryExists lib symbol var)
   endif(${var})
 endmacro()
 
+# called from: apr/configure.cmake
 macro(xpcfgCheckStructHasMember struct member header variable)
   check_struct_has_member("${struct}" "${member}" "${header}" ${variable})
 endmacro()
@@ -105,6 +111,7 @@ int main()
   xpcfgSetDefine(${var} 1)
 endmacro(xpcfgStdcHeaders)
 
+# called from: apr/configure.cmake
 macro(xpcfgConst var)
   # Define to empty if 'const' does not conform to ANSI C.
   check_c_source_compiles("
@@ -240,6 +247,7 @@ int main()
   endif()
 endmacro()
 
+# called from: apr/configure.cmake
 macro(xpcfgGaiAddrconfig var)
   # Define if getaddrinfo accepts the AI_ADDRCONFIG flag
   check_c_source_compiles("
@@ -257,6 +265,7 @@ int main(int argc, char **argv)
     )
 endmacro()
 
+# called from: apr/configure.cmake
 macro(xpcfgGetaddrinfo var)
   # Define to 1 if getaddrinfo exists and works well enough
   check_c_source_compiles("
@@ -279,6 +288,7 @@ int main(void)
     )
 endmacro()
 
+# called from: apr/configure.cmake
 macro(xpcfgInetAddr var)
   check_c_source_compiles("
 ${XP_INCLUDES}
@@ -292,6 +302,7 @@ int main(void)
     )
 endmacro()
 
+# called from: apr/configure.cmake
 macro(xpcfgInetNetwork var)
   check_c_source_compiles("
 ${XP_INCLUDES}
@@ -305,6 +316,7 @@ int main(void)
     )
 endmacro()
 
+# called from: apr/configure.cmake
 macro(xpcfgUnionSemun var)
   check_c_source_compiles("
 ${XP_INCLUDES}
@@ -319,6 +331,7 @@ int main(void)
     )
 endmacro()
 
+# called from: apr/configure.cmake
 macro(xpcfgSctp var)
   check_c_source_compiles("
 ${XP_INCLUDES}
@@ -359,6 +372,7 @@ macro(xpcfgTargetCpu var)
     )
 endmacro()
 
+# called from: apr/configure.cmake
 function(xpcfgDotinFile in out)
   cmake_path(GET out FILENAME outFilename)
   cmake_path(GET in FILENAME inFilename)
@@ -417,4 +431,4 @@ function(xpcfgDotinFile in out)
   set(cmakeDotin "${CMAKE_CURRENT_BINARY_DIR}/${inStem}.cmake.in")
   file(WRITE "${cmakeDotin}" "${outContent}")
   configure_file("${cmakeDotin}" "${out}")
-endfunction()
+endfunction(xpcfgDotinFile)
