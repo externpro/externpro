@@ -7,11 +7,15 @@ set(xp_exdlpro REPO github.com/externpro/exdlpro TAG v25.02
   SHA256_Linux 55e5b4b1c70882f3090026710f5a15ac4b6008cf196a041f66a1651debf3a036
   SHA256_win64 a4934d1eedddb282cc8e4ec490155df7d5ebd0deae7fc7b7c55877032a4f6676
   )
-set(xp_apr REPO github.com/externpro/apr VER 1.5.2 XP_MODULE
-  BASE apache:1.5.2 BRANCH xp1.5.2
+set(xp_apr REPO github.com/externpro/apr TAG v1.7.6.1
+  BASE 1.7.6 BRANCH dev
   WEB "http://apr.apache.org/" UPSTREAM "github.com/apache/apr"
   DESC "Apache Portable Runtime project"
   LICENSE "[Apache-2.0](http://www.apache.org/licenses/LICENSE-2.0.html 'Apache License, Version 2.0')"
+  SHA256_Darwin-arm64 54f95e19f086b37492b47b47cf1e805f82e6bf887eb42f67f5caf02ab8c2252c
+  SHA256_Linux-arm64 b245be1af71c15625d859995c2cbbd87bb69956abcf24fa951d97e8928d2ce4d
+  SHA256_Linux b42262a1e8f6e84990482b8c8b1a4107f8e798fed19aa541cec57e5544c6f26f
+  SHA256_win64 12004ff076d3fc1442f9211fbf4eb9c29d8248bf178b0c729abbd17a88b3ec80
   )
 set(xp_argon2 REPO github.com/externpro/argon2 TAG v20210625.1
   BASE 20210625 BRANCH dev
