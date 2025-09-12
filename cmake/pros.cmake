@@ -328,15 +328,15 @@ set(xp_geotiff REPO github.com/externpro/libgeotiff VER 1.2.4 XP_MODULE
   DESC "georeferencing info embedded within TIFF file"
   LICENSE "[MIT](https://github.com/OSGeo/libgeotiff/blob/master/libgeotiff/LICENSE 'MIT License or public domain')"
   )
-set(xp_hdf5 REPO github.com/externpro/hdf5 TAG v1.14.6.4
+set(xp_hdf5 REPO github.com/externpro/hdf5 TAG v1.14.6.5
   BASE hdf5_1.14.6 BRANCH dev DEPS zlib
   WEB "https://www.hdfgroup.org/solutions/hdf5/" UPSTREAM "github.com/HDFGroup/hdf5"
   DESC "Utilize the HDF5 high performance data software library and file format to manage, process, and store your heterogeneous data. HDF5 is built for fast I/O processing and storage."
   LICENSE "[BSD-3-Clause](https://github.com/HDFGroup/hdf5/blob/develop/LICENSE 'BSD 3-Clause New or Revised License')"
-  SHA256_Darwin-arm64 386e18cab2ecfcc0c13d22d9957775960b115246b3bc961a645f97938a78fb16
-  SHA256_Linux-arm64 6f2e09924836ccb51f1f5221cb2ae6f3f77a07213c6047ab6bb0b70a8da977bb
-  SHA256_Linux 329b74ecf3d7b00cdf8ac44f78400aec3da01f44ed9395ace61023ae6e811f8f
-  SHA256_win64 2efb5bb600bab8fa6b2ce26387f652e7dede6a2ff18c956a9572ef230668b708
+  SHA256_Darwin-arm64 0e3b00aa64b989fc55047a01ac278a6938c22324394ea28e2173bbdccecc6d91
+  SHA256_Linux-arm64 a008859feae11aefbf9d475c62250b6ba44d5435b87a3ff110f8e90bd9ef3988
+  SHA256_Linux 8665645ce59162219df17b168e20b081d0b1224cc453322fd7aae13c9352fb34
+  SHA256_win64 3cbefc592730f8999897efc1b2c14930ed8f58549afe048f521e041930d471da
   )
 set(xp_librttopo REPO github.com/externpro/librttopo TAG v1.1.0.2
   BASE librttopo-1.1.0 BRANCH dev DEPS geos
