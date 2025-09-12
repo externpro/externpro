@@ -2380,8 +2380,8 @@ function(xpToggleDebugInfo)
     set(reldebCompiler "/Zi /O2 /Ob1")
     set(releaseLinker "/INCREMENTAL:NO")
     set(reldebLinker "/debug /INCREMENTAL")
-  elseif((CMAKE_C_COMPILER_ID STREQUAL GNU) OR (CMAKE_CXX_COMPILER_ID STREQUAL GNU) OR
-         ${CMAKE_C_COMPILER_ID} MATCHES "Clang" OR ${CMAKE_CXX_COMPILER_ID} MATCHES "Clang"
+  elseif("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR
+         "${CMAKE_C_COMPILER_ID}" MATCHES "Clang" OR "${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang"
     )
     set(releaseCompiler "-O3")
     set(reldebCompiler "-O2 -g")
@@ -2467,12 +2467,6 @@ function(xpSetPostfix)
 endfunction()
 
 macro(xpCommonFlags)
-  if(NOT DEFINED CMAKE_C_COMPILER_ID)
-    set(CMAKE_C_COMPILER_ID NOTDEFINED)
-  endif()
-  if(NOT DEFINED CMAKE_CXX_COMPILER_ID)
-    set(CMAKE_CXX_COMPILER_ID NOTDEFINED)
-  endif()
   if(EXISTS ${xpThisDir}/xpopts.cmake)
     include(${xpThisDir}/xpopts.cmake) # determine XP_BUILD_STATIC_RT
   elseif(MSVC)
@@ -2537,7 +2531,7 @@ macro(xpCommonFlags)
       add_definitions(-D_DEBUG)
     endif()
     # C
-    if(EXISTS CMAKE_C_COMPILER AND EXISTS CMAKE_C_COMPILER_ID)
+    if(CMAKE_C_COMPILER AND CMAKE_C_COMPILER_ID)
       include(CheckCCompilerFlag)
       check_c_compiler_flag("-fPIC" has_c_fPIC)
       if(has_c_fPIC)
@@ -2565,7 +2559,7 @@ macro(xpCommonFlags)
       endif() # CMAKE_SYSTEM_NAME (Darwin)
     endif()
     # C++
-    if(EXISTS CMAKE_CXX_COMPILER AND EXISTS CMAKE_CXX_COMPILER_ID)
+    if(CMAKE_CXX_COMPILER AND CMAKE_CXX_COMPILER_ID)
       include(CheckCXXCompilerFlag)
       if(${CMAKE_CXX_COMPILER_ID} MATCHES "Clang")
         check_cxx_compiler_flag("-stdlib=libc++" has_libcxx)
