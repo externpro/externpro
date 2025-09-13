@@ -23,7 +23,7 @@ function(xpcfgSetDefineList)
   endforeach()
 endfunction()
 
-# called from: apr/configure.cmake
+# called from: apr
 function(xpcfgSet01 var boolVar)
   if(${boolVar})
     set(${var} 1 PARENT_SCOPE)
@@ -32,7 +32,7 @@ function(xpcfgSet01 var boolVar)
   endif()
 endfunction()
 
-# called from: apr/configure.cmake
+# called from: apr
 macro(xpcfgCheckIncludeFile incfile var)
   check_include_file("${incfile}" ${var})
   if(${var})
@@ -41,7 +41,7 @@ macro(xpcfgCheckIncludeFile incfile var)
   endif(${var})
 endmacro()
 
-# called from: apr/configure.cmake
+# called from: apr
 macro(xpcfgCheckSymFnExists func var)
   check_symbol_exists("${func}" "${XP_INCLUDE_LIST}" ${var})
   if(NOT ${var})
@@ -50,12 +50,12 @@ macro(xpcfgCheckSymFnExists func var)
   endif()
 endmacro()
 
-# called from: apr/configure.cmake
+# called from: apr
 macro(xpcfgCheckSymExistsInHdr sym hdr var)
   check_symbol_exists("${sym}" "${hdr}" ${var})
 endmacro()
 
-# called from: apr/configure.cmake
+# called from: apr
 macro(xpcfgCheckLibraryExists lib symbol var)
   check_library_exists("${lib};${XP_SYSTEM_LIBS}" ${symbol} "${CMAKE_LIBRARY_PATH}" ${var})
   if(${var})
@@ -63,7 +63,7 @@ macro(xpcfgCheckLibraryExists lib symbol var)
   endif(${var})
 endmacro()
 
-# called from: apr/configure.cmake
+# called from: apr
 macro(xpcfgCheckStructHasMember struct member header variable)
   check_struct_has_member("${struct}" "${member}" "${header}" ${variable})
 endmacro()
@@ -111,7 +111,7 @@ int main()
   xpcfgSetDefine(${var} 1)
 endmacro(xpcfgStdcHeaders)
 
-# called from: apr/configure.cmake
+# called from: apr
 macro(xpcfgConst var)
   # Define to empty if 'const' does not conform to ANSI C.
   check_c_source_compiles("
@@ -256,7 +256,7 @@ macro(xpcfgTargetCpu var)
     )
 endmacro()
 
-# called from: apr/configure.cmake
+# called from: apr
 macro(xpcfgGaiAddrconfig var)
   # Define if getaddrinfo accepts the AI_ADDRCONFIG flag
   check_c_source_compiles("
@@ -274,7 +274,7 @@ int main(int argc, char **argv)
     )
 endmacro()
 
-# called from: apr/configure.cmake
+# called from: apr
 macro(xpcfgGetaddrinfo var)
   # Define to 1 if getaddrinfo exists and works well enough
   check_c_source_compiles("
@@ -297,7 +297,7 @@ int main(void)
     )
 endmacro()
 
-# called from: apr/configure.cmake
+# called from: apr
 macro(xpcfgInetAddr var)
   check_c_source_compiles("
 ${XP_INCLUDES}
@@ -311,7 +311,7 @@ int main(void)
     )
 endmacro()
 
-# called from: apr/configure.cmake
+# called from: apr
 macro(xpcfgInetNetwork var)
   check_c_source_compiles("
 ${XP_INCLUDES}
@@ -325,7 +325,7 @@ int main(void)
     )
 endmacro()
 
-# called from: apr/configure.cmake
+# called from: apr
 macro(xpcfgUnionSemun var)
   check_c_source_compiles("
 ${XP_INCLUDES}
@@ -340,7 +340,7 @@ int main(void)
     )
 endmacro()
 
-# called from: apr/configure.cmake
+# called from: apr
 macro(xpcfgSctp var)
   check_c_source_compiles("
 ${XP_INCLUDES}
@@ -372,7 +372,7 @@ int main(void)
     )
 endmacro()
 
-# called from: apr/configure.cmake
+# called from: apr
 macro(xpcfgSockCloexec var)
   # Define if the SOCK_CLOEXEC flag is supported
   check_c_source_compiles("
@@ -385,7 +385,7 @@ int main(void)
     )
 endmacro()
 
-# called from: apr/configure.cmake
+# called from: apr
 macro(xpcfgTcpNodelayWithCork var)
   # Define if TCP_NODELAY and TCP_CORK can be enabled at the same time
   check_c_source_compiles("
@@ -415,7 +415,7 @@ int main(void)
     )
 endmacro()
 
-# called from: apr/configure.cmake
+# called from: apr
 macro(xpcfgONonblockInherited var)
   # Is the O_NONBLOCK flag inherited from listening sockets?
   # Platform-specific overrides
@@ -520,7 +520,7 @@ int main(void) {
 endmacro(xpcfgONonblockInherited)
 
 # Process 64-bit integer literals
-# called from: apr/configure.cmake
+# called from: apr
 function(xpcfgInt64Literal int64_literal_var uint64_literal_var)
   cmake_push_check_state(RESET)
   include(CheckTypeSize)
@@ -559,7 +559,7 @@ function(xpcfgInt64Literal int64_literal_var uint64_literal_var)
 endfunction(xpcfgInt64Literal)
 
 # Process 64-bit integer format specifiers
-# called from: apr/configure.cmake
+# called from: apr
 function(xpcfgInt64Format int64_t_fmt_var uint64_t_fmt_var uint64_t_hex_fmt_var long_value_var)
   cmake_push_check_state(RESET)
   include(CheckTypeSize)
@@ -610,7 +610,7 @@ function(xpcfgInt64Format int64_t_fmt_var uint64_t_fmt_var uint64_t_hex_fmt_var 
 endfunction(xpcfgInt64Format)
 
 # Determine the appropriate string conversion functions for 64-bit integers and off_t
-# called from: apr/configure.cmake
+# called from: apr
 function(xpcfgStrfn int64_strfn_var off_t_strfn_var)
   cmake_push_check_state(RESET)
   include(CheckTypeSize)
@@ -675,7 +675,7 @@ int main() { strtoq(\"0\", NULL, 10); return 0; }
 endfunction(xpcfgStrfn)
 
 # check and set format specifiers for size_t and ssize_t
-# called from: apr/configure.cmake
+# called from: apr
 function(xpcfgSizeTypeFormat ssize_t_fmt_var size_t_fmt_var)
   cmake_push_check_state(RESET)
   # Default format specifiers for size_t and ssize_t
@@ -691,7 +691,7 @@ function(xpcfgSizeTypeFormat ssize_t_fmt_var size_t_fmt_var)
 endfunction()
 
 # check and set format specifiers for off_t
-# called from: apr/configure.cmake
+# called from: apr
 function(xpcfgOffFormat off_t_fmt_var)
   cmake_parse_arguments(ARG "" "INT64_T_FMT" "" ${ARGN})
   if(NOT DEFINED ARG_INT64_T_FMT)
@@ -730,7 +730,7 @@ function(xpcfgOffFormat off_t_fmt_var)
 endfunction(xpcfgOffFormat)
 
 # check and set format specifiers for pid_t
-# called from: apr/configure.cmake
+# called from: apr
 function(xpcfgPidFormat pid_t_fmt_var)
   cmake_parse_arguments(ARG "" "INT64_T_FMT" "" ${ARGN})
   if(NOT DEFINED ARG_INT64_T_FMT)
@@ -768,7 +768,7 @@ function(xpcfgPidFormat pid_t_fmt_var)
 endfunction(xpcfgPidFormat)
 
 # Check for TCP_NOPUSH or TCP_CORK socket option
-# called from: apr/configure.cmake
+# called from: apr
 function(xpcfgDetermineTcpNopushFlag out_var)
   cmake_push_check_state(RESET)
   # Check for TCP_NOPUSH first
@@ -805,7 +805,7 @@ int main(void) {
 endfunction(xpcfgDetermineTcpNopushFlag)
 
 # Check if getaddrinfo returns negative error codes
-# called from: apr/configure.cmake
+# called from: apr
 function(xpcfgNegativeEai var)
   cmake_push_check_state()
   set(CMAKE_REQUIRED_INCLUDES "${CMAKE_REQUIRED_INCLUDES}")
@@ -880,7 +880,7 @@ int main(void) {
 endfunction(xpcfgNegativeEai)
 
 # Check if SYS_getrandom is declared in sys/syscall.h
-# called from: apr/configure.cmake
+# called from: apr
 macro(xpcfgDeclSysGetrandom var)
   cmake_push_check_state(RESET)
   set(CMAKE_REQUIRED_INCLUDES "${CMAKE_REQUIRED_INCLUDES}")
@@ -902,7 +902,7 @@ endmacro()
 # Parameters:
 #   epoll_var - output variable that will be set to 1 if epoll is supported, 0 otherwise
 #   reliable_timeout_var - output variable that will be set to 1 if epoll_wait has reliable timeout, 0 otherwise
-# called from: apr/configure.cmake
+# called from: apr
 function(xpcfgCheckEpoll epoll_var reliable_timeout_var)
   cmake_push_check_state(RESET)
   set(CMAKE_REQUIRED_INCLUDES "${CMAKE_REQUIRED_INCLUDES}")
@@ -974,7 +974,7 @@ endfunction(xpcfgCheckEpoll)
 # Check for sys_siglist declaration
 # Parameters:
 #   var - output variable that will be set to 1 if sys_siglist is declared, 0 otherwise
-# called from: apr/configure.cmake
+# called from: apr
 macro(xpcfgCheckSysSiglist var)
   cmake_push_check_state(RESET)
   set(CMAKE_REQUIRED_INCLUDES "${CMAKE_REQUIRED_INCLUDES}")
@@ -1013,7 +1013,7 @@ endmacro(xpcfgCheckSysSiglist)
 #   servbyname_r_glibc2_var - variable that will be set to 1 if getservbyname_r is glibc2 style, 0 otherwise
 #   servbyname_r_osf1_var - variable that will be set to 1 if getservbyname_r is OSF1 style, 0 otherwise
 #   servbyname_r_solaris_var - variable that will be set to 1 if getservbyname_r is Solaris style, 0 otherwise
-# called from: apr/configure.cmake
+# called from: apr
 macro(xpcfgCheckGetNameStyle
   hostbyname_r_glibc2_var
   hostbyname_r_data_var
@@ -1105,7 +1105,7 @@ endmacro(xpcfgCheckGetNameStyle)
 # Check for SEM_UNDO constant in sys/sem.h
 # Parameters:
 #   var - variable that will be set to 1 if SEM_UNDO is defined, 0 otherwise
-# called from: apr/configure.cmake
+# called from: apr
 macro(xpcfgCheckSysVSemaphores var)
   cmake_push_check_state(RESET)
   set(CMAKE_REQUIRED_INCLUDES "${CMAKE_REQUIRED_INCLUDES}")
@@ -1128,7 +1128,7 @@ endmacro()
 #   robust_var - variable that will be set if PTHREAD_MUTEX_ROBUST is supported
 #   robust_np_var - variable that will be set if PTHREAD_MUTEX_ROBUST_NP is supported
 #   rwlocks_var - variable that will be set if pthread rwlocks are supported
-# called from: apr/configure.cmake
+# called from: apr
 macro(xpcfgCheckPthreadFeatures recursive_var robust_var robust_np_var rwlocks_var)
   cmake_push_check_state(RESET)
   set(CMAKE_REQUIRED_INCLUDES "${CMAKE_REQUIRED_INCLUDES}")
@@ -1205,7 +1205,7 @@ endmacro(xpcfgCheckPthreadFeatures)
 # Check if strerror_r returns an int (POSIX) or char* (GNU)
 # This determines if we should check the return value or the buffer for the error message
 # Sets ${var} to 1 if strerror_r returns int, 0 otherwise
-# called from: apr/configure.cmake
+# called from: apr
 macro(xpcfgStrerrorRReturnType var)
   cmake_push_check_state(RESET)
   set(CMAKE_REQUIRED_DEFINITIONS "-D_GNU_SOURCE")
@@ -1244,7 +1244,7 @@ int main(void) {
   cmake_pop_check_state()
 endmacro(xpcfgStrerrorRReturnType)
 
-# called from: apr/configure.cmake
+# called from: apr
 function(xpcfgDotinFile in out)
   cmake_path(GET out FILENAME outFilename)
   cmake_path(GET in FILENAME inFilename)
