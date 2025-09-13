@@ -357,21 +357,6 @@ int main(void)
     )
 endmacro()
 
-macro(xpcfgInt64C var)
-  check_c_source_compiles("
-${XP_INCLUDES}
-int main(void)
-{
-#ifdef INT64_C
-  return 0;
-#else
-  return 1;
-#endif
-}
-"   ${var}
-    )
-endmacro()
-
 # called from: apr
 macro(xpcfgSockCloexec var)
   # Define if the SOCK_CLOEXEC flag is supported
