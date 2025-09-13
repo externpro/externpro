@@ -32,7 +32,7 @@ function(xpcfgSet01 var boolVar)
   endif()
 endfunction()
 
-# called from: apr
+# called from: apr, librttopo
 macro(xpcfgCheckIncludeFile incfile var)
   check_include_file("${incfile}" ${var})
   if(${var})
@@ -41,7 +41,7 @@ macro(xpcfgCheckIncludeFile incfile var)
   endif(${var})
 endmacro()
 
-# called from: apr
+# called from: apr, librttopo
 macro(xpcfgCheckSymFnExists func var)
   check_symbol_exists("${func}" "${XP_INCLUDE_LIST}" ${var})
   if(NOT ${var})
@@ -68,6 +68,7 @@ macro(xpcfgCheckStructHasMember struct member header variable)
   check_struct_has_member("${struct}" "${member}" "${header}" ${variable})
 endmacro()
 
+# called from: librttopo
 macro(xpcfgCheckTypeSize)
   cmake_push_check_state(RESET)
   check_type_size(off_t SIZEOF_OFF_T) # sets HAVE_SIZEOF_OFF_T
@@ -75,6 +76,7 @@ macro(xpcfgCheckTypeSize)
   cmake_pop_check_state()
 endmacro()
 
+# called from: librttopo
 macro(xpcfgLtObjdir var)
   ####################
   # Define to the sub-directory in which libtool stores uninstalled libraries.
@@ -93,6 +95,7 @@ macro(xpcfgHugeFileSupport)
   set(_LARGE_FILE 1)
 endmacro()
 
+# called from: librttopo
 macro(xpcfgStdcHeaders var)
   ########################################
   # Define to 1 if you have the ANSI C header files.
@@ -111,7 +114,7 @@ int main()
   xpcfgSetDefine(${var} 1)
 endmacro(xpcfgStdcHeaders)
 
-# called from: apr
+# called from: apr, librttopo
 macro(xpcfgConst var)
   # Define to empty if 'const' does not conform to ANSI C.
   check_c_source_compiles("
@@ -178,6 +181,7 @@ int main()
   endif()
 endmacro(xpcfgConst)
 
+# called from: librttopo
 macro(xpcfgFnEmptyStringBug fn var)
   ########################################
   # checking whether specified fn (stat/lstat) accepts an empty string
@@ -194,6 +198,7 @@ int main()
   xpcfgSetDefine(${var} 1)
 endmacro()
 
+# called from: librttopo
 macro(xpcfgLstatFollowsSlashedSymlink var)
   ########################################
   # whether lstat correctly handles trailing slash
@@ -203,6 +208,7 @@ macro(xpcfgLstatFollowsSlashedSymlink var)
   xpcfgSetDefine(${var} 1)
 endmacro()
 
+# called from: librttopo
 macro(xpcfgTimeWithSysTime var)
   ########################################
   # whether can safely include both <sys/time.h> and <time.h>
@@ -212,6 +218,7 @@ macro(xpcfgTimeWithSysTime var)
   xpcfgSetDefine(${var} 1)
 endmacro()
 
+# called from: librttopo
 macro(xpcfgTmInHdr hdr var)
   ########################################
   # checking whether struct tm is in specified hdr (sys/time.h or time.h)
@@ -228,6 +235,7 @@ int main()
   xpcfgSetDefine(${var} 1)
 endmacro()
 
+# called from: librttopo
 macro(xpcfgVolatile var)
   ########################################
   # checking for working volatile
@@ -1229,7 +1237,7 @@ int main(void) {
   cmake_pop_check_state()
 endmacro(xpcfgStrerrorRReturnType)
 
-# called from: apr
+# called from: apr, librttopo
 function(xpcfgDotinFile in out)
   cmake_path(GET out FILENAME outFilename)
   cmake_path(GET in FILENAME inFilename)
