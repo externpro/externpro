@@ -203,8 +203,8 @@ macro(xpcfgLstatFollowsSlashedSymlink var)
   ########################################
   # whether lstat correctly handles trailing slash
   # https://www.gnu.org/software/autoconf/manual/autoconf-2.60/html_node/Particular-Functions.html#index-AC_005fFUNC_005fLSTAT_005fFOLLOWS_005fSLASHED_005fSYMLINK-381
-  # this check is for ancient systems, just set it to ON
-  set(${var} ON)
+  # this check is for ancient systems, just set it to TRUE
+  set(${var} TRUE)
   xpcfgSetDefine(${var} 1)
 endmacro()
 
@@ -213,8 +213,8 @@ macro(xpcfgTimeWithSysTime var)
   ########################################
   # whether can safely include both <sys/time.h> and <time.h>
   # https://www.gnu.org/software/autoconf/manual/autoconf-2.67/html_node/Particular-Headers.html#AC_005fHEADER_005fTIME
-  # this check is for ancient systems, just set it to OFF so the var isn't defined
-  set(${var} OFF)
+  # This macro is obsolescent, as current systems can include both files when they exist.
+  set(${var} TRUE)
   xpcfgSetDefine(${var} 1)
 endmacro()
 
@@ -249,7 +249,7 @@ int main()
 "   ${var}Compiles
     )
   if(${var}Compiles)
-    unset(${var})
+    set(${var} 0) # cmakedefine
   else()
     set(${var} /**/)
   endif()
