@@ -84,14 +84,15 @@ set(xp_fmt REPO github.com/externpro/fmt TAG v11.2.0.3
   SHA256_Linux f4f65488036cfb48763ac89cc3c92b3182d043e74ad962cb094005bd202ff123
   SHA256_win64 524a02569353895cf30cbb2c8cd1a81585afb04a6a5cf695234cbb6498df777d
   )
-set(xp_geos REPO github.com/externpro/geos TAG v3.13.0.3
+set(xp_geos REPO github.com/externpro/geos TAG v3.13.0.4
   BASE 3.13.0 BRANCH dev
   WEB "https://libgeos.org" UPSTREAM "github.com/libgeos/geos"
   DESC "C/C++ library for computational geometry with a focus on algorithms used in geographic information systems (GIS) software"
   LICENSE "[LPGL-2.1](https://trac.osgeo.org/geos/ 'LGPL version 2.1')"
-  SHA256_Linux-arm64 81304bc9fd0332cb0806d8e87fb076d2a08f7b3701b22f10fbec148c6271fbbe
-  SHA256_Linux 5cf8633aed023f40f11011e2b3782fe6fa74f7e7b79ec2067c61eb4760670ea1
-  SHA256_win64 171b4c1488fbaf603a1f999aabfed414f4e15475f108fd786e823fa20dc416e9
+  SHA256_Darwin-arm64 ada51bf5945990e63a7e3856545410e3af8c1f54a45ae75239ba20ec61166809
+  SHA256_Linux-arm64 08026046256fc7ba251932a1cf8ecb636a59ad92ba59bcbdbbde9f44a16c945f
+  SHA256_Linux 2853045a06fd25535bbd157cea19bf0d9073882c58f179b0eb790544d3ba9a34
+  SHA256_win64 bb776f18b782d4287db2b81dbd85831776836a06c4da344aaac7dbbffedea740
   )
 set(xp_geotrans REPO github.com/externpro/geotranz VER 2.4.2 XP_MODULE
   BASE v2.4.2 BRANCH xp2.4.2
