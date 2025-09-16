@@ -152,15 +152,15 @@ set(xp_jxrlib REPO github.com/externpro/jxrlib VER 15.08 XP_MODULE
   DESC "JPEG XR Image Codec reference implementation library released by Microsoft"
   LICENSE "[BSD-2-Clause](https://github.com/4creators/jxrlib/blob/master/LICENSE 'BSD 2-Clause Simplified License')"
   )
-set(xp_libiconv REPO github.com/externpro/libiconv TAG v1.18.4
+set(xp_libiconv REPO github.com/externpro/libiconv TAG v1.18.5
   BASE v0 BRANCH dev
   WEB "https://www.gnu.org/software/libiconv/" UPSTREAM "github.com/pffang/libiconv-for-Windows/releases/tag/1.18-eed6782"
   DESC "character set conversion library"
   LICENSE "[LGPL-2.1](https://savannah.gnu.org/projects/libiconv/ 'LGPL version 2.1')"
-  SHA256_Darwin-arm64 68a75745133669d796ab44f9a5d73e40ce8b163688a374062c3d6f8107602be1
-  SHA256_Linux-arm64 3fd8b1a1a5c497cbbac67493bc6a5089c33a3e66ce36b95dd46a5c3d27ba1e76
-  SHA256_Linux 93aec04c5a2bd8f34ec2b7998a63b7ca8bf970d3250265ddf7656f2845823981
-  SHA256_win64 745306b46293eaa87bb2798bd15dcf7421c6449f710fa54817aac52517ce803f
+  SHA256_Darwin-arm64 50570377c80270a418d27ec8a73cc8072eca91762e4409ee3ff9b9032d285ad9
+  SHA256_Linux-arm64 28ee02b77a894fe61ee708fd9da2c2fe84281e8a1a6f56c1faab047841582912
+  SHA256_Linux baa61c505ec1f854c95cb4f9bde5312ef4a9cc43737480959ded11dd42aa7bba
+  SHA256_win64 6a66a347a0dacc9b4af9227e187e4679bd7742bfb488ba398b5b2a589a38c077
   )
 set(xp_lua REPO github.com/externpro/lua VER 5.2.3 XP_MODULE
   BASE LuaDist:5.2.3 BRANCH xp5.2.3
