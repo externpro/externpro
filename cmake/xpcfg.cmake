@@ -32,7 +32,7 @@ function(xpcfgSet01 var boolVar)
   endif()
 endfunction()
 
-# called from: apr, librttopo, libspatialite
+# called from: apr, librttopo, libspatialite, spatialite-tools
 macro(xpcfgCheckIncludeFile incfile var)
   check_include_file("${incfile}" ${var})
   if(${var})
@@ -41,7 +41,7 @@ macro(xpcfgCheckIncludeFile incfile var)
   endif(${var})
 endmacro()
 
-# called from: apr, librttopo, libspatialite
+# called from: apr, librttopo, libspatialite, spatialite-tools
 macro(xpcfgCheckSymFnExists func var)
   check_symbol_exists("${func}" "${XP_INCLUDE_LIST}" ${var})
   if(NOT ${var})
@@ -55,7 +55,7 @@ macro(xpcfgCheckSymExistsInHdr sym hdr var)
   check_symbol_exists("${sym}" "${hdr}" ${var})
 endmacro()
 
-# called from: apr, libspatialite
+# called from: apr, libspatialite, spatialite-tools
 macro(xpcfgCheckLibraryExists lib symbol var)
   check_library_exists("${lib};${XP_SYSTEM_LIBS}" ${symbol} "${CMAKE_LIBRARY_PATH}" ${var})
   if(${var})
@@ -68,7 +68,7 @@ macro(xpcfgCheckStructHasMember struct member header variable)
   check_struct_has_member("${struct}" "${member}" "${header}" ${variable})
 endmacro()
 
-# called from: librttopo, libspatialite
+# called from: librttopo, libspatialite, spatialite-tools
 macro(xpcfgCheckTypeSize)
   cmake_push_check_state(RESET)
   check_type_size(off_t SIZEOF_OFF_T) # sets HAVE_SIZEOF_OFF_T
@@ -76,7 +76,7 @@ macro(xpcfgCheckTypeSize)
   cmake_pop_check_state()
 endmacro()
 
-# called from: librttopo, libspatialite
+# called from: librttopo, libspatialite, spatialite-tools
 macro(xpcfgLtObjdir var)
   ####################
   # Define to the sub-directory in which libtool stores uninstalled libraries.
@@ -88,7 +88,7 @@ macro(xpcfgLtObjdir var)
   endif()
 endmacro()
 
-# called from: libspatialite
+# called from: libspatialite, spatialite-tools
 macro(xpcfgHugeFileSupport)
   # enabling huge-file support (64 bit file pointers)
   set(_FILE_OFFSET_BITS 64)
@@ -96,7 +96,7 @@ macro(xpcfgHugeFileSupport)
   set(_LARGE_FILE 1)
 endmacro()
 
-# called from: librttopo, libspatialite
+# called from: librttopo, libspatialite, spatialite-tools
 macro(xpcfgStdcHeaders var)
   ########################################
   # Define to 1 if you have the ANSI C header files.
@@ -114,7 +114,7 @@ int main()
     )
 endmacro(xpcfgStdcHeaders)
 
-# called from: apr, librttopo, libspatialite
+# called from: apr, librttopo, libspatialite, spatialite-tools
 macro(xpcfgConst var)
   # Define to empty if 'const' does not conform to ANSI C.
   check_c_source_compiles("
@@ -181,7 +181,7 @@ int main()
   endif()
 endmacro(xpcfgConst)
 
-# called from: librttopo, libspatialite
+# called from: librttopo, libspatialite, spatialite-tools
 macro(xpcfgFnEmptyStringBug fn var)
   ########################################
   # checking whether specified fn (stat/lstat) accepts an empty string
@@ -197,7 +197,7 @@ int main()
     )
 endmacro()
 
-# called from: librttopo, libspatialite
+# called from: librttopo, libspatialite, spatialite-tools
 macro(xpcfgLstatFollowsSlashedSymlink var)
   ########################################
   # whether lstat correctly handles trailing slash
@@ -215,7 +215,7 @@ macro(xpcfgTimeWithSysTime var)
   set(${var} TRUE)
 endmacro()
 
-# called from: librttopo, libspatialite
+# called from: librttopo, libspatialite, spatialite-tools
 macro(xpcfgTmInHdr hdr var)
   ########################################
   # checking whether struct tm is in specified hdr (sys/time.h or time.h)
@@ -231,7 +231,7 @@ int main()
     )
 endmacro()
 
-# called from: librttopo, libspatialite
+# called from: librttopo, libspatialite, spatialite-tools
 macro(xpcfgVolatile var)
   ########################################
   # checking for working volatile
@@ -1234,7 +1234,7 @@ int main(void) {
   cmake_pop_check_state()
 endmacro(xpcfgStrerrorRReturnType)
 
-# called from: apr, librttopo, libspatialite
+# called from: apr, librttopo, libspatialite, spatialite-tools
 function(xpcfgDotinFile in out)
   cmake_path(GET out FILENAME outFilename)
   cmake_path(GET in FILENAME inFilename)
