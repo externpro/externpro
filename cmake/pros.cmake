@@ -173,14 +173,15 @@ set(xp_luabridge REPO github.com/vinniefalco/LuaBridge/tree/2.5 VER 2.5
   DESC "a lightweight, dependency-free library for binding Lua to C++ [submodule of: _lua_]"
   LICENSE "[MIT](https://github.com/vinniefalco/LuaBridge/#official-repository 'MIT License')"
   )
-set(xp_nasm REPO github.com/externpro/nasm TAG v2.14.02.1
+set(xp_nasm REPO github.com/externpro/nasm TAG v2.14.02.2
   BASE v0 BRANCH dev
   WEB "https://www.nasm.us/"
   DESC "The Netwide Assembler - an 80x86 and x86-64 assembler (MSW-only)"
   LICENSE "[BSD-2-Clause](https://www.nasm.us/ 'BSD 2-Clause Simplified License')"
-  SHA256_Linux-arm64 f1c934bbdef48c31b8ca5dbf53bc6798ad2788414fbcb7865bd63bacc915293f
-  SHA256_Linux 3b452814ca0a2c53edffd15b5801fb1778ddfba115804c21ef03e71c31c4965b
-  SHA256_win64 b9ec621141b54f4d04948d039901e92ff4712792a133780e1c6ffb4e347b6646
+  SHA256_Darwin-arm64 381bcd1a5e7d98a8db694b6101349544a58510068a654e67d7244b38d70f222f
+  SHA256_Linux-arm64 6d2b1b6ebc8af910d7930fc324e4bb2d50fefb27283ac0a5694cdae47e9a82eb
+  SHA256_Linux 9a7a6e110d7a2187af79b7045f16320e022e7e9fed7113b7cde5f5d98e3aace8
+  SHA256_win64 d0e1791fb20264cc3d0a3e7f995c220afb326bc9d6cf983be23d63fd39ca48a2
   )
 set(xp_nlohmann_json REPO github.com/externpro/nlohmann_json TAG v3.12.0.1
   BASE v3.12.0 BRANCH dev
