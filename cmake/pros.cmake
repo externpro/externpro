@@ -221,14 +221,15 @@ set(xp_nodexp REPO github.com/externpro/nodexp TAG v14.17.6.2
   SHA256_Linux 6df479d0c832d46686401fbc4f575a8c3e93812490ef862c73310088dc9ff5e0
   SHA256_win64 43cdceaf386ccbf70d1e9cbe1ceeb76b90c0c30eac84f804dc9f2a333d028681
   )
-set(xp_nvjpeg2000 REPO github.com/externpro/nvJPEG2000 TAG v0.8.1.2
+set(xp_nvjpeg2000 REPO github.com/externpro/nvJPEG2000 TAG v0.8.1.3
   BASE v0 BRANCH dev
   WEB "https://developer.nvidia.com/nvjpeg"
-  DESC "high-performance GPU-accelerated library for decoding JPEG 2000 format images"
+  DESC "high-performance GPU-accelerated library for decoding JPEG 2000 format images (not available on macOS)"
   LICENSE "[NVIDIA](https://docs.nvidia.com/cuda/nvjpeg2000/license.html 'NVIDIA Software License Agreement')"
-  SHA256_Linux-arm64 1d245c836c0eda10065dbb689a17dbd8f3370c5db8024738ae042b033a5d8071
-  SHA256_Linux 966664bd491bf214cb9730e771690f61da3b53a92809ed8d03f27f042bc021b2
-  SHA256_win64 f31707f118db7d4e673ac29bcf809412c6378cbd5fd5513b9534d0ce2559830f
+  SHA256_Darwin-arm64 f509fa5b26e97fa4c3a72d8a871a811182f958086dd93dff741c1de5accb27da
+  SHA256_Linux-arm64 77b374aab05acc02fbaffa0c50476b30e9c2a0446922498786216d9ab58964df
+  SHA256_Linux 3af2f9f73f79941b8a7ed12d1b158f1c2222b96b4857eb41bf0bda79e816d016
+  SHA256_win64 86a810f9feb0495130c7b093a4e004b5764f57821f8e2f7739a973d5bb445e67
   )
 set(xp_patch REPO github.com/externpro/patch TAG v2.7.6.3
   BASE v0 BRANCH dev
