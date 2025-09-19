@@ -1,0 +1,44 @@
+#!/bin/sh
+# cp .devcontainer/git_hooks_pre-commit .git/hooks/pre-commit
+# Run clang-format on modified C++ files and leave changes unstaged
+echo "Running clang-format on modified C++ files..."
+# Get the list of modified C++ files (both staged and unstaged)
+FILES=$(git diff --cached --name-only --diff-filter=ACMRTUXB | grep -E '\.(cpp|hpp|c|h|cc|hh|cxx|hxx)$')
+# Also include any modified but unstaged files
+UNSTAGED_FILES=$(git diff --name-only --diff-filter=ACMRTUXB | grep -E '\.(cpp|hpp|c|h|cc|hh|cxx|hxx)$')
+FILES=$(echo -e "$FILES\n$UNSTAGED_FILES" | sort | uniq)
+if [ -z "$FILES" ]; then
+  echo "No modified C++ files found."
+  exit 0
+fi
+# Check if clang-format is installed
+if ! command -v clang-format >/dev/null 2>&1; then
+  echo "Error: clang-format is not installed."
+  echo "Please install clang-format and try again."
+  exit 1
+fi
+# Format each file without staging changes
+FORMAT_CHANGES=0
+for file in $FILES; do
+  if [ -f "$file" ]; then
+    # Save the original modification time
+    ORIG_MTIME=$(stat -f %m "$file" 2>/dev/null || stat -c %Y "$file" 2>/dev/null)
+    # Format the file in-place
+    clang-format -i "$file"
+    # Check if the file was modified
+    NEW_MTIME=$(stat -f %m "$file" 2>/dev/null || stat -c %Y "$file" 2>/dev/null)
+    if [ "$ORIG_MTIME" != "$NEW_MTIME" ]; then
+      echo "Formatted: $file"
+      FORMAT_CHANGES=1
+    fi
+  fi
+done
+if [ $FORMAT_CHANGES -ne 0 ]; then
+  echo "\nclang-format has made changes to some files."
+  echo "Please review the changes with 'git diff' and stage them with 'git add -p'"
+  echo "Once you're happy with the changes, run 'git commit' again."
+  exit 1
+else
+  echo "No formatting changes needed."
+  exit 0
+fi
