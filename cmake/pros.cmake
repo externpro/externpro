@@ -371,14 +371,15 @@ set(xp_libzmq REPO github.com/externpro/libzmq VER 4.3.4 XP_MODULE
   DESC "high-performance asynchronous messaging library"
   LICENSE "[MPL-2.0](http://wiki.zeromq.org/area:licensing 'Mozilla Public License 2.0')"
   )
-set(xp_node-addon-api REPO github.com/externpro/node-addon-api TAG v3.0.2.2
+set(xp_node-addon-api REPO github.com/externpro/node-addon-api TAG v3.0.2.3
   BASE nodejs:3.0.2 BRANCH dev DEPS nodexp
   WEB "https://github.com/nodejs/node-addon-api" UPSTREAM "github.com/nodejs/node-addon-api"
   DESC "Module for using N-API from C++"
   LICENSE "[MIT](https://github.com/nodejs/node-addon-api/blob/3.0.2/LICENSE.md 'MIT License')"
-  SHA256_Linux-arm64 0d132c932515edd6d758a90f7426804c7a5eb8379b68bd44a12a43cddfe0e254
-  SHA256_Linux 685a10b6ee38c672de16ca4917007412c43a5fe69f16cdd6c4fbc90feb7aac48
-  SHA256_win64 714ff5682ebef712197d172d98684d5f7a269d6e061c7bc5474ddb36806bd219
+  SHA256_Darwin-arm64 fb1929e7d7b7c4e54652f42e88231996795e909f2d58fee1d7b14de0639afbf6
+  SHA256_Linux-arm64 e37a1ed59ebb264d366da8195a257f06e1861745406d796ba81cad4fa3950ca7
+  SHA256_Linux a672e91c2a2d5b1c3ed34611ac5410127b3c9d4dd668f70dc579b26d8b9c6012
+  SHA256_win64 33ed8593f9e44892ca970d77d7c078236adda923a799c383eb1da43d22e87383
   )
 set(xp_openh264 REPO github.com/externpro/openh264 VER 1.4.0 XP_MODULE
   BASE cisco:v1.4.0 BRANCH xp1.4.0 DEPS yasm
