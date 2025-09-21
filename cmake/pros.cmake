@@ -162,6 +162,16 @@ set(xp_libiconv REPO github.com/externpro/libiconv TAG v1.18.6
   SHA256_Linux 7c24a6ae1fad58ed8560aa3e39f5475483bad27719e51b77ec140a41e0b3d558
   SHA256_win64 2e196d43265bb2af3f419358b686f3a220ca76f08113e2d162dd3b334934985c
   )
+set(xp_libsodium REPO github.com/externpro/libsodium TAG v1.0.18.221
+  BASE jedisct1:aa099f5e82ae78175f9c1c48372a123cb634dd92 BRANCH dev
+  WEB "https://doc.libsodium.org/" UPSTREAM "github.com/jedisct1/libsodium"
+  DESC "library for encryption, decryption, signatures, password hashing and more"
+  LICENSE "[ISC](https://doc.libsodium.org/#license 'Internet Systems Consortium License, functionally equivalent to simplified BSD and MIT licenses')"
+  SHA256_Darwin-arm64 8b269b29ea6f389ccf8d457005a016019f6fa32f8fa70161dfb33a6403e06421
+  SHA256_Linux-arm64 b44dd44cbe5aa3b0d4dd777a83c9ed9c850096898dc9d134cd3a87f47137a110
+  SHA256_Linux ef476149bdaa409774cd6dda73e9fe8cdf5e7d0475a91a8a349ee8baa79dccd7
+  SHA256_win64 ba76566a2add1a1a5f43b87194d5ecc5b748616a29c3c995950e4e98ded46182
+  )
 set(xp_lua REPO github.com/externpro/lua VER 5.2.3 XP_MODULE
   BASE LuaDist:5.2.3 BRANCH xp5.2.3
   WEB "http://www.lua.org/" UPSTREAM "github.com/LuaDist/lua"
@@ -260,12 +270,6 @@ set(xp_shapelib REPO github.com/externpro/shapelib VER 1.2.10 XP_MODULE
   WEB "http://shapelib.maptools.org/" UPSTREAM "github.com/modgeosys/shapelib"
   DESC "reading, writing, updating ESRI Shapefiles"
   LICENSE "[MIT or LGPL](http://shapelib.maptools.org/license.html 'MIT or LGPL License')"
-  )
-set(xp_sodium REPO github.com/externpro/libsodium VER 21.11.18 XP_MODULE
-  BASE jedisct1:aa099f5e82ae78175f9c1c48372a123cb634dd92 BRANCH xp21.11.18
-  WEB "https://doc.libsodium.org/" UPSTREAM "github.com/jedisct1/libsodium"
-  DESC "library for encryption, decryption, signatures, password hashing and more"
-  LICENSE "[ISC](https://doc.libsodium.org/#license 'Internet Systems Consortium License, functionally equivalent to simplified BSD and MIT licenses')"
   )
 set(xp_sqlite3 REPO github.com/externpro/SQLite3 TAG v3.38.2.1
   BASE 3.38.2 BRANCH dev
