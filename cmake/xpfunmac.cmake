@@ -2467,6 +2467,9 @@ function(xpSetPostfix)
 endfunction()
 
 macro(xpCommonFlags)
+  if(NOT DEFINED xp_exdlpro)
+    include(${xpThisDir}/pros.cmake) # xp_<project> lists
+  endif()
   if(EXISTS ${xpThisDir}/xpopts.cmake)
     include(${xpThisDir}/xpopts.cmake) # determine XP_BUILD_STATIC_RT
   elseif(MSVC)
