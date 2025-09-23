@@ -369,15 +369,15 @@ set(xp_libspatialite REPO github.com/externpro/libspatialite TAG v5.1.0.6
   SHA256_Linux 00549a7292e6f0391d585c1de642b142d0cb36f67bd01391fc0f89f6c622c506
   SHA256_win64 cb744298b24539e1cad2cb17db9909bbc9ee209bf34c018049b7a42ab767f832
   )
-set(xp_libzmq REPO github.com/externpro/libzmq TAG v4.3.4.1
+set(xp_libzmq REPO github.com/externpro/libzmq TAG v4.3.4.2
   BASE v4.3.4 BRANCH dev DEPS sodium
   WEB "https://zeromq.org/" UPSTREAM "github.com/zeromq/libzmq"
   DESC "high-performance asynchronous messaging library"
   LICENSE "[MPL-2.0](http://wiki.zeromq.org/area:licensing 'Mozilla Public License 2.0')"
-  SHA256_Darwin-arm64 377183d82a6f233430f8b9e49e2a060249ff1cd85316b1902474823231e003a0
-  SHA256_Linux-arm64 4ae9c31dc434e59cbab1d9d5dddaa890be07d8447d16b948ab0e1ca97043f504
-  SHA256_Linux 04b8fe7318f8a65e8f1811617ace8fb065663d34b0dc26433f183119261a8f40
-  SHA256_win64 1da8ae3cb8eef5a355cbf8d5c5178ee9ee9d1dc8b8a90c55c1fd12674f77b03d
+  SHA256_Darwin-arm64 8f4dd694dbec18ee51d37f10221b437c3246f78dc30f92822219ab6e678220f4
+  SHA256_Linux-arm64 a9d698de563710b5139815a39a04134816be7eeba760d2d85abde10c8919c523
+  SHA256_Linux b010329f58e199ffb01f3fbd016d4ed9acc2ce304c526162c75ea96bad870c05
+  SHA256_win64 24ee926b65966edceaba9e7df7a25885cee636f4b01b15c6b70744aacbcfe2a6
   )
 set(xp_node-addon-api REPO github.com/externpro/node-addon-api TAG v8.5.0.1
   BASE v8.5.0 BRANCH dev DEPS nodexp
