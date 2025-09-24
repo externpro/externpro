@@ -2490,6 +2490,11 @@ macro(xpCommonFlags)
   endif()
   xpSetPostfix()
   xpDebugInfoOption()
+  if(CMAKE_SYSTEM_NAME STREQUAL "Darwin" AND CMAKE_SYSTEM_PROCESSOR STREQUAL "arm64")
+    list(REMOVE_ITEM CMAKE_SYSTEM_PREFIX_PATH
+      /opt/homebrew # Brew on Apple Silicon
+      )
+  endif()
   if(MSVC)
     if(CMAKE_SIZEOF_VOID_P EQUAL 8)
       add_definitions(-DWIN64)
