@@ -317,15 +317,15 @@ set(xp_zlib REPO github.com/externpro/zlib TAG v1.3.1.1
   SHA256_win64 41bd417795e6349e0cb71c6097d2c71ef1e30d274d0be0f1311e891e1f105749
   )
 ### depend on previous group
-set(xp_boost REPO github.com/externpro/boost TAG v1.76.0.1
+set(xp_boost REPO github.com/externpro/boost TAG v1.76.0.2
   BASE boost-1.76.0 BRANCH dev DEPS bzip2 zlib
   WEB "http://www.boost.org/ 'Boost website'" UPSTREAM "github.com/boostorg/boost"
   DESC "libraries that give C++ a boost"
   LICENSE "[BSL-1.0](http://www.boost.org/users/license.html 'Boost Software License')"
-  SHA256_Darwin-arm64 05b2edcf5ed0326b6aab56276a564eb3b66df22ff9534cca950bf69b9c37f25a
-  SHA256_Linux-arm64 f2fe866f57cf34688cb81713a3e5ee4af332a29e9a59d6f191c173e0d8875123
-  SHA256_Linux 56f6037bded9c6f367a87302be3e3c632393f69387345b68b449f447f8a9b1fb
-  SHA256_win64 abe0c538e8ea5333da3c30fef6281f59e5639a15a5b5e7f53894e3c8f4cc79bf
+  SHA256_Darwin-arm64 ab0a1119f42fe8be6334c92f8a60cf6bd45ad61a1e28fd345b1886ffb7de6d11
+  SHA256_Linux-arm64 6b0cdc88b6b7dab256330a404900da205f5833d6d5df80897a27ddf7824ccddd
+  SHA256_Linux 1a010b8370020656effe722b88c01ace36255b8ecb5a1aeeda76c41bddb21c4e
+  SHA256_win64 40d22b0e708c723d1bb3a2940522ccbd435117f9e9d9525af687f99004fd5bd6
   )
 set(xp_ceres-solver REPO github.com/externpro/ceres-solver TAG v2.2.0.2
   BASE 2.2.0 BRANCH dev DEPS eigen
