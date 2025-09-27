@@ -317,12 +317,15 @@ set(xp_zlib REPO github.com/externpro/zlib TAG v1.3.1.1
   SHA256_win64 41bd417795e6349e0cb71c6097d2c71ef1e30d274d0be0f1311e891e1f105749
   )
 ### depend on previous group
-set(xp_boost VER 1.76.0 XP_MODULE
-  DEPS bzip2 zlib
+set(xp_boost REPO github.com/externpro/boost TAG v1.76.0.1
+  BASE boost-1.76.0 BRANCH dev DEPS bzip2 zlib
   WEB "http://www.boost.org/ 'Boost website'" UPSTREAM "github.com/boostorg/boost"
   DESC "libraries that give C++ a boost"
   LICENSE "[BSL-1.0](http://www.boost.org/users/license.html 'Boost Software License')"
-  # SUBMODULES beast dll gil graph boost_install interprocess program_options regex units # TODO
+  SHA256_Darwin-arm64 05b2edcf5ed0326b6aab56276a564eb3b66df22ff9534cca950bf69b9c37f25a
+  SHA256_Linux-arm64 f2fe866f57cf34688cb81713a3e5ee4af332a29e9a59d6f191c173e0d8875123
+  SHA256_Linux 56f6037bded9c6f367a87302be3e3c632393f69387345b68b449f447f8a9b1fb
+  SHA256_win64 abe0c538e8ea5333da3c30fef6281f59e5639a15a5b5e7f53894e3c8f4cc79bf
   )
 set(xp_ceres-solver REPO github.com/externpro/ceres-solver TAG v2.2.0.2
   BASE 2.2.0 BRANCH dev DEPS eigen
