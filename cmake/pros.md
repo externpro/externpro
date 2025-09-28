@@ -9,8 +9,8 @@
    git submodule add https://github.com/externpro/externpro .devcontainer
    ```
    * you may need to consider removing an existing `.devcontainer/` directory
-   * examples
-      * [hdf5](https://github.com/externpro/externpro/blob/main/cmake/README.md#hdf5)
+     * examples:
+       [hdf5](https://github.com/externpro/externpro/blob/main/cmake/README.md#hdf5)
 1. add docker-compose links
    ```bash
    ln -s .devcontainer/compose.pro.sh docker-compose.sh
@@ -28,6 +28,19 @@
    docker-compose.override.yml
    ```
 1. consider updating the default branch name to `dev` if it is not already
+1. GitHub Actions workflows
+   * add GitHub Actions workflows from externpro
+      ```bash
+      mkdir -p .github/workflows
+      cp .devcontainer/.github/wf-templates/xp*.yml .github/workflows/
+      ```
+   * consider modifying `.github/workflows/xpbuild.yml`'s `cmake-workflow-preset` to be `[Linux|Windows]Release` if the project doesn't need to build a `Debug` version of a library (for example, the project only builds an executable or a header-only library)
+   * you may need to disable or modify the trigger of existing "upstream" GitHub Actions workflows
+      * examples:
+        [fmt](https://github.com/externpro/externpro/blob/main/cmake/README.md#fmt)
+        [geos](https://github.com/externpro/externpro/blob/main/cmake/README.md#geos)
+        [hdf5](https://github.com/externpro/externpro/blob/main/cmake/README.md#hdf5)
+        [spdlog](https://github.com/externpro/externpro/blob/main/cmake/README.md#spdlog)
 1. possibly modify CMakePresetsBase.json
    * add a `cacheVariables` section to set variables
      * `XP_INSTALL_CMAKEDIR` is a common one I add... and then modify CMakeLists.txt to use it in determining whether the project is being built via externpro cmake or not
@@ -53,18 +66,18 @@
    * consider if `cmake_minimum_required` should be modified
    * before the `project()` call...
      ```cmake
-     list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/.devcontainer/cmake)
-     include(preproject)
+     set(CMAKE_PROJECT_TOP_LEVEL_INCLUDES .devcontainer/cmake/xproinc.cmake)
      project(foo)
      ```
-     * append to `CMAKE_MODULE_PATH` -- to find cmake functions from externpro
-     * call `include(preproject)` -- to set `CMAKE_INSTALL_PREFIX` (and possibly anything else determined to be needed before the `project()` call) https://github.com/externpro/externpro/blob/main/cmake/preproject.cmake
-   * possibly modify the `project()` call...
-     * if the existing cmake `project()` call has a `VERSION` argument, consider using it to version an externpro release (if a project uses the first 3 digits of a version number then use the fourth digit to version an externpro release so it's obvious which version of the upstream project is being used)
-     * `xpPackageDevel()` (more specifically `xpGetVersionString()`) uses `git describe --tags` to get the version string (and possibly a 'dirtyrepo' marker if the repository is 'dirty'), so the `VERSION` doesn't have to be specified in `project()` if it's not already specified there in existing cmake
-   * set preprocessor, compiler, linker flags by including `flags.cmake` so all externpro-built projects are built with a common set of flags https://github.com/externpro/externpro/blob/main/cmake/flags.cmake
+     * see [xproinc](https://github.com/externpro/externpro/blob/main/cmake/xproinc.cmake) to examine what it does currently, but as of this documentation it:
+       * defines `CMAKE_INSTALL_PREFIX` if it's not already defined
+       * appends `.devcontainer/cmake/` directory to `CMAKE_MODULE_PATH`, if it's not already in `CMAKE_MODULE_PATH`
+       * includes [pros](https://github.com/externpro/externpro/blob/main/cmake/pros.cmake), which defines the default dependencies/projects provided by externpro
+       * calls `cmake_language(SET_DEPENDENCY_PROVIDER` to set externpro as the dependency provider so all `find_package()` calls are routed through the `externpro_provide_dependency()` macro also defined in `xproinc`
+   * there really is no reason to modify the `project()` call... if the cmake `project()` call has a `VERSION` argument just keep it as-is -- `xpPackageDevel()` (more specifically `xpGetVersionString()`) uses `git describe --tags` to get the version string (and possibly a 'dirtyrepo' marker if the repository is 'dirty'), so the `VERSION` doesn't have to be specified in `project()` if it's not already specified there in existing cmake
+   * set preprocessor, compiler, linker flags by including `xpflags.cmake` so all externpro-built projects are built with a common set of flags https://github.com/externpro/externpro/blob/main/cmake/xpflags.cmake
      ```cmake
-     include(flags)
+     include(xpflags)
      ```
    * setup for and call `xpPackageDevel()`...
      * the extraction of a devel package happens by calling `xpFindPkg()`, which calls `ipGetPrefixPath()`, which assumes the `PKG_NAME` is the same as the repository name (https://github.com/externpro/externpro/blob/25.05/cmake/xpfunmac.cmake#L1356)
@@ -84,19 +97,6 @@
      ```
      or perhaps instead of `XP_[COMPONENT|NAMESPACE]`... use variable names to match the existing project variable naming
    * consider some way of disabling the `install()` of `pkgconfig` related files, as there is no need for them in externpro devel packages
-1. GitHub Actions workflows
-   * add GitHub Actions workflows from externpro
-      ```bash
-      mkdir -p .github/workflows
-      cp .devcontainer/.github/wf-templates/xp*.yml .github/workflows/
-      ```
-   * consider modifying `.github/workflows/xpbuild.yml`'s `cmake-workflow-preset` to be `[Linux|Windows]Release` if the project doesn't need to build a `Debug` version of a library (for example, the project only builds an executable or a header-only library)
-   * you may need to disable or modify the trigger of existing "upstream" GitHub Actions workflows
-      * examples:
-        [fmt](https://github.com/externpro/externpro/blob/main/cmake/README.md#fmt)
-        [geos](https://github.com/externpro/externpro/blob/main/cmake/README.md#geos)
-        [hdf5](https://github.com/externpro/externpro/blob/main/cmake/README.md#hdf5)
-        [spdlog](https://github.com/externpro/externpro/blob/main/cmake/README.md#spdlog)
 
 projects that modify existing cmake
 * [fmt](https://github.com/externpro/externpro/blob/main/cmake/README.md#fmt)
