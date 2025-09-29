@@ -457,11 +457,15 @@ set(xp_activemqcpp REPO github.com/externpro/activemq-cpp VER 3.9.5 XP_MODULE
   DESC "ActiveMQ C++ Messaging Service (CMS) client library"
   LICENSE "[Apache-2.0](http://www.apache.org/licenses/LICENSE-2.0.html 'Apache License, Version 2.0')"
   )
-set(xp_azmq REPO github.com/externpro/azmq VER 21.12.05 XP_MODULE
-  BASE zeromq:e0058a38976399006f535a9010d29e763b43fcd8 BRANCH xp21.12.05 DEPS boost libzmq
+set(xp_azmq REPO github.com/externpro/azmq TAG v1.0.3.1
+  BASE v1.0.3 BRANCH dev DEPS boost libzmq
   WEB "https://zeromq.org/" UPSTREAM "github.com/zeromq/azmq"
   DESC "provides Boost Asio style bindings for ZeroMQ"
   LICENSE "[BSL-1.0](https://github.com/zeromq/azmq/blob/master/LICENSE-BOOST_1_0 'Boost Software License 1.0')"
+  SHA256_Darwin-arm64 2951835ea4dd24d11d1d922212cb65319d2925641ce5beb4cd01363bf9a8c719
+  SHA256_Linux-arm64 3ff2ab1995e7ee9c954c7a8c2bebdf1ebf75dd87bda7d885762271948ddc503e
+  SHA256_Linux 33b12c2408f41480d47e4415ab6d9564d1d2c3da42913dbe2e6a5b8475723bac
+  SHA256_win64 3d3c92b9da136dcafec91ebc728743219d55a5be30cfa53d71bc3c56a2d81201
   )
 set(xp_cppzmq REPO github.com/externpro/cppzmq VER 4.7.1 XP_MODULE
   BASE zeromq:v4.7.1 BRANCH xp4.7.1 DEPS libzmq
