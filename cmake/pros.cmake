@@ -523,11 +523,15 @@ set(xp_spatialite-tools REPO github.com/externpro/spatialite-tools TAG v5.1.0.5
   SHA256_Linux 14d9e25006371d2c64e866a0a021eaa721dad410bb8a5125a5019d09e1aee2a3
   SHA256_win64 1f3b86512e2f2a0b218a2db1eefddf121132304ac45f535b7d53940459b0214a
   )
-set(xp_wxinclude REPO github.com/externpro/wxInclude VER 1.0 XP_MODULE
-  BASE v1.0 BRANCH rel EXE_DEPS boost
+set(xp_wxinclude REPO github.com/externpro/wxInclude TAG v1.2.1
+  BASE v1.0 BRANCH dev EXE_DEPS boost
   WEB "http://wiki.wxwidgets.org/Embedding_PNG_Images"
   DESC "embed resources into cross-platform code"
   LICENSE "[wxWindows](http://wiki.wxwidgets.org/Embedding_PNG_Images 'assumed wxWindows license, since source can be downloaded from wxWiki')"
+  SHA256_Darwin-arm64 554f46a0f13ce7d95871032f5dc2c68bd2f52104ba01d602b90fd2b61ec7987a
+  SHA256_Linux-arm64 cc3f86ad91f519407c8fdda2ca9a0df6b374085fbfc73cce086d6f166974d7f6
+  SHA256_Linux 3ce88bcb0204b5b5382a3445f849fb2eb0eaa8a7c67d2befb8492f5395bc9a8d
+  SHA256_win64 7c71aa6993197210ea2410f2e1447ae66b0d6ea834f481b9e49e05905de3e71e
   )
 set(xp_zmqpp REPO github.com/externpro/zmqpp VER 21.07.09 XP_MODULE
   BASE zeromq:ba4230d5d03d29ced9ca788e3bd1095477db08ae BRANCH xp21.07.09 DEPS libzmq
