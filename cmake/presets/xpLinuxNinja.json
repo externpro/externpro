@@ -51,6 +51,11 @@
       "inherits": ["isLinux"],
       "configurePreset": "Linux",
       "configuration": "Release"
+    },
+    {
+      "name": "LinuxReleaseTargets",
+      "displayName": "build Linux Release Target(s) from CMakePresetsBase",
+      "inherits": ["LinuxReleaseNoInstall", "build-base"]
     }
   ],
   "testPresets": [
@@ -151,6 +156,24 @@
         {
           "type": "build",
           "name": "LinuxRelease"
+        },
+        {
+          "type": "package",
+          "name": "LinuxRelease"
+        }
+      ]
+    },
+    {
+      "name": "LinuxReleaseTargets",
+      "displayName": "workflow Linux Release Targets",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "Linux"
+        },
+        {
+          "type": "build",
+          "name": "LinuxReleaseTargets"
         },
         {
           "type": "package",

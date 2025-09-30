@@ -51,6 +51,11 @@
       "inherits": ["isDarwin"],
       "configurePreset": "Darwin",
       "configuration": "Release"
+    },
+    {
+      "name": "DarwinReleaseTargets",
+      "displayName": "build Darwin Release Target(s) from CMakePresetsBase",
+      "inherits": ["DarwinReleaseNoInstall", "build-base"]
     }
   ],
   "testPresets": [
@@ -151,6 +156,24 @@
         {
           "type": "build",
           "name": "DarwinRelease"
+        },
+        {
+          "type": "package",
+          "name": "DarwinRelease"
+        }
+      ]
+    },
+    {
+      "name": "DarwinReleaseTargets",
+      "displayName": "workflow Darwin Release Targets",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "Darwin"
+        },
+        {
+          "type": "build",
+          "name": "DarwinReleaseTargets"
         },
         {
           "type": "package",
