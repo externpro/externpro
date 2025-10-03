@@ -44,10 +44,15 @@ set(xp_cares REPO github.com/externpro/c-ares VER 1.18.1 XP_MODULE
   DESC "C library for asynchronous DNS requests (including name resolves)"
   LICENSE "[MIT](http://c-ares.haxx.se/license.html 'MIT License')"
   )
-set(xp_clangformat REPO github.com/llvm/llvm-project/tree/llvmorg-11.0.0/clang/tools/clang-format VER 11.0.0 XP_MODULE
-  WEB "https://clang.llvm.org/docs/ClangFormat.html"
-  DESC "used to format C/C++/Java/JavaScript/JSON/Objective-C/Protobuf/C# code"
+set(xp_clang-format REPO github.com/externpro/clang-format TAG v19.1.5.1
+  BASE v0 BRANCH dev
+  WEB "https://clang.llvm.org/docs/ClangFormat.html" UPSTREAM "github.com/llvm/llvm-project"
+  DESC "used to format C/C++/Java/JavaScript/JSON/Objective-C/Protobuf/C# code (clang/tools/clang-format in upstream repo)"
   LICENSE "[Apache-2.0](https://releases.llvm.org/11.0.0/LICENSE.TXT 'Apache License v2.0 with LLVM Exceptions, see https://clang.llvm.org/features.html#license and https://llvm.org/docs/DeveloperPolicy.html#copyright-license-and-patents')"
+  SHA256_Darwin-arm64 5d3559dce45e20b32a64e19e63ef9aee6b6385c8869ab00d8d49e60e85021e72
+  SHA256_Linux-arm64 10bc83ac98e7e7090c57a1dc66722ef5b77d6902b4b8b5d94b3e08dec79eed73
+  SHA256_Linux 5ee07eddc025462bcfaa44e32547b43951ee03099b13b789866d0047a47e5524
+  SHA256_win64 c75c1d540ff8ed273b140c2e2c6f13bc978a65539d57c6e35ec001e149d85b89
   )
 set(xp_eigen REPO github.com/externpro/eigen TAG v3.4.0.1
   BASE 3.4.0 BRANCH dev
