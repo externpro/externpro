@@ -6,5 +6,11 @@
       "hidden": true,
       "binaryDir": "${sourceDir}/_bld-${presetName}"
     }
+  ],
+  "buildPresets": [
+    {
+      "name": "build-base",
+      "hidden": true
+    }
   ]
 }
