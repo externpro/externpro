@@ -16,7 +16,7 @@
       "name": "Linux",
       "displayName": "configure Linux Ninja",
       "inherits": ["config-base", "isLinux"],
-      "generator": "Ninja Multi-Config"
+      "generator": "Ninja"
     }
   ],
   "buildPresets": [
@@ -31,61 +31,11 @@
       }
     },
     {
-      "name": "LinuxDebug",
-      "displayName": "build Linux Debug",
-      "inherits": ["isLinux"],
-      "configurePreset": "Linux",
-      "configuration": "Debug"
-    },
-    {
-      "name": "LinuxRelease",
-      "displayName": "build Linux Release",
-      "inherits": ["isLinux"],
-      "targets": ["all", "install"],
-      "configurePreset": "Linux",
-      "configuration": "Release"
-    },
-    {
-      "name": "LinuxReleaseNoInstall",
-      "displayName": "build Linux Release, no install",
-      "inherits": ["isLinux"],
-      "configurePreset": "Linux",
-      "configuration": "Release"
-    },
-    {
       "name": "LinuxReleaseTargets",
       "displayName": "build Linux Release Target(s) from CMakePresetsBase",
-      "inherits": ["LinuxReleaseNoInstall", "build-base"]
-    }
-  ],
-  "testPresets": [
-    {
-      "name": "isLinux",
-      "hidden": true,
-      "condition": {
-        "type": "allOf",
-        "conditions": [
-          { "lhs": "${hostSystemName}", "type": "equals", "rhs": "Linux" }
-        ]
-      }
-    },
-    {
-      "name": "LinuxDebug",
-      "displayName": "test Linux Debug",
-      "inherits": ["isLinux"],
+      "inherits": ["isLinux", "build-base"],
       "configurePreset": "Linux",
-      "configuration": "Debug",
-      "output": { "outputOnFailure": true },
-      "execution": { "noTestsAction": "ignore", "stopOnFailure": false }
-    },
-    {
-      "name": "LinuxRelease",
-      "displayName": "test Linux Release",
-      "inherits": ["isLinux"],
-      "configurePreset": "Linux",
-      "configuration": "Release",
-      "output": { "outputOnFailure": true },
-      "execution": { "noTestsAction": "ignore", "stopOnFailure": false }
+      "configuration": "Release"
     }
   ],
   "packagePresets": [
@@ -100,13 +50,6 @@
       }
     },
     {
-      "name": "Linux",
-      "displayName": "package Linux",
-      "inherits": ["isLinux"],
-      "configurePreset": "Linux",
-      "configurations": ["Debug", "Release"]
-    },
-    {
       "name": "LinuxRelease",
       "displayName": "package Linux Release",
       "inherits": ["isLinux"],
@@ -115,54 +58,6 @@
     }
   ],
   "workflowPresets": [
-    {
-      "name": "Linux",
-      "displayName": "workflow Linux",
-      "steps": [
-        {
-          "type": "configure",
-          "name": "Linux"
-        },
-        {
-          "type": "build",
-          "name": "LinuxDebug"
-        },
-        {
-          "type": "build",
-          "name": "LinuxRelease"
-        },
-        {
-          "type": "test",
-          "name": "LinuxDebug"
-        },
-        {
-          "type": "test",
-          "name": "LinuxRelease"
-        },
-        {
-          "type": "package",
-          "name": "Linux"
-        }
-      ]
-    },
-    {
-      "name": "LinuxRelease",
-      "displayName": "workflow Linux Release",
-      "steps": [
-        {
-          "type": "configure",
-          "name": "Linux"
-        },
-        {
-          "type": "build",
-          "name": "LinuxRelease"
-        },
-        {
-          "type": "package",
-          "name": "LinuxRelease"
-        }
-      ]
-    },
     {
       "name": "LinuxReleaseTargets",
       "displayName": "workflow Linux Release Targets",
@@ -178,20 +73,6 @@
         {
           "type": "package",
           "name": "LinuxRelease"
-        }
-      ]
-    },
-    {
-      "name": "LinuxReleaseNoInstall",
-      "displayName": "workflow Linux Release, no install",
-      "steps": [
-        {
-          "type": "configure",
-          "name": "Linux"
-        },
-        {
-          "type": "build",
-          "name": "LinuxReleaseNoInstall"
         }
       ]
     }
