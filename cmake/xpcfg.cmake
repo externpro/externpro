@@ -261,6 +261,71 @@ macro(xpcfgTargetCpu var)
     )
 endmacro()
 
+# called from: jasper
+macro(xpcfgCheck_doprnt var)
+  check_c_source_compiles("
+/* Define _doprnt to an innocuous variant, in case <limits.h> declares _doprnt.
+   For example, HP-UX 11i <limits.h> declares gettimeofday.  */
+#define _doprnt innocuous__doprnt
+
+/* System header to define __stub macros and hopefully few prototypes,
+    which can conflict with char _doprnt (); below.
+    Prefer <limits.h> to <assert.h> if __STDC__ is defined, since
+    <limits.h> exists even on freestanding compilers.  */
+
+#ifdef __STDC__
+# include <limits.h>
+#else
+# include <assert.h>
+#endif
+
+#undef _doprnt
+
+/* Override any gcc2 internal prototype to avoid an error.  */
+#ifdef __cplusplus
+extern \"C\"
+{
+#endif
+/* We use char because int might match the return type of a gcc2
+   builtin and then its argument prototype would still apply.  */
+char _doprnt ();
+/* The GNU C library defines this for functions which it implements
+    to always fail with ENOSYS.  Some functions are actually named
+    something starting with __ and the normal name is an alias.  */
+#if defined (__stub__doprnt) || defined (__stub____doprnt)
+choke me
+#else
+char (*f) () = _doprnt;
+#endif
+#ifdef __cplusplus
+}
+#endif
+
+int
+main ()
+{
+return f != _doprnt;
+  ;
+  return 0;
+}
+"   ${var}
+    )
+endmacro()
+
+# called from: jasper
+macro(xpcfgHaveVariableLengthArrays var)
+  check_c_source_compiles("
+int main()
+{
+  int n;
+  int foo[n];
+  ;
+  return 0;
+}
+"   ${var}
+    )
+endmacro()
+
 # called from: apr
 macro(xpcfgGaiAddrconfig var)
   # Define if getaddrinfo accepts the AI_ADDRCONFIG flag
