@@ -122,11 +122,15 @@ set(xp_googletest REPO github.com/externpro/googletest TAG v1.16.0.1
   SHA256_Linux 9ca3f35c60306fbcd14038772b0cce5fd3e81c371beebf5472ae80a33887a431
   SHA256_win64 479ab2c6dd7bccabe2c41cad27399d441d32667c563a1428f8fd154072bb8858
   )
-set(xp_jasper REPO github.com/externpro/jasper VER 1.900.1 XP_MODULE
-  BASE version-1.900.1 BRANCH xp-1.900.1
-  WEB "http://www.ece.uvic.ca/~frodo/jasper/" UPSTREAM "github.com/jasper-software/jasper"
-  DESC "JPEG 2000 Part-1 codec implementation"
-  LICENSE "[JasPer-2.0](http://www.ece.uvic.ca/~frodo/jasper/#license 'JasPer software license based on MIT License')"
+set(xp_jasper REPO github.com/externpro/jasper TAG v1.900.1.1
+  BASE version-1.900.1 BRANCH dev
+  WEB "https://jasper-software.github.io/jasper/" UPSTREAM "github.com/jasper-software/jasper"
+  DESC "JasPer is a software toolkit for the handling of image data. It was initially developed as a reference implementation of the JPEG 2000 Part-1 codec."
+  LICENSE "[JasPer-2.0](https://github.com/jasper-software/jasper/blob/master/LICENSE.txt 'JasPer software license based on MIT License')"
+  SHA256_Darwin-arm64 59acfce4e6bd7b2de6facae10fd086f137e567e13dc925bcfe289d7355525ee3
+  SHA256_Linux-arm64 c3de594a78c3c97178e582ee353d1cadb4fb9d337a42eae86fc75861d6881521
+  SHA256_Linux 0f6ac4aade72a0d0cbecbd5cdd4113486051edfc99516927fd0f33e632a68378
+  SHA256_win64 a3c516004b010fd280c342e1c3f42bed9b1752b6b47bb3882d40d62315a2c56b
   )
 set(xp_jpegxp REPO github.com/externpro/jpegxp VER 24.01 XP_MODULE
   BASE jxp.240125 BRANCH jxp
