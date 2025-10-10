@@ -299,11 +299,15 @@ set(xp_sqlite3 REPO github.com/externpro/SQLite3 TAG v3.38.2.1
   SHA256_Linux 8cc51f5a86c75ed83956ede8e5aae6f076f213697009741765a5d402af3d4496
   SHA256_win64 0b59fc70300618ebc6a4eaf01fc63a41d43e37e003317cf1db68270674f9d171
   )
-set(xp_wirehair REPO github.com/externpro/wirehair VER 21.07.31 XP_MODULE
-  BASE catid:6d84fad40cbbbb29d4eb91204750ddffe0dcacfe BRANCH xp21.07.31
+set(xp_wirehair REPO github.com/externpro/wirehair TAG v23.12.02.1
+  BASE v23.12.02 BRANCH dev
   WEB "https://github.com/catid/wirehair" UPSTREAM "github.com/catid/wirehair"
   DESC "fast and portable fountain codes in C"
   LICENSE "[BSD-3-Clause](https://github.com/catid/wirehair/blob/master/LICENSE 'BSD 3-Clause New or Revised License')"
+  SHA256_Darwin-arm64 2950704bfd0b032b01a91a6c2c3397954b45047cdc25f33228105e186097631e
+  SHA256_Linux-arm64 6d691b82afc5bba40ba778b78b07f7e69b7bf6b3c5be92552bc8b8b766715601
+  SHA256_Linux bea56e35e2292b620532aab17058165e968c53c37bd7e6e660c7c4e1394d7f94
+  SHA256_win64 c768565e46ac9aa99e04d19be7f84b6572dd389c741683769e4f4ffc01a75dd5
   )
 set(xp_wxwidgets REPO github.com/externpro/wxWidgets VER 3.1.0 XP_MODULE
   BASE v3.1.0_240125 BRANCH xp3.1.0
