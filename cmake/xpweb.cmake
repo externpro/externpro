@@ -32,7 +32,26 @@ function(ipwebGetNodeNgPath)
   endif()
 endfunction()
 
-function(ipwebGetYarnPath)
+function(ipwebGetNpmPath)
+  ipwebGetNodeXpPath() # Sets NODEXP_EXE
+  if(NOT DEFINED NPM_EXE)
+    if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+      set(ext ".cmd")
+    endif()
+    get_filename_component(NODEXP_ROOTDIR ${NODEXP_EXE} DIRECTORY)
+    set(NPM_EXE "${NODEXP_ROOTDIR}/npm${ext}" PARENT_SCOPE)
+  endif()
+endfunction()
+
+function(ipwebGetNpxPath)
+  ipwebGetNodeXpPath() # Sets NODEXP_EXE
+  if(NOT DEFINED NPX_EXE)
+    if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+      set(ext ".cmd")
+    endif()
+    get_filename_component(NODEXP_ROOTDIR ${NODEXP_EXE} DIRECTORY)
+    set(NPX_EXE "${NODEXP_ROOTDIR}/npx${ext}" PARENT_SCOPE)
+  endif()
 endfunction()
 
 function(ipwebGetAngularPath)
@@ -72,11 +91,11 @@ function(ipwebVerifyTestFolder)
   set(P_TEST_FOLDER ${P_TEST_FOLDER} PARENT_SCOPE)
 endfunction()
 
-function(ipwebVerifyYarnTarget)
-  if(NOT DEFINED P_YARN_TARGET)
+function(ipwebVerifyNpmTarget)
+  if(NOT DEFINED P_NPM_TARGET)
     message(FATAL_ERROR "This target requires a dependency upon an install target")
   endif()
-  list(APPEND P_DEPENDS ${P_YARN_TARGET})
+  list(APPEND P_DEPENDS ${P_NPM_TARGET})
   set(P_DEPENDS ${P_DEPENDS} PARENT_SCOPE)
 endfunction()
 
@@ -157,35 +176,30 @@ endfunction()
 # ARGV0 - What to name the target
 # FOLDER - What folder to put the target under
 # WORKING_DIRECTORY - Where to perform the install
-function(xpwebAddYarnTarget)
-  set(YARN_TARGET ${ARGV0})
+function(xpwebAddNpmTarget)
+  set(NPM_TARGET ${ARGV0})
   set(oneValueArgs FOLDER WORKING_DIRECTORY)
   cmake_parse_arguments(P "" "${oneValueArgs}" "" ${ARGN})
-  ipwebVerifyTargetName(YARN_TARGET)
+  ipwebVerifyTargetName(NPM_TARGET)
   ipwebVerifyWorkingDirectory() # Can set P_WORKING_DIRECTORY
-  ipwebGetNodeXpPath() # sets NODEXP_EXE
-  ipwebGetYarnPath() # sets YARN_SCRIPT
+  ipwebGetNpmPath() # sets NPM_EXE
   ipwebVerifyFolder() # Can set P_FOLDER
-  if(TARGET ${YARN_TARGET})
+  if(TARGET ${NPM_TARGET})
     return()
   endif()
-  configure_file(${webpro_DIR}/share/cmake/.yarnrc.in ${CMAKE_CURRENT_BINARY_DIR}/.yarnrc)
-  set(build_stamp ${P_WORKING_DIRECTORY}/node_modules/.yarn-integrity)
+  set(build_stamp ${P_WORKING_DIRECTORY}/node_modules/.package-lock.json)
   add_custom_command(OUTPUT ${build_stamp}
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${webpro_DIR}/share/yarn.lock ${P_WORKING_DIRECTORY}
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_BINARY_DIR}/.yarnrc ${P_WORKING_DIRECTORY}
-    COMMAND ${NODEXP_EXE} ${YARN_SCRIPT} install --offline --pure-lockfile --ignore-scripts
-      --mutex network 2>&1
-    COMMENT "Installing ${YARN_TARGET}"
+    COMMAND ${NPM_EXE} install
+    COMMENT "Installing ${NPM_TARGET}"
     WORKING_DIRECTORY ${P_WORKING_DIRECTORY}
     DEPENDS ${P_WORKING_DIRECTORY}/package.json
     )
-  add_custom_target(${YARN_TARGET} ALL
+  add_custom_target(${NPM_TARGET} ALL
     DEPENDS ${build_stamp}
     SOURCES ${P_WORKING_DIRECTORY}/package.json
     WORKING_DIRECTORY ${P_WORKING_DIRECTORY}
     )
-  ipwebSetBuildProperties(${YARN_TARGET})
+  ipwebSetBuildProperties(${NPM_TARGET})
 endfunction()
 
 # ARGV0 - What to name the target
@@ -245,19 +259,19 @@ endfunction()
 # PROTO_SRCS - The list of the proto files to process
 # TARGET_FORMAT - The target format for the generated files
 # WORKING_DIRECTORY - Where to perform the command
-# YARN_TARGET - What install target is depended upon
+# NPM_TARGET - What install target is depended upon
 function(xpwebGenerateProto)
   set(GENERATE_TARGET ${ARGV0})
-  set(oneValueArgs FOLDER PROTO_DEST TARGET_FORMAT WORKING_DIRECTORY YARN_TARGET)
+  set(oneValueArgs FOLDER PROTO_DEST TARGET_FORMAT WORKING_DIRECTORY NPM_TARGET)
   set(multiValueArgs PROTO_SRCS)
   cmake_parse_arguments(P "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
   ipwebVerifyTargetName(GENERATE_TARGET)
   ipwebVerifyFolder() # Can set P_FOLDER
   ipwebVerifyWorkingDirectory() # Can set P_WORKING_DIRECTORY
-  ipwebVerifyYarnTarget()
+  ipwebVerifyNpmTarget()
   file(GLOB P_PROTO_SRCS ${P_PROTO_SRCS})
   ipwebVerifySrcs(P_PROTO_SRCS)
-  ipwebGetNodeXpPath() # sets NODEXP_EXE
+  ipwebGetNpxPath() # Sets NPX_EXE
   if(NOT DEFINED P_PROTO_DEST)
     message(FATAL_ERROR "xpwebGenerateProto requires a destination")
   endif()
@@ -269,15 +283,15 @@ function(xpwebGenerateProto)
   set(build_stamp ${protobufJsOut} ${protobufTsOut})
   add_custom_command(OUTPUT ${build_stamp}
     COMMAND ${CMAKE_COMMAND} -E make_directory ${P_PROTO_DEST}
-    COMMAND ${NODEXP_EXE} ${P_WORKING_DIRECTORY}/${PROTOBUFJS-CLI_SCRIPT} --keep-case -t ${P_TARGET_FORMAT} -w commonjs
+    COMMAND ${NPX_EXE} ${P_WORKING_DIRECTORY}/pbjs --keep-case -t ${P_TARGET_FORMAT} -w commonjs
       -o ${protobufJsOut} -l eslint-disable -r ${ARGV0} ${P_PROTO_SRCS}
-    COMMAND ${NODEXP_EXE} ${PROTOBUFJS-CLI_PBTS_SCRIPT} -o ${protobufTsOut} ${protobufJsOut}
+    COMMAND ${NPX_EXE} pbts -o ${protobufTsOut} ${protobufJsOut}
     COMMAND ${CMAKE_COMMAND} -E touch ${protobufJsOut} ${protobufTsOut}
-    DEPENDS ${P_YARN_TARGET} ${P_PROTO_SRCS}
+    DEPENDS ${P_NPM_TARGET} ${P_PROTO_SRCS}
     WORKING_DIRECTORY ${P_WORKING_DIRECTORY}
     )
   add_custom_target(${GENERATE_TARGET} ALL
-    DEPENDS ${P_YARN_TARGET}
+    DEPENDS ${P_NPM_TARGET}
     SOURCES ${P_PROTO_SRCS}
     )
   ipwebSetBuildProperties(${GENERATE_TARGET})
@@ -287,22 +301,22 @@ endfunction()
 # DEPENDS - What targets does this target depend on
 # FOLDER - What folder to put the target under
 # LIBRARY_DIR - It is a directory of libraries and has no code
-# SKIP_YARN_TARGET - Whether there is a yarn target associated with the project
+# SKIP_NPM_TARGET - Whether there is a npm target associated with the project
 # SRCS - What files are part of this target
 # TEST_TOOL - Whether the target is a test tool or not (to be scanned with fortify)
 # WORKING_DIRECTORY - Where to perform the command
-# YARN_TARGET - What install target is depended upon
+# NPM_TARGET - What install target is depended upon
 function(xpwebAddLibrary)
   set(BUILD_TARGET ${ARGV0})
-  set(optionArgs LIBRARY_DIR SKIP_YARN_TARGET TEST_TOOL)
-  set(oneValueArgs FOLDER WORKING_DIRECTORY YARN_TARGET)
+  set(optionArgs LIBRARY_DIR SKIP_NPM_TARGET TEST_TOOL)
+  set(oneValueArgs FOLDER WORKING_DIRECTORY NPM_TARGET)
   set(multiValueArgs SRCS DEPENDS)
   cmake_parse_arguments(P "${optionArgs}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
   ipwebVerifyTargetName(BUILD_TARGET)
   ipwebVerifyFolder() # Can set P_FOLDER
   ipwebVerifyWorkingDirectory() # Can set P_WORKING_DIRECTORY
-  if(NOT P_SKIP_YARN_TARGET)
-    ipwebVerifyYarnTarget() # appends YARN_TARGET to P_DEPENDS
+  if(NOT P_SKIP_NPM_TARGET)
+    ipwebVerifyNpmTarget() # appends NPM_TARGET to P_DEPENDS
     ipwebCalculateDependencies() # returns: depends
   endif()
   ipwebVerifySrcs(P_SRCS)
@@ -335,19 +349,19 @@ endfunction()
 # SRCS - What files are part of this target
 # TEST_TOOL - Whether the target is a test tool or not (to be scanned with fortify)
 # WORKING_DIRECTORY - Where to perform the command
-# YARN_TARGET - What install target is depended upon
+# NPM_TARGET - What install target is depended upon
 function(xpwebAddBuildWebpack)
   set(BUILD_TARGET ${ARGV0})
   set(optionArgs EXCLUDE_WEB_LIBRARIES TEST_TOOL)
-  set(oneValueArgs FOLDER INSTALL_COMPONENT INSTALL_DESTINATION INSTALL_NODE_DESTINATION WORKING_DIRECTORY YARN_TARGET)
+  set(oneValueArgs FOLDER INSTALL_COMPONENT INSTALL_DESTINATION INSTALL_NODE_DESTINATION WORKING_DIRECTORY NPM_TARGET)
   set(multiValueArgs SRCS DEPENDS OUTPUT_FILES)
   cmake_parse_arguments(P "${optionArgs}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
   ipwebVerifyTargetName(BUILD_TARGET)
   ipwebVerifyFolder() # Can set P_FOLDER
   ipwebVerifyWorkingDirectory() # Can set P_WORKING_DIRECTORY
-  ipwebVerifyYarnTarget() # appends YARN_TARGET to P_DEPENDS
+  ipwebVerifyNpmTarget() # appends NPM_TARGET to P_DEPENDS
   ipwebVerifySrcs(P_SRCS)
-  ipwebGetNodeXpPath() # sets NODEXP_EXE
+  ipwebGetNpxPath() # Sets NPX_EXE
   ipwebCalculateDependencies() # returns: depends
   if(P_EXCLUDE_WEB_LIBRARIES)
     set(build_stamp ${CMAKE_CURRENT_BINARY_DIR}/xpwebStamp/${BUILD_TARGET}.stamp)
@@ -363,7 +377,7 @@ function(xpwebAddBuildWebpack)
     set(build_stamp ${P_OUTPUT_FILES})
     list(TRANSFORM build_stamp PREPEND ${build_dir}/)
     list(TRANSFORM build_stamp APPEND .js)
-    set(commandToRun ${CMAKE_COMMAND} -E env BROWSERSLIST_IGNORE_OLD_DATA=True ${NODEXP_EXE} ${WEBPACK-CLI_SCRIPT} --output-path ${build_dir} --env context=${CMAKE_CURRENT_SOURCE_DIR})
+    set(commandToRun ${CMAKE_COMMAND} -E env BROWSERSLIST_IGNORE_OLD_DATA=True ${NPX_EXE} webpack-cli --output-path ${build_dir} --env context=${CMAKE_CURRENT_SOURCE_DIR})
   endif()
   add_custom_command(OUTPUT ${build_stamp}
     COMMAND ${commandToRun}
@@ -400,17 +414,17 @@ endfunction()
 # SRCS - What files are part of this target
 # TEST_TOOL - Whether the target is a test tool or not (to be scanned with fortify)
 # WORKING_DIRECTORY - Where to perform the command
-# YARN_TARGET - What install target is depended upon
+# NPM_TARGET - What install target is depended upon
 function(xpwebAddBuildAngular)
   set(BUILD_TARGET ${ARGV0})
   set(optionArgs ARCHIVE_BUILD EXCLUDE_WEB_LIBRARIES TEST_TOOL)
-  set(oneValueArgs ANGULAR_PROJECT FOLDER INSTALL_COMPONENT INSTALL_DESTINATION WORKING_DIRECTORY YARN_TARGET)
+  set(oneValueArgs ANGULAR_PROJECT FOLDER INSTALL_COMPONENT INSTALL_DESTINATION WORKING_DIRECTORY NPM_TARGET)
   set(multiValueArgs SRCS DEPENDS EXTRA_PACKAGE_FILES)
   cmake_parse_arguments(P "${optionArgs}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
   ipwebVerifyTargetName(BUILD_TARGET)
   ipwebVerifyFolder() # Can set P_FOLDER
   ipwebVerifyWorkingDirectory() # Can set P_WORKING_DIRECTORY
-  ipwebVerifyYarnTarget() # appends YARN_TARGET to P_DEPENDS
+  ipwebVerifyNpmTarget() # appends NPM_TARGET to P_DEPENDS
   ipwebVerifySrcs(P_SRCS)
   ipwebGetNodeNgPath() # sets NODENG_EXE
   ipwebCalculateDependencies() # returns: depends
@@ -485,7 +499,7 @@ function(xpwebAddTestJasmine)
   cmake_parse_arguments(P "${optionArgs}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
   ipwebVerifyTargetName(BUILD_TARGET)
   ipwebVerifyWorkingDirectory() # Can set P_WORKING_DIRECTORY
-  ipwebGetNodeXpPath() # Sets NODEXP_EXE
+  ipwebGetNpxPath() # Sets NPX_EXE
   ipwebAddTestTarget(${BUILD_TARGET}) # Uses DEPENDS, FOLDER, TEST_DIR
   if(P_EXCLUDE_COVERAGE)
     set(JS_SERVER_COVERAGE_FLAGS)
@@ -500,7 +514,7 @@ function(xpwebAddTestJasmine)
     list(TRANSFORM JS_SERVER_COVERAGE_FLAGS REPLACE "@BUILD_TARGET@" "${BUILD_TARGET}")
   endif()
   add_test(NAME ${BUILD_TARGET}Test
-    COMMAND ${JS_SERVER_COVERAGE_FLAGS} ${NODEXP_EXE} ${P_WORKING_DIRECTORY}/ts-node --project ${CMAKE_CURRENT_SOURCE_DIR}/tsconfig.spec.json
+    COMMAND ${JS_SERVER_COVERAGE_FLAGS} ${NPX_EXE} ${P_WORKING_DIRECTORY}/ts-node --project ${CMAKE_CURRENT_SOURCE_DIR}/tsconfig.spec.json
       jasmine --config=${CMAKE_CURRENT_SOURCE_DIR}/jasmine.json
     WORKING_DIRECTORY ${P_WORKING_DIRECTORY}
     )
@@ -552,13 +566,13 @@ endfunction()
 # INPUT - Where are the routes found
 # OUTPUT - Where to output the api docs
 # WORKING_DIRECTORY - Where to perform the command
-# YARN_TARGET - What install target is depended upon
+# NPM_TARGET - What install target is depended upon
 function(xpwebGenerateApiDoc)
   set(GENERATE_TARGET ${ARGV0})
-  set(oneValueArgs FOLDER INPUT OUTPUT WORKING_DIRECTORY YARN_TARGET)
+  set(oneValueArgs FOLDER INPUT OUTPUT WORKING_DIRECTORY NPM_TARGET)
   cmake_parse_arguments(P "" "${oneValueArgs}" "" ${ARGN})
   ipwebVerifyFolder() # Can set P_FOLDER
-  ipwebGetNodeXpPath() # sets NODEXP_EXE
+  ipwebGetNpxPath() # Sets NPX_EXE
   ipwebVerifyWorkingDirectory() # Can set P_WORKING_DIRECTORY
   if(NOT DEFINED P_INPUT)
     message(FATAL_ERROR "Input files must be set to generate api docs")
@@ -569,10 +583,10 @@ function(xpwebGenerateApiDoc)
   file(GLOB_RECURSE routeSrcs ${P_INPUT}/**)
   set(build_stamp ${CMAKE_CURRENT_BINARY_DIR}/${P_OUTPUT}/index.html)
   add_custom_command(OUTPUT ${build_stamp}
-    COMMAND ${NODEXP_EXE} ${P_WORKING_DIRECTORY}/apidoc -i ${P_INPUT} -o ${CMAKE_CURRENT_BINARY_DIR}/${P_OUTPUT}
+    COMMAND ${NPX_EXE} ${P_WORKING_DIRECTORY}/apidoc -i ${P_INPUT} -o ${CMAKE_CURRENT_BINARY_DIR}/${P_OUTPUT}
     COMMAND ${CMAKE_COMMAND} -E touch ${build_stamp}
     WORKING_DIRECTORY ${P_WORKING_DIRECTORY}
-    DEPENDS ${routeSrcs} ${P_YARN_TARGET}
+    DEPENDS ${routeSrcs} ${P_NPM_TARGET}
     )
   add_custom_target(${GENERATE_TARGET} ALL DEPENDS ${build_stamp})
   ipwebSetBuildProperties(${GENERATE_TARGET})
@@ -604,7 +618,7 @@ endfunction()
 # TYPE - What type of project
 # VERSION_DEST - Where to put the version file
 # WORKING_DIRECTORY - Where to perform the command
-# YARN_TARGET - What install target is depended upon
+# NPM_TARGET - What install target is depended upon
 function(xpwebInstallNBuild)
   set(BUILD_TARGET ${ARGV0})
   set(optionArgs ADD_SUBMODULE_TEST_LABEL ADD_TO_TEST ARCHIVE_BUILD EXCLUDE_WEB_LIBRARIES LIBRARY_DIR TEST_TOOL)
@@ -623,23 +637,23 @@ function(xpwebInstallNBuild)
     TYPE
     VERSION_DEST
     WORKING_DIRECTORY
-    YARN_TARGET
+    NPM_TARGET
     )
   set(multiValueArgs DEPENDS EXTRA_PACKAGE_FILES OUTPUT_FILES PROTO_SRCS SRCS TEST_DEPENDS)
   cmake_parse_arguments(P "${optionArgs}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
-  if(NOT DEFINED P_YARN_TARGET)
+  if(NOT DEFINED P_NPM_TARGET)
     if(NOT DEFINED PROJECT_NAME)
-      message(FATAL_ERROR "If YARN_TARGET is not given, PROJECT_NAME must be set")
+      message(FATAL_ERROR "If NPM_TARGET is not given, PROJECT_NAME must be set")
     endif()
-    set(P_YARN_TARGET ${PROJECT_NAME}Deps)
+    set(P_NPM_TARGET ${PROJECT_NAME}Deps)
   endif()
   ipwebVerifyFolder() # Sets P_FOLDER
-  if(DEFINED P_FOLDER AND (DEFINED P_APIDOC_INPUT OR DEFINED P_PROTO_SRCS OR NOT TARGET ${P_YARN_TARGET}))
+  if(DEFINED P_FOLDER AND (DEFINED P_APIDOC_INPUT OR DEFINED P_PROTO_SRCS OR NOT TARGET ${P_NPM_TARGET}))
     set(P_FOLDER ${P_FOLDER}/${BUILD_TARGET}Targets)
   endif()
   ipwebSetIfDefined(WORKING_DIRECTORY) # Sets P_WORKING_DIRECTORY
-  xpwebAddYarnTarget(${P_YARN_TARGET} ${P_FOLDER} ${P_WORKING_DIRECTORY})
-  set(P_YARN_TARGET YARN_TARGET ${P_YARN_TARGET})
+  xpwebAddNpmTarget(${P_NPM_TARGET} ${P_FOLDER} ${P_WORKING_DIRECTORY})
+  set(P_NPM_TARGET NPM_TARGET ${P_NPM_TARGET})
   ipwebSetIfDefined(DEPENDS) # Sets P_DEPENDS
   if(DEFINED P_VERSION_DEST)
     xpwebGenerateVersion(${BUILD_TARGET}_version ${P_FOLDER} VERSION_DEST ${P_VERSION_DEST})
@@ -655,7 +669,7 @@ function(xpwebInstallNBuild)
       ${P_PROTO_SRCS}
       ${P_TARGET_FORMAT}
       ${P_WORKING_DIRECTORY}
-      ${P_YARN_TARGET}
+      ${P_NPM_TARGET}
       )
     list(APPEND P_DEPENDS ${BUILD_TARGET}-pb)
   endif()
@@ -674,7 +688,7 @@ function(xpwebInstallNBuild)
     if(P_LIBRARY_DIR)
       set(LIBRARY_DIR LIBRARY_DIR)
     endif()
-    xpwebAddLibrary(${BUILD_TARGET} ${P_DEPENDS} ${P_FOLDER} ${LIBRARY_DIR} ${P_SRCS} ${TEST_TOOL} ${P_WORKING_DIRECTORY} ${P_YARN_TARGET})
+    xpwebAddLibrary(${BUILD_TARGET} ${P_DEPENDS} ${P_FOLDER} ${LIBRARY_DIR} ${P_SRCS} ${TEST_TOOL} ${P_WORKING_DIRECTORY} ${P_NPM_TARGET})
   elseif(P_TYPE STREQUAL "webpack")
     ipwebSetIfDefined(OUTPUT_FILES) # Sets P_OUTPUT_FILES
     ipwebSetIfDefined(INSTALL_NODE_DESTINATION) # Sets P_INSTALL_NODE_DESTINATION
@@ -689,7 +703,7 @@ function(xpwebInstallNBuild)
       ${P_SRCS}
       ${TEST_TOOL}
       ${P_WORKING_DIRECTORY}
-      ${P_YARN_TARGET}
+      ${P_NPM_TARGET}
       )
   elseif(P_TYPE STREQUAL "angular")
     if(P_ARCHIVE_BUILD)
@@ -708,7 +722,7 @@ function(xpwebInstallNBuild)
       ${P_SRCS}
       ${TEST_TOOL}
       ${P_WORKING_DIRECTORY}
-      ${P_YARN_TARGET}
+      ${P_NPM_TARGET}
       )
   endif()
   if(P_ADD_TO_TEST)
@@ -721,7 +735,7 @@ function(xpwebInstallNBuild)
     endif()
     ipwebVerifyTestFolder() # Sets P_TEST_FOLDER
     if(P_TYPE STREQUAL "angular")
-      xpwebAddTestAngular(${BUILD_TARGET} ${ADD_SUBMODULE_TEST_LABEL} ${P_ANGULAR_PROJECT} ${P_TEST_DEPENDS} ${P_TEST_DIR} ${P_TEST_FOLDER} ${P_WORKING_DIRECTORY} ${P_YARN_TARGET})
+      xpwebAddTestAngular(${BUILD_TARGET} ${ADD_SUBMODULE_TEST_LABEL} ${P_ANGULAR_PROJECT} ${P_TEST_DEPENDS} ${P_TEST_DIR} ${P_TEST_FOLDER} ${P_WORKING_DIRECTORY} ${P_NPM_TARGET})
     else()
       xpwebAddTestJasmine(${BUILD_TARGET} ${ADD_SUBMODULE_TEST_LABEL} ${P_TEST_DIR} ${P_TEST_DEPENDS} ${P_TEST_FOLDER} ${P_WORKING_DIRECTORY})
     endif()
@@ -732,7 +746,7 @@ function(xpwebInstallNBuild)
       INPUT ${P_APIDOC_INPUT}
       OUTPUT ${P_APIDOC_OUTPUT}
       ${P_WORKING_DIRECTORY}
-      ${P_YARN_TARGET}
+      ${P_NPM_TARGET}
       )
   endif()
   xpSourceListAppend()
@@ -761,7 +775,7 @@ function(xpwebAddTestAddon)
   ipwebSetIfDefined(TEST_DIR) # Sets P_TEST_DIR
   ipwebSetIfDefined(DEPENDS) # Sets P_DEPENDS
   ipwebSetIfDefined(WORKING_DIRECTORY) # Sets P_WORKING_DIRECTORY
-  xpwebAddYarnTarget(${TEST_TARGET}Deps ${P_TEST_FOLDER} ${P_WORKING_DIRECTORY})
+  xpwebAddNpmTarget(${TEST_TARGET}Deps ${P_TEST_FOLDER} ${P_WORKING_DIRECTORY})
   list(APPEND P_DEPENDS ${TEST_TARGET}Deps)
   xpwebAddTestJasmine(${TEST_TARGET} ${ADD_SUBMODULE_TEST_LABEL} ${P_DEPENDS} EXCLUDE_COVERAGE ${P_TEST_FOLDER} ${P_TEST_DIR} ${P_WORKING_DIRECTORY})
   xpSourceListAppend()
