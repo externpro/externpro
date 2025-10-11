@@ -528,11 +528,15 @@ set(xp_libssh2 REPO github.com/externpro/libssh2 VER 1.9.0 XP_MODULE
   DESC "client-side C library implementing SSH2 protocol"
   LICENSE "[BSD-3-Clause](http://www.libssh2.org/license.html 'BSD 3-Clause New or Revised License')"
   )
-set(xp_libstrophe REPO github.com/externpro/libstrophe VER 0.9.1 XP_MODULE
-  BASE strophe:0.9.1 BRANCH xp0.9.1 DEPS expat openssl
+set(xp_libstrophe REPO github.com/externpro/libstrophe TAG v0.9.1.2
+  BASE 0.9.1 BRANCH dev DEPS expat openssl
   WEB "http://strophe.im/libstrophe/" UPSTREAM "github.com/strophe/libstrophe"
   DESC "A simple, lightweight C library for writing XMPP client"
   LICENSE "[MIT or GPL-3.0](https://github.com/strophe/libstrophe/blob/0.9.1/LICENSE.txt 'dual licensed under MIT and GPLv3 licenses')"
+  SHA256_Darwin-arm64 08e1b10b41e38d8bb2242849733c3b6bb0f146e9e66a58923ad2dd5a2994acd9
+  SHA256_Linux-arm64 c5ff401cb9a96001d4f4d7681bf33a811737270e258263b00d718956c2685fd7
+  SHA256_Linux e3c847890d4ff3c3755abd0eb5e198233f2795be883971fc9edb7e86cbf328c8
+  SHA256_win64 492a26d7628b28151b4d12cbf3679bebe8e8fabb7a2827eb1ebbb71bae7cc4e0
   )
 set(xp_spatialite-tools REPO github.com/externpro/spatialite-tools TAG v5.1.0.5
   BASE 5.1.0a BRANCH dev EXE_DEPS libspatialite
