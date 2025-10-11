@@ -25,7 +25,6 @@ x-all-build-args: &all-build-args-alias
   RUN_IT: ${RUN_IT}
   TZ: ${TZ}
 x-bld-build-args: &bld-build-args-alias
-  WEBPRO: ${WEBPRO}
   TOOLS: ${TOOLS}
   TOOLS_PATH: ${TOOLS_PATH}
 services:

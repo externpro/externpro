@@ -82,23 +82,6 @@ EXTERN_DIR=/opt/extern
 GCC_VER=gcc921
 urlPfx="https://isrhub.usurf.usu.edu"
 ##############################
-wproVer="$(findVer 'set(webpro_REV' CMakeLists.txt */CMakeLists.txt */toplevel.cmake */*/toplevel.cmake)"
-[[ "${wproVer}" == "NONE" ]] && wproVer=""
-if [[ -n "${wproVer}" ]]; then
-  wproBase=webpro-${wproVer}-${GCC_VER}-64-$(uname -s)
-  if [[ ${wproVer} < "20.05.1" ]]; then
-    WEBPRO_DL="wget -q \"${urlPfx}/webpro/webpro/releases/download/${wproVer}/${wproBase}.sh\" \
-&& chmod 755 webpro*.sh "
-    WEBPRO="${WEBPRO_DL} \
-&& ./${wproBase}.sh --prefix=${EXTERN_DIR} --include-subdir \
-&& rm ${wproBase}.sh"
-  else
-    WEBPRO_DL="wget ${urlPfx}/webpro/webpro/releases/download/${wproVer}/${wproBase}.tar.xz"
-    WEBPRO="${WEBPRO_DL} -qO- | tar --no-same-owner -xJ -C ${EXTERN_DIR}"
-  fi
-fi
-env="${env}\nWEBPRO=${WEBPRO}"
-##############################
 if [ -f .crtoolrc ]; then
   crtv=`grep version .crtoolrc`
 fi
