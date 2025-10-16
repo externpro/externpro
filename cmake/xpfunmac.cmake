@@ -953,7 +953,7 @@ function(xpStringRemoveIfExists removeFrom str)
 endfunction()
 
 function(xpGetConfigureFlags cpprefix _ret)
-  include(${MODULES_DIR}/xpflags.cmake) # populates CMAKE_*_FLAGS
+  include(${xpThisDir}/xpflags.cmake) # populates CMAKE_*_FLAGS
   if(XP_BUILD_VERBOSE AND XP_FLAGS_VERBOSE)
     message(STATUS "  CMAKE_CXX_FLAGS: ${CMAKE_CXX_FLAGS}")
     message(STATUS "  CMAKE_C_FLAGS: ${CMAKE_C_FLAGS}")
