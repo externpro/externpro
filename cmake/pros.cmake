@@ -479,6 +479,16 @@ set(xp_wxtlc REPO github.com/externpro/wxTLC
   DESC "a multi column tree control [submodule of: _wxx_]"
   LICENSE "[wxWindows](http://wxcode.sourceforge.net/ 'wxWindows Library License')"
   )
+set(xp_wxtetris REPO github.com/smanders/wxTetris TAG v1.2.0
+  BASE v0 BRANCH dev DEPS wxwidgets
+  WEB "https://github.com/smanders/wxTetris"
+  DESC "wxWidgets Tetris game"
+  LICENSE "[MIT](https://github.com/smanders/wxTetris/blob/dev/LICENSE 'MIT License')"
+  SHA256_Darwin-arm64 6aeace636c56f72746cef5acefe98ca859b14243f6178bc49fb4bbac2574af72
+  SHA256_Linux-arm64 a2543dfcb6d3343724b3fed6f8cab70efd0631af30ede45443f91de6d5533008
+  SHA256_Linux 984ed430f611b8bf03323902fa33a04ef8a28fc704fd5c32917bb26fe3912057
+  SHA256_win64 b457f46b71d1787eb9e70fd5cf1ff16386937c53b021f5b70db79b2b61755ad7
+  )
 ### depend on previous group
 set(xp_activemqcpp REPO github.com/externpro/activemq-cpp VER 3.9.5 XP_MODULE
   BASE apache:activemq-cpp-3.9.5 BRANCH xp-3.9.5 DEPS apr openssl

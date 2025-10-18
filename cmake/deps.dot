@@ -36,6 +36,7 @@ digraph GG {
   "spatialite-tools" -> "libspatialite";
   "spdlog" -> "fmt";
   "wxinclude" -> "boost";
+  "wxtetris" -> "wxwidgets";
   "wxx" -> "wxwidgets";
   "zmqpp" -> "libzmq";
 }
