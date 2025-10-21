@@ -317,7 +317,7 @@ set(xp_wxwidgets REPO github.com/externpro/wxWidgets TAG v3.1.0.3
   BASE v3.1.0 BRANCH dev
   WEB "http://wxwidgets.org/" UPSTREAM "github.com/wxWidgets/wxWidgets"
   DESC "Cross-Platform C++ GUI Library"
-  LICENSE "[wxWindows](http://www.wxwidgets.org/about/newlicen.htm 'essentially LGPL with an exception')"
+  LICENSE "[wxWindows](https://wxwidgets.org/about/licence/ 'essentially LGPL with an exception')"
   SHA256_Darwin-arm64 b1324ffb17b5005854f47f6e4492d236ac22a3f7fca3bfbea8b86939b2fff897
   SHA256_Linux-arm64 db9cf53113ef81f9353fa6faa52fb5a819de37331c83cb2793d63aa96f2ff6b8
   SHA256_Linux bef10053f7fa35fa031a5a862b1fe3e742cb2742813e0a38df12ad2f24028eec
@@ -327,7 +327,7 @@ set(xp_wxcmake REPO github.com/externpro/wxcmake
   BASE wx0 BRANCH dev
   WEB "https://github.com/externpro/wxcmake 'wxcmake repo on github'"
   DESC "build wxWidgets via cmake [submodule of: _wxwidgets_]"
-  LICENSE "[wxWindows](http://www.wxwidgets.org/about/newlicen.htm 'same as wxWidgets license')"
+  LICENSE "[wxWindows](https://wxwidgets.org/about/licence/ 'same as wxWidgets license')"
   )
 set(xp_yasm REPO github.com/externpro/yasm VER 1.3.0
   BASE yasm:v1.3.0 BRANCH xp1.3.0
