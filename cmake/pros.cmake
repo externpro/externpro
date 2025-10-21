@@ -324,9 +324,9 @@ set(xp_wxwidgets REPO github.com/externpro/wxWidgets TAG v3.1.0.3
   SHA256_win64 6c7134ab9a5ec426cdf994ba828feeaec37a32b6ccf53c72bfef3133d4e9f1ab
   )
 set(xp_wxcmake REPO github.com/externpro/wxcmake
-  BASE wx0 BRANCH wx31
-  WEB "https://github.com/externpro/wxcmake/tree/wx31 'wxcmake repo on github, wx31 branch'"
-  DESC "build wxWidgets via cmake (MSW-only) [submodule of: _wxwidgets_]"
+  BASE wx0 BRANCH dev
+  WEB "https://github.com/externpro/wxcmake 'wxcmake repo on github'"
+  DESC "build wxWidgets via cmake [submodule of: _wxwidgets_]"
   LICENSE "[wxWindows](http://www.wxwidgets.org/about/newlicen.htm 'same as wxWidgets license')"
   )
 set(xp_yasm REPO github.com/externpro/yasm VER 1.3.0
