@@ -480,7 +480,7 @@ set(xp_wxtlc REPO github.com/externpro/wxTLC
   LICENSE "[wxWindows](http://wxcode.sourceforge.net/ 'wxWindows Library License')"
   )
 set(xp_wxtetris REPO github.com/smanders/wxTetris TAG v1.2.0
-  BASE v0 BRANCH dev DEPS wxwidgets
+  BASE v0 BRANCH dev EXE_DEPS wxwidgets
   WEB "https://github.com/smanders/wxTetris"
   DESC "wxWidgets Tetris game"
   LICENSE "[MIT](https://github.com/smanders/wxTetris/blob/dev/LICENSE 'MIT License')"
@@ -513,7 +513,7 @@ set(xp_cppzmq REPO github.com/externpro/cppzmq VER 4.7.1 XP_MODULE
   LICENSE "[MPL-2.0](http://wiki.zeromq.org/area:licensing 'Mozilla Public License 2.0')"
   )
 set(xp_fecpp REPO github.com/externpro/fecpp TAG v0.9.1
-  BASE v0.9 BRANCH dev DEPS boost
+  BASE v0.9 BRANCH dev EXE_DEPS boost
   WEB "http://www.randombit.net/code/fecpp/" UPSTREAM "github.com/randombit/fecpp"
   DESC "C++ forward error correction with SIMD optimizations"
   LICENSE "[BSD-2-Clause](http://www.randombit.net/code/fecpp/ 'BSD 2-Clause Simplified License')"
