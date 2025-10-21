@@ -313,15 +313,15 @@ set(xp_wirehair REPO github.com/externpro/wirehair TAG v23.12.02.1
   SHA256_Linux bea56e35e2292b620532aab17058165e968c53c37bd7e6e660c7c4e1394d7f94
   SHA256_win64 c768565e46ac9aa99e04d19be7f84b6572dd389c741683769e4f4ffc01a75dd5
   )
-set(xp_wxwidgets REPO github.com/externpro/wxWidgets TAG v3.1.0.2
+set(xp_wxwidgets REPO github.com/externpro/wxWidgets TAG v3.1.0.3
   BASE v3.1.0 BRANCH dev
   WEB "http://wxwidgets.org/" UPSTREAM "github.com/wxWidgets/wxWidgets"
   DESC "Cross-Platform C++ GUI Library"
   LICENSE "[wxWindows](http://www.wxwidgets.org/about/newlicen.htm 'essentially LGPL with an exception')"
-  SHA256_Darwin-arm64 34dc61fd9cdeaa58a9177e80449a06771dda96492a6d1aa10a0b336ad14b1a7e
-  SHA256_Linux-arm64 de95ac6a91a2a03cb5a8b08d77196febf9f227462514c9a59134a25020c900ff
-  SHA256_Linux 406692bbbccdeaffe34d62f5d38fe83bc1459635913e545dbfaaf37dcc8b0c7f
-  SHA256_win64 f1a06eafdcb88cf0d947ffaf487a837b48ada667b5ade7f8c0b949e257eb819a
+  SHA256_Darwin-arm64 b1324ffb17b5005854f47f6e4492d236ac22a3f7fca3bfbea8b86939b2fff897
+  SHA256_Linux-arm64 db9cf53113ef81f9353fa6faa52fb5a819de37331c83cb2793d63aa96f2ff6b8
+  SHA256_Linux bef10053f7fa35fa031a5a862b1fe3e742cb2742813e0a38df12ad2f24028eec
+  SHA256_win64 6c7134ab9a5ec426cdf994ba828feeaec37a32b6ccf53c72bfef3133d4e9f1ab
   )
 set(xp_wxcmake REPO github.com/externpro/wxcmake
   BASE wx0 BRANCH wx31
