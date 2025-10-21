@@ -455,26 +455,30 @@ set(xp_spdlog REPO github.com/externpro/spdlog TAG v1.15.3.1
   SHA256_Linux a79a4cfb510a9080f920a84ed88d47499a2662dcd4f0a22d296966d63738d5c9
   SHA256_win64 8812951049a04c5c9ab4e7d24de1ba6b9fca029e892da81f9429ac214f875014
   )
-set(xp_wxx REPO github.com/externpro/wxx VER 2024.01.25 XP_MODULE
-  BASE wxx.03 BRANCH xpro DEPS wxwidgets
+set(xp_wxx REPO github.com/externpro/wxx TAG v25.01
+  BASE v0 BRANCH dev DEPS wxwidgets
   WEB "https://github.com/externpro/wxx"
   DESC "wxWidget-based extra components"
   LICENSE "[wxWindows](http://wxcode.sourceforge.net/ 'wxWindows Library License')"
+  SHA256_Darwin-arm64 e560e75c34a6556300ce39a878a69af1c09c57d0c2689a60506aaf29bd61a99d
+  SHA256_Linux-arm64 fa37c7d8e52527c2c1c50e3fef701600df3faa83ac849f5df72993aff8e269aa
+  SHA256_Linux 996e5200e2c3bc3f447a60b34621ea3c95818cab8d59fb134aaf2d765190bf82
+  SHA256_win64 ed8c03460ffbdd66bdede8afc2b6b71c296adab2351a7128851745599a449f54
   )
 set(xp_wxplotctrl REPO github.com/externpro/wxplotctrl
-  BASE v2006.04.28 BRANCH xp2006.04.28
+  BASE v2006.04.28 BRANCH dev
   WEB "https://sourceforge.net/projects/wxcode/files/Components/wxPlotCtrl/"
   DESC "interactive xy data plotting widgets [submodule of: _wxx_]"
   LICENSE "[wxWindows](http://wxcode.sourceforge.net/ 'wxWindows Library License')"
   )
 set(xp_wxthings REPO github.com/externpro/wxthings
-  BASE v2006.04.28 BRANCH xp2006.04.28
+  BASE v2006.04.28 BRANCH dev
   WEB "https://sourceforge.net/projects/wxcode/files/Components/wxThings/"
   DESC "a variety of data containers and controls [submodule of: _wxx_]"
   LICENSE "[wxWindows](http://wxcode.sourceforge.net/ 'wxWindows Library License')"
   )
 set(xp_wxtlc REPO github.com/externpro/wxTLC
-  BASE v1208 BRANCH xp1208
+  BASE v1208 BRANCH dev
   WEB "https://sourceforge.net/projects/wxcode/files/Components/treelistctrl/"
   DESC "a multi column tree control [submodule of: _wxx_]"
   LICENSE "[wxWindows](http://wxcode.sourceforge.net/ 'wxWindows Library License')"
