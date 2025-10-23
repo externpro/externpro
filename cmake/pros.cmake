@@ -366,11 +366,15 @@ set(xp_ceres-solver REPO github.com/externpro/ceres-solver TAG v2.2.0.2
   SHA256_Linux 7497798658fa914227d81f7b409705aa143f4ed2b3ee028e74f4894566807703
   SHA256_win64 ccb00129f23e457b92435ca95f09fb56b25f29275eb750b8c722c7d9db21da40
   )
-set(xp_geotiff REPO github.com/externpro/libgeotiff VER 1.2.4 XP_MODULE
-  BASE v1.2.4 BRANCH xp1.2.4 DEPS wxwidgets
-  WEB "http://trac.osgeo.org/geotiff/ 'GeoTIFF trac website'" # TODO upstream github.com/OSGeo/libgeotiff (fork)
+set(xp_libgeotiff REPO github.com/externpro/libgeotiff TAG v1.2.4.1
+  BASE 1.2.4 BRANCH dev DEPS wxwidgets
+  WEB "http://trac.osgeo.org/geotiff/ 'GeoTIFF trac website'" UPSTREAM "github.com/OSGeo/libgeotiff"
   DESC "georeferencing info embedded within TIFF file"
   LICENSE "[MIT](https://github.com/OSGeo/libgeotiff/blob/master/libgeotiff/LICENSE 'MIT License or public domain')"
+  SHA256_Darwin-arm64 21d7fa96357cd6472b1505ed7ebf49c5dbe4aa1ea6adbeb98d4097532a5c849b
+  SHA256_Linux-arm64 736c5d8dea3ffae0a8775c9c03bc93cca5f6e43c303f798f18457448fbb1bb84
+  SHA256_Linux 974064eaf86badd8648c5167ab4f243335e3851d8b072d43b5cb4b4e0108a5c9
+  SHA256_win64 5e0a9d7f1cf95d6cbde071ac1f982453dafc9e26b97631dc54314b646e68cd55
   )
 set(xp_hdf5 REPO github.com/externpro/hdf5 TAG v1.14.6.5
   BASE hdf5_1.14.6 BRANCH dev DEPS zlib
