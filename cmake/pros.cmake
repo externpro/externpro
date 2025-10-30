@@ -430,11 +430,15 @@ set(xp_node-addon-api REPO github.com/externpro/node-addon-api TAG v8.5.0.1
   SHA256_Linux 2a9b1ada4a0df02333e4204194c8449be23f136d92d25a583a9c3fb4b1c8489c
   SHA256_win64 8cb379185c546648d8f23ea12247919294db4229e2d05a486a4f72a911ac1d49
   )
-set(xp_openh264 REPO github.com/externpro/openh264 VER 1.4.0 XP_MODULE
-  BASE cisco:v1.4.0 BRANCH xp1.4.0 DEPS yasm
-  DESC "a codec library which supports H.264 encoding and decoding"
+set(xp_openh264 REPO github.com/externpro/openh264 TAG v1.4.0.1
+  BASE v1.4.0 BRANCH dev DEPS yasm
   WEB "http://www.openh264.org/" UPSTREAM "github.com/cisco/openh264"
+  DESC "a codec library which supports H.264 encoding and decoding"
   LICENSE "[BSD-2-Clause](http://www.openh264.org/faq.html 'BSD 2-Clause Simplified License')"
+  SHA256_Darwin-arm64 893b7db45ce7c535ad1eab767e0987a879a425e99f81594feafba9150d029b46
+  SHA256_Linux-arm64 99ade5a99d79da5ef7e9ae0ee89941c9fab03859ab847d1a6c7c83c85ae7de08
+  SHA256_Linux 93e09307fef110a4cb51e21c7ddc986f65af14cec26c756da1b0514c8d32a563
+  SHA256_win64 fdb01196f8ce0a16af3a78e1f42936d533a28a69e3b3fd12875217e6d776c012
   )
 set(xp_openssl REPO github.com/externpro/openssl VER 1.1.1l XP_MODULE
   BASE openssl:OpenSSL_1_1_1l BRANCH xp_1_1_1l DEPS nasm opensslasm # TRICKY: nodexp, openssl versions coordinated
