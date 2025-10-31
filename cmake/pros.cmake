@@ -538,8 +538,17 @@ set(xp_fecpp REPO github.com/externpro/fecpp TAG v0.9.1
   SHA256_Linux ef1a3f8db144a49fde390bcaa2d6b137c764cd23880a365c94702d14f3bc31d1
   SHA256_win64 90951863a61b1a7196caf00a66127736b5c9e7be003c4b4cc93c5c0a60dd73ad
   )
+set(xp_ffmpeg REPO github.com/externpro/FFmpeg TAG v4.3.1.1
+  BASE n4.3.1 BRANCH dev DEPS openh264 yasm
+  WEB "https://www.ffmpeg.org/" UPSTREAM "github.com/FFmpeg/FFmpeg"
+  DESC "complete, cross-platform solution to record, convert and stream audio and video (pre-release: no windows package)"
+  LICENSE "[LGPL-2.1](https://www.ffmpeg.org/legal.html 'LGPL version 2.1 or later')"
+  SHA256_Darwin-arm64 e6eaa0d3bdb1c2b381306a19f6597ae8c79ad8d98e1803d3af0671e695538519
+  SHA256_Linux-arm64 7f11c8790f21d67716ea25c5b6b49ba202f8bf9f94e235fa0d5c33cd89dfd225
+  SHA256_Linux 5e6121f9471742e37a41080afccbd21c701f601db6a9c6cbce8a8354275af34e
+  )
 set(xp_ffmpeg REPO github.com/externpro/FFmpeg TAG v2.6.2.2
-  BASE n2.6.2 BRANCH dev DEPS openh264 yasm
+  BASE n2.6.2 BRANCH dev2.6.2 DEPS openh264 yasm
   WEB "https://www.ffmpeg.org/" UPSTREAM "github.com/FFmpeg/FFmpeg"
   DESC "complete, cross-platform solution to record, convert and stream audio and video"
   LICENSE "[LGPL-2.1](https://www.ffmpeg.org/legal.html 'LGPL version 2.1 or later')"
@@ -547,12 +556,6 @@ set(xp_ffmpeg REPO github.com/externpro/FFmpeg TAG v2.6.2.2
   SHA256_Linux-arm64 7f84e517475d6dc6fb139d826f578eaf128719327ff44e35bf8272f17dc65953
   SHA256_Linux 8ba9439fff1f92e34d84cc45fc12699e47ce148b2e3f9680dffb105f7611fafa
   SHA256_win64 79399ed5b6ad4361ae629aeeb861fb71d0691fb4f34fe04ef27d91edeb5c0a8e
-  )
-set(xp_ffmpeg4 REPO github.com/externpro/FFmpeg VER 4.3.1
-  BASE FFmpeg:n4.3.1 BRANCH xp4.3.1 DEPS openh264 yasm
-  WEB "https://www.ffmpeg.org/" UPSTREAM "github.com/FFmpeg/FFmpeg"
-  DESC "complete, cross-platform solution to record, convert and stream audio and video"
-  LICENSE "[LGPL-2.1](https://www.ffmpeg.org/legal.html 'LGPL version 2.1 or later')"
   )
 set(xp_libssh2 REPO github.com/externpro/libssh2 VER 1.9.0 XP_MODULE
   BASE libssh2:libssh2-1.9.0 BRANCH xp-1.9.0 DEPS openssl zlib

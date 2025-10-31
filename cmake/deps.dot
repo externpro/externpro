@@ -13,8 +13,6 @@ digraph GG {
   "fecpp" -> "boost";
   "ffmpeg" -> "openh264";
   "ffmpeg" -> "yasm";
-  "ffmpeg4" -> "openh264";
-  "ffmpeg4" -> "yasm";
   "hdf5" -> "zlib";
   "libgeotiff" -> "wxwidgets";
   "libgit2" -> "libssh2";
