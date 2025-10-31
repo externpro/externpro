@@ -538,15 +538,15 @@ set(xp_fecpp REPO github.com/externpro/fecpp TAG v0.9.1
   SHA256_Linux ef1a3f8db144a49fde390bcaa2d6b137c764cd23880a365c94702d14f3bc31d1
   SHA256_win64 90951863a61b1a7196caf00a66127736b5c9e7be003c4b4cc93c5c0a60dd73ad
   )
-set(xp_ffmpeg REPO github.com/externpro/FFmpeg TAG v2.6.2.1
+set(xp_ffmpeg REPO github.com/externpro/FFmpeg TAG v2.6.2.2
   BASE n2.6.2 BRANCH dev DEPS openh264 yasm
   WEB "https://www.ffmpeg.org/" UPSTREAM "github.com/FFmpeg/FFmpeg"
   DESC "complete, cross-platform solution to record, convert and stream audio and video"
   LICENSE "[LGPL-2.1](https://www.ffmpeg.org/legal.html 'LGPL version 2.1 or later')"
-  SHA256_Darwin-arm64 7a839055163f29137800db19fcce816b8bb7f9fd2ea794f87fdddb590825a516
-  SHA256_Linux-arm64 3552bcbb1da320b3ae329e0b7c34f91aecf55cd5547087b88dca90bc131f5cc8
-  SHA256_Linux b3b01790f1a43884f5a66813d7fc75eb9f7d8d9bed908b95f91e3b4da186f1a6
-  SHA256_win64 5764ad79e901146604e5f93accded955559a6c295d0fdf78ee20117684ff46d0
+  SHA256_Darwin-arm64 6624fbdca192d88f0e163f36e47d19a1aa2286beeec630285bed242475f2db84
+  SHA256_Linux-arm64 7f84e517475d6dc6fb139d826f578eaf128719327ff44e35bf8272f17dc65953
+  SHA256_Linux 8ba9439fff1f92e34d84cc45fc12699e47ce148b2e3f9680dffb105f7611fafa
+  SHA256_win64 79399ed5b6ad4361ae629aeeb861fb71d0691fb4f34fe04ef27d91edeb5c0a8e
   )
 set(xp_ffmpeg4 REPO github.com/externpro/FFmpeg VER 4.3.1
   BASE FFmpeg:n4.3.1 BRANCH xp4.3.1 DEPS openh264 yasm
