@@ -9,7 +9,7 @@ set(xp_exdlpro REPO github.com/externpro/exdlpro TAG v25.06
   SHA256_win64 372421edc8a8dd2c493c1b6f18202f0e1987175662731fe5772222c45af189eb
   )
 set(xp_apr REPO github.com/externpro/apr TAG v1.7.6.1
-  BASE 1.7.6 BRANCH dev
+  XPBLD "patch(msw),auto(unix)" BASE 1.7.6 BRANCH dev
   WEB "http://apr.apache.org/" UPSTREAM "github.com/apache/apr"
   DESC "Apache Portable Runtime project"
   LICENSE "[Apache-2.0](http://www.apache.org/licenses/LICENSE-2.0.html 'Apache License, Version 2.0')"
@@ -19,7 +19,7 @@ set(xp_apr REPO github.com/externpro/apr TAG v1.7.6.1
   SHA256_win64 12004ff076d3fc1442f9211fbf4eb9c29d8248bf178b0c729abbd17a88b3ec80
   )
 set(xp_argon2 REPO github.com/externpro/argon2 TAG v20210625.1
-  BASE 20210625 BRANCH dev
+  XPBLD "intro" BASE 20210625 BRANCH dev
   WEB "https://www.password-hashing.net" UPSTREAM "github.com/P-H-C/phc-winner-argon2"
   DESC "The reference C implementation of the Argon2, the password-hashing function that won the Password Hashing Competition (PHC)"
   LICENSE "[CC0-1.0 or Apache-2.0](https://github.com/P-H-C/phc-winner-argon2/blob/master/LICENSE 'dual licensed under Creative Commons Zero v1.0 Universal and Apache License, Version 2.0')"
@@ -29,7 +29,7 @@ set(xp_argon2 REPO github.com/externpro/argon2 TAG v20210625.1
   SHA256_win64 fa649f8c8975985f9714f11c500aef67468fc66801611aa067bbb489e9814da2
   )
 set(xp_bzip2 REPO github.com/externpro/bzip2 TAG v1.0.8.2
-  BASE bzip2-1.0.8 BRANCH dev
+  XPBLD "intro" BASE bzip2-1.0.8 BRANCH dev
   WEB "https://sourceware.org/bzip2/" UPSTREAM "github.com/opencor/bzip2"
   DESC "lossless block-sorting data compression library"
   LICENSE "[bzip2-1.0.6](https://spdx.org/licenses/bzip2-1.0.6.html 'BSD-like, modified zlib license')"
@@ -39,13 +39,13 @@ set(xp_bzip2 REPO github.com/externpro/bzip2 TAG v1.0.8.2
   SHA256_win64 cc9a1b482e6833a47020b2a9a18c38edb9a23f236ec4894598e761ed047d5b7e
   )
 set(xp_cares REPO github.com/externpro/c-ares VER 1.18.1 XP_MODULE
-  BASE c-ares:cares-1_18_1 BRANCH xp-1_18_1
+  XPBLD "patch" BASE c-ares:cares-1_18_1 BRANCH xp-1_18_1
   WEB "http://c-ares.haxx.se/" UPSTREAM "github.com/c-ares/c-ares"
   DESC "C library for asynchronous DNS requests (including name resolves)"
   LICENSE "[MIT](http://c-ares.haxx.se/license.html 'MIT License')"
   )
 set(xp_clang-format REPO github.com/externpro/clang-format TAG v19.1.5.1
-  BASE v0 BRANCH dev
+  XPBLD "fetch" BASE v0 BRANCH dev
   WEB "https://clang.llvm.org/docs/ClangFormat.html" UPSTREAM "github.com/llvm/llvm-project"
   DESC "used to format C/C++/Java/JavaScript/JSON/Objective-C/Protobuf/C# code (clang/tools/clang-format in upstream repo)"
   LICENSE "[Apache-2.0](https://releases.llvm.org/11.0.0/LICENSE.TXT 'Apache License v2.0 with LLVM Exceptions, see https://clang.llvm.org/features.html#license and https://llvm.org/docs/DeveloperPolicy.html#copyright-license-and-patents')"
@@ -55,7 +55,7 @@ set(xp_clang-format REPO github.com/externpro/clang-format TAG v19.1.5.1
   SHA256_win64 c75c1d540ff8ed273b140c2e2c6f13bc978a65539d57c6e35ec001e149d85b89
   )
 set(xp_eigen REPO github.com/externpro/eigen TAG v3.4.0.1
-  BASE 3.4.0 BRANCH dev
+  XPBLD "patch" BASE 3.4.0 BRANCH dev
   WEB "http://eigen.tuxfamily.org" UPSTREAM "gitlab.com/libeigen/eigen.git"
   DESC "C++ template library for linear algebra"
   LICENSE "[MPL-2.0](http://eigen.tuxfamily.org/index.php?title=Main_Page#License 'Mozilla Public License 2.0')"
@@ -65,13 +65,13 @@ set(xp_eigen REPO github.com/externpro/eigen TAG v3.4.0.1
   SHA256_win64 9bec874c71af9d899e0ab68f470d1ed2208004178a400ea04babe803358995cf
   )
 set(xp_expat REPO github.com/externpro/libexpat VER 2.2.5 XP_MODULE
-  BASE libexpat:R_2_2_5 BRANCH xp2.2.5
+  XPBLD "patch" BASE libexpat:R_2_2_5 BRANCH xp2.2.5
   WEB "https://libexpat.github.io" UPSTREAM "github.com/libexpat/libexpat"
   DESC "a stream-oriented XML parser library written in C"
   LICENSE "[MIT](https://github.com/libexpat/libexpat/blob/R_2_2_5/expat/COPYING 'MIT License')"
   )
 set(xp_flatbuffers REPO github.com/externpro/flatbuffers TAG v25.2.10.1
-  BASE v25.2.10 BRANCH dev
+  XPBLD "patch" BASE v25.2.10 BRANCH dev
   WEB "http://google.github.io/flatbuffers/" UPSTREAM "github.com/google/flatbuffers"
   DESC "efficient cross platform serialization library"
   LICENSE "[Apache-2.0](https://github.com/google/flatbuffers/blob/v25.2.10/LICENSE 'Apache License, Version 2.0')"
@@ -81,7 +81,7 @@ set(xp_flatbuffers REPO github.com/externpro/flatbuffers TAG v25.2.10.1
   SHA256_win64 650f5866d26ad36f06166b18f371dd46c76ee2c68dd7f094fcefb77d347d60a8
   )
 set(xp_fmt REPO github.com/externpro/fmt TAG v11.2.0.3
-  BASE 11.2.0 BRANCH dev
+  XPBLD "patch" BASE 11.2.0 BRANCH dev
   WEB "https://fmt.dev" UPSTREAM "github.com/fmtlib/fmt"
   DESC "fmtlib: a modern formatting library"
   LICENSE "[MIT](https://github.com/externpro/fmt/blob/master/LICENSE 'MIT License')"
@@ -91,7 +91,7 @@ set(xp_fmt REPO github.com/externpro/fmt TAG v11.2.0.3
   SHA256_win64 524a02569353895cf30cbb2c8cd1a81585afb04a6a5cf695234cbb6498df777d
   )
 set(xp_geos REPO github.com/externpro/geos TAG v3.13.0.4
-  BASE 3.13.0 BRANCH dev
+  XPBLD "patch" BASE 3.13.0 BRANCH dev
   WEB "https://libgeos.org" UPSTREAM "github.com/libgeos/geos"
   DESC "C/C++ library for computational geometry with a focus on algorithms used in geographic information systems (GIS) software"
   LICENSE "[LPGL-2.1](https://trac.osgeo.org/geos/ 'LGPL version 2.1')"
@@ -101,7 +101,7 @@ set(xp_geos REPO github.com/externpro/geos TAG v3.13.0.4
   SHA256_win64 bb776f18b782d4287db2b81dbd85831776836a06c4da344aaac7dbbffedea740
   )
 set(xp_geotranz REPO github.com/externpro/geotranz TAG v2.4.2.1
-  BASE v2.4.2 BRANCH dev
+  XPBLD "intro" BASE v2.4.2 BRANCH dev
   WEB "https://earth-info.nga.mil"
   DESC "geographic translator (convert coordinates)"
   LICENSE "[public domain](https://github.com/externpro/geotranz 'see GEOTRANS Terms of Use in README or download https://earth-info.nga.mil/php/download.php?file=wgs-terms')"
@@ -111,13 +111,13 @@ set(xp_geotranz REPO github.com/externpro/geotranz TAG v2.4.2.1
   SHA256_win64 687cee720040645ba293d51c2c8d1353fd256fe9e7058198324493f9dbc7db2b
   )
 set(xp_glew REPO github.com/externpro/glew VER 1.13.0 XP_MODULE
-  BASE nigels-com:glew-1.13.0 BRANCH xp-1.13.0
+  XPBLD "patch" BASE nigels-com:glew-1.13.0 BRANCH xp-1.13.0
   WEB "http://glew.sourceforge.net" UPSTREAM "github.com/nigels-com/glew"
   DESC "The OpenGL Extension Wrangler Library"
   LICENSE "[MIT](https://github.com/nigels-com/glew/blob/master/LICENSE.txt 'Modified BSD, Mesa 3D (renamed X11/MIT), Khronos (renamed X11/MIT)')"
   )
 set(xp_googletest REPO github.com/externpro/googletest TAG v1.16.0.1
-  BASE v1.16.0 BRANCH dev
+  XPBLD "patch" BASE v1.16.0 BRANCH dev
   WEB "https://google.github.io/googletest/" UPSTREAM "github.com/google/googletest"
   DESC "GoogleTest - Google Testing and Mocking Framework"
   LICENSE "[BSD-3-Clause](https://github.com/google/googletest/blob/master/LICENSE 'BSD 3-Clause New or Revised License')"
@@ -127,7 +127,7 @@ set(xp_googletest REPO github.com/externpro/googletest TAG v1.16.0.1
   SHA256_win64 479ab2c6dd7bccabe2c41cad27399d441d32667c563a1428f8fd154072bb8858
   )
 set(xp_jasper REPO github.com/externpro/jasper TAG v1.900.1.1
-  BASE version-1.900.1 BRANCH dev
+  XPBLD "auto" BASE version-1.900.1 BRANCH dev
   WEB "https://jasper-software.github.io/jasper/" UPSTREAM "github.com/jasper-software/jasper"
   DESC "JasPer is a software toolkit for the handling of image data. It was initially developed as a reference implementation of the JPEG 2000 Part-1 codec."
   LICENSE "[JasPer-2.0](https://github.com/jasper-software/jasper/blob/master/LICENSE.txt 'JasPer software license based on MIT License')"
@@ -137,7 +137,7 @@ set(xp_jasper REPO github.com/externpro/jasper TAG v1.900.1.1
   SHA256_win64 a3c516004b010fd280c342e1c3f42bed9b1752b6b47bb3882d40d62315a2c56b
   )
 set(xp_jpegxp REPO github.com/externpro/jpegxp VER 24.01 XP_MODULE
-  BASE jxp.240125 BRANCH jxp
+  XPBLD "intro" BASE jxp.240125 BRANCH jxp
   WEB "http://www.ijg.org/"
   DESC "JPEG codec with mods for Lossless, 12-bit lossy (XP)"
   LICENSE "[IJG](https://github.com/externpro/libjpeg/blob/upstream/README 'Independent JPEG Group License, see LEGAL ISSUES in README')"
@@ -161,7 +161,7 @@ set(xp_jpeglossy8 REPO github.com/externpro/libjpeg VER 6b
   LICENSE "[IJG](https://github.com/externpro/libjpeg/blob/upstream/README 'Independent JPEG Group License, see LEGAL ISSUES in README')"
   )
 set(xp_jxrlib REPO github.com/externpro/jxrlib TAG v2019.10.9.1
-  BASE v2019.10.9 BRANCH dev
+  XPBLD "intro" BASE v2019.10.9 BRANCH dev
   WEB "https://github.com/4creators/jxrlib" UPSTREAM "github.com/4creators/jxrlib"
   DESC "JPEG XR Image Codec reference implementation library released by Microsoft"
   LICENSE "[BSD-2-Clause](https://github.com/4creators/jxrlib/blob/master/LICENSE 'BSD 2-Clause Simplified License')"
@@ -171,7 +171,7 @@ set(xp_jxrlib REPO github.com/externpro/jxrlib TAG v2019.10.9.1
   SHA256_win64 505f1984cd8950cf1d4a52a95b76340c334632318cb59e83ba05fac7d6050df0
   )
 set(xp_libiconv REPO github.com/externpro/libiconv TAG v1.18.6
-  BASE v0 BRANCH dev
+  XPBLD "bin" BASE v0 BRANCH dev
   WEB "https://www.gnu.org/software/libiconv/" UPSTREAM "github.com/pffang/libiconv-for-Windows/releases/tag/1.18-eed6782"
   DESC "character set conversion library"
   LICENSE "[LGPL-2.1](https://savannah.gnu.org/projects/libiconv/ 'LGPL version 2.1')"
@@ -181,7 +181,7 @@ set(xp_libiconv REPO github.com/externpro/libiconv TAG v1.18.6
   SHA256_win64 2e196d43265bb2af3f419358b686f3a220ca76f08113e2d162dd3b334934985c
   )
 set(xp_libsodium REPO github.com/externpro/libsodium TAG v1.0.18.221
-  BASE jedisct1:aa099f5e82ae78175f9c1c48372a123cb634dd92 BRANCH dev
+  XPBLD "auto" BASE jedisct1:aa099f5e82ae78175f9c1c48372a123cb634dd92 BRANCH dev
   WEB "https://doc.libsodium.org/" UPSTREAM "github.com/jedisct1/libsodium"
   DESC "library for encryption, decryption, signatures, password hashing and more"
   LICENSE "[ISC](https://doc.libsodium.org/#license 'Internet Systems Consortium License, functionally equivalent to simplified BSD and MIT licenses')"
@@ -191,7 +191,7 @@ set(xp_libsodium REPO github.com/externpro/libsodium TAG v1.0.18.221
   SHA256_win64 ba76566a2add1a1a5f43b87194d5ecc5b748616a29c3c995950e4e98ded46182
   )
 set(xp_lua REPO github.com/externpro/lua VER 5.2.3 XP_MODULE
-  BASE LuaDist:5.2.3 BRANCH xp5.2.3
+  XPBLD "patch" BASE LuaDist:5.2.3 BRANCH xp5.2.3
   WEB "http://www.lua.org/" UPSTREAM "github.com/LuaDist/lua"
   DESC "a powerful, fast, lightweight, embeddable scripting language"
   LICENSE "[MIT](http://www.lua.org/license.html 'MIT License')"
@@ -202,7 +202,7 @@ set(xp_luabridge REPO github.com/vinniefalco/LuaBridge/tree/2.5 VER 2.5
   LICENSE "[MIT](https://github.com/vinniefalco/LuaBridge/#official-repository 'MIT License')"
   )
 set(xp_nasm REPO github.com/externpro/nasm TAG v2.14.02.2
-  BASE v0 BRANCH dev
+  XPBLD "bin" BASE v0 BRANCH dev
   WEB "https://www.nasm.us/"
   DESC "The Netwide Assembler - an 80x86 and x86-64 assembler (MSW-only)"
   LICENSE "[BSD-2-Clause](https://www.nasm.us/ 'BSD 2-Clause Simplified License')"
@@ -212,7 +212,7 @@ set(xp_nasm REPO github.com/externpro/nasm TAG v2.14.02.2
   SHA256_win64 d0e1791fb20264cc3d0a3e7f995c220afb326bc9d6cf983be23d63fd39ca48a2
   )
 set(xp_nlohmann_json REPO github.com/externpro/nlohmann_json TAG v3.12.0.1
-  BASE v3.12.0 BRANCH dev
+  XPBLD "patch" BASE v3.12.0 BRANCH dev
   WEB "https://json.nlohmann.me" UPSTREAM "github.com/nlohmann/json"
   DESC "JSON for Modern C++"
   LICENSE "[MIT](https://github.com/nlohmann/json/blob/develop/LICENSE.MIT 'MIT License')"
@@ -232,7 +232,7 @@ set(xp_nodeng REPO github.com/externpro/nodeng TAG v22.16.0.2-2-ge210ba4 # overr
   SHA256_win64 88b003f7d3d60f090a7ec30f77e8c0174caedf9eec670a74018d7c5d7ba26d5f
   )
 set(xp_nodeng REPO github.com/externpro/nodeng TAG v22.19.0.1
-  BASE v0 BRANCH dev
+  XPBLD "bin" BASE v0 BRANCH dev
   WEB "https://nodejs.org/en/blog/release/v22.19.0/"
   DESC "node executable bundled as externpro devel package to build angular (ng) projects"
   LICENSE "[MIT](https://raw.githubusercontent.com/nodejs/node/v22.19.0/LICENSE 'MIT License')"
@@ -242,7 +242,7 @@ set(xp_nodeng REPO github.com/externpro/nodeng TAG v22.19.0.1
   SHA256_win64 a3c990d9de9ebb29f4967b10dd9ae66472f8bf37e45c899d80914d5d25d2c890
   )
 set(xp_nodexp REPO github.com/externpro/nodexp TAG v22.19.0.1
-  BASE v0 BRANCH dev # TRICKY: nodexp, openssl versions coordinated
+  XPBLD "bin" BASE v0 BRANCH dev # TRICKY: nodexp, openssl versions coordinated
   WEB "https://nodejs.org/en/blog/release/v22.19.0/"
   DESC "node/npm development platform and runtime executable bundled as externpro devel package to build addons"
   LICENSE "[MIT](https://raw.githubusercontent.com/nodejs/node/v22.19.0/LICENSE 'MIT License')"
@@ -252,7 +252,7 @@ set(xp_nodexp REPO github.com/externpro/nodexp TAG v22.19.0.1
   SHA256_win64 220446e3ba9e5aa83bc7e970062922f066e0803bbc78de0e2568dddfaec8dfc7
   )
 set(xp_nvjpeg2000 REPO github.com/externpro/nvJPEG2000 TAG v0.8.1.3
-  BASE v0 BRANCH dev
+  XPBLD "bin" BASE v0 BRANCH dev
   WEB "https://developer.nvidia.com/nvjpeg"
   DESC "high-performance GPU-accelerated library for decoding JPEG 2000 format images (not available on macOS)"
   LICENSE "[NVIDIA](https://docs.nvidia.com/cuda/nvjpeg2000/license.html 'NVIDIA Software License Agreement')"
@@ -262,7 +262,7 @@ set(xp_nvjpeg2000 REPO github.com/externpro/nvJPEG2000 TAG v0.8.1.3
   SHA256_win64 86a810f9feb0495130c7b093a4e004b5764f57821f8e2f7739a973d5bb445e67
   )
 set(xp_patch REPO github.com/externpro/patch TAG v2.7.6.4
-  BASE v0 BRANCH dev
+  XPBLD "bin(msw),native(unix)" BASE v0 BRANCH dev
   WEB "https://savannah.gnu.org/projects/patch/" UPSTREAM "git.savannah.gnu.org/cgit/patch.git"
   DESC "takes a patch file containing a difference listing produced by the diff program and applies those differences to one or more original files, producing patched versions"
   LICENSE "[GPL-3.0](https://savannah.gnu.org/projects/patch/ 'GNU General Public License v3 or later')"
@@ -272,7 +272,7 @@ set(xp_patch REPO github.com/externpro/patch TAG v2.7.6.4
   SHA256_win64 aab7af2d24e547946aa0d4468ca2bee2487970175ce10c595954fa782e3f7c32
   )
 set(xp_rapidjson REPO github.com/externpro/rapidjson TAG v1.1.0-763.1
-  BASE v1.1.0-763 BRANCH dev
+  XPBLD "patch" BASE v1.1.0-763 BRANCH dev
   WEB "http://Tencent.github.io/rapidjson/" UPSTREAM "github.com/Tencent/rapidjson"
   DESC "A fast JSON parser/generator for C++ with both SAX/DOM style API"
   LICENSE "[MIT](https://raw.githubusercontent.com/Tencent/rapidjson/master/license.txt 'MIT License')"
@@ -282,19 +282,19 @@ set(xp_rapidjson REPO github.com/externpro/rapidjson TAG v1.1.0-763.1
   SHA256_win64 b4029d033a9f41b54009e38824ec177d849138a2add3b02462480a2eff0dfbea
   )
 set(xp_rapidxml REPO github.com/externpro/rapidxml VER 1.13 XP_MODULE
-  BASE v1.13 BRANCH xp1.13
+  XPBLD "intro" BASE v1.13 BRANCH xp1.13
   WEB "http://rapidxml.sourceforge.net/"
   DESC "fast XML parser"
   LICENSE "[BSL-1.0 or MIT](http://rapidxml.sourceforge.net/license.txt 'Boost Software License or MIT License')"
   )
 set(xp_shapelib REPO github.com/externpro/shapelib VER 1.2.10 XP_MODULE
-  BASE v1.2.10 BRANCH xp1.2.10
+  XPBLD "intro" BASE v1.2.10 BRANCH xp1.2.10
   WEB "http://shapelib.maptools.org/" UPSTREAM "github.com/modgeosys/shapelib"
   DESC "reading, writing, updating ESRI Shapefiles"
   LICENSE "[MIT or LGPL](http://shapelib.maptools.org/license.html 'MIT or LGPL License')"
   )
 set(xp_sqlite3 REPO github.com/externpro/SQLite3 TAG v3.38.2.1
-  BASE 3.38.2 BRANCH dev
+  XPBLD "patch" BASE 3.38.2 BRANCH dev
   WEB "https://www.sqlite.org/index.html 'SQLite website'" UPSTREAM "github.com/azadkuh/sqlite-amalgamation"
   DESC "C-language library that implements a small, fast, self-contained, high-reliability, full-featured, SQL database engine"
   LICENSE "[public domain](https://www.sqlite.org/copyright.html 'open-source, not open-contribution')"
@@ -304,7 +304,7 @@ set(xp_sqlite3 REPO github.com/externpro/SQLite3 TAG v3.38.2.1
   SHA256_win64 0b59fc70300618ebc6a4eaf01fc63a41d43e37e003317cf1db68270674f9d171
   )
 set(xp_wirehair REPO github.com/externpro/wirehair TAG v23.12.02.1
-  BASE v23.12.02 BRANCH dev
+  XPBLD "patch" BASE v23.12.02 BRANCH dev
   WEB "https://github.com/catid/wirehair" UPSTREAM "github.com/catid/wirehair"
   DESC "fast and portable fountain codes in C"
   LICENSE "[BSD-3-Clause](https://github.com/catid/wirehair/blob/master/LICENSE 'BSD 3-Clause New or Revised License')"
@@ -314,7 +314,7 @@ set(xp_wirehair REPO github.com/externpro/wirehair TAG v23.12.02.1
   SHA256_win64 c768565e46ac9aa99e04d19be7f84b6572dd389c741683769e4f4ffc01a75dd5
   )
 set(xp_wxwidgets REPO github.com/externpro/wxWidgets TAG v3.1.0.4
-  BASE v3.1.0 BRANCH dev
+  XPBLD "intro(msw),native(unix)" BASE v3.1.0 BRANCH dev
   WEB "http://wxwidgets.org/" UPSTREAM "github.com/wxWidgets/wxWidgets"
   DESC "Cross-Platform C++ GUI Library"
   LICENSE "[wxWindows](https://wxwidgets.org/about/licence/ 'essentially LGPL with an exception')"
@@ -330,7 +330,7 @@ set(xp_wxcmake REPO github.com/externpro/wxcmake
   LICENSE "[wxWindows](https://wxwidgets.org/about/licence/ 'same as wxWidgets license')"
   )
 set(xp_yasm REPO github.com/externpro/yasm TAG v1.3.0.1
-  BASE v1.3.0 BRANCH dev
+  XPBLD "patch" BASE v1.3.0 BRANCH dev
   WEB "http://yasm.tortall.net/" UPSTREAM "github.com/yasm/yasm"
   DESC "assembler and disassembler for the Intel x86 architecture"
   LICENSE "[BSD-2-Clause](https://github.com/yasm/yasm/blob/v1.3.0/COPYING 'BSD 2-Clause Simplified License')"
@@ -340,7 +340,7 @@ set(xp_yasm REPO github.com/externpro/yasm TAG v1.3.0.1
   SHA256_win64 a4c7249a4d4812251e8925c4b8fbc5e01e8af141acce9ae9aad7728b488751d6
   )
 set(xp_zlib REPO github.com/externpro/zlib TAG v1.3.1.1
-  BASE v1.3.1 BRANCH dev
+  XPBLD "patch" BASE v1.3.1 BRANCH dev
   WEB "https://zlib.net 'zlib website'" UPSTREAM "github.com/madler/zlib"
   DESC "compression library"
   LICENSE "[permissive](https://zlib.net/zlib_license.html 'zlib/libpng license, see https://en.wikipedia.org/wiki/Zlib_License')"
@@ -351,7 +351,7 @@ set(xp_zlib REPO github.com/externpro/zlib TAG v1.3.1.1
   )
 ### depend on previous group
 set(xp_boost REPO github.com/externpro/boost TAG v1.76.0.2
-  BASE boost-1.76.0 BRANCH dev DEPS bzip2 zlib
+  XPBLD "native" BASE boost-1.76.0 BRANCH dev DEPS bzip2 zlib
   WEB "http://www.boost.org/ 'Boost website'" UPSTREAM "github.com/boostorg/boost"
   DESC "libraries that give C++ a boost"
   LICENSE "[BSL-1.0](http://www.boost.org/users/license.html 'Boost Software License')"
@@ -361,7 +361,7 @@ set(xp_boost REPO github.com/externpro/boost TAG v1.76.0.2
   SHA256_win64 40d22b0e708c723d1bb3a2940522ccbd435117f9e9d9525af687f99004fd5bd6
   )
 set(xp_ceres-solver REPO github.com/externpro/ceres-solver TAG v2.2.0.2
-  BASE 2.2.0 BRANCH dev DEPS eigen
+  XPBLD "patch" BASE 2.2.0 BRANCH dev DEPS eigen
   WEB "http://ceres-solver.org" UPSTREAM "github.com/ceres-solver/ceres-solver"
   DESC "C++ library for modeling and solving large, complicated optimization problems"
   LICENSE "[BSD-3-Clause](http://ceres-solver.org/license.html 'BSD 3-Clause New or Revised License')"
@@ -371,7 +371,7 @@ set(xp_ceres-solver REPO github.com/externpro/ceres-solver TAG v2.2.0.2
   SHA256_win64 ccb00129f23e457b92435ca95f09fb56b25f29275eb750b8c722c7d9db21da40
   )
 set(xp_libgeotiff REPO github.com/externpro/libgeotiff TAG v1.2.4.2
-  BASE 1.2.4 BRANCH dev DEPS wxwidgets
+  XPBLD "intro" BASE 1.2.4 BRANCH dev DEPS wxwidgets
   WEB "http://trac.osgeo.org/geotiff/ 'GeoTIFF trac website'" UPSTREAM "github.com/OSGeo/libgeotiff"
   DESC "georeferencing info embedded within TIFF file"
   LICENSE "[MIT](https://github.com/OSGeo/libgeotiff/blob/master/libgeotiff/LICENSE 'MIT License or public domain')"
@@ -381,7 +381,7 @@ set(xp_libgeotiff REPO github.com/externpro/libgeotiff TAG v1.2.4.2
   SHA256_win64 8062b2f4a58a9747e981498cd5f251b8988ba493839162ae702b5af5ffc602b0
   )
 set(xp_hdf5 REPO github.com/externpro/hdf5 TAG v1.14.6.5
-  BASE hdf5_1.14.6 BRANCH dev DEPS zlib
+  XPBLD "patch" BASE hdf5_1.14.6 BRANCH dev DEPS zlib
   WEB "https://www.hdfgroup.org/solutions/hdf5/" UPSTREAM "github.com/HDFGroup/hdf5"
   DESC "Utilize the HDF5 high performance data software library and file format to manage, process, and store your heterogeneous data. HDF5 is built for fast I/O processing and storage."
   LICENSE "[BSD-3-Clause](https://github.com/HDFGroup/hdf5/blob/develop/LICENSE 'BSD 3-Clause New or Revised License')"
@@ -391,7 +391,7 @@ set(xp_hdf5 REPO github.com/externpro/hdf5 TAG v1.14.6.5
   SHA256_win64 3cbefc592730f8999897efc1b2c14930ed8f58549afe048f521e041930d471da
   )
 set(xp_librttopo REPO github.com/externpro/librttopo TAG v1.1.0.3
-  BASE librttopo-1.1.0 BRANCH dev DEPS geos
+  XPBLD "auto" BASE librttopo-1.1.0 BRANCH dev DEPS geos
   WEB "https://git.osgeo.org/gitea/rttopo/librttopo" UPSTREAM "github.com/CGX-GROUP/librttopo"
   DESC "RT Topology Library exposes an API to create and manage standard topologies using user-provided data stores"
   LICENSE "[GPL-2.0](https://github.com/CGX-GROUP/librttopo/blob/master/COPYING 'GNU General Public License v2.0 or later')"
@@ -401,7 +401,7 @@ set(xp_librttopo REPO github.com/externpro/librttopo TAG v1.1.0.3
   SHA256_win64 5f821543ffa68e59c3a1c075cbd94be3ebb3409b5aab7be3eb8af9f43a571209
   )
 set(xp_libspatialite REPO github.com/externpro/libspatialite TAG v5.1.0.6
-  BASE 5.1.0 BRANCH dev DEPS geos libiconv sqlite3 zlib
+  XPBLD "auto" BASE 5.1.0 BRANCH dev DEPS geos libiconv sqlite3 zlib
   WEB "https://www.gaia-gis.it/fossil/libspatialite/home"
   DESC "extends capabilities of SQLite, enabling ti to handle spatial data and perform spatial queries"
   LICENSE "[MPL-1.1](https://www.gaia-gis.it/fossil/libspatialite/home 'MPL tri-license: choose MPL-1.1, GPL-2.0-or-later, LGPL-2.1-or-later')"
@@ -411,7 +411,7 @@ set(xp_libspatialite REPO github.com/externpro/libspatialite TAG v5.1.0.6
   SHA256_win64 cb744298b24539e1cad2cb17db9909bbc9ee209bf34c018049b7a42ab767f832
   )
 set(xp_libzmq REPO github.com/externpro/libzmq TAG v4.3.4.2
-  BASE v4.3.4 BRANCH dev DEPS sodium
+  XPBLD "patch" BASE v4.3.4 BRANCH dev DEPS sodium
   WEB "https://zeromq.org/" UPSTREAM "github.com/zeromq/libzmq"
   DESC "high-performance asynchronous messaging library"
   LICENSE "[MPL-2.0](http://wiki.zeromq.org/area:licensing 'Mozilla Public License 2.0')"
@@ -421,7 +421,7 @@ set(xp_libzmq REPO github.com/externpro/libzmq TAG v4.3.4.2
   SHA256_win64 24ee926b65966edceaba9e7df7a25885cee636f4b01b15c6b70744aacbcfe2a6
   )
 set(xp_node-addon-api REPO github.com/externpro/node-addon-api TAG v8.5.0.1
-  BASE v8.5.0 BRANCH dev DEPS nodexp
+  XPBLD "intro" BASE v8.5.0 BRANCH dev DEPS nodexp
   WEB "https://github.com/nodejs/node-addon-api" UPSTREAM "github.com/nodejs/node-addon-api"
   DESC "Module for using N-API from C++"
   LICENSE "[MIT](https://github.com/nodejs/node-addon-api/blob/v8.5.0/LICENSE.md 'MIT License')"
@@ -431,7 +431,7 @@ set(xp_node-addon-api REPO github.com/externpro/node-addon-api TAG v8.5.0.1
   SHA256_win64 8cb379185c546648d8f23ea12247919294db4229e2d05a486a4f72a911ac1d49
   )
 set(xp_openh264 REPO github.com/externpro/openh264 TAG v1.4.0.1
-  BASE v1.4.0 BRANCH dev DEPS yasm
+  XPBLD "intro" BASE v1.4.0 BRANCH dev DEPS yasm
   WEB "http://www.openh264.org/" UPSTREAM "github.com/cisco/openh264"
   DESC "a codec library which supports H.264 encoding and decoding"
   LICENSE "[BSD-2-Clause](http://www.openh264.org/faq.html 'BSD 2-Clause Simplified License')"
@@ -441,7 +441,7 @@ set(xp_openh264 REPO github.com/externpro/openh264 TAG v1.4.0.1
   SHA256_win64 fdb01196f8ce0a16af3a78e1f42936d533a28a69e3b3fd12875217e6d776c012
   )
 set(xp_openssl REPO github.com/externpro/openssl VER 1.1.1l XP_MODULE
-  BASE openssl:OpenSSL_1_1_1l BRANCH xp_1_1_1l DEPS nasm opensslasm # TRICKY: nodexp, openssl versions coordinated
+  XPBLD "intro" BASE openssl:OpenSSL_1_1_1l BRANCH xp_1_1_1l DEPS nasm opensslasm # TRICKY: nodexp, openssl versions coordinated
   WEB "http://www.openssl.org/" UPSTREAM "github.com/openssl/openssl"
   DESC "Cryptography and SSL/TLS Toolkit"
   LICENSE "[BSD-style](http://www.openssl.org/source/license.html 'dual OpenSSL and SSLeay License: both are BSD-style licenses')"
@@ -452,13 +452,13 @@ set(xp_opensslasm REPO github.com/externpro/opensslasm VER 1.1.1l
   LICENSE "[BSD-style](http://www.openssl.org/source/license.html 'dual OpenSSL and SSLeay License: both are BSD-style licenses')"
   )
 set(xp_protobuf REPO github.com/externpro/protobuf VER 3.14.0 XP_MODULE
-  BASE protocolbuffers:v3.14.0 BRANCH xp3.14.0 DEPS zlib
+  XPBLD "patch" BASE protocolbuffers:v3.14.0 BRANCH xp3.14.0 DEPS zlib
   WEB "https://developers.google.com/protocol-buffers/" UPSTREAM "github.com/protocolbuffers/protobuf"
   DESC "language-neutral, platform-neutral extensible mechanism for serializing structured data"
   LICENSE "[BSD-3-Clause](https://github.com/protocolbuffers/protobuf/blob/v3.14.0/LICENSE 'BSD 3-Clause New or Revised License')"
   )
 set(xp_spdlog REPO github.com/externpro/spdlog TAG v1.15.3.1
-  BASE v1.15.3 BRANCH dev DEPS fmt
+  XPBLD "patch" BASE v1.15.3 BRANCH dev DEPS fmt
   WEB "https://github.com/gabime/spdlog/wiki" UPSTREAM "github.com/gabime/spdlog"
   DESC "Fast C++ logging library"
   LICENSE "[MIT](https://github.com/gabime/spdlog?tab=License-1-ov-file 'MIT License')"
@@ -468,7 +468,7 @@ set(xp_spdlog REPO github.com/externpro/spdlog TAG v1.15.3.1
   SHA256_win64 8812951049a04c5c9ab4e7d24de1ba6b9fca029e892da81f9429ac214f875014
   )
 set(xp_wxx REPO github.com/externpro/wxx TAG v25.01
-  BASE v0 BRANCH dev DEPS wxwidgets
+  XPBLD "intro" BASE v0 BRANCH dev DEPS wxwidgets
   WEB "https://github.com/externpro/wxx"
   DESC "wxWidget-based extra components"
   LICENSE "[wxWindows](http://wxcode.sourceforge.net/ 'wxWindows Library License')"
@@ -496,7 +496,7 @@ set(xp_wxtlc REPO github.com/externpro/wxTLC
   LICENSE "[wxWindows](http://wxcode.sourceforge.net/ 'wxWindows Library License')"
   )
 set(xp_wxtetris REPO github.com/smanders/wxTetris TAG v1.2.0
-  BASE v0 BRANCH dev EXE_DEPS wxwidgets
+  XPBLD "intro" BASE v0 BRANCH dev EXE_DEPS wxwidgets
   WEB "https://github.com/smanders/wxTetris"
   DESC "wxWidgets Tetris game"
   LICENSE "[MIT](https://github.com/smanders/wxTetris/blob/dev/LICENSE 'MIT License')"
@@ -507,13 +507,13 @@ set(xp_wxtetris REPO github.com/smanders/wxTetris TAG v1.2.0
   )
 ### depend on previous group
 set(xp_activemqcpp REPO github.com/externpro/activemq-cpp VER 3.9.5 XP_MODULE
-  BASE apache:activemq-cpp-3.9.5 BRANCH xp-3.9.5 DEPS apr openssl
+  XPBLD "auto" BASE apache:activemq-cpp-3.9.5 BRANCH xp-3.9.5 DEPS apr openssl
   WEB "http://activemq.apache.org/cms/" UPSTREAM "github.com/apache/activemq-cpp"
   DESC "ActiveMQ C++ Messaging Service (CMS) client library"
   LICENSE "[Apache-2.0](http://www.apache.org/licenses/LICENSE-2.0.html 'Apache License, Version 2.0')"
   )
 set(xp_azmq REPO github.com/externpro/azmq TAG v1.0.3.1
-  BASE v1.0.3 BRANCH dev DEPS boost libzmq
+  XPBLD "patch" BASE v1.0.3 BRANCH dev DEPS boost libzmq
   WEB "https://zeromq.org/" UPSTREAM "github.com/zeromq/azmq"
   DESC "provides Boost Asio style bindings for ZeroMQ"
   LICENSE "[BSL-1.0](https://github.com/zeromq/azmq/blob/master/LICENSE-BOOST_1_0 'Boost Software License 1.0')"
@@ -523,13 +523,13 @@ set(xp_azmq REPO github.com/externpro/azmq TAG v1.0.3.1
   SHA256_win64 3d3c92b9da136dcafec91ebc728743219d55a5be30cfa53d71bc3c56a2d81201
   )
 set(xp_cppzmq REPO github.com/externpro/cppzmq VER 4.7.1 XP_MODULE
-  BASE zeromq:v4.7.1 BRANCH xp4.7.1 DEPS libzmq
+  XPBLD "patch" BASE zeromq:v4.7.1 BRANCH xp4.7.1 DEPS libzmq
   WEB "https://zeromq.org/" UPSTREAM "github.com/zeromq/cppzmq"
   DESC "header-only C++ binding for libzmq"
   LICENSE "[MPL-2.0](http://wiki.zeromq.org/area:licensing 'Mozilla Public License 2.0')"
   )
 set(xp_fecpp REPO github.com/externpro/fecpp TAG v0.9.1
-  BASE v0.9 BRANCH dev EXE_DEPS boost
+  XPBLD "intro" BASE v0.9 BRANCH dev EXE_DEPS boost
   WEB "http://www.randombit.net/code/fecpp/" UPSTREAM "github.com/randombit/fecpp"
   DESC "C++ forward error correction with SIMD optimizations"
   LICENSE "[BSD-2-Clause](http://www.randombit.net/code/fecpp/ 'BSD 2-Clause Simplified License')"
@@ -539,7 +539,7 @@ set(xp_fecpp REPO github.com/externpro/fecpp TAG v0.9.1
   SHA256_win64 90951863a61b1a7196caf00a66127736b5c9e7be003c4b4cc93c5c0a60dd73ad
   )
 set(xp_ffmpeg REPO github.com/externpro/FFmpeg TAG v4.3.1.1
-  BASE n4.3.1 BRANCH dev DEPS openh264 yasm
+  XPBLD "native(unix)" BASE n4.3.1 BRANCH dev DEPS openh264 yasm
   WEB "https://www.ffmpeg.org/" UPSTREAM "github.com/FFmpeg/FFmpeg"
   DESC "complete, cross-platform solution to record, convert and stream audio and video (pre-release: no windows package)"
   LICENSE "[LGPL-2.1](https://www.ffmpeg.org/legal.html 'LGPL version 2.1 or later')"
@@ -548,7 +548,7 @@ set(xp_ffmpeg REPO github.com/externpro/FFmpeg TAG v4.3.1.1
   SHA256_Linux 5e6121f9471742e37a41080afccbd21c701f601db6a9c6cbce8a8354275af34e
   )
 set(xp_ffmpeg REPO github.com/externpro/FFmpeg TAG v2.6.2.2
-  BASE n2.6.2 BRANCH dev2.6.2 DEPS openh264 yasm
+  XPBLD "bin(msw),native(unix)" BASE n2.6.2 BRANCH dev2.6.2 DEPS openh264 yasm
   WEB "https://www.ffmpeg.org/" UPSTREAM "github.com/FFmpeg/FFmpeg"
   DESC "complete, cross-platform solution to record, convert and stream audio and video"
   LICENSE "[LGPL-2.1](https://www.ffmpeg.org/legal.html 'LGPL version 2.1 or later')"
@@ -558,13 +558,13 @@ set(xp_ffmpeg REPO github.com/externpro/FFmpeg TAG v2.6.2.2
   SHA256_win64 79399ed5b6ad4361ae629aeeb861fb71d0691fb4f34fe04ef27d91edeb5c0a8e
   )
 set(xp_libssh2 REPO github.com/externpro/libssh2 VER 1.9.0 XP_MODULE
-  BASE libssh2:libssh2-1.9.0 BRANCH xp-1.9.0 DEPS openssl zlib
+  XPBLD "patch" BASE libssh2:libssh2-1.9.0 BRANCH xp-1.9.0 DEPS openssl zlib
   WEB "http://www.libssh2.org/" UPSTREAM "github.com/libssh2/libssh2"
   DESC "client-side C library implementing SSH2 protocol"
   LICENSE "[BSD-3-Clause](http://www.libssh2.org/license.html 'BSD 3-Clause New or Revised License')"
   )
 set(xp_libstrophe REPO github.com/externpro/libstrophe TAG v0.9.1.2
-  BASE 0.9.1 BRANCH dev DEPS expat openssl
+  XPBLD "intro" BASE 0.9.1 BRANCH dev DEPS expat openssl
   WEB "http://strophe.im/libstrophe/" UPSTREAM "github.com/strophe/libstrophe"
   DESC "A simple, lightweight C library for writing XMPP client"
   LICENSE "[MIT or GPL-3.0](https://github.com/strophe/libstrophe/blob/0.9.1/LICENSE.txt 'dual licensed under MIT and GPLv3 licenses')"
@@ -574,7 +574,7 @@ set(xp_libstrophe REPO github.com/externpro/libstrophe TAG v0.9.1.2
   SHA256_win64 492a26d7628b28151b4d12cbf3679bebe8e8fabb7a2827eb1ebbb71bae7cc4e0
   )
 set(xp_spatialite-tools REPO github.com/externpro/spatialite-tools TAG v5.1.0.5
-  BASE 5.1.0a BRANCH dev EXE_DEPS libspatialite
+  XPBLD "auto" BASE 5.1.0a BRANCH dev EXE_DEPS libspatialite
   WEB "https://www.gaia-gis.it/fossil/spatialite-tools/index"
   DESC "collection of open source Command Line Interface (CLI) tools supporting SpatiaLite"
   LICENSE "[GPL-3.0](https://www.gaia-gis.it/fossil/spatialite-tools/index 'GPL-3.0-or-later')"
@@ -584,7 +584,7 @@ set(xp_spatialite-tools REPO github.com/externpro/spatialite-tools TAG v5.1.0.5
   SHA256_win64 1f3b86512e2f2a0b218a2db1eefddf121132304ac45f535b7d53940459b0214a
   )
 set(xp_wxinclude REPO github.com/externpro/wxInclude TAG v1.2.1
-  BASE v1.0 BRANCH dev EXE_DEPS boost
+  XPBLD "intro" BASE v1.0 BRANCH dev EXE_DEPS boost
   WEB "http://wiki.wxwidgets.org/Embedding_PNG_Images"
   DESC "embed resources into cross-platform code"
   LICENSE "[wxWindows](http://wiki.wxwidgets.org/Embedding_PNG_Images 'assumed wxWindows license, since source can be downloaded from wxWiki')"
@@ -594,20 +594,20 @@ set(xp_wxinclude REPO github.com/externpro/wxInclude TAG v1.2.1
   SHA256_win64 7c71aa6993197210ea2410f2e1447ae66b0d6ea834f481b9e49e05905de3e71e
   )
 set(xp_zmqpp REPO github.com/externpro/zmqpp VER 21.07.09 XP_MODULE
-  BASE zeromq:ba4230d5d03d29ced9ca788e3bd1095477db08ae BRANCH xp21.07.09 DEPS libzmq
+  XPBLD "patch" BASE zeromq:ba4230d5d03d29ced9ca788e3bd1095477db08ae BRANCH xp21.07.09 DEPS libzmq
   WEB "https://zeromq.github.io/zmqpp/" UPSTREAM "github.com/zeromq/zmqpp"
   DESC "high-level binding for libzmq"
   LICENSE "[MPL-2.0](https://github.com/zeromq/zmqpp/blob/develop/LICENSE 'Mozilla Public License 2.0')"
   )
 ### depend on previous group
 set(xp_curl REPO github.com/externpro/curl VER 7.80.0 XP_MODULE
-  BASE curl:curl-7_80_0 BRANCH xp-7_80_0 DEPS cares libssh2
+  XPBLD "patch" BASE curl:curl-7_80_0 BRANCH xp-7_80_0 DEPS cares libssh2
   WEB "http://curl.haxx.se/libcurl/" UPSTREAM "github.com/curl/curl"
   DESC "the multiprotocol file transfer library"
   LICENSE "[curl](http://curl.haxx.se/docs/copyright.html 'curl license inspired by MIT/X, but not identical')"
   )
 set(xp_libgit2 REPO github.com/externpro/libgit2 VER 1.3.0 XP_MODULE
-  BASE libgit2:v1.3.0 BRANCH xp1.3.0 DEPS libssh2
+  XPBLD "patch" BASE libgit2:v1.3.0 BRANCH xp1.3.0 DEPS libssh2
   WEB "https://libgit2.github.com/" UPSTREAM "github.com/libgit2/libgit2"
   DESC "portable, pure C implementation of the Git core methods"
   LICENSE "[GPL-2.0 WITH le](https://github.com/libgit2/libgit2/blob/master/README.md#license 'GPL2 with linking exception')"
