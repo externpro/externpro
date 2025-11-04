@@ -1,6 +1,6 @@
 function(proDeps)
   set(options XP_MODULE)
-  set(oneValueArgs PKG BASE BRANCH DESC DIST_DIR LICENSE REPO TAG UPSTREAM VER WEB)
+  set(oneValueArgs PKG BASE BRANCH DESC DIST_DIR LICENSE REPO TAG UPSTREAM VER WEB XPBLD)
   list(APPEND oneValueArgs SHA256_Darwin-arm64 SHA256_Linux SHA256_Linux-arm64 SHA256_win64)
   list(APPEND oneValueArgs URL_Darwin-arm64 URL_Linux URL_Linux-arm64 URL_win64 SHA256_utres)
   set(multiValueArgs DEPS EXE_DEPS)
@@ -63,6 +63,10 @@ function(proDeps)
   else()
     string(APPEND rme "| ")
   endif()
+  # append XPBLD to 'diff' cell
+  if(DEFINED P_XPBLD)
+    string(APPEND rme " [${P_XPBLD}]")
+  endif()
   set(rme "${rme}|\n" PARENT_SCOPE)
 endfunction()
 string(JOIN "\n" dot
@@ -72,6 +76,15 @@ string(JOIN "\n" dot
   )
 string(JOIN "\n" rme
   "# projects"
+  "|diff  |description|"
+  "|------|-----------|"
+  "|patch |diff modifies/patches existing cmake|"
+  "|intro |diff introduces cmake|"
+  "|auto  |diff adds cmake to replace autotools/configure/make|"
+  "|native|diff adds cmake but uses existing build system|"
+  "|bin   |diff adds cmake to repackage binaries built elsewhere|"
+  "|fetch |diff adds cmake and utilizes FetchContent|"
+  ""
   "[SPDX License List](https://spdx.org/licenses/ '')"
   "|project|license|description [dependencies]|version|source|diff|"
   "|-------|-------|--------------------------|-------|------|----|"
