@@ -43,24 +43,24 @@
         [spdlog](https://github.com/externpro/externpro/blob/main/cmake/README.md#spdlog)
 1. possibly modify CMakePresetsBase.json
    * add a `cacheVariables` section to set variables
-     * `XP_INSTALL_CMAKEDIR` is a common one I add... and then modify CMakeLists.txt to use it in determining whether the project is being built via externpro cmake or not
+     * `XP_NAMESPACE` or `XP_INSTALL_CMAKEDIR` are common variables I add to CMakePresetsBase.json... and then modify CMakeLists.txt to use one of them in determining whether the project is being built via externpro cmake or not
    ```diff
    diff --git a/CMakePresetsBase.json b/CMakePresetsBase.json
-   index 09653d8a..65047105 100644
+   index 085cdc3..4489d79 100644
    --- a/CMakePresetsBase.json
    +++ b/CMakePresetsBase.json
    @@ -4,7 +4,10 @@
-         {
+        {
           "name": "config-base",
           "hidden": true,
    -      "binaryDir": "${sourceDir}/_bld-${presetName}"
    +      "binaryDir": "${sourceDir}/_bld-${presetName}",
    +      "cacheVariables": {
-   +        "XP_INSTALL_CMAKEDIR": "share/cmake"
+   +        "XP_NAMESPACE": "xpro"
    +      }
         }
-      ]
-    }
+      ],
+      "buildPresets": [
    ```
 1. modify root CMakeLists.txt (and possibly other cmake files depending on where things are)
    * consider if `cmake_minimum_required` should be modified
@@ -83,7 +83,7 @@
      * the extraction of a devel package happens by calling `xpFindPkg()`, which calls `ipGetPrefixPath()`, which assumes the `PKG_NAME` is the same as the repository name (https://github.com/externpro/externpro/blob/25.05/cmake/xpfunmac.cmake#L1356)
      * so in the creation of the devel package, if the `project()` name (which becomes `CMAKE_PROJECT_NAME`) doesn't match the repository name, then
        ```cmake
-       set(CPACK_PACKAGE_NAME "<repository-name>") # before calling `xpPackageDevel()`
+       set(CMAKE_PROJECT_NAME "<repository-name>") # before calling `xpPackageDevel()`
        ```
    * conditionally set `install()` arguments `COMPONENT` and `NAMESPACE` if project is externpro-built, for example:
      ```cmake
@@ -97,32 +97,10 @@
      ```
      or perhaps instead of `XP_[COMPONENT|NAMESPACE]`... use variable names to match the existing project variable naming
    * consider some way of disabling the `install()` of `pkgconfig` related files, as there is no need for them in externpro devel packages
-
-projects that modify existing cmake
-* [fmt](https://github.com/externpro/externpro/blob/main/cmake/README.md#fmt)
-* [geos](https://github.com/externpro/externpro/blob/main/cmake/README.md#geos)
-* [googletest](https://github.com/externpro/externpro/blob/main/cmake/README.md#googletest)
-* [hdf5](https://github.com/externpro/externpro/blob/main/cmake/README.md#hdf5)
-* [spdlog](https://github.com/externpro/externpro/blob/main/cmake/README.md#spdlog)
-* [sqlite3](https://github.com/externpro/externpro/blob/main/cmake/README.md#sqlite3)
-* [zlib](https://github.com/externpro/externpro/blob/main/cmake/README.md#zlib)
-
-projects that introduce cmake
-* [argon2](https://github.com/externpro/externpro/blob/main/cmake/README.md#argon2)
-* [node-addon-api](https://github.com/externpro/externpro/blob/main/cmake/README.md#node-addon-api)
-
-projects that add cmake to replace autotools/configure/make
-* [librttopo](https://github.com/externpro/externpro/blob/main/cmake/README.md#librttopo)
-* [libspatialite](https://github.com/externpro/externpro/blob/main/cmake/README.md#libspatialite)
-* [spatialite-tools](https://github.com/externpro/externpro/blob/main/cmake/README.md#spatialite-tools)
-
-projects that add cmake and repackage binaries built elsewhere
-* [libiconv](https://github.com/externpro/externpro/blob/main/cmake/README.md#libiconv)
-* [nasm](https://github.com/externpro/externpro/blob/main/cmake/README.md#nasm)
-* [nodeng](https://github.com/externpro/externpro/blob/main/cmake/README.md#nodeng)
-* [nodexp](https://github.com/externpro/externpro/blob/main/cmake/README.md#nodexp)
-* [nvjpeg2000](https://github.com/externpro/externpro/blob/main/cmake/README.md#nvjpeg2000)
-* [patch](https://github.com/externpro/externpro/blob/main/cmake/README.md#patch) on Windows
-
-projects that add cmake but use existing build system
-* [patch](https://github.com/externpro/externpro/blob/main/cmake/README.md#patch) on Linux
+1. a great way to learn what should be modified or created is to examine project diffs links in the [README.md](README.md#DIFF_TABLE)
+   * `[patch]` diff modifies/patches existing cmake (example: [fmt](https://github.com/externpro/externpro/blob/main/cmake/README.md#fmt))
+   * `[intro]` diff introduces cmake (example: [argon2](https://github.com/externpro/externpro/blob/main/cmake/README.md#argon2))
+   * `[auto]` diff adds cmake to replace autotools/configure/make (example: [libspatialite](https://github.com/externpro/externpro/blob/main/cmake/README.md#libspatialite))
+   * `[native]` diff adds cmake but uses existing build system (example: [boost](https://github.com/externpro/externpro/blob/main/cmake/README.md#boost) tools/cmake)
+   * `[bin]` diff adds cmake to repackage binaries built elsewhere (example: [nodeng](https://github.com/externpro/externpro/blob/main/cmake/README.md#nodeng))
+   * `[fetch]` diff adds cmake and utilizes FetchContent (example: [clang-format](https://github.com/externpro/externpro/blob/main/cmake/README.md#clang-format))
