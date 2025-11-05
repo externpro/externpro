@@ -9,7 +9,7 @@ set(xp_exdlpro REPO github.com/externpro/exdlpro TAG v25.06
   SHA256_win64 372421edc8a8dd2c493c1b6f18202f0e1987175662731fe5772222c45af189eb
   )
 set(xp_apr REPO github.com/externpro/apr TAG v1.7.6.1
-  XPBLD "patch(msw),auto(unix)" BASE 1.7.6 BRANCH dev
+  XPBLD "patch(msw), auto(unix)" BASE 1.7.6 BRANCH dev
   WEB "http://apr.apache.org/" UPSTREAM "github.com/apache/apr"
   DESC "Apache Portable Runtime project"
   LICENSE "[Apache-2.0](http://www.apache.org/licenses/LICENSE-2.0.html 'Apache License, Version 2.0')"
@@ -262,7 +262,7 @@ set(xp_nvjpeg2000 REPO github.com/externpro/nvJPEG2000 TAG v0.8.1.3
   SHA256_win64 86a810f9feb0495130c7b093a4e004b5764f57821f8e2f7739a973d5bb445e67
   )
 set(xp_patch REPO github.com/externpro/patch TAG v2.7.6.4
-  XPBLD "bin(msw),native(unix)" BASE v0 BRANCH dev
+  XPBLD "bin(msw), native(unix)" BASE v0 BRANCH dev
   WEB "https://savannah.gnu.org/projects/patch/" UPSTREAM "git.savannah.gnu.org/cgit/patch.git"
   DESC "takes a patch file containing a difference listing produced by the diff program and applies those differences to one or more original files, producing patched versions"
   LICENSE "[GPL-3.0](https://savannah.gnu.org/projects/patch/ 'GNU General Public License v3 or later')"
@@ -314,7 +314,7 @@ set(xp_wirehair REPO github.com/externpro/wirehair TAG v23.12.02.1
   SHA256_win64 c768565e46ac9aa99e04d19be7f84b6572dd389c741683769e4f4ffc01a75dd5
   )
 set(xp_wxwidgets REPO github.com/externpro/wxWidgets TAG v3.1.0.4
-  XPBLD "intro(msw),native(unix)" BASE v3.1.0 BRANCH dev
+  XPBLD "intro(msw), native(unix)" BASE v3.1.0 BRANCH dev
   WEB "http://wxwidgets.org/" UPSTREAM "github.com/wxWidgets/wxWidgets"
   DESC "Cross-Platform C++ GUI Library"
   LICENSE "[wxWindows](https://wxwidgets.org/about/licence/ 'essentially LGPL with an exception')"
@@ -548,7 +548,7 @@ set(xp_ffmpeg REPO github.com/externpro/FFmpeg TAG v4.3.1.1
   SHA256_Linux 5e6121f9471742e37a41080afccbd21c701f601db6a9c6cbce8a8354275af34e
   )
 set(xp_ffmpeg REPO github.com/externpro/FFmpeg TAG v2.6.2.2
-  XPBLD "bin(msw),native(unix)" BASE n2.6.2 BRANCH dev2.6.2 DEPS openh264 yasm
+  XPBLD "bin(msw), native(unix)" BASE n2.6.2 BRANCH dev2.6.2 DEPS openh264 yasm
   WEB "https://www.ffmpeg.org/" UPSTREAM "github.com/FFmpeg/FFmpeg"
   DESC "complete, cross-platform solution to record, convert and stream audio and video"
   LICENSE "[LGPL-2.1](https://www.ffmpeg.org/legal.html 'LGPL version 2.1 or later')"
