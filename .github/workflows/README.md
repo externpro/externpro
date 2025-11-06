@@ -17,7 +17,7 @@ Builds the project in a Docker container on Linux systems.
 ```yaml
 jobs:
   linux:
-    uses: externpro/externpro/.github/workflows/build-linux.yml@25.05.2
+    uses: externpro/externpro/.github/workflows/build-linux.yml@25.06
     with:
       cmake-workflow-preset: Linux # Release and Debug
     secrets: inherit
@@ -35,7 +35,7 @@ Builds the project on macOS (aka Darwin) systems.
 ```yaml
 jobs:
   macos:
-    uses: externpro/externpro/.github/workflows/build-macos.yml@25.05.2
+    uses: externpro/externpro/.github/workflows/build-macos.yml@25.06
     with:
       cmake-workflow-preset: Darwin # Release and Debug
     secrets: inherit
@@ -53,7 +53,7 @@ Builds the project on Windows systems.
 ```yaml
 jobs:
   windows:
-    uses: externpro/externpro/.github/workflows/build-windows.yml@25.05.2
+    uses: externpro/externpro/.github/workflows/build-windows.yml@25.06
     with:
       cmake-workflow-preset: Windows # Release and Debug
     secrets: inherit
@@ -97,7 +97,7 @@ permissions:
 ```yaml
 jobs:
   release-from-build:
-    uses: externpro/externpro/.github/workflows/release-from-build.yml@25.05.2
+    uses: externpro/externpro/.github/workflows/release-from-build.yml@25.06
     with:
       workflow_run_url: https://github.com/owner/repo/actions/runs/123456789
       artifact_pattern: "*.tar.xz"
@@ -125,7 +125,7 @@ on:
         type: string
 jobs:
   release-from-build:
-    uses: externpro/externpro/.github/workflows/release-from-build.yml@25.05.2
+    uses: externpro/externpro/.github/workflows/release-from-build.yml@25.06
     with:
       workflow_run_url: ${{ github.event.inputs.workflow_run_url }}
       artifact_pattern: "*.tar.xz"
@@ -162,14 +162,14 @@ You can customize the CMake workflow presets and Linux runner used for builds:
 ```yaml
 jobs:
   linux:
-    uses: externpro/externpro/.github/workflows/build-linux.yml@25.05.2
+    uses: externpro/externpro/.github/workflows/build-linux.yml@25.06
     with:
       cmake-workflow-preset: LinuxRelease  # Use release preset
       runon: ubuntu-24.04-arm # Use ARM64 runner
     secrets: inherit
 
   windows:
-    uses: externpro/externpro/.github/workflows/build-windows.yml@25.05.2
+    uses: externpro/externpro/.github/workflows/build-windows.yml@25.06
     with:
       cmake-workflow-preset: WindowsRelease  # Use release preset
     secrets: inherit
@@ -183,7 +183,7 @@ build.yml
 ```yaml
 jobs:
   linux:
-    uses: externpro/externpro/.github/workflows/build-linux.yml@25.05.2
+    uses: externpro/externpro/.github/workflows/build-linux.yml@25.06
     with:
       artifact-pattern: "${{ github.event.repository.name }}-*.zip"
       cmake-workflow-preset: LinuxRelease
@@ -195,7 +195,7 @@ release.yml
 ```yaml
 jobs:
   release-from-build:
-    uses: externpro/externpro/.github/workflows/release-from-build.yml@25.05.2
+    uses: externpro/externpro/.github/workflows/release-from-build.yml@25.06
     with:
       workflow_run_url: https://github.com/owner/repo/actions/runs/123456789
       artifact_pattern: "*.zip"  # Upload ZIP files instead
