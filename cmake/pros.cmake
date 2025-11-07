@@ -473,11 +473,15 @@ set(xp_rapidxml REPO github.com/externpro/rapidxml VER 1.13 XP_MODULE
   DESC "fast XML parser"
   LICENSE "[BSL-1.0 or MIT](http://rapidxml.sourceforge.net/license.txt 'Boost Software License or MIT License')"
   )
-set(xp_shapelib REPO github.com/externpro/shapelib VER 1.2.10 XP_MODULE
-  XPBLD "intro" BASE v1.2.10 BRANCH xp1.2.10
-  WEB "http://shapelib.maptools.org/" UPSTREAM "github.com/modgeosys/shapelib"
+set(xp_shapelib REPO github.com/externpro/shapelib TAG v1.2.10.1
+  XPBLD "intro" BASE 1.2.10 BRANCH dev
+  WEB "http://shapelib.maptools.org/" UPSTREAM "github.com/OSGeo/shapelib"
   DESC "reading, writing, updating ESRI Shapefiles"
   LICENSE "[MIT or LGPL](http://shapelib.maptools.org/license.html 'MIT or LGPL License')"
+  SHA256_Darwin-arm64 a9396c58ef8ae2375eb392d11e773eca78361a7f1c6c630ae1a17dd15bf1067c
+  SHA256_Linux-arm64 b16e1ed28ef47b2ea477df7f204b9c28e1c40d6e6f6891c7d95aafbb63d36f83
+  SHA256_Linux 4d5ae021737aaea49295377c5040ae247a91d922a19200252bb76bd3aa42e3d0
+  SHA256_win64 e2b4970d2d040d35fb145c42dfca758da29bf4bbfee5d7ac5dfa48ab65e46cc3
   )
 set(xp_spatialite-tools REPO github.com/externpro/spatialite-tools TAG v5.1.0.5
   XPBLD "auto" BASE 5.1.0a BRANCH dev EXE_DEPS libspatialite
