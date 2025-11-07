@@ -467,11 +467,15 @@ set(xp_rapidjson REPO github.com/externpro/rapidjson TAG v1.1.0-763.1
   SHA256_Linux 6941459e00591d97b52cf3e50aae16c09c4de288f17ae1bf50ab8c4f0398bcf0
   SHA256_win64 b4029d033a9f41b54009e38824ec177d849138a2add3b02462480a2eff0dfbea
   )
-set(xp_rapidxml REPO github.com/externpro/rapidxml VER 1.13 XP_MODULE
-  XPBLD "intro" BASE v1.13 BRANCH xp1.13
+set(xp_rapidxml REPO github.com/externpro/rapidxml TAG v1.13.1
+  XPBLD "intro" BASE v1.13 BRANCH dev
   WEB "http://rapidxml.sourceforge.net/"
   DESC "fast XML parser"
   LICENSE "[BSL-1.0 or MIT](http://rapidxml.sourceforge.net/license.txt 'Boost Software License or MIT License')"
+  SHA256_Darwin-arm64 4d00947669c5cf97561f180cf28b0c2b6f7fe91b95ef0fbc04545b55c49915a9
+  SHA256_Linux-arm64 63e96a732bce5f38b11f5d5ccfcedb21849777f71c2051f98af54e8e37254cf5
+  SHA256_Linux 127c9ca42df99ee61c7dce7263ec1d42ce0e154e26ad742c15e7f4a6c5dd04f7
+  SHA256_win64 13ad304b798725f9084a8f39ab5b205f0afa5b7e0048a04ab9d1331798173118
   )
 set(xp_shapelib REPO github.com/externpro/shapelib TAG v1.2.10.1
   XPBLD "intro" BASE 1.2.10 BRANCH dev
