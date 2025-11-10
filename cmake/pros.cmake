@@ -116,12 +116,6 @@ set(xp_exdlpro REPO github.com/externpro/exdlpro TAG v25.06
   SHA256_Linux a7a2864e2fc9e284eec084b3e776e78774985611ec44abc995fe29a5f70e543b
   SHA256_win64 372421edc8a8dd2c493c1b6f18202f0e1987175662731fe5772222c45af189eb
   )
-set(xp_expat REPO github.com/externpro/libexpat VER 2.2.5 XP_MODULE
-  XPBLD "patch" BASE libexpat:R_2_2_5 BRANCH xp2.2.5
-  WEB "https://libexpat.github.io" UPSTREAM "github.com/libexpat/libexpat"
-  DESC "a stream-oriented XML parser library written in C"
-  LICENSE "[MIT](https://github.com/libexpat/libexpat/blob/R_2_2_5/expat/COPYING 'MIT License')"
-  )
 set(xp_fecpp REPO github.com/externpro/fecpp TAG v0.9.1
   XPBLD "intro" BASE v0.9 BRANCH dev EXE_DEPS boost
   WEB "http://www.randombit.net/code/fecpp/" UPSTREAM "github.com/randombit/fecpp"
@@ -264,6 +258,16 @@ set(xp_jxrlib REPO github.com/externpro/jxrlib TAG v2019.10.9.1
   SHA256_Linux-arm64 bbd1e172e91e77598a47f48d5b950b7c7417180268e92590f0674be50cbb9f93
   SHA256_Linux 2e79d179fb0ae0ee5347f346bc017f7f94240f79af241aeb90dd520451d57d49
   SHA256_win64 505f1984cd8950cf1d4a52a95b76340c334632318cb59e83ba05fac7d6050df0
+  )
+set(xp_libexpat REPO github.com/externpro/libexpat TAG v2.2.5.1
+  XPBLD "patch" BASE R_2_2_5 BRANCH dev
+  WEB "https://libexpat.github.io" UPSTREAM "github.com/libexpat/libexpat"
+  DESC "a stream-oriented XML parser library written in C"
+  LICENSE "[MIT](https://github.com/libexpat/libexpat/blob/R_2_2_5/expat/COPYING 'MIT License')"
+  SHA256_Darwin-arm64 5c3fa451b9d81a2824b2d2ea9905b4689942ad0acf4eace55c3dbc96e6a35341
+  SHA256_Linux-arm64 265dd10be5af4b12a13cc84402cf54396e7d368670c317d0729d3ff758da2297
+  SHA256_Linux a30e93a2968ed81ac5a6a5786f9b5ff6d27fb092f0994bc0c115162b2398fab0
+  SHA256_win64 d288723453272c74dd16a5a103f8d0e48f71f2ae05e22bdc01da24a13dbcbf64
   )
 set(xp_libgeotiff REPO github.com/externpro/libgeotiff TAG v1.2.4.2
   XPBLD "intro" BASE 1.2.4 BRANCH dev DEPS wxwidgets
