@@ -23,7 +23,7 @@ digraph GG {
   "libspatialite" -> "zlib";
   "libssh2" -> "openssl";
   "libssh2" -> "zlib";
-  "libstrophe" -> "expat";
+  "libstrophe" -> "libexpat";
   "libstrophe" -> "openssl";
   "libzmq" -> "sodium";
   "node-addon-api" -> "nodexp";

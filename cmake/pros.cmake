@@ -331,15 +331,15 @@ set(xp_libssh2 REPO github.com/externpro/libssh2 VER 1.9.0 XP_MODULE
   DESC "client-side C library implementing SSH2 protocol"
   LICENSE "[BSD-3-Clause](http://www.libssh2.org/license.html 'BSD 3-Clause New or Revised License')"
   )
-set(xp_libstrophe REPO github.com/externpro/libstrophe TAG v0.9.1.2
-  XPBLD "intro" BASE 0.9.1 BRANCH dev DEPS expat openssl
+set(xp_libstrophe REPO github.com/externpro/libstrophe TAG v0.9.1.3
+  XPBLD "intro" BASE 0.9.1 BRANCH dev DEPS libexpat openssl
   WEB "http://strophe.im/libstrophe/" UPSTREAM "github.com/strophe/libstrophe"
   DESC "A simple, lightweight C library for writing XMPP client"
   LICENSE "[MIT or GPL-3.0](https://github.com/strophe/libstrophe/blob/0.9.1/LICENSE.txt 'dual licensed under MIT and GPLv3 licenses')"
-  SHA256_Darwin-arm64 08e1b10b41e38d8bb2242849733c3b6bb0f146e9e66a58923ad2dd5a2994acd9
-  SHA256_Linux-arm64 c5ff401cb9a96001d4f4d7681bf33a811737270e258263b00d718956c2685fd7
-  SHA256_Linux e3c847890d4ff3c3755abd0eb5e198233f2795be883971fc9edb7e86cbf328c8
-  SHA256_win64 492a26d7628b28151b4d12cbf3679bebe8e8fabb7a2827eb1ebbb71bae7cc4e0
+  SHA256_Darwin-arm64 14c6c3cc2da5593f01b2101948cc5e1afe26d6d680cf0a2f1c6f7eec7c59fbd8
+  SHA256_Linux-arm64 bcf187d96c34be780162f04b3bbd8c88118f6d7a837a566edde9169ef7bb952c
+  SHA256_Linux b1324e9fcdc8978b4d6b8c4e93dd8fca4a6fe9e8f6cd5a3531280c39dedf0bd5
+  SHA256_win64 515c416d47203accebee1281178d4b17755f61a039b21936458c23d3cd039f0e
   )
 set(xp_libzmq REPO github.com/externpro/libzmq TAG v4.3.4.2
   XPBLD "patch" BASE v4.3.4 BRANCH dev DEPS sodium
