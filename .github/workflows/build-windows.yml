@@ -67,3 +67,12 @@ jobs:
         with:
           name: ${{ steps.find_package.outputs.filename }}
           path: ${{ steps.convert_path.outputs.windows_path }}
+      -
+        name: Check for dirty repo
+        shell: bash
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "Error: Dirty repo detected!"
+            git status
+            exit 1
+          fi
