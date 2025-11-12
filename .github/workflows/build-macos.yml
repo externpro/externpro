@@ -46,7 +46,7 @@ jobs:
         run: |
           file=$(pwd)/$(ls _bld-${{ env.CMAKE_PRESET }}/${{ inputs.artifact-pattern }})
           if [[ ! -f "$file" ]]; then
-            echo "Package not found!" >&2
+            echo "::error::Package not found!" >&2
             exit 1
           fi
           echo "filepath=$file" >> $GITHUB_OUTPUT
@@ -64,7 +64,7 @@ jobs:
         shell: bash
         run: |
           if [ -n "$(git status --porcelain)" ]; then
-            echo "Error: Dirty repo detected!"
+            echo "::error::Dirty repo detected!"
             git status
             exit 1
           fi

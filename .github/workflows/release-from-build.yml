@@ -67,7 +67,7 @@ jobs:
             echo "run_id=$run_id" >> $GITHUB_OUTPUT
             echo "Extracted run ID: $run_id"
           else
-            echo "Error: Invalid workflow run URL format. Expected: https://github.com/owner/repo/actions/runs/123456789"
+            echo "::error::Invalid workflow run URL format. Expected: https://github.com/owner/repo/actions/runs/123456789"
             exit 1
           fi
       -
@@ -101,7 +101,7 @@ jobs:
             fi
           done < <(find ./artifacts -name "${{ inputs.artifact_pattern }}" -type f -print0)
           if [ ${#artifacts[@]} -eq 0 ]; then
-            echo "No artifacts found matching pattern: ${{ inputs.artifact_pattern }}"
+            echo "::error::No artifacts found matching pattern: ${{ inputs.artifact_pattern }}"
             exit 1
           fi
           # Create a checksums file in the artifacts directory
@@ -189,12 +189,12 @@ jobs:
               fi
               echo "tag=$version_tag" >> $GITHUB_OUTPUT
             else
-              echo "Error: Could not determine version tag from filename: $filename"
+              echo "::error::Could not determine version tag from filename: $filename"
               echo "Expected pattern: *-v#.#[.#[.#]][-#-g<hash>].tar.xz"
               exit 1
             fi
           else
-            echo "Error: No valid artifacts found"
+            echo "::error::No valid artifacts found"
             echo "Available files in workspace:"
             find . -type f | sort
             exit 1
@@ -212,7 +212,7 @@ jobs:
           tag="${{ steps.determine_tag.outputs.tag }}"
           echo "Checking if tag exists: $tag"
           if gh release view "$tag" &>/dev/null; then
-            echo "Error: Release for tag $tag already exists. This workflow is configured to fail if the release already exists."
+            echo "::error::Release for tag $tag already exists. This workflow is configured to fail if the release already exists."
             exit 1
           else
             echo "Release does not exist for tag: $tag"
