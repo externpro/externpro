@@ -66,5 +66,6 @@ jobs:
           if [ -n "$(git status --porcelain)" ]; then
             echo "::error::Dirty repo detected!"
             git status
+            git submodule foreach git status
             exit 1
           fi
