@@ -442,15 +442,15 @@ set(xp_openh264 REPO github.com/externpro/openh264 TAG v1.4.0.1
   SHA256_Linux 93e09307fef110a4cb51e21c7ddc986f65af14cec26c756da1b0514c8d32a563
   SHA256_win64 fdb01196f8ce0a16af3a78e1f42936d533a28a69e3b3fd12875217e6d776c012
   )
-set(xp_openssl REPO github.com/externpro/openssl TAG v1.1.1l.1
+set(xp_openssl REPO github.com/externpro/openssl TAG v1.1.1l.2
   XPBLD "intro" BASE OpenSSL_1_1_1l BRANCH dev DEPS nasm yasm # TRICKY: nodexp, openssl versions coordinated
   WEB "http://www.openssl.org/" UPSTREAM "github.com/openssl/openssl"
   DESC "Cryptography and SSL/TLS Toolkit"
   LICENSE "[BSD-style](http://www.openssl.org/source/license.html 'dual OpenSSL and SSLeay License: both are BSD-style licenses')"
-  SHA256_Darwin-arm64 64d0bc8af7434e1829b81dcdff9a4484955680cc83261b8831eced8521b9d120
-  SHA256_Linux-arm64 f62dd985fbe0ef97f32fd7111729b1fbc2a61c0521d6ee784eab10bd6a5c10b0
-  SHA256_Linux 00a8abee0d4e5315975dd52c218f86242d93b04394d77cf6f895a2ccee3ecece
-  SHA256_win64 98d67c06449b7b852f04faae5f422fac833a7b954d779c3f82cee93bb995d847
+  SHA256_Darwin-arm64 6056e3d05b520f22d931e10054e4f7497b564956971edae44eda275f3002a9d5
+  SHA256_Linux-arm64 4a423dd81a56d6a345f28db5e800888f8f9ce9a3fc77d773452853c7c1f520cf
+  SHA256_Linux 577921734c57a722be9bd33d215ad8ece9b56e0319b85710f978dfe1460f39de
+  SHA256_win64 64129b5c90d89c848f28aa588d96d9981356132102f9e6b1425067218c1d1df0
   )
 set(xp_patch REPO github.com/externpro/patch TAG v2.7.6.4
   XPBLD "bin(msw), native(unix)" BASE v0 BRANCH dev
