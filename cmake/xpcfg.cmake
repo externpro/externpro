@@ -85,6 +85,8 @@ macro(xpcfgLtObjdir var)
     )
   if(hasLibtool EQUAL 0) # 0 == success
     set(${var} .libs/)
+  else()
+    set(${var} 0) # cmakedefine
   endif()
 endmacro()
 
@@ -326,6 +328,37 @@ int main()
     )
 endmacro()
 
+# called from: activemq-cpp
+macro(xpcfgHaveAtomicBuiltins var)
+  # Define if compiler provides atomic builtins
+  check_c_source_compiles("
+int main()
+{
+  unsigned long val = 1010, tmp, *mem = &val;
+  if (__sync_fetch_and_add(&val, 1010) != 1010 || val != 2020)
+    return 1;
+  tmp = val;
+  if (__sync_fetch_and_sub(mem, 1010) != tmp || val != 1010)
+    return 1;
+  if (__sync_sub_and_fetch(&val, 1010) != 0 || val != 0)
+    return 1;
+  tmp = 3030;
+  if (__sync_val_compare_and_swap(mem, 0, tmp) != 0 || val != tmp)
+    return 1;
+  if (__sync_lock_test_and_set(&val, 4040) != 3030)
+    return 1;
+  mem = &tmp;
+  if (__sync_val_compare_and_swap(&mem, &tmp, &val) != &tmp)
+    return 1;
+  __sync_synchronize();
+  if (mem != &val)
+    return 1;
+  return 0;
+}
+"   ${var}
+    )
+endmacro()
+
 # called from: apr
 macro(xpcfgGaiAddrconfig var)
   # Define if getaddrinfo accepts the AI_ADDRCONFIG flag
@@ -364,6 +397,21 @@ int main(void)
   exit(0);
 }
 "   ${var}
+    )
+endmacro()
+
+# called from: activemq-cpp
+macro(xpcfgHaveStructAddrinfo var)
+  # define if you have struct addrinfo
+  check_c_source_compiles("
+${XP_INCLUDES}
+int main(void)
+{
+  struct addrinfo a;
+  (void) a.ai_flags;
+  ;
+  return 0;
+}"   ${var}
     )
 endmacro()
 
@@ -1256,6 +1304,69 @@ int main() {
     )
   cmake_pop_check_state()
 endmacro(xpcfgCheckPthreadFeatures)
+
+# called from: activemq-cpp
+macro(xpcfgCheckPthreadAttrArgs getdetachstate_var getspecific_var)
+  cmake_push_check_state(RESET)
+  set(CMAKE_REQUIRED_INCLUDES "${CMAKE_REQUIRED_INCLUDES}")
+  set(CMAKE_REQUIRED_DEFINITIONS "${CMAKE_REQUIRED_DEFINITIONS}")
+  set(CMAKE_REQUIRED_LIBRARIES "${CMAKE_REQUIRED_LIBRARIES} pthread")
+  # Define if pthread_attr_getdetachstate() has one arg
+  check_c_source_compiles("
+#include <pthread.h>
+int main()
+{
+  pthread_attr_t *attr;
+  pthread_attr_getdetachstate(attr);
+  ;
+  return 0;
+}
+"   ${getdetachstate_var}
+    )
+  # Define if pthread_getspecific() has two args
+  check_c_source_compiles("
+#include <pthread.h>
+int main()
+{
+  pthread_key_t key;
+  void *tmp;
+  pthread_getspecific(key,&tmp);
+  ;
+  return 0;
+}
+"   ${getspecific_var}
+    )
+  cmake_pop_check_state()
+endmacro(xpcfgCheckPthreadAttrArgs)
+
+# called from: activemq-cpp
+macro(xpcfgCheckSigwaitArgs var)
+  cmake_push_check_state(RESET)
+  set(CMAKE_REQUIRED_INCLUDES "${CMAKE_REQUIRED_INCLUDES}")
+  set(CMAKE_REQUIRED_DEFINITIONS "${CMAKE_REQUIRED_DEFINITIONS}")
+  set(CMAKE_REQUIRED_LIBRARIES "${CMAKE_REQUIRED_LIBRARIES} pthread")
+  # Define if sigwait takes one arg
+  check_c_source_compiles("
+#if defined(__NETBSD__) || defined(DARWIN)
+  /* When using the unproven-pthreads package, we need to pull in this
+   * header to get a prototype for sigwait().  Else things will fail later
+   * on.  XXX Should probably be fixed in the unproven-pthreads package.
+   * Darwin is declaring sigwait() in the wrong place as well.
+   */
+   #include <pthread.h>
+#endif
+#include <signal.h>
+int main()
+{
+  sigset_t set;
+  sigwait(&set);
+  ;
+  return 0;
+}
+"   ${var}
+    )
+  cmake_pop_check_state()
+endmacro()
 
 # Check if strerror_r returns an int (POSIX) or char* (GNU)
 # This determines if we should check the return value or the buffer for the error message
