@@ -32,7 +32,7 @@ function(xpcfgSet01 var boolVar)
   endif()
 endfunction()
 
-# called from: apr, librttopo, libspatialite, spatialite-tools, jasper
+# called from: activemq-cpp, apr, librttopo, libspatialite, spatialite-tools, jasper
 macro(xpcfgCheckIncludeFile incfile var)
   check_include_file("${incfile}" ${var})
   if(${var})
@@ -41,7 +41,7 @@ macro(xpcfgCheckIncludeFile incfile var)
   endif(${var})
 endmacro()
 
-# called from: apr, librttopo, libspatialite, spatialite-tools, jasper
+# called from: activemq-cpp, apr, librttopo, libspatialite, spatialite-tools, jasper
 macro(xpcfgCheckSymFnExists func var)
   check_symbol_exists("${func}" "${XP_INCLUDE_LIST}" ${var})
   if(NOT ${var})
@@ -55,7 +55,7 @@ macro(xpcfgCheckSymExistsInHdr sym hdr var)
   check_symbol_exists("${sym}" "${hdr}" ${var})
 endmacro()
 
-# called from: apr, libspatialite, spatialite-tools, jasper
+# called from: activemq-cpp, apr, libspatialite, spatialite-tools, jasper
 macro(xpcfgCheckLibraryExists lib symbol var)
   check_library_exists("${lib};${XP_SYSTEM_LIBS}" ${symbol} "${CMAKE_LIBRARY_PATH}" ${var})
   if(${var})
@@ -76,7 +76,7 @@ macro(xpcfgCheckTypeSize)
   cmake_pop_check_state()
 endmacro()
 
-# called from: librttopo, libspatialite, spatialite-tools
+# called from: activemq-cpp, librttopo, libspatialite, spatialite-tools
 macro(xpcfgLtObjdir var)
   ####################
   # Define to the sub-directory in which libtool stores uninstalled libraries.
@@ -96,7 +96,7 @@ macro(xpcfgHugeFileSupport)
   set(_LARGE_FILE 1)
 endmacro()
 
-# called from: librttopo, libspatialite, spatialite-tools, jasper
+# called from: activemq-cpp, librttopo, libspatialite, spatialite-tools, jasper
 macro(xpcfgStdcHeaders var)
   ########################################
   # Define to 1 if you have the ANSI C header files.
@@ -114,7 +114,7 @@ int main()
     )
 endmacro(xpcfgStdcHeaders)
 
-# called from: apr, librttopo, libspatialite, spatialite-tools, jasper
+# called from: activemq-cpp, apr, librttopo, libspatialite, spatialite-tools, jasper
 macro(xpcfgConst var)
   # Define to empty if 'const' does not conform to ANSI C.
   check_c_source_compiles("
@@ -1183,7 +1183,7 @@ endmacro()
 #   robust_var - variable that will be set if PTHREAD_MUTEX_ROBUST is supported
 #   robust_np_var - variable that will be set if PTHREAD_MUTEX_ROBUST_NP is supported
 #   rwlocks_var - variable that will be set if pthread rwlocks are supported
-# called from: apr
+# called from: activemq-cpp, apr
 macro(xpcfgCheckPthreadFeatures recursive_var robust_var robust_np_var rwlocks_var)
   cmake_push_check_state(RESET)
   set(CMAKE_REQUIRED_INCLUDES "${CMAKE_REQUIRED_INCLUDES}")
@@ -1299,7 +1299,7 @@ int main(void) {
   cmake_pop_check_state()
 endmacro(xpcfgStrerrorRReturnType)
 
-# called from: apr, librttopo, libspatialite, spatialite-tools, jasper
+# called from: activemq-cpp, apr, librttopo, libspatialite, spatialite-tools, jasper
 function(xpcfgDotinFile in out)
   cmake_path(GET out FILENAME outFilename)
   cmake_path(GET in FILENAME inFilename)
