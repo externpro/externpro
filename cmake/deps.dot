@@ -1,7 +1,7 @@
 digraph GG {
   node [fontsize=12];
-  "activemqcpp" -> "apr";
-  "activemqcpp" -> "openssl";
+  "activemq-cpp" -> "apr";
+  "activemq-cpp" -> "openssl";
   "azmq" -> "boost";
   "azmq" -> "libzmq";
   "boost" -> "bzip2";
