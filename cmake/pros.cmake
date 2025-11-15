@@ -98,11 +98,15 @@ set(xp_cppzmq REPO github.com/externpro/cppzmq TAG v4.7.1.1
   SHA256_Linux 3c2c6a0881d294a8ebd6076db3da348161e39124276d403bffcc1556545036ef
   SHA256_win64 ff5dc6f2f9dd946c45e2c26090d7586597ada4e3038822b7510dc50a7ef06f33
   )
-set(xp_curl REPO github.com/externpro/curl VER 7.80.0 XP_MODULE
-  XPBLD "patch" BASE curl:curl-7_80_0 BRANCH xp-7_80_0 DEPS cares libssh2
+set(xp_curl REPO github.com/externpro/curl TAG v7.80.0.1
+  XPBLD "patch" BASE curl-7_80_0 BRANCH dev DEPS cares libssh2
   WEB "http://curl.haxx.se/libcurl/" UPSTREAM "github.com/curl/curl"
   DESC "the multiprotocol file transfer library"
   LICENSE "[curl](http://curl.haxx.se/docs/copyright.html 'curl license inspired by MIT/X, but not identical')"
+  SHA256_Darwin-arm64 fba49c87e5c0f66427eb50b3e539f187c26e8b7801b1d5c051d0e3527b5e209b
+  SHA256_Linux-arm64 7e27c063e9979428e842ada5e3009dde9b34fc7acabc88167a3cbbe31be55649
+  SHA256_Linux b868d0e45051464ee6ff2714316ce7c6ecd6df43cbccc28f52ec877739b699a3
+  SHA256_win64 ce60efd149a3ebaf1f93411b870d6ab9baf4a2f2920cc152a30fc2f95fb5a0d8
   )
 set(xp_eigen REPO github.com/externpro/eigen TAG v3.4.0.1
   XPBLD "patch" BASE 3.4.0 BRANCH dev
