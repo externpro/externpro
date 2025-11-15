@@ -58,11 +58,15 @@ set(xp_bzip2 REPO github.com/externpro/bzip2 TAG v1.0.8.2
   SHA256_Linux 2a0e485c83d7c6c69dcfbe15409af4d896a4dc898b854f1e8812ea6d4d5e1d8c
   SHA256_win64 cc9a1b482e6833a47020b2a9a18c38edb9a23f236ec4894598e761ed047d5b7e
   )
-set(xp_cares REPO github.com/externpro/c-ares VER 1.18.1 XP_MODULE
-  XPBLD "patch" BASE c-ares:cares-1_18_1 BRANCH xp-1_18_1
+set(xp_c-ares REPO github.com/externpro/c-ares TAG v1.18.1.1
+  XPBLD "patch" BASE cares-1_18_1 BRANCH dev
   WEB "http://c-ares.haxx.se/" UPSTREAM "github.com/c-ares/c-ares"
   DESC "C library for asynchronous DNS requests (including name resolves)"
   LICENSE "[MIT](http://c-ares.haxx.se/license.html 'MIT License')"
+  SHA256_Darwin-arm64 b092d0a9148a786d5a8fa53e4f5b820e6446443d7516daaf0b1f789d34aefad3
+  SHA256_Linux-arm64 24fd67d5b547b16839ca83d0522bf9acc7cbdbc448095379dfca17e52b2d1101
+  SHA256_Linux 404c214e6dfa1542b74ce25416024514cd618c0045360566cb520b1b3ff4ade7
+  SHA256_win64 c6fab6e3598868e8136df180571fb35d0ae7289503d291dcd854a6005c515fc8
   )
 set(xp_ceres-solver REPO github.com/externpro/ceres-solver TAG v2.2.0.2
   XPBLD "patch" BASE 2.2.0 BRANCH dev DEPS eigen
