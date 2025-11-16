@@ -482,11 +482,15 @@ set(xp_patch REPO github.com/externpro/patch TAG v2.7.6.4
   SHA256_Linux 28a0698ec9881d6a8414409d36b59f000f6113559a76fe2e68dc88142c75a92b
   SHA256_win64 aab7af2d24e547946aa0d4468ca2bee2487970175ce10c595954fa782e3f7c32
   )
-set(xp_protobuf REPO github.com/externpro/protobuf VER 3.14.0 XP_MODULE
-  XPBLD "patch" BASE protocolbuffers:v3.14.0 BRANCH xp3.14.0 DEPS zlib
+set(xp_protobuf REPO github.com/externpro/protobuf TAG v3.14.0.1
+  XPBLD "patch" BASE v3.14.0 BRANCH dev DEPS zlib
   WEB "https://developers.google.com/protocol-buffers/" UPSTREAM "github.com/protocolbuffers/protobuf"
   DESC "language-neutral, platform-neutral extensible mechanism for serializing structured data"
   LICENSE "[BSD-3-Clause](https://github.com/protocolbuffers/protobuf/blob/v3.14.0/LICENSE 'BSD 3-Clause New or Revised License')"
+  SHA256_Darwin-arm64 8958c3c28e2ce7fd62c3fa295ddda226e0eb6ab76e1baf33c28d86377ff3a250
+  SHA256_Linux-arm64 3cb4fc614eaba04a40e67bda98641e12ff496970d73a2b5e9a424822c0d42799
+  SHA256_Linux 1b3930f740f0e9f0419c4440d8adfeecd5d67e5a759a43c763e94ce62a1da59b
+  SHA256_win64 03c12d1b8cf3cadb4ef9f11ef036922e42682d14ff3050b35f57da4eaef149b7
   )
 set(xp_rapidjson REPO github.com/externpro/rapidjson TAG v1.1.0-763.1
   XPBLD "patch" BASE v1.1.0-763 BRANCH dev
