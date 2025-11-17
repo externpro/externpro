@@ -99,7 +99,7 @@ set(xp_cppzmq REPO github.com/externpro/cppzmq TAG v4.7.1.1
   SHA256_win64 ff5dc6f2f9dd946c45e2c26090d7586597ada4e3038822b7510dc50a7ef06f33
   )
 set(xp_curl REPO github.com/externpro/curl TAG v7.80.0.1
-  XPBLD "patch" BASE curl-7_80_0 BRANCH dev DEPS cares libssh2
+  XPBLD "patch" BASE curl-7_80_0 BRANCH dev DEPS c-ares libssh2
   WEB "http://curl.haxx.se/libcurl/" UPSTREAM "github.com/curl/curl"
   DESC "the multiprotocol file transfer library"
   LICENSE "[curl](http://curl.haxx.se/docs/copyright.html 'curl license inspired by MIT/X, but not identical')"
@@ -362,7 +362,7 @@ set(xp_libstrophe REPO github.com/externpro/libstrophe TAG v0.9.1.3
   SHA256_win64 515c416d47203accebee1281178d4b17755f61a039b21936458c23d3cd039f0e
   )
 set(xp_libzmq REPO github.com/externpro/libzmq TAG v4.3.4.2
-  XPBLD "patch" BASE v4.3.4 BRANCH dev DEPS sodium
+  XPBLD "patch" BASE v4.3.4 BRANCH dev DEPS libsodium
   WEB "https://zeromq.org/" UPSTREAM "github.com/zeromq/libzmq"
   DESC "high-performance asynchronous messaging library"
   LICENSE "[MPL-2.0](http://wiki.zeromq.org/area:licensing 'Mozilla Public License 2.0')"

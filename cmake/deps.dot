@@ -8,7 +8,7 @@ digraph GG {
   "boost" -> "zlib";
   "ceres-solver" -> "eigen";
   "cppzmq" -> "libzmq";
-  "curl" -> "cares";
+  "curl" -> "c-ares";
   "curl" -> "libssh2";
   "fecpp" -> "boost";
   "ffmpeg" -> "openh264";
@@ -25,7 +25,7 @@ digraph GG {
   "libssh2" -> "zlib";
   "libstrophe" -> "libexpat";
   "libstrophe" -> "openssl";
-  "libzmq" -> "sodium";
+  "libzmq" -> "libsodium";
   "node-addon-api" -> "nodexp";
   "openh264" -> "yasm";
   "openssl" -> "nasm";
