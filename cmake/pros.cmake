@@ -371,11 +371,15 @@ set(xp_libzmq REPO github.com/externpro/libzmq TAG v4.3.4.2
   SHA256_Linux b010329f58e199ffb01f3fbd016d4ed9acc2ce304c526162c75ea96bad870c05
   SHA256_win64 24ee926b65966edceaba9e7df7a25885cee636f4b01b15c6b70744aacbcfe2a6
   )
-set(xp_lua REPO github.com/externpro/lua VER 5.2.3 XP_MODULE
-  XPBLD "patch" BASE LuaDist:5.2.3 BRANCH xp5.2.3
-  WEB "http://www.lua.org/" UPSTREAM "github.com/LuaDist/lua"
+set(xp_lua REPO github.com/externpro/lua TAG v5.2.3.1
+  XPBLD "patch" BASE v5.2.3 BRANCH dev
+  WEB "http://www.lua.org/" UPSTREAM "github.com/lua/lua"
   DESC "a powerful, fast, lightweight, embeddable scripting language"
   LICENSE "[MIT](http://www.lua.org/license.html 'MIT License')"
+  SHA256_Darwin-arm64 598f90f0fc383f056507326dedf44ad7ff75f67480879ec52a67735854de197b
+  SHA256_Linux-arm64 d34d2a722900d8035ace261d6cb04bcf2336c24e0cecb542197752c0f755477e
+  SHA256_Linux f73fb7d78ea4d66522e660df1dc0e52fa45a97affb92a67497cd75b12758895e
+  SHA256_win64 18dd0d950beed3e1df142f77015a0498a50c2292d4b51a0c2844bb8b867d78a9
   )
 set(xp_luabridge REPO github.com/vinniefalco/LuaBridge/tree/2.5 VER 2.5
   WEB "http://vinniefalco.github.io/LuaBridge/Manual.html 'LuaBridge Reference Manual'"
