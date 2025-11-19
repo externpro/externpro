@@ -8,7 +8,6 @@
 # create multiple sync scripts
 #  cmake -P cmake/sync.cmake -- zlib palam
 function(generateSyncScript)
-  set(options XP_MODULE)
   set(reqArgs PKG BRANCH REPO TAG SHA256_Linux SHA256_Linux-arm64 SHA256_win64)
   set(oneValueArgs ${reqArgs} BASE DESC DIST_DIR LICENSE UPSTREAM VER WEB XPBLD)
   list(APPEND oneValueArgs SHA256_Darwin-arm64) # TODO move to reqArgs once all projects have Darwin build
