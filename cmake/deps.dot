@@ -26,6 +26,7 @@ digraph GG {
   "libstrophe" -> "libexpat";
   "libstrophe" -> "openssl";
   "libzmq" -> "libsodium";
+  "luabridge" -> "lua";
   "node-addon-api" -> "nodexp";
   "openh264" -> "yasm";
   "openssl" -> "nasm";

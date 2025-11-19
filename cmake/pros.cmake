@@ -381,15 +381,15 @@ set(xp_lua REPO github.com/externpro/lua TAG v5.2.3.1
   SHA256_Linux f73fb7d78ea4d66522e660df1dc0e52fa45a97affb92a67497cd75b12758895e
   SHA256_win64 18dd0d950beed3e1df142f77015a0498a50c2292d4b51a0c2844bb8b867d78a9
   )
-set(xp_luabridge REPO github.com/externpro/LuaBridge TAG v2.10.1
-  XPBLD "patch" BASE 2.10 BRANCH dev
+set(xp_luabridge REPO github.com/externpro/LuaBridge TAG v2.10.3
+  XPBLD "patch" BASE 2.10 BRANCH dev DEPS lua
   WEB "http://vinniefalco.github.io/LuaBridge/Manual.html 'LuaBridge Reference Manual'" UPSTREAM "github.com/vinniefalco/LuaBridge"
   DESC "a lightweight, dependency-free library for binding Lua to C++"
   LICENSE "[MIT](https://github.com/vinniefalco/LuaBridge/#official-repository 'MIT License')"
-  SHA256_Darwin-arm64 1f99872bdf4d7be8cc827af08ce8b9dcbf1ba47ed861ac0192ed0318a6ef655b
-  SHA256_Linux-arm64 9035522d4a0de6bf9a8b4c2d6f291025a8b061a5c1fe0048e6b994a67ebc25b1
-  SHA256_Linux 9680a9919c3593d9080611bcef6b2fc074b688b4569a0fa90991353a59ac4d0e
-  SHA256_win64 9efb131ac42f08fce74341933a4f5867756269fb189fc44418d054129583e26f
+  SHA256_Darwin-arm64 af2b632c302c9b71151bf45f1eea651e085dfb8fe831f726062a403e94670e0e
+  SHA256_Linux-arm64 86d7cdcbe08b7431efde8d67846bf72b713d231359a96490f6333bf05fbec8c1
+  SHA256_Linux 481c33e6497c1b7358ae05aa067441dd5a77d501736cf6a75976f7084bc3ac93
+  SHA256_win64 49c01bcfb4ae0c5f64cc43e08d13630209e242136e589726936594fa373e3723
   )
 set(xp_nasm REPO github.com/externpro/nasm TAG v2.14.02.2
   XPBLD "bin" BASE v0 BRANCH dev
