@@ -1,7 +1,0 @@
-set(@PRJ@_VER "@VER@ [@PROJECT_NAME@]")
-set(reqVars @PRJ@_VER)
-@FIND_DEPS@include(${CMAKE_CURRENT_LIST_DIR}/@TARGETS_FILE@)
-@USE_VARS@include(FindPackageHandleStandardArgs)
-set(FPHSA_NAME_MISMATCHED TRUE) # find_package_handle_standard_args NAME_MISMATCHED (prefix usexp-)
-find_package_handle_standard_args(@NAME@ REQUIRED_VARS ${reqVars})
-mark_as_advanced(${reqVars})
