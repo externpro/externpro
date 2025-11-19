@@ -37,9 +37,9 @@ there is a legacy externpro project at [smanders/externpro](https://github.com/s
 that's been archived and then continued at [externpro/exdlpro](https://github.com/externpro/exdlpro)
 that creates a bundled package of several third-party
 [projects](https://github.com/externpro/exdlpro/blob/dev/projects/README.md) in tar.xz
-[releases](https://github.com/externpro/exdlpro/releases) -- externpro/exdlpro will eventually be
-phased out and archived as work is done to move these projects to build standalone and host their
-devel packages as github release assets
+[releases](https://github.com/externpro/exdlpro/releases) -- externpro/exdlpro has now been
+phased out and archived as all projects now build standalone and host their devel packages as
+github release assets
 
 ## notes
 
