@@ -118,16 +118,6 @@ set(xp_eigen REPO github.com/externpro/eigen TAG v3.4.0.1
   SHA256_Linux 78a03eb8d1b3b6161b3d2de440172e456a13723cc9ae4730df5933589167f46e
   SHA256_win64 9bec874c71af9d899e0ab68f470d1ed2208004178a400ea04babe803358995cf
   )
-set(xp_exdlpro REPO github.com/externpro/exdlpro TAG v25.06
-  BRANCH dev
-  WEB "https://github.com/externpro/exdlpro"
-  DESC "build external projects with cmake"
-  LICENSE "[MIT](https://github.com/externpro/exdlpro/blob/dev/LICENSE 'MIT License')"
-  SHA256_Darwin-arm64 a06ef2904cabe81cc04758fdfab6e366d276c2b427616009ae7c2ece5fec3c4f
-  SHA256_Linux-arm64 8614f78bbd5cd62ead0851f135714c34d370f8b6d3c7ed0b18595f03edb85fa3
-  SHA256_Linux a7a2864e2fc9e284eec084b3e776e78774985611ec44abc995fe29a5f70e543b
-  SHA256_win64 372421edc8a8dd2c493c1b6f18202f0e1987175662731fe5772222c45af189eb
-  )
 set(xp_fecpp REPO github.com/externpro/fecpp TAG v0.9.1
   XPBLD "intro" BASE v0.9 BRANCH dev EXE_DEPS boost
   WEB "http://www.randombit.net/code/fecpp/" UPSTREAM "github.com/randombit/fecpp"
