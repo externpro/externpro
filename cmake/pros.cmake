@@ -38,15 +38,15 @@ set(xp_azmq REPO github.com/externpro/azmq TAG v1.0.3.1
   SHA256_Linux 33b12c2408f41480d47e4415ab6d9564d1d2c3da42913dbe2e6a5b8475723bac
   SHA256_win64 3d3c92b9da136dcafec91ebc728743219d55a5be30cfa53d71bc3c56a2d81201
   )
-set(xp_boost REPO github.com/externpro/boost TAG v1.76.0.2
+set(xp_boost REPO github.com/externpro/boost TAG v1.76.0.3
   XPBLD "native" BASE boost-1.76.0 BRANCH dev DEPS bzip2 zlib
   WEB "http://www.boost.org/ 'Boost website'" UPSTREAM "github.com/boostorg/boost"
   DESC "libraries that give C++ a boost"
   LICENSE "[BSL-1.0](http://www.boost.org/users/license.html 'Boost Software License')"
-  SHA256_Darwin-arm64 ab0a1119f42fe8be6334c92f8a60cf6bd45ad61a1e28fd345b1886ffb7de6d11
-  SHA256_Linux-arm64 6b0cdc88b6b7dab256330a404900da205f5833d6d5df80897a27ddf7824ccddd
-  SHA256_Linux 1a010b8370020656effe722b88c01ace36255b8ecb5a1aeeda76c41bddb21c4e
-  SHA256_win64 40d22b0e708c723d1bb3a2940522ccbd435117f9e9d9525af687f99004fd5bd6
+  SHA256_Darwin-arm64 2202073ab9f3edf2a7474075bdeee8079408fa53069e4cc4a3b897a1c4bf918e
+  SHA256_Linux-arm64 00fc3ce11610d4c70bdc8e83d02e0e41747e329f3a66c585f910929d76dec817
+  SHA256_Linux 0834719184aaa570747c97149a024bfd78b5363ead15b7440f3e4390f9bfb8e9
+  SHA256_win64 05bccbfce1a27cceb0a77da0aa5de099e4bee1a4100e24854862adceaa3ba975
   )
 set(xp_bzip2 REPO github.com/externpro/bzip2 TAG v1.0.8.2
   XPBLD "intro" BASE bzip2-1.0.8 BRANCH dev
