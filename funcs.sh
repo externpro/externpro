@@ -28,14 +28,16 @@ function findVer
 function gitlfsreq
 {
   if ! command -v git-lfs &>/dev/null; then
-    echo "git-lfs not installed, attempting (requires sudo)..."
-    sudo sh -c \
-     "mkdir /usr/local/src/lfs \
+    echo "ERROR: git-lfs not installed"
+    echo "Install with commands similar to the following:"
+    echo "
+      mkdir /usr/local/src/lfs \
       && wget -qO- 'https://github.com/git-lfs/git-lfs/releases/download/v2.12.1/git-lfs-linux-amd64-v2.12.1.tar.gz' \
       | tar -xz -C /usr/local/src/lfs \
       && /usr/local/src/lfs/install.sh \
       && rm -rf /usr/local/src/lfs/ \
-      && /usr/local/bin/git-lfs install --system"
+      && /usr/local/bin/git-lfs install --system
+      "
     echo "repo will need to be cloned again for git-lfs to get files stored with lfs"
     exit 1
   fi
@@ -93,8 +95,10 @@ function buildreq
 function gpureq
 {
   if ! command -v nvidia-container-toolkit 2>&1 > /dev/null; then
-    echo "nvidia-docker not installed, attempting to install (requires sudo)..."
+    echo "nvidia-container-toolkit (nvidia-docker) not installed"
     if [ -d "/etc/apt" ]; then
+      echo "Install with commands similar to the following:"
+      echo "
       curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | \
         sudo gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg && \
         curl -s -L https://nvidia.github.io/libnvidia-container/stable/deb/nvidia-container-toolkit.list | \
@@ -102,10 +106,16 @@ function gpureq
         sudo tee /etc/apt/sources.list.d/nvidia-container-toolkit.list
       sudo apt-get update
       sudo apt-get install -y nvidia-container-toolkit
+      "
     elif [ -d "/etc/yum.repos.d" ]; then
+      echo "Install with commands similar to the following:"
+      echo "
       curl -s -L https://nvidia.github.io/libnvidia-container/stable/rpm/nvidia-container-toolkit.repo | \
         sudo tee /etc/yum.repos.d/nvidia-container-toolkit.repo
       sudo yum install -y nvidia-container-toolkit
+      "
+    else
+      echo "please determine how to install nvidia-container-toolkit for your package manager"
     fi
   fi
 }
