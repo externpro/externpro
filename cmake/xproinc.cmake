@@ -22,3 +22,4 @@ cmake_language(
   SET_DEPENDENCY_PROVIDER externpro_provide_dependency
   SUPPORTED_METHODS FIND_PACKAGE
   )
+set(CMAKE_PROJECT_INCLUDE xpflags;GNUInstallDirs)
