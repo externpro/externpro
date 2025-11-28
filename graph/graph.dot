@@ -1,20 +1,20 @@
 digraph GG {
   node [fontsize=12];
   "ubuntu:20.04" [shape=diamond];
-  "rockylinux:8.9" [shape=diamond];
+  "rockylinux/rockylinux:8" [shape=diamond];
   "externpro dev" [shape=box];
   "PluginSdk" [shape=box];
   "plugins" [shape=box];
   "plugin dev" [shape=box];
   "microservices" [shape=box];
   "VantageCI" [shape=box];
-  "buildpro/rocky-pro" -> "rockylinux:8.9";
-  "buildpro/rocky-mdv" -> "buildpro/rocky-pro";
-  "buildpro/rocky-pin" -> "buildpro/rocky-pro";
-  "buildpro/rocky-pdv" -> "buildpro/rocky-pro";
+  "buildpro/rocky8-gcc9" -> "rockylinux/rockylinux:8";
+  "buildpro/rocky-mdv" -> "buildpro/rocky8-gcc9";
+  "buildpro/rocky-pin" -> "buildpro/rocky8-gcc9";
+  "buildpro/rocky-pdv" -> "buildpro/rocky8-gcc9";
   "buildpro/rocky-ci" -> "buildpro/rocky-mdv";
   "buildpro/ubuntu" -> "ubuntu:20.04";
-  "externpro dev" -> "buildpro/rocky-pro";
+  "externpro dev" -> "buildpro/rocky8-gcc9";
   "PluginSdk" -> "buildpro/rocky-pin";
   "plugins" -> "buildpro/rocky-pin";
   "plugin dev" -> "buildpro/rocky-pdv";
