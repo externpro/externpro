@@ -157,6 +157,17 @@ function defOptions
         ;;
     esac
   done
+  shift $((OPTIND - 1))
+  if [ $# -gt 0 ]; then
+    if [ ${do_build} -eq 1 ] && [ -z "${img}" ] && [ $# -eq 1 ]; then
+      echo "Unexpected argument: $1"
+      echo "Did you mean: $0 -b -i $1 ?"
+    else
+      echo "Unexpected argument(s): $*"
+    fi
+    defUsage
+    exit 1
+  fi
   if [ -n "${img}" ]; then
     BPROIMG="${img}"
   fi
