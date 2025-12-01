@@ -122,39 +122,29 @@ function gpureq
 function defUsage
 {
   echo "`basename -- $0` usage:"
-  echo " -h      display this help message"
-  echo "         run the build container (no switches)"
-  echo " -b      build docker image(s)"
-  echo " -u      run the experimental ubuntu build container"
+  echo " -h          display this help message"
+  echo "             (no switches) run the default build container"
+  echo " -b          build the default docker image only (do not run container)"
+  echo " -i <img>    build and run using the specified buildpro image <img>"
+  echo " -b -i <img> build the specified buildpro image <img> only (do not run container)"
 }
+# Option parsing:
+#   no args = build+run
+#   -b = build-only
+#   -i <img> sets BPROIMG
+#   -b -i = build-only with image
 function defOptions
 {
-  if [ $# -eq 0 ]; then
-    buildreq
-    init
-    docker compose --profile pbld build
-    docker compose run --rm bld
-    deinit
-    exit 0
-  fi
-  while getopts "bhu" opt
+  local do_build=0
+  local img=""
+  while getopts "bhi:" opt
   do
     case ${opt} in
       b )
-        buildreq
-        init
-        docker compose --profile pbld build
-        deinit
-        exit 0
+        do_build=1
         ;;
-      u )
-        BPROIMG=ubuntu
-        buildreq
-        init
-        docker compose --profile pbld build
-        docker compose run --rm bld
-        deinit
-        exit 0
+      i )
+        img="${OPTARG}"
         ;;
       h )
         defUsage
@@ -162,8 +152,19 @@ function defOptions
         ;;
       \? )
         defUsage
-        exit 0
+        exit 1
         ;;
     esac
   done
+  if [ -n "${img}" ]; then
+    BPROIMG="${img}"
+  fi
+  buildreq
+  init
+  docker compose --profile pbld build
+  if [ ${do_build} -eq 0 ]; then
+    docker compose run --rm bld
+  fi
+  deinit
+  exit 0
 }
