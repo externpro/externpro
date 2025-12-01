@@ -2,7 +2,7 @@
 cd "$( dirname "$0" )"
 pushd .. > /dev/null
 source ./.devcontainer/funcs.sh
-BPROIMG=${1:-rocky8-gcc9}
+BPROIMG=${1:-${BPROIMG_DEFAULT}}
 if [[ $(basename -s .git `git config --get remote.origin.url`) == buildpro ]]; then
   BPROTAG=`git describe --tags`
   if [ -n "$(git status --porcelain --untracked=no)" ] || [[ ${BPROTAG} == *"-g"* ]]; then
