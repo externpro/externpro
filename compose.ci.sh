@@ -3,4 +3,3 @@ cd "$( dirname "$0" )"
 source ./.devcontainer/funcs.sh
 BPROIMG=rocky-ci
 defOptions "$@"
-# docker compose run
