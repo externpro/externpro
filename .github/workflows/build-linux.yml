@@ -17,12 +17,17 @@ on:
         type: string
         description: 'runs-on value (e.g., ubuntu-latest, ubuntu-24.04-arm, etc.)'
         default: "ubuntu-latest"
+      buildpro-images:
+        required: false
+        type: string
+        description: 'JSON array of buildpro images to build (e.g. "[\"rocky8-gcc9\",\"rocky9-gcc13\",\"ubuntu\"]")'
+        default: '["rocky8-gcc9"]'
 jobs:
   build-docker-image:
     runs-on: ${{ inputs.runon }}
-    outputs:
-      ghcrio_image_name: ${{ steps.image-names.outputs.ghcrio_image_name }}
-      delete_image_name: ${{ steps.image-names.outputs.delete_image_name }}
+    strategy:
+      matrix:
+        buildpro_image: ${{ fromJson(inputs.buildpro-images) }}
     steps:
       -
         name: Checkout repo
@@ -38,16 +43,6 @@ jobs:
           git config user.name ${{ github.actor }}
           git config user.email ${{ github.actor }}@users.noreply.github.com
       -
-        name: Get docker and ghcr.io image names
-        id: image-names
-        run: |
-          REPO_NAME=$(echo $(basename ${{ github.repository }}) | tr '[:upper:]' '[:lower:]')
-          ORG_REPO_NAME=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')
-          ARCH_NAME=$(echo '${{ runner.arch }}' | tr '[:upper:]' '[:lower:]')
-          echo "docker_image_name=${REPO_NAME}-bld" >> $GITHUB_OUTPUT
-          echo "ghcrio_image_name=ghcr.io/${ORG_REPO_NAME}/bldimg-${ARCH_NAME}" >> $GITHUB_OUTPUT
-          echo "delete_image_name=${REPO_NAME}/bldimg-${ARCH_NAME}" >> $GITHUB_OUTPUT
-      -
         name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
         with:
@@ -57,18 +52,24 @@ jobs:
       -
         name: Build and push docker image
         run: |
-          ./docker-compose.sh -b
-          docker tag ${{ steps.image-names.outputs.docker_image_name }}:latest ${{ steps.image-names.outputs.ghcrio_image_name }}:latest
-          docker push ${{ steps.image-names.outputs.ghcrio_image_name }}:latest
+          LOCAL_IMAGE="${{ toLower(github.event.repository.name) }}-bld:latest"
+          REMOTE_IMAGE="ghcr.io/${{ toLower(github.repository) }}/bldimg-${{ matrix.buildpro_image }}-${{ toLower(runner.arch) }}:latest"
+          echo "Building buildpro image ${REMOTE_IMAGE}"
+          ./docker-compose.sh -b -i "${{ matrix.buildpro_image }}"
+          docker tag "${LOCAL_IMAGE}" "${REMOTE_IMAGE}"
+          docker push "${REMOTE_IMAGE}"
           docker images
   build:
     needs: build-docker-image
     if: ${{ needs.build-docker-image.result == 'success' }}
     runs-on: ${{ inputs.runon }}
+    strategy:
+      matrix:
+        buildpro_image: ${{ fromJson(inputs.buildpro-images) }}
     env:
       CMAKE_PRESET: Linux
     container:
-      image: ${{ needs.build-docker-image.outputs.ghcrio_image_name }}:latest
+      image: ${{ format('ghcr.io/{0}/bldimg-{1}-{2}:latest', toLower(github.repository), matrix.buildpro_image, toLower(runner.arch)) }}
       credentials:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
@@ -128,6 +129,9 @@ jobs:
     needs: [build-docker-image, build]
     if: ${{ needs.build.result == 'success' }}
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        buildpro_image: ${{ fromJson(inputs.buildpro-images) }}
     steps:
       -
         name: Delete untagged images from ghcr
@@ -135,7 +139,7 @@ jobs:
         with:
           account: ${{ github.actor == github.repository_owner && 'user' || github.repository_owner }}
           token: ${{ secrets.GITHUB_TOKEN }}
-          image-names: ${{ needs.build-docker-image.outputs.delete_image_name }}
+          image-names: ${{ format('{0}/bldimg-{1}-{2}', toLower(github.event.repository.name), matrix.buildpro_image, toLower(runner.arch)) }}
           tag-selection: untagged
           cut-off: 1m
           dry-run: false
