@@ -1,4 +1,3 @@
-set(buildpro_REV 25.06)
 include(xpfunmac)
 if(NOT DEFINED XP_SANITIZER)
   set(XP_SANITIZER "ASAN")

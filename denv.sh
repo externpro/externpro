@@ -9,10 +9,10 @@ if [[ $(basename -s .git `git config --get remote.origin.url`) == buildpro ]]; t
     BPROTAG=latest
   fi
 else
-  BPROTAG="$(findVer 'set(buildpro_REV' CMakeLists.txt */toplevel.cmake */*/toplevel.cmake .devcontainer/cmake/xptoplevel.cmake)"
+  BPROTAG="$(findVer 'set(buildpro_REV' CMakeLists.txt */toplevel.cmake */*/toplevel.cmake)"
   if [ -z ${BPROTAG} ]; then
-    echo "*** buildpro_REV should be set"
-    BPROTAG=latest
+    # echo "*** buildpro_REV not set, defaulting to BPROTAG_DEFAULT=${BPROTAG_DEFAULT}"
+    BPROTAG=${BPROTAG_DEFAULT}
   fi
 fi
 dkr="$(findVer 'FROM' .devcontainer/local.dockerfile)"
