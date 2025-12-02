@@ -1,5 +1,12 @@
 EXTERN_DIR=/opt/extern
-urlPfx="https://isrhub.usurf.usu.edu"
+installExample=false
+INTERNAL=isrhub.usurf.usu.edu
+urlPfx="https://${INTERNAL}"
+if ${installExample} && command -v host >/dev/null && host ${INTERNAL} | grep "has address" >/dev/null; then
+  isIntern=true
+elif ${installExample}; then
+  echo "INFO: ${INTERNAL} not reachable; skipping internal tool downloads."
+fi
 ##############################
 if [ -f .crtoolrc ]; then
   crtv=`grep version .crtoolrc`
@@ -9,7 +16,7 @@ crWrapVer=20.07.1
 if [[ ${crToolVer} > "24.01" || ${crToolVer} == "24.01" ]]; then
   crToolVer=v${crToolVer}
 fi
-if [[ -n "${crToolVer}" && -n "${crWrapVer}" ]]; then
+if [[ -n "${crToolVer}" && -n "${crWrapVer}" && ${isIntern} ]]; then
   CRTOOL_DL="wget -q \"${urlPfx}/CRTool/CRTool/releases/download/${crWrapVer}/CRTool-${crWrapVer}.sh\" \
 && wget -q \"${urlPfx}/CRTool/CRToolImpl/releases/download/${crToolVer}/CRToolImpl-${crToolVer}.sh\" \
 && chmod 755 CRTool*.sh"
@@ -27,40 +34,57 @@ ictVer="$(findVer 'set(ImageChangeToolRelease' PluginLibraries/CMakeLists.txt)"
 iqtVer="$(findVer 'set(ImageQualityToolRelease' PluginLibraries/CMakeLists.txt)"
 pmuVer="$(findVer 'set(PluginEmulatorRelease' PluginLibraries/CMakeLists.txt)"
 spvVer="$(findVer 'set(SARPyValidatorRelease' PluginLibraries/CMakeLists.txt)"
-if [[ -n "${bmvVer}" ]]; then
+if [[ -n "${bmvVer}" && ${isIntern} ]]; then
   bmvBase=BrokerMessageValidatorTool-${bmvVer}-$(uname -s)
   bmvDl="wget ${urlPfx}/VantagePlugins/BrokerMessageValidatorTool/releases/download/v${bmvVer}/${bmvBase}-tool.tar.xz"
   TOOLS=${TOOLS:+${TOOLS} && }
   TOOLS=${TOOLS}"mkdir -p ${EXTERN_DIR}/${bmvBase} && ${bmvDl} -qO- | tar --no-same-owner -xJ -C ${EXTERN_DIR}/${bmvBase}"
   TOOLS_PATH=${TOOLS_PATH}:${EXTERN_DIR}/${bmvBase}
 fi
-if [[ -n "${ictVer}" ]]; then
+if [[ -n "${ictVer}" && ${isIntern} ]]; then
   ictBase=ImageChangeTool-${ictVer}-$(uname -s)
   ictDl="wget ${urlPfx}/VantagePlugins/ImageChangeTool/releases/download/v${ictVer}/${ictBase}-tool.tar.xz"
   TOOLS=${TOOLS:+${TOOLS} && }
   TOOLS=${TOOLS}"mkdir -p ${EXTERN_DIR}/${ictBase} && ${ictDl} -qO- | tar --no-same-owner -xJ -C ${EXTERN_DIR}/${ictBase}"
   TOOLS_PATH=${TOOLS_PATH}:${EXTERN_DIR}/${ictBase}
 fi
-if [[ -n "${iqtVer}" ]]; then
+if [[ -n "${iqtVer}" && ${isIntern} ]]; then
   iqtBase=ImageQualityTool-${iqtVer}-$(uname -s)
   iqtDl="wget ${urlPfx}/VantagePlugins/ImageQualityTool/releases/download/v${iqtVer}/${iqtBase}-tool.tar.xz"
   TOOLS=${TOOLS:+${TOOLS} && }
   TOOLS=${TOOLS}"mkdir -p ${EXTERN_DIR}/${iqtBase} && ${iqtDl} -qO- | tar --no-same-owner -xJ -C ${EXTERN_DIR}/${iqtBase}"
   TOOLS_PATH=${TOOLS_PATH}:${EXTERN_DIR}/${iqtBase}
 fi
-if [[ -n "${pmuVer}" ]]; then
+if [[ -n "${pmuVer}" && ${isIntern} ]]; then
   pmuBase=SDLPluginSDK-v${pmuVer}-gcc931-64-$(uname -s)
   pmuDl="wget ${urlPfx}/PluginFramework/SDKSuper/releases/download/v${pmuVer}/${pmuBase}.tar.xz"
   TOOLS=${TOOLS:+${TOOLS} && }
   TOOLS=${TOOLS}"${pmuDl} -qO- | tar --no-same-owner -xJ -C ${EXTERN_DIR}"
   TOOLS_PATH=${TOOLS_PATH}:${EXTERN_DIR}/${pmuBase}/bin
 fi
-if [[ -n "${spvVer}" ]]; then
+if [[ -n "${spvVer}" && ${isIntern} ]]; then
   spvBase=SARPyValidator-${spvVer}.0-$(uname -s)
   spvDl="wget ${urlPfx}/VantagePlugins/SARPyValidator/releases/download/v${spvVer}/${spvBase}-tool.tar.xz"
   TOOLS=${TOOLS:+${TOOLS} && }
   TOOLS=${TOOLS}"mkdir -p ${EXTERN_DIR}/${spvBase} && ${spvDl} -qO- | tar --no-same-owner -xJ -C ${EXTERN_DIR}/${spvBase}"
   TOOLS_PATH=${TOOLS_PATH}:${EXTERN_DIR}/${spvBase}
+fi
+##############################
+# wxTetris tool (optional example)
+if ${installExample} && command -v host >/dev/null && host github.com | grep "has address" >/dev/null; then
+  wxTetrisBase=wxTetris
+  arch="$(uname -m)"
+  if [[ "${arch}" == "aarch64" || "${arch}" == "arm64" ]]; then
+    wxTetrisUrl="https://github.com/smanders/wxTetris/releases/download/v1.2.0/wxTetris-v1.2.0-Linux-arm64-devel.tar.xz"
+  else
+    wxTetrisUrl="https://github.com/smanders/wxTetris/releases/download/v1.2.0/wxTetris-v1.2.0-Linux-devel.tar.xz"
+  fi
+  wxTetrisDl="wget ${wxTetrisUrl}"
+  TOOLS=${TOOLS:+${TOOLS} && }
+  TOOLS=${TOOLS}"mkdir -p ${EXTERN_DIR}/${wxTetrisBase} && ${wxTetrisDl} -qO- | tar --no-same-owner --strip-components=1 -xJ -C ${EXTERN_DIR}/${wxTetrisBase}"
+  TOOLS_PATH=${TOOLS_PATH}:${EXTERN_DIR}/${wxTetrisBase}/bin
+elif ${installExample}; then
+  echo "INFO: github.com not reachable; skipping example wxTetris download."
 fi
 ##############################
 env="${env}\nTOOLS=${TOOLS}\nTOOLS_PATH=${TOOLS_PATH}"
