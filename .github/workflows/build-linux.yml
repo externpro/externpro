@@ -23,7 +23,25 @@ on:
         description: 'JSON array of buildpro images to build (e.g. "[\"rocky8-gcc9\",\"rocky9-gcc13\",\"ubuntu\"]")'
         default: '["rocky8-gcc9"]'
 jobs:
+  docker-image-name:
+    runs-on: ${{ inputs.runon }}
+    outputs:
+      ghcrio_image_base: ${{ steps.names.outputs.ghcrio_image_base }}
+      delete_image_base: ${{ steps.names.outputs.delete_image_base }}
+    steps:
+      -
+        name: Compute docker/GHCR base image names
+        id: names
+        run: |
+          REPO_NAME=$(echo $(basename ${{ github.repository }}) | tr '[:upper:]' '[:lower:]')
+          ORG_REPO_NAME=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')
+          ARCH_NAME=$(echo '${{ runner.arch }}' | tr '[:upper:]' '[:lower:]')
+
+          echo "ghcrio_image_base=ghcr.io/${ORG_REPO_NAME}/bldimg-${ARCH_NAME}" >> "$GITHUB_OUTPUT"
+          echo "delete_image_base=${REPO_NAME}/bldimg-${ARCH_NAME}" >> "$GITHUB_OUTPUT"
+
   build-docker-image:
+    needs: docker-image-name
     runs-on: ${{ inputs.runon }}
     strategy:
       matrix:
@@ -52,15 +70,17 @@ jobs:
       -
         name: Build and push docker image
         run: |
-          LOCAL_IMAGE="${{ toLower(github.event.repository.name) }}-bld:latest"
-          REMOTE_IMAGE="ghcr.io/${{ toLower(github.repository) }}/bldimg-${{ matrix.buildpro_image }}-${{ toLower(runner.arch) }}:latest"
+          REPO_NAME=$(echo '${{ github.event.repository.name }}' | tr '[:upper:]' '[:lower:]')
+          LOCAL_IMAGE="${REPO_NAME}-bld:latest"
+          REMOTE_BASE="${{ needs.docker-image-name.outputs.ghcrio_image_base }}"
+          REMOTE_IMAGE="${REMOTE_BASE}-${{ matrix.buildpro_image }}:latest"
           echo "Building buildpro image ${REMOTE_IMAGE}"
           ./docker-compose.sh -b -i "${{ matrix.buildpro_image }}"
           docker tag "${LOCAL_IMAGE}" "${REMOTE_IMAGE}"
           docker push "${REMOTE_IMAGE}"
           docker images
   build:
-    needs: build-docker-image
+    needs: [docker-image-name, build-docker-image]
     if: ${{ needs.build-docker-image.result == 'success' }}
     runs-on: ${{ inputs.runon }}
     strategy:
@@ -69,7 +89,7 @@ jobs:
     env:
       CMAKE_PRESET: Linux
     container:
-      image: ${{ format('ghcr.io/{0}/bldimg-{1}-{2}:latest', toLower(github.repository), matrix.buildpro_image, toLower(runner.arch)) }}
+      image: ${{ format('{0}-{1}:latest', needs.docker-image-name.outputs.ghcrio_image_base, matrix.buildpro_image) }}
       credentials:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
@@ -126,7 +146,7 @@ jobs:
             exit 1
           fi
   clean-up:
-    needs: [build-docker-image, build]
+    needs: [docker-image-name, build-docker-image, build]
     if: ${{ needs.build.result == 'success' }}
     runs-on: ubuntu-latest
     strategy:
@@ -139,7 +159,7 @@ jobs:
         with:
           account: ${{ github.actor == github.repository_owner && 'user' || github.repository_owner }}
           token: ${{ secrets.GITHUB_TOKEN }}
-          image-names: ${{ format('{0}/bldimg-{1}-{2}', toLower(github.event.repository.name), matrix.buildpro_image, toLower(runner.arch)) }}
+          image-names: ${{ format('{0}-{1}', needs.docker-image-name.outputs.delete_image_base, matrix.buildpro_image) }}
           tag-selection: untagged
           cut-off: 1m
           dry-run: false
