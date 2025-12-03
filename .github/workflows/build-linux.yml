@@ -28,6 +28,7 @@ jobs:
     outputs:
       ghcrio_image_base: ${{ steps.names.outputs.ghcrio_image_base }}
       delete_image_base: ${{ steps.names.outputs.delete_image_base }}
+      arch_name: ${{ steps.names.outputs.arch_name }}
     steps:
       -
         name: Compute docker/GHCR base image names
@@ -35,9 +36,17 @@ jobs:
         run: |
           REPO_NAME=$(echo $(basename ${{ github.repository }}) | tr '[:upper:]' '[:lower:]')
           ORG_REPO_NAME=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')
-          ARCH_NAME=$(echo '${{ runner.arch }}' | tr '[:upper:]' '[:lower:]')
+          ARCH_RAW='${{ runner.arch }}'
+          if [[ "$ARCH_RAW" =~ ^(aarch64|arm64|ARM64)$ ]]; then
+            ARCH_NAME=arm64
+          elif [[ "$ARCH_RAW" =~ ^(x86_64|amd64|AMD64|x64|X64)$ ]]; then
+            ARCH_NAME=amd64
+          else
+            ARCH_NAME=$(echo "$ARCH_RAW" | tr '[:upper:]' '[:lower:]')
+          fi
           echo "ghcrio_image_base=ghcr.io/${ORG_REPO_NAME}/bldimg-${ARCH_NAME}" >> "$GITHUB_OUTPUT"
           echo "delete_image_base=${REPO_NAME}/bldimg-${ARCH_NAME}" >> "$GITHUB_OUTPUT"
+          echo "arch_name=${ARCH_NAME}" >> "$GITHUB_OUTPUT"
   build-docker-image:
     needs: docker-image-name
     runs-on: ${{ inputs.runon }}
@@ -106,7 +115,7 @@ jobs:
         name: Upload CMake logs
         uses: actions/upload-artifact@v4
         with:
-          name: cmake-logs-${{ env.CMAKE_PRESET }}-${{ runner.arch }}-${{ matrix.buildpro_image }}
+          name: cmake-logs-${{ env.CMAKE_PRESET }}-${{ needs.docker-image-name.outputs.arch_name }}-${{ matrix.buildpro_image }}
           path: |
             _bld-${{ env.CMAKE_PRESET }}/CMakeFiles/CMakeConfigureLog.yaml
       -
