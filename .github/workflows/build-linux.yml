@@ -20,7 +20,7 @@ on:
       buildpro-images:
         required: false
         type: string
-        description: 'JSON array of buildpro images to build (e.g. "[\"rocky8-gcc9\",\"rocky9-gcc13\",\"ubuntu\"]")'
+        description: 'JSON array of buildpro images to build (e.g. ["rocky8-gcc9","rocky9-gcc13","ubuntu"])'
         default: '["rocky8-gcc9"]'
 jobs:
   docker-image-name:
@@ -36,10 +36,8 @@ jobs:
           REPO_NAME=$(echo $(basename ${{ github.repository }}) | tr '[:upper:]' '[:lower:]')
           ORG_REPO_NAME=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')
           ARCH_NAME=$(echo '${{ runner.arch }}' | tr '[:upper:]' '[:lower:]')
-
           echo "ghcrio_image_base=ghcr.io/${ORG_REPO_NAME}/bldimg-${ARCH_NAME}" >> "$GITHUB_OUTPUT"
           echo "delete_image_base=${REPO_NAME}/bldimg-${ARCH_NAME}" >> "$GITHUB_OUTPUT"
-
   build-docker-image:
     needs: docker-image-name
     runs-on: ${{ inputs.runon }}
