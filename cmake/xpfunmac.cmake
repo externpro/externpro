@@ -13,16 +13,24 @@ include(CheckCXXCompilerFlag)
 include(CMakeDependentOption)
 
 function(xpGetCompilerPrefix _ret)
-  set(options GCC_TWO_VER)
+  set(options MATCH_BOOST VER_ONE VER_TWO)
   cmake_parse_arguments(X "${options}" "" "" ${ARGN})
+  if(X_MATCH_BOOST)
+    if(${CMAKE_SYSTEM_NAME} STREQUAL Darwin)
+      set(digits "\\1\\2")
+    else()
+      set(digits "\\1")
+    endif()
+  elseif(X_VER_ONE)
+    set(digits "\\1")
+  elseif(X_VER_TWO)
+    set(digits "\\1\\2")
+  else()
+    set(digits "\\1\\2\\3")
+  endif()
   if(MSVC)
     set(prefix vc${MSVC_TOOLSET_VERSION})
   elseif((CMAKE_CXX_COMPILER_ID STREQUAL GNU) OR (CMAKE_C_COMPILER_ID STREQUAL GNU))
-    if(X_GCC_TWO_VER)
-      set(digits "\\1\\2")
-    else()
-      set(digits "\\1\\2\\3")
-    endif()
     if(DEFINED CMAKE_CXX_COMPILER_VERSION)
       set(compilerVersion ${CMAKE_CXX_COMPILER_VERSION})
     elseif(DEFINED CMAKE_C_COMPILER_VERSION)
@@ -34,38 +42,24 @@ function(xpGetCompilerPrefix _ret)
       "gcc${digits}"
       prefix ${compilerVersion}
       )
-  elseif(${CMAKE_CXX_COMPILER_ID} MATCHES "Clang") # LLVM/Apple Clang (clang.llvm.org)
-    if(${CMAKE_SYSTEM_NAME} STREQUAL Darwin)
-      execute_process(COMMAND ${CMAKE_CXX_COMPILER} ${CMAKE_CXX_COMPILER_ARG1} -dumpversion
-        OUTPUT_VARIABLE CLANG_VERSION
-        OUTPUT_STRIP_TRAILING_WHITESPACE
-        )
-      string(REGEX REPLACE "([0-9]+)\\.([0-9]+)(\\.[0-9]+)?"
-        "clang-darwin\\1\\2" # match boost naming
-        prefix ${CLANG_VERSION}
-        )
+  elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_C_COMPILER_ID MATCHES "Clang")
+    # LLVM/Apple Clang (clang.llvm.org)
+    if(X_MATCH_BOOST AND ${CMAKE_SYSTEM_NAME} STREQUAL Darwin)
+      set(clangName clang-darwin)
     else()
-      string(REGEX REPLACE "([0-9]+)\\.([0-9]+)(\\.[0-9]+)?"
-        "clang\\1\\2" # match boost naming
-        prefix ${CMAKE_CXX_COMPILER_VERSION}
-        )
+      set(clangName clang)
     endif()
-  elseif(${CMAKE_C_COMPILER_ID} MATCHES "Clang") # LLVM/Apple Clang (clang.llvm.org)
-    if(${CMAKE_SYSTEM_NAME} STREQUAL Darwin)
-      execute_process(COMMAND ${CMAKE_C_COMPILER} ${CMAKE_C_COMPILER_ARG1} -dumpversion
-        OUTPUT_VARIABLE CLANG_VERSION
-        OUTPUT_STRIP_TRAILING_WHITESPACE
-        )
-      string(REGEX REPLACE "([0-9]+)\\.([0-9]+)(\\.[0-9]+)?"
-        "clang-darwin\\1\\2" # match boost naming
-        prefix ${CLANG_VERSION}
-        )
+    if(DEFINED CMAKE_CXX_COMPILER_VERSION)
+      set(compilerVersion ${CMAKE_CXX_COMPILER_VERSION})
+    elseif(DEFINED CMAKE_C_COMPILER_VERSION)
+      set(compilerVersion ${CMAKE_C_COMPILER_VERSION})
     else()
-      string(REGEX REPLACE "([0-9]+)\\.([0-9]+)(\\.[0-9]+)?"
-        "clang\\1\\2" # match boost naming
-        prefix ${CMAKE_C_COMPILER_VERSION}
-        )
+      message(SEND_ERROR "xpfunmac.cmake: unknown CMAKE_<LANG>_COMPILER_VERSION")
     endif()
+    string(REGEX REPLACE "([0-9]+)\\.([0-9]+)\\.([0-9]+)\\.([0-9]+)?"
+      "${clangName}${digits}"
+      prefix ${compilerVersion}
+      )
   else()
     message(SEND_ERROR "xpfunmac.cmake: compiler support lacking: ${CMAKE_C_COMPILER_ID}")
   endif()
