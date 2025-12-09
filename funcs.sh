@@ -8,6 +8,14 @@ function init
     cat .env
   fi
 }
+function ttyfix
+{
+  if command -v tput >/dev/null 2>&1; then
+    tput cnorm || true
+  else
+    printf '\e[?25h'
+  fi
+}
 function deinit
 {
   if [ -d .devcontainer/_bldtmp ]; then
@@ -175,8 +183,10 @@ function defOptions
   buildreq
   init
   docker compose --profile pbld build
+  ttyfix
   if [ ${do_build} -eq 0 ]; then
     docker compose run --rm bld
+    ttyfix
   fi
   deinit
   exit 0
