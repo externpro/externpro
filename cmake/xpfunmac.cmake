@@ -986,38 +986,45 @@ function(xpGetVersionString verString)
   set(${verString} ${gitDescribe} PARENT_SCOPE)
 endfunction()
 
-macro(xpPackageDevel)
+function(xpExternPackage)
   # NOTE: if repository name doesn't match CMAKE_PROJECT_NAME (case sensitive),
-  # set(CPACK_PACKAGE_NAME repositoryName) # before calling xpPackageDevel()
-  set(oneValueArgs EXE EXE_PATH TARGETS_FILE)
+  #   use REPO_NAME parameter to specify the repository name
+  # NOTE: if XP_INSTALL_CMAKEDIR is not defined, it will be set here
+  #   and available in PARENT_SCOPE
+  set(opts FIND_THREADS)
+  set(oneValueArgs COMPONENT EXE EXE_PATH NAMESPACE REPO_NAME TARGETS_FILE)
   set(multiValueArgs DEPS LIBRARIES)
-  cmake_parse_arguments(P "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
-  set(CMAKE_INSTALL_DEFAULT_COMPONENT_NAME devel)
-  set(CPACK_ARCHIVE_COMPONENT_INSTALL ON)
-  list(APPEND CPACK_COMPONENTS_ALL devel)
-  xpGetVersionString(CPACK_PACKAGE_VERSION) # override CPACK_PACKAGE_VERSION
-  xpGetCompilerPrefix(pfx VER_ONE)
-  set(CPACK_PACKAGE_VERSION "${CPACK_PACKAGE_VERSION}-${pfx}")
-  set(CPACK_COMPONENT_INCLUDE_TOPLEVEL_DIRECTORY ON)
-  unset(CPACK_PACKAGING_INSTALL_PREFIX)
-  set(CPACK_GENERATOR TXZ)
-  if(CMAKE_SYSTEM_PROCESSOR MATCHES "^(aarch64|arm64|ARM64)$")
-    set(CPACK_SYSTEM_NAME "${CMAKE_SYSTEM_NAME}-arm64") # override CPACK_SYSTEM_NAME
-  elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "^(x86_64|amd64|AMD64)$")
-    set(CPACK_SYSTEM_NAME "${CMAKE_SYSTEM_NAME}-amd64") # override CPACK_SYSTEM_NAME
+  cmake_parse_arguments(P "${opts}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+  if(DEFINED P_COMPONENT)
+    set(XP_COMPONENT COMPONENT ${P_COMPONENT})
+    set(CPACK_ARCHIVE_COMPONENT_INSTALL ON)
+    set(CPACK_COMPONENT_INCLUDE_TOPLEVEL_DIRECTORY ON)
+    list(APPEND CPACK_COMPONENTS_ALL ${P_COMPONENT})
   endif()
-  include(CPack) # CPACK_PACKAGE_FILE_NAME is ${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}-${CPACK_SYSTEM_NAME}
-  string(TOUPPER ${CMAKE_PROJECT_NAME} PRJ)
-  string(TOLOWER ${CMAKE_PROJECT_NAME} NAME)
-  set(VER ${CPACK_PACKAGE_VERSION})
+  if(NOT DEFINED P_REPO_NAME)
+    set(P_REPO_NAME ${CMAKE_PROJECT_NAME})
+  endif()
+  string(TOUPPER ${P_REPO_NAME} PRJ)
+  string(TOLOWER ${P_REPO_NAME} NAME)
+  xpGetVersionString(VER)
   if(DEFINED P_DEPS)
     list(JOIN P_DEPS " " deps) # list to string with spaces
     set(FIND_DEPS "xpFindPkg(PKGS ${deps}) # dependencies\n")
+  endif()
+  if(P_FIND_THREADS)
+    string(JOIN "\n" FIND_THREADS
+      "set(THREAD_PREFER_PTHREAD_FLAG ON)"
+      "find_package(Threads REQUIRED) # depends on Threads::Threads"
+      ""
+      )
   endif()
   if(DEFINED P_TARGETS_FILE)
     set(TARGETS_FILE "include(\${CMAKE_CURRENT_LIST_DIR}/${P_TARGETS_FILE}.cmake)\n")
   endif()
   if(DEFINED P_LIBRARIES)
+    if(DEFINED P_NAMESPACE)
+      list(TRANSFORM P_LIBRARIES PREPEND "${P_NAMESPACE}::")
+    endif()
     list(JOIN P_LIBRARIES " " libs) # list to string with spaces
     string(JOIN "\n" LIBS
       "set(${PRJ}_LIBRARIES ${libs})"
@@ -1027,7 +1034,10 @@ macro(xpPackageDevel)
   endif()
   if(DEFINED P_EXE)
     if(DEFINED P_EXE_PATH)
-      message(FATAL_ERROR "xpPackageDevel: can only define EXE or EXE_PATH, not both")
+      message(FATAL_ERROR "xpExternPackage: can only define EXE or EXE_PATH, not both")
+    endif()
+    if(DEFINED P_NAMESPACE)
+      string(PREPEND P_EXE "${P_NAMESPACE}::")
     endif()
     string(JOIN "\n" EXE
       "set(${PRJ}_EXE ${P_EXE})"
@@ -1045,8 +1055,9 @@ macro(xpPackageDevel)
   endif()
   set(xpuseFile ${CMAKE_CURRENT_BINARY_DIR}/xpuse-${NAME}-config.cmake)
   configure_file(${xpThisDir}/xpuse.cmake.in ${xpuseFile} @ONLY NEWLINE_STYLE LF)
+  # sysinfo.txt file
   set(xpinfoFile ${CMAKE_CURRENT_BINARY_DIR}/sysinfo.txt)
-  file(WRITE ${xpinfoFile} "${CPACK_PACKAGE_VERSION}\n")
+  file(WRITE ${xpinfoFile} "${VER}\n")
   execute_process(COMMAND uname -a
     OUTPUT_VARIABLE uname
     OUTPUT_STRIP_TRAILING_WHITESPACE
@@ -1068,8 +1079,37 @@ macro(xpPackageDevel)
   endif()
   xpGetCompilerPrefix(compilerPrefix)
   file(APPEND ${xpinfoFile} "COMPILER_PREFIX: ${compilerPrefix}\n")
-  install(FILES ${xpinfoFile} ${xpuseFile} DESTINATION ${XP_INSTALL_CMAKEDIR})
-endmacro()
+  # install sysinfo.txt and xpuse-${NAME}-config.cmake
+  if(NOT DEFINED CMAKE_INSTALL_DATADIR)
+    include(GNUInstallDirs)
+  endif()
+  if(NOT DEFINED XP_INSTALL_CMAKEDIR)
+    # NOTE: if your project is overriding XP_INSTALL_CMAKEDIR
+    # be aware that xpFindPkg() (really, ipGetPrefixPath()) expects
+    # to find the xpuse file in ${FETCHCONTENT_BASE_DIR}/${pkgdir}/share/cmake
+    set(XP_INSTALL_CMAKEDIR ${CMAKE_INSTALL_DATADIR}/cmake)
+    set(XP_INSTALL_CMAKEDIR ${XP_INSTALL_CMAKEDIR} PARENT_SCOPE)
+  endif()
+  install(FILES ${xpinfoFile} ${xpuseFile}
+    DESTINATION ${XP_INSTALL_CMAKEDIR} ${XP_COMPONENT}
+    )
+  # packaging
+  unset(CPACK_PACKAGING_INSTALL_PREFIX)
+  set(CPACK_GENERATOR TXZ)
+  set(CPACK_PACKAGE_NAME ${P_REPO_NAME})
+  xpGetCompilerPrefix(pfx VER_ONE)
+  set(CPACK_PACKAGE_VERSION "${VER}-${pfx}") # override CPACK_PACKAGE_VERSION
+  if(CMAKE_SYSTEM_PROCESSOR MATCHES "^(aarch64|arm64|ARM64)$")
+    set(CPACK_SYSTEM_NAME "${CMAKE_SYSTEM_NAME}-arm64") # override CPACK_SYSTEM_NAME
+  elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "^(x86_64|amd64|AMD64)$")
+    set(CPACK_SYSTEM_NAME "${CMAKE_SYSTEM_NAME}-amd64") # override CPACK_SYSTEM_NAME
+  endif()
+  if(NOT DEFINED P_COMPONENT)
+    set(CPACK_SYSTEM_NAME ${CPACK_SYSTEM_NAME}-devel)
+  endif()
+  # CPACK_PACKAGE_FILE_NAME is ${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}-${CPACK_SYSTEM_NAME}
+  include(CPack)
+endfunction()
 
 function(xpProjectInstall)
   set(options DISABLE_MD5_WARNING)
