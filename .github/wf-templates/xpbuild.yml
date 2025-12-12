@@ -17,17 +17,6 @@ jobs:
     uses: externpro/externpro/.github/workflows/build-linux.yml@main
     with:
       cmake-workflow-preset: Linux
-      runon: ubuntu-latest
-    secrets: inherit
-  linux-arm64:
-    permissions:
-      contents: read
-      pull-requests: write
-      packages: write
-    uses: externpro/externpro/.github/workflows/build-linux.yml@main
-    with:
-      cmake-workflow-preset: Linux
-      runon: ubuntu-24.04-arm
     secrets: inherit
   macos:
     uses: externpro/externpro/.github/workflows/build-macos.yml@main
