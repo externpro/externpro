@@ -23,8 +23,8 @@ on:
       buildpro-images:
         required: false
         type: string
-        description: 'JSON array of buildpro images to build (e.g. ["rocky8-gcc9","rocky9-gcc13","ubuntu"])'
-        default: '["rocky8-gcc9"]'
+        description: 'JSON array of buildpro images to build (e.g. ["rocky8-gcc9","rocky9-gcc13","rocky10-gcc15","ubuntu"])'
+        default: '["rocky8-gcc9","rocky9-gcc13","rocky10-gcc15"]'
 jobs:
   lc-repo-names:
     runs-on: ubuntu-latest
