@@ -9,7 +9,7 @@ on:
 jobs:
   # Upload build artifacts as release assets
   release-from-build:
-    uses: externpro/externpro/.github/workflows/release-from-build.yml@25.06
+    uses: externpro/externpro/.github/workflows/release-from-build.yml@25.06.1
     with:
       workflow_run_url: ${{ github.event.inputs.workflow_run_url }}
       artifact_pattern: "*.tar.xz"
