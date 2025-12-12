@@ -3,6 +3,7 @@ digraph GG {
   "ubuntu:24.04" [shape=diamond];
   "rockylinux/rockylinux:8" [shape=diamond];
   "rockylinux/rockylinux:9" [shape=diamond];
+  "rockylinux/rockylinux:10" [shape=diamond];
   "externpro dev" [shape=box];
   "PluginSdk" [shape=box];
   "plugins" [shape=box];
@@ -11,6 +12,7 @@ digraph GG {
   "VantageCI" [shape=box];
   "buildpro/rocky8-gcc9" -> "rockylinux/rockylinux:8";
   "buildpro/rocky9-gcc13" -> "rockylinux/rockylinux:9";
+  "buildpro/rocky10-gcc15" -> "rockylinux/rockylinux:10";
   "buildpro/rocky-mdv" -> "buildpro/rocky8-gcc9";
   "buildpro/rocky-pin" -> "buildpro/rocky8-gcc9";
   "buildpro/rocky-pdv" -> "buildpro/rocky8-gcc9";
@@ -18,6 +20,7 @@ digraph GG {
   "buildpro/ubuntu" -> "ubuntu:24.04";
   "externpro dev" -> "buildpro/rocky8-gcc9";
   "externpro dev" -> "buildpro/rocky9-gcc13";
+  "externpro dev" -> "buildpro/rocky10-gcc15";
   "PluginSdk" -> "buildpro/rocky-pin";
   "plugins" -> "buildpro/rocky-pin";
   "plugin dev" -> "buildpro/rocky-pdv";
