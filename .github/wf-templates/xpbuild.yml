@@ -1,4 +1,7 @@
 name: Build
+permissions:
+  contents: read
+  pull-requests: write
 on:
   push:
     branches: [ "dev" ]
@@ -7,12 +10,20 @@ on:
   workflow_dispatch:
 jobs:
   linux:
+    permissions:
+      contents: read
+      pull-requests: write
+      packages: write
     uses: externpro/externpro/.github/workflows/build-linux.yml@25.06.1
     with:
       cmake-workflow-preset: Linux
       runon: ubuntu-latest
     secrets: inherit
   linux-arm64:
+    permissions:
+      contents: read
+      pull-requests: write
+      packages: write
     uses: externpro/externpro/.github/workflows/build-linux.yml@25.06.1
     with:
       cmake-workflow-preset: Linux
