@@ -1,6 +1,6 @@
 digraph GG {
   node [fontsize=12];
-  "ubuntu:20.04" [shape=diamond];
+  "ubuntu:24.04" [shape=diamond];
   "rockylinux/rockylinux:8" [shape=diamond];
   "rockylinux/rockylinux:9" [shape=diamond];
   "externpro dev" [shape=box];
@@ -15,7 +15,7 @@ digraph GG {
   "buildpro/rocky-pin" -> "buildpro/rocky8-gcc9";
   "buildpro/rocky-pdv" -> "buildpro/rocky8-gcc9";
   "buildpro/rocky-ci" -> "buildpro/rocky-mdv";
-  "buildpro/ubuntu" -> "ubuntu:20.04";
+  "buildpro/ubuntu" -> "ubuntu:24.04";
   "externpro dev" -> "buildpro/rocky8-gcc9";
   "externpro dev" -> "buildpro/rocky9-gcc13";
   "PluginSdk" -> "buildpro/rocky-pin";
