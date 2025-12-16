@@ -33,7 +33,7 @@ jobs:
         name: Lowercase repository names
         id: names
         run: |
-          REPO_NAME=$(echo '${{ github.event.repository.name }}' | tr '[:upper:]' '[:lower:]' | tr -d '.')
+          REPO_NAME=$(echo '${{ github.event.repository.name }}' | tr '[:upper:]' '[:lower:]')
           OWN_REPO_NAME=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')
           echo "owner_repo=${OWN_REPO_NAME}" >> "$GITHUB_OUTPUT"
           echo "repo=${REPO_NAME}" >> "$GITHUB_OUTPUT"
@@ -69,6 +69,7 @@ jobs:
         name: Build and push docker image
         run: |
           REPO_NAME='${{ needs.lc-repo-names.outputs.repo }}'
+          REPO_NAME="${REPO_NAME//./}"
           OWN_REPO_NAME='${{ needs.lc-repo-names.outputs.owner_repo }}'
           LOCAL_IMAGE="${REPO_NAME}-bld:latest"
           REMOTE_IMAGE="ghcr.io/${OWN_REPO_NAME}/bldimg-${{ matrix.arch }}-${{ matrix.buildpro_image }}:latest"
