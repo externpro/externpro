@@ -39,16 +39,11 @@ jobs:
           echo "repo=${REPO_NAME}" >> "$GITHUB_OUTPUT"
   build-docker-image:
     needs: lc-repo-names
-    runs-on: ${{ matrix.runner }}
+    runs-on: ${{ matrix.arch == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
     strategy:
       matrix:
         arch: ${{ fromJson(inputs.arch-list) }}
         buildpro_image: ${{ fromJson(inputs.buildpro-images) }}
-        include:
-          - arch: amd64
-            runner: ubuntu-latest
-          - arch: arm64
-            runner: ubuntu-24.04-arm
     steps:
       -
         name: Checkout repo
@@ -85,16 +80,11 @@ jobs:
   build:
     needs: [lc-repo-names, build-docker-image]
     if: ${{ needs.build-docker-image.result == 'success' }}
-    runs-on: ${{ matrix.runner }}
+    runs-on: ${{ matrix.arch == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
     strategy:
       matrix:
         arch: ${{ fromJson(inputs.arch-list) }}
         buildpro_image: ${{ fromJson(inputs.buildpro-images) }}
-        include:
-          - arch: amd64
-            runner: ubuntu-latest
-          - arch: arm64
-            runner: ubuntu-24.04-arm
     env:
       CMAKE_PRESET: Linux
     container:
