@@ -140,7 +140,7 @@ jobs:
           done
           # Write formatted hashes to a SHA256SUMS file (release asset)
           sha256sums_file="./artifacts/SHA256SUMS"
-          printf '%s\n' "${formatted_hashes[@]}" > "$sha256sums_file"
+          printf '%s\n' "${formatted_hashes[@]}" | LC_ALL=C sort > "$sha256sums_file"
           echo "SHA256SUMS file created at: $sha256sums_file"
           echo "SHA256SUMS file contents:"
           cat "$sha256sums_file"
