@@ -127,17 +127,13 @@ jobs:
             # Extract platform from filename pattern: <name>-v#.#.#.#-g<hash>-<platform>.<ext>
             # or <name>-v#.#.#.#-<platform>.<ext>
             platform=""
-            # Platform detection based on filename patterns - check most specific patterns first
-            if [[ "$filename" =~ -[dD]arwin-[aA][rR][mM]64- ]]; then
-                platform="Darwin-arm64"
-            elif [[ "$filename" =~ -[dD]arwin- ]]; then
-                platform="Darwin"
-            elif [[ "$filename" =~ -[wW]in64- ]]; then
-                platform="win64"
-            elif [[ "$filename" =~ -[lL]inux-[aA][rR][mM]64- ]]; then
-                platform="Linux-arm64"
-            elif [[ "$filename" =~ -[lL]inux- ]]; then
-                platform="Linux"
+            # Platform detection based on filename pattern: <compiler-prefix>-<os>-<arch>
+            # Example: clang17-Darwin-arm64, gcc13-Linux-amd64, vc143-Windows-amd64
+            if [[ "$filename" =~ -((clang|gcc|vc)[0-9]+)-(Darwin|Linux|Windows)-(amd64|arm64)([-.]) ]]; then
+                compiler_prefix="${BASH_REMATCH[1]}"
+                os_name="${BASH_REMATCH[3]}"
+                arch_name="${BASH_REMATCH[4]}"
+                platform="${compiler_prefix}-${os_name}-${arch_name}"
             else
                 platform="unknown"
                 echo "WARNING: Could not detect platform for file: $filename"
