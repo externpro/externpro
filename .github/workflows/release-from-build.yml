@@ -28,9 +28,6 @@ on:
 
           ### Download
           - Download the appropriate `.tar.xz` file for your platform
-
-          ### Verification
-          SHA256 checksums are provided below for artifact verification.
     outputs:
       release_id:
         description: 'The ID of the release'
@@ -141,6 +138,14 @@ jobs:
             # Format: SHA256_platform hash
             formatted_hashes+=("SHA256_$platform $hash_value")
           done
+          # Write formatted hashes to a SHA256SUMS file (release asset)
+          sha256sums_file="./artifacts/SHA256SUMS"
+          printf '%s\n' "${formatted_hashes[@]}" > "$sha256sums_file"
+          echo "SHA256SUMS file created at: $sha256sums_file"
+          echo "SHA256SUMS file contents:"
+          cat "$sha256sums_file"
+          sha256sums_hash=$(sha256sum "$sha256sums_file" | cut -d' ' -f1)
+          echo "SHA256 (SHA256SUMS): $sha256sums_hash"
           # Set outputs - use environment file method for better reliability
           {
             echo "artifacts<<EOF"
@@ -149,9 +154,8 @@ jobs:
             echo "hashes<<EOF"
             printf '%s\n' "${hashes[@]}"
             echo "EOF"
-            echo "hash_summary<<EOF"
-            printf '%s\n' "${formatted_hashes[@]}"
-            echo "EOF"
+            echo "sha256sums_file=$sha256sums_file"
+            echo "sha256sums_hash=$sha256sums_hash"
           } >> $GITHUB_OUTPUT
       -
         name: Determine tag from artifacts
@@ -163,8 +167,10 @@ jobs:
           echo "${{ steps.find_artifacts.outputs.artifacts }}"
           echo "Hashes:"
           echo "${{ steps.find_artifacts.outputs.hashes }}"
-          echo "Hash summary:"
-          echo "${{ steps.find_artifacts.outputs.hash_summary }}"
+          echo "SHA256SUMS file:"
+          echo "${{ steps.find_artifacts.outputs.sha256sums_file }}"
+          echo "SHA256SUMS hash:"
+          echo "${{ steps.find_artifacts.outputs.sha256sums_hash }}"
           # Get the first artifact using the output directly
           first_artifact=$(echo "${{ steps.find_artifacts.outputs.artifacts }}" | head -1)
           echo "First artifact: $first_artifact"
@@ -251,8 +257,8 @@ jobs:
           ### Checksums
           ```
           EOF
-          # Add each hash on a new line
-          echo "${{ steps.find_artifacts.outputs.hash_summary }}" >> "$RELEASE_NOTES_FILE"
+          # Include SHA256 for the SHA256SUMS file (uploaded as an asset)
+          echo "SHA256SUMS ${{ steps.find_artifacts.outputs.sha256sums_hash }}" >> "$RELEASE_NOTES_FILE"
           # Close the code block
           echo '```' >> "$RELEASE_NOTES_FILE"
           # Set flags based on release type
@@ -321,6 +327,13 @@ jobs:
                 gh release upload "$tag" "$artifact" --clobber
               fi
             done <<< "${{ steps.find_artifacts.outputs.artifacts }}"
+          fi
+          sha256sums_file="${{ steps.find_artifacts.outputs.sha256sums_file }}"
+          if [ -n "$sha256sums_file" ] && [ -f "$sha256sums_file" ]; then
+            echo "Uploading checksums file: $sha256sums_file"
+            gh release upload "$tag" "$sha256sums_file" --clobber
+          else
+            echo "WARNING: SHA256SUMS file not found at: $sha256sums_file"
           fi
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
