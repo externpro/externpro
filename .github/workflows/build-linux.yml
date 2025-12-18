@@ -149,6 +149,7 @@ jobs:
     needs: [lc-repo-names, build-docker-image, build]
     if: ${{ needs.build.result == 'success' }}
     runs-on: ubuntu-latest
+    continue-on-error: true
     strategy:
       matrix:
         arch: ${{ fromJson(inputs.arch-list) }}
