@@ -101,46 +101,9 @@ jobs:
             echo "::error::No artifacts found matching pattern: ${{ inputs.artifact_pattern }}"
             exit 1
           fi
-          # Create a checksums file in the artifacts directory
-          checksums_file="./artifacts/checksums.txt"
-          printf '%s\n' "${hashes[@]}" > "$checksums_file"
-          echo "Checksums file created at: $checksums_file"
-          echo "Checksums file contents:"
-          cat "$checksums_file"
-          # Output artifacts, hashes, and checksums file path for next steps
-          echo "artifacts=${artifacts[*]}" >> $GITHUB_OUTPUT
-          echo "hashes=${hashes[*]}" >> $GITHUB_OUTPUT
-          echo "checksums_file=$checksums_file" >> $GITHUB_OUTPUT
-          # Convert arrays to JSON for output
-          printf -v artifacts_json '%s\n' "${artifacts[@]}" | jq -R . | jq -s .
-          printf -v hashes_json '%s\n' "${hashes[@]}" | jq -R . | jq -s .
-
-          # Process hashes to extract platform and format for summary
-          formatted_hashes=()
-          for hash_line in "${hashes[@]}"; do
-            # Extract hash and filename
-            hash_value="${hash_line%%  *}"
-            filename="${hash_line#*  }"
-            # Extract platform from filename pattern: <name>-v#.#.#.#-g<hash>-<platform>.<ext>
-            # or <name>-v#.#.#.#-<platform>.<ext>
-            platform=""
-            # Platform detection based on filename pattern: <compiler-prefix>-<os>-<arch>
-            # Example: clang17-Darwin-arm64, gcc13-Linux-amd64, vc143-Windows-amd64
-            if [[ "$filename" =~ -((clang|gcc|vc)[0-9]+)-(Darwin|Linux|Windows)-(amd64|arm64)([-.]) ]]; then
-                compiler_prefix="${BASH_REMATCH[1]}"
-                os_name="${BASH_REMATCH[3]}"
-                arch_name="${BASH_REMATCH[4]}"
-                platform="${compiler_prefix}-${os_name}-${arch_name}"
-            else
-                platform="unknown"
-                echo "WARNING: Could not detect platform for file: $filename"
-            fi
-            # Format: SHA256_platform hash
-            formatted_hashes+=("SHA256_$platform $hash_value")
-          done
-          # Write formatted hashes to a SHA256SUMS file (release asset)
+          # Create SHA256SUMS file in standard format: "<hash>  <filename>"
           sha256sums_file="./artifacts/SHA256SUMS"
-          printf '%s\n' "${formatted_hashes[@]}" | LC_ALL=C sort > "$sha256sums_file"
+          printf '%s\n' "${hashes[@]}" | LC_ALL=C sort -k2,2 > "$sha256sums_file"
           echo "SHA256SUMS file created at: $sha256sums_file"
           echo "SHA256SUMS file contents:"
           cat "$sha256sums_file"
@@ -150,9 +113,6 @@ jobs:
           {
             echo "artifacts<<EOF"
             printf '%s\n' "${artifacts[@]}"
-            echo "EOF"
-            echo "hashes<<EOF"
-            printf '%s\n' "${hashes[@]}"
             echo "EOF"
             echo "sha256sums_file=$sha256sums_file"
             echo "sha256sums_hash=$sha256sums_hash"
@@ -165,8 +125,6 @@ jobs:
           echo "=== Debug: find_artifacts outputs ==="
           echo "Artifacts:"
           echo "${{ steps.find_artifacts.outputs.artifacts }}"
-          echo "Hashes:"
-          echo "${{ steps.find_artifacts.outputs.hashes }}"
           echo "SHA256SUMS file:"
           echo "${{ steps.find_artifacts.outputs.sha256sums_file }}"
           echo "SHA256SUMS hash:"
@@ -205,7 +163,7 @@ jobs:
         uses: actions/attest-build-provenance@v2
         with:
           subject-name: ${{ github.repository }}@${{ steps.determine_tag.outputs.tag }}
-          subject-checksums: ${{ steps.find_artifacts.outputs.checksums_file }}
+          subject-checksums: ${{ steps.find_artifacts.outputs.sha256sums_file }}
           push-to-registry: false
       -
         name: Check if tag exists
@@ -310,24 +268,12 @@ jobs:
         run: |
           tag="${{ steps.determine_tag.outputs.tag }}"
           echo "Uploading artifacts to release: $tag"
-          # Read artifacts from the output, handling both JSON and plain text formats
-          if [[ "${{ steps.find_artifacts.outputs.artifacts }}" == *"["* ]]; then
-            # JSON array format
-            while IFS= read -r artifact; do
-              if [ -n "$artifact" ] && [ -f "$artifact" ]; then
-                echo "Uploading artifact: $artifact"
-                gh release upload "$tag" "$artifact" --clobber
-              fi
-            done < <(echo '${{ steps.find_artifacts.outputs.artifacts }}' | jq -r '.[]')
-          else
-            # Plain text format (one per line)
-            while IFS= read -r artifact; do
-              if [ -n "$artifact" ] && [ -f "$artifact" ]; then
-                echo "Uploading artifact: $artifact"
-                gh release upload "$tag" "$artifact" --clobber
-              fi
-            done <<< "${{ steps.find_artifacts.outputs.artifacts }}"
-          fi
+          while IFS= read -r artifact; do
+            if [ -n "$artifact" ] && [ -f "$artifact" ]; then
+              echo "Uploading artifact: $artifact"
+              gh release upload "$tag" "$artifact" --clobber
+            fi
+          done <<< "${{ steps.find_artifacts.outputs.artifacts }}"
           sha256sums_file="${{ steps.find_artifacts.outputs.sha256sums_file }}"
           if [ -n "$sha256sums_file" ] && [ -f "$sha256sums_file" ]; then
             echo "Uploading checksums file: $sha256sums_file"
