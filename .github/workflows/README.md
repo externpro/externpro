@@ -11,12 +11,24 @@ Builds the project in a Docker container on Linux systems.
 **Inputs:**
 - `artifact-pattern` (optional): Pattern to search for artifact files (default: `[repository-name]-*-xpro.tar.xz`)
 - `cmake-workflow-preset` (optional): CMake workflow preset (default: `Linux`)
-- `runon` (optional): Runner to use (default: `ubuntu-latest`)
+- `arch-list` (optional): JSON array of target architectures as a string (default: `["amd64","arm64"]`)
+- `buildpro-images` (optional): JSON array of buildpro images as a string (default: `["rocky8-gcc9","rocky9-gcc13","rocky10-gcc15"]`)
+
+**Caller permissions:**
+- `contents: read`
+- `pull-requests: write`
+- `packages: write` (required to push build container images to GHCR)
+
+These can be set at the top of the caller workflow via `permissions:` and/or per job (as shown below).
 
 **Usage:**
 ```yaml
 jobs:
   linux:
+    permissions:
+      contents: read
+      pull-requests: write
+      packages: write
     uses: externpro/externpro/.github/workflows/build-linux.yml@25.06
     with:
       cmake-workflow-preset: Linux # Release and Debug
@@ -31,10 +43,19 @@ Builds the project on macOS (aka Darwin) systems.
 - `artifact-pattern` (optional): Pattern to search for artifact files (default: `[repository-name]-*-xpro.tar.xz`)
 - `cmake-workflow-preset` (optional): CMake workflow preset (default: `Darwin`)
 
+**Caller permissions:**
+- `contents: read`
+- `pull-requests: write`
+
+These can be set at the top of the caller workflow via `permissions:` and/or per job (as shown below).
+
 **Usage:**
 ```yaml
 jobs:
   macos:
+    permissions:
+      contents: read
+      pull-requests: write
     uses: externpro/externpro/.github/workflows/build-macos.yml@25.06
     with:
       cmake-workflow-preset: Darwin # Release and Debug
@@ -49,10 +70,19 @@ Builds the project on Windows systems.
 - `artifact-pattern` (optional): Pattern to search for artifact files (default: `[repository-name]-*-xpro.tar.xz`)
 - `cmake-workflow-preset` (optional): CMake workflow preset (default: `Windows`)
 
+**Caller permissions:**
+- `contents: read`
+- `pull-requests: write`
+
+These can be set at the top of the caller workflow via `permissions:` and/or per job (as shown below).
+
 **Usage:**
 ```yaml
 jobs:
   windows:
+    permissions:
+      contents: read
+      pull-requests: write
     uses: externpro/externpro/.github/workflows/build-windows.yml@25.06
     with:
       cmake-workflow-preset: Windows # Release and Debug
@@ -155,20 +185,28 @@ The workflow will automatically:
    - Determine if it should be a prerelease based on the tag format
    - Always create releases as drafts
 
-### Customizing CMake Workflow Presets and Linux Runner
+### Customizing CMake Workflow Presets and Linux Build Matrix
 
-You can customize the CMake workflow presets and Linux runner used for builds:
+You can customize the CMake workflow preset, and the Linux build matrix (architectures and build container images) used for builds:
 
 ```yaml
 jobs:
   linux:
+    permissions:
+      contents: read
+      pull-requests: write
+      packages: write
     uses: externpro/externpro/.github/workflows/build-linux.yml@25.06
     with:
       cmake-workflow-preset: LinuxRelease  # Use release preset
-      runon: ubuntu-24.04-arm # Use ARM64 runner
+      arch-list: '["arm64"]'
+      buildpro-images: '["rocky9-gcc13"]'
     secrets: inherit
 
   windows:
+    permissions:
+      contents: read
+      pull-requests: write
     uses: externpro/externpro/.github/workflows/build-windows.yml@25.06
     with:
       cmake-workflow-preset: WindowsRelease  # Use release preset
@@ -181,13 +219,19 @@ To upload different types of artifacts:
 
 build.yml
 ```yaml
+permissions:
+  contents: read
+  pull-requests: write
 jobs:
   linux:
+    permissions:
+      contents: read
+      pull-requests: write
+      packages: write
     uses: externpro/externpro/.github/workflows/build-linux.yml@25.06
     with:
       artifact-pattern: "${{ github.event.repository.name }}-*.zip"
       cmake-workflow-preset: LinuxRelease
-      runon: ubuntu-latest
     secrets: inherit
 ```
 
