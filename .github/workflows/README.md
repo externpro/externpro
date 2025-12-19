@@ -9,7 +9,7 @@ This directory contains reusable GitHub Actions for building and releasing the p
 Builds the project in a Docker container on Linux systems.
 
 **Inputs:**
-- `artifact-pattern` (optional): Pattern to search for artifact files (default: `[repository-name]-*-devel.tar.xz`)
+- `artifact-pattern` (optional): Pattern to search for artifact files (default: `[repository-name]-*-xpro.tar.xz`)
 - `cmake-workflow-preset` (optional): CMake workflow preset (default: `Linux`)
 - `runon` (optional): Runner to use (default: `ubuntu-latest`)
 
@@ -28,7 +28,7 @@ jobs:
 Builds the project on macOS (aka Darwin) systems.
 
 **Inputs:**
-- `artifact-pattern` (optional): Pattern to search for artifact files (default: `[repository-name]-*-devel.tar.xz`)
+- `artifact-pattern` (optional): Pattern to search for artifact files (default: `[repository-name]-*-xpro.tar.xz`)
 - `cmake-workflow-preset` (optional): CMake workflow preset (default: `Darwin`)
 
 **Usage:**
@@ -46,7 +46,7 @@ jobs:
 Builds the project on Windows systems.
 
 **Inputs:**
-- `artifact-pattern` (optional): Pattern to search for artifact files (default: `[repository-name]-*-devel.tar.xz`)
+- `artifact-pattern` (optional): Pattern to search for artifact files (default: `[repository-name]-*-xpro.tar.xz`)
 - `cmake-workflow-preset` (optional): CMake workflow preset (default: `Windows`)
 
 **Usage:**

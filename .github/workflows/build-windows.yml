@@ -6,7 +6,7 @@ on:
         required: false
         type: string
         description: 'Pattern to search for artifact file'
-        default: '${{ github.event.repository.name }}-*-devel.tar.xz'
+        default: '${{ github.event.repository.name }}-*-xpro.tar.xz'
       cmake-workflow-preset:
         required: false
         type: string
