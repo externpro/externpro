@@ -157,12 +157,12 @@ set(xp_flatbuffers REPO github.com/externpro/flatbuffers TAG v25.2.10.1
   SHA256_Linux 952061515c851ce9c89500a7311a72d7d7494627dc52f588a66df76d386adf5e
   SHA256_win64 650f5866d26ad36f06166b18f371dd46c76ee2c68dd7f094fcefb77d347d60a8
   )
-set(xp_fmt REPO github.com/externpro/fmt TAG v11.2.0.5
-  XPBLD "patch" BASE 11.2.0 BRANCH dev
+set(xp_fmt REPO github.com/externpro/fmt TAG v11.2.0.6
+  XPBLD "patch" BASE 11.2.0
   WEB "https://fmt.dev" UPSTREAM "github.com/fmtlib/fmt"
   DESC "fmtlib: a modern formatting library"
   LICENSE "[MIT](https://github.com/externpro/fmt/blob/master/LICENSE 'MIT License')"
-  SHA256SUMS 03bccc0ba1ce646f40783f82f5e1cc824746adebebfa2b34801eaf7df36ca67b
+  SHA256SUMS b786afa1a1e96e1441680bcd80d05ef3307433a93a86bc71a8668c9f221f933f
   )
 set(xp_geos REPO github.com/externpro/geos TAG v3.13.0.4
   XPBLD "patch" BASE 3.13.0 BRANCH dev
