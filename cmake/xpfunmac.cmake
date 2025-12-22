@@ -1042,7 +1042,7 @@ function(xpExternPackage)
   # NOTE: if XP_INSTALL_CMAKEDIR is not defined, it will be set here
   #   and available in PARENT_SCOPE
   set(opts FIND_THREADS)
-  set(oneValueArgs COMPONENT EXE EXE_PATH NAMESPACE REPO_NAME TARGETS_FILE)
+  set(oneValueArgs ALIAS_NAMESPACE COMPONENT EXE EXE_PATH NAMESPACE REPO_NAME TARGETS_FILE)
   set(multiValueArgs DEPS LIBRARIES)
   cmake_parse_arguments(P "${opts}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
   if(DEFINED P_COMPONENT)
@@ -1072,6 +1072,17 @@ function(xpExternPackage)
     set(TARGETS_FILE "include(\${CMAKE_CURRENT_LIST_DIR}/${P_TARGETS_FILE}.cmake)\n")
   endif()
   if(DEFINED P_LIBRARIES)
+    if(DEFINED P_ALIAS_NAMESPACE AND DEFINED P_NAMESPACE)
+      foreach(lib ${P_LIBRARIES})
+        string(JOIN "\n" alias
+          "if(NOT TARGET ${P_ALIAS_NAMESPACE}::${lib})"
+          "  add_library(${P_ALIAS_NAMESPACE}::${lib} ALIAS ${P_NAMESPACE}::${lib})"
+          "endif()"
+          ""
+          )
+        set(ALIASES ${ALIASES}${alias})
+      endforeach()
+    endif()
     if(DEFINED P_NAMESPACE)
       list(TRANSFORM P_LIBRARIES PREPEND "${P_NAMESPACE}::")
     endif()
@@ -1085,6 +1096,15 @@ function(xpExternPackage)
   if(DEFINED P_EXE)
     if(DEFINED P_EXE_PATH)
       message(FATAL_ERROR "xpExternPackage: can only define EXE or EXE_PATH, not both")
+    endif()
+    if(DEFINED P_ALIAS_NAMESPACE AND DEFINED P_NAMESPACE)
+      string(JOIN "\n" alias
+        "if(NOT TARGET ${P_ALIAS_NAMESPACE}::${P_EXE})"
+        "  add_executable(${P_ALIAS_NAMESPACE}::${P_EXE} ALIAS ${P_NAMESPACE}::${P_EXE})"
+        "endif()"
+        ""
+        )
+      set(ALIASES ${ALIASES}${alias})
     endif()
     if(DEFINED P_NAMESPACE)
       string(PREPEND P_EXE "${P_NAMESPACE}::")
