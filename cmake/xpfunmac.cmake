@@ -1042,6 +1042,29 @@ function(xpGetVersionString verString)
   set(${verString} ${gitDescribe} PARENT_SCOPE)
 endfunction()
 
+function(ipManifestDepsFromVars _out deps)
+  foreach(dep ${deps})
+    string(TOLOWER "${dep}" dep_lc)
+    if(NOT DEFINED xp_${dep_lc})
+      message(FATAL_ERROR "ipManifestDepsFromVars: dependency variable 'xp_${dep_lc}' is not defined")
+    endif()
+    set(block "set(xp_${dep_lc}\n")
+    foreach(item IN LISTS xp_${dep_lc})
+      set(_item "${item}")
+      if(_item MATCHES "[\\t\\r\\n \"\\\\()#]" OR _item STREQUAL "")
+        string(REPLACE "\\" "\\\\" _esc "${_item}")
+        string(REPLACE "\"" "\\\"" _esc "${_esc}")
+        string(APPEND block "  \"${_esc}\"\n")
+      else()
+        string(APPEND block "  ${_item}\n")
+      endif()
+    endforeach()
+    string(APPEND block ")\n")
+    set(out "${out}${block}")
+  endforeach()
+  set(${_out} "${out}" PARENT_SCOPE)
+endfunction()
+
 function(xpExternPackage)
   # NOTE: if repository name doesn't match CMAKE_PROJECT_NAME (case sensitive),
   #   use REPO_NAME parameter to specify the repository name
@@ -1131,6 +1154,17 @@ function(xpExternPackage)
   endif()
   set(xpuseFile ${CMAKE_CURRENT_BINARY_DIR}/xpuse-${NAME}-config.cmake)
   configure_file(${xpThisDir}/xpuse.cmake.in ${xpuseFile} @ONLY NEWLINE_STYLE LF)
+  set(xpmanifestFile ${CMAKE_CURRENT_BINARY_DIR}/${P_REPO_NAME}-${VER}.manifest.cmake)
+  if(DEFINED P_DEPS)
+    ipManifestDepsFromVars(MANIFEST_DEPS "${P_DEPS}")
+  endif()
+  file(WRITE ${xpmanifestFile}
+    "set(XP_MANIFEST_VERSION 1)\n"
+    "set(XP_MANIFEST_REPO \\\"${P_REPO_NAME}\\\")\n"
+    "set(XP_MANIFEST_TAG \\\"${VER}\\\")\n"
+    "set(XP_MANIFEST_ARTIFACTS)\n"
+    "${MANIFEST_DEPS}"
+    )
   # sysinfo.txt file
   set(xpinfoFile ${CMAKE_CURRENT_BINARY_DIR}/sysinfo.txt)
   file(WRITE ${xpinfoFile} "${VER}\n")
@@ -1166,7 +1200,7 @@ function(xpExternPackage)
     set(XP_INSTALL_CMAKEDIR ${CMAKE_INSTALL_DATADIR}/cmake)
     set(XP_INSTALL_CMAKEDIR ${XP_INSTALL_CMAKEDIR} PARENT_SCOPE)
   endif()
-  install(FILES ${xpinfoFile} ${xpuseFile}
+  install(FILES ${xpinfoFile} ${xpuseFile} ${xpmanifestFile}
     DESTINATION ${XP_INSTALL_CMAKEDIR} ${XP_COMPONENT}
     )
   # packaging
