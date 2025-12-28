@@ -155,7 +155,7 @@ jobs:
         if: ${{ inputs.cmake-workflow-preset != 'LinuxReleaseNoInstall' }}
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ steps.find_manifest.outputs.filename }}-${{ runner.arch }}-${{ matrix.buildpro_image }}
+          name: ${{ steps.find_manifest.outputs.filename }}-${{ env.CMAKE_PRESET }}-${{ runner.arch }}-${{ matrix.buildpro_image }}
           path: ${{ steps.find_manifest.outputs.filepath }}
       -
         name: Check for dirty repo

@@ -89,7 +89,7 @@ jobs:
         if: ${{ inputs.cmake-workflow-preset != 'WindowsReleaseNoInstall' }}
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ steps.find_manifest.outputs.filename }}-${{ runner.arch }}
+          name: ${{ steps.find_manifest.outputs.filename }}-${{ env.CMAKE_PRESET }}-${{ runner.arch }}
           path: ${{ steps.convert_paths.outputs.manifest_windows_path }}
       -
         name: Check for dirty repo

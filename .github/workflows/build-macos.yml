@@ -79,7 +79,7 @@ jobs:
         if: ${{ inputs.cmake-workflow-preset != 'DarwinReleaseNoInstall' }}
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ steps.find_manifest.outputs.filename }}-${{ runner.arch }}
+          name: ${{ steps.find_manifest.outputs.filename }}-${{ env.CMAKE_PRESET }}-${{ runner.arch }}
           path: ${{ steps.find_manifest.outputs.filepath }}
       -
         name: Check for dirty repo
