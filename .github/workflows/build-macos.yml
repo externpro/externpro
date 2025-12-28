@@ -60,6 +60,28 @@ jobs:
           name: ${{ steps.find_package.outputs.filename }}
           path: ${{ steps.find_package.outputs.filepath }}
       -
+        name: Find manifest
+        id: find_manifest
+        if: ${{ inputs.cmake-workflow-preset != 'DarwinReleaseNoInstall' }}
+        shell: bash
+        run: |
+          file=$(pwd)/$(ls _bld-${{ env.CMAKE_PRESET }}/${{ github.event.repository.name }}-*.manifest.cmake | head -1)
+          if [[ ! -f "$file" ]]; then
+            echo "::error::Manifest not found!" >&2
+            ls -la _bld-${{ env.CMAKE_PRESET }} || true
+            exit 1
+          fi
+          echo "filepath=$file" >> $GITHUB_OUTPUT
+          echo "filename=$(basename $file)" >> $GITHUB_OUTPUT
+        working-directory: ${{ github.workspace }}
+      -
+        name: Upload manifest artifact
+        if: ${{ inputs.cmake-workflow-preset != 'DarwinReleaseNoInstall' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.find_manifest.outputs.filename }}
+          path: ${{ steps.find_manifest.outputs.filepath }}
+      -
         name: Check for dirty repo
         shell: bash
         run: |
