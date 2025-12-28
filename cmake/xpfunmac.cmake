@@ -1190,8 +1190,8 @@ function(xpExternPackage)
   endif()
   file(WRITE ${xpmanifestFile}
     "set(XP_MANIFEST_VERSION 1)\n"
-    "set(XP_MANIFEST_REPO \\\"${P_REPO_NAME}\\\")\n"
-    "set(XP_MANIFEST_TAG \\\"${VER}\\\")\n"
+    "set(XP_MANIFEST_REPO \"${P_REPO_NAME}\")\n"
+    "set(XP_MANIFEST_TAG \"${VER}\")\n"
     "set(XP_MANIFEST_ARTIFACTS)\n"
     "${MANIFEST_DEPS}"
     )
