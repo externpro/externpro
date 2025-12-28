@@ -105,11 +105,23 @@ jobs:
           sha256sums_file="./artifacts/SHA256SUMS"
           printf '%s\n' "${hashes[@]}" | LC_ALL=C sort -k2,2 > "${sha256sums_file}"
           sha256sums_hash=$(sha256sum "${sha256sums_file}" | cut -d' ' -f1)
-          manifest_file=$(find ./artifacts -name "*.manifest.cmake" -type f | head -1)
-          if [ -z "${manifest_file}" ] || [ ! -f "${manifest_file}" ]; then
+          mapfile -t manifest_files < <(find ./artifacts -name "*.manifest.cmake" -type f | sort)
+          if [ ${#manifest_files[@]} -eq 0 ]; then
             echo "::error::No manifest file found in downloaded artifacts (expected: *.manifest.cmake)"
             find ./artifacts -type f | sort
             exit 1
+          fi
+          manifest_file="${manifest_files[0]}"
+          if [ ${#manifest_files[@]} -gt 1 ]; then
+            echo "Found ${#manifest_files[@]} manifest files; verifying they are identical"
+            ref_hash=$(sha256sum "${manifest_file}" | cut -d' ' -f1)
+            for f in "${manifest_files[@]}"; do
+              h=$(sha256sum "$f" | cut -d' ' -f1)
+              if [ "$h" != "$ref_hash" ]; then
+                echo "::error::Manifest files differ: '$manifest_file' ($ref_hash) vs '$f' ($h)" >&2
+                exit 1
+              fi
+            done
           fi
           version_tag=$(grep -E '^set\(XP_MANIFEST_TAG ' "${manifest_file}" | head -1 | sed -E 's/^set\(XP_MANIFEST_TAG "?([^\)"]+)"?\).*/\1/')
           if [ -z "${version_tag}" ]; then
