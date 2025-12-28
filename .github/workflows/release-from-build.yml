@@ -48,8 +48,8 @@ jobs:
     outputs:
       release_id: ${{ steps.create_release.outputs.release_id }}
       release_url: ${{ steps.create_release.outputs.release_url }}
-      release_tag: ${{ steps.determine_tag.outputs.tag }}
-      is_prerelease: ${{ steps.determine_tag.outputs.is_prerelease }}
+      release_tag: ${{ steps.find_artifacts.outputs.tag }}
+      is_prerelease: ${{ steps.find_artifacts.outputs.is_prerelease }}
     steps:
       -
         name: Checkout repository
@@ -101,14 +101,36 @@ jobs:
             echo "::error::No artifacts found matching pattern: ${{ inputs.artifact_pattern }}"
             exit 1
           fi
-          # Create SHA256SUMS file in standard format: "<hash>  <filename>"
+          # Create SHA256SUMS file (kept for attestations, but not uploaded)
           sha256sums_file="./artifacts/SHA256SUMS"
-          printf '%s\n' "${hashes[@]}" | LC_ALL=C sort -k2,2 > "$sha256sums_file"
-          echo "SHA256SUMS file created at: $sha256sums_file"
-          echo "SHA256SUMS file contents:"
-          cat "$sha256sums_file"
-          sha256sums_hash=$(sha256sum "$sha256sums_file" | cut -d' ' -f1)
-          echo "SHA256 (SHA256SUMS): $sha256sums_hash"
+          printf '%s\n' "${hashes[@]}" | LC_ALL=C sort -k2,2 > "${sha256sums_file}"
+          sha256sums_hash=$(sha256sum "${sha256sums_file}" | cut -d' ' -f1)
+          manifest_file=$(find ./artifacts -name "*.manifest.cmake" -type f | head -1)
+          if [ -z "${manifest_file}" ] || [ ! -f "${manifest_file}" ]; then
+            echo "::error::No manifest file found in downloaded artifacts (expected: *.manifest.cmake)"
+            find ./artifacts -type f | sort
+            exit 1
+          fi
+          version_tag=$(grep -E '^set\(XP_MANIFEST_TAG ' "${manifest_file}" | head -1 | sed -E 's/^set\(XP_MANIFEST_TAG "?([^\)"]+)"?\).*/\1/')
+          if [ -z "${version_tag}" ]; then
+            echo "::error::Could not read XP_MANIFEST_TAG from manifest: ${manifest_file}"
+            exit 1
+          fi
+          echo "Manifest: ${manifest_file}"
+          echo "Extracted version tag: ${version_tag}"
+          if [[ "${version_tag}" =~ -[0-9]+-g[a-f0-9]+$ ]]; then
+            is_prerelease="true"
+          else
+            is_prerelease="false"
+          fi
+          for entry in "${hashes[@]}"; do
+            hash="${entry%%  *}"
+            fname="${entry#*  }"
+            norm=$(printf '%s' "${fname}" | sed -E 's/[^A-Za-z0-9]/_/g')
+            printf 'list(APPEND XP_MANIFEST_ARTIFACTS "%s")\n' "${fname}" >> "${manifest_file}"
+            printf 'set(XP_ARTIFACT_SHA256__%s "%s")\n' "${norm}" "${hash}" >> "${manifest_file}"
+          done
+          manifest_hash=$(sha256sum "${manifest_file}" | cut -d' ' -f1)
           # Set outputs - use environment file method for better reliability
           {
             echo "artifacts<<EOF"
@@ -116,60 +138,22 @@ jobs:
             echo "EOF"
             echo "sha256sums_file=$sha256sums_file"
             echo "sha256sums_hash=$sha256sums_hash"
+            echo "tag=$version_tag"
+            echo "is_prerelease=$is_prerelease"
+            echo "manifest_file=$manifest_file"
+            echo "manifest_hash=$manifest_hash"
           } >> $GITHUB_OUTPUT
-      -
-        name: Determine tag from artifacts
-        id: determine_tag
-        run: |
-          # Debug: Show all outputs from previous step
-          echo "=== Debug: find_artifacts outputs ==="
-          echo "Artifacts:"
-          echo "${{ steps.find_artifacts.outputs.artifacts }}"
-          echo "SHA256SUMS file:"
-          echo "${{ steps.find_artifacts.outputs.sha256sums_file }}"
-          echo "SHA256SUMS hash:"
-          echo "${{ steps.find_artifacts.outputs.sha256sums_hash }}"
-          # Get the first artifact using the output directly
-          first_artifact=$(echo "${{ steps.find_artifacts.outputs.artifacts }}" | head -1)
-          echo "First artifact: $first_artifact"
-          if [ -n "$first_artifact" ] && [ -f "$first_artifact" ]; then
-            filename=$(basename "$first_artifact")
-            echo "Determining tag from filename: $filename"
-            # Extract version pattern from filename (matches patterns like v22.16.0.1-19-gead5928)
-            if [[ "$filename" =~ ([vV][0-9]+\.[0-9]+(\.[0-9]+)?(\.[0-9]+)?(-[0-9]+-g[a-f0-9]+)?) ]]; then
-              version_tag="${BASH_REMATCH[1]}"
-              echo "Extracted version tag: $version_tag"
-              # Determine if this is a prerelease (has -#-g<hash> suffix)
-              if [[ "$version_tag" =~ -[0-9]+-g[a-f0-9]+$ ]]; then
-                echo "is_prerelease=true" >> $GITHUB_OUTPUT
-                echo "This is a prerelease version"
-              else
-                echo "is_prerelease=false" >> $GITHUB_OUTPUT
-                echo "This is a release version"
-              fi
-              echo "tag=$version_tag" >> $GITHUB_OUTPUT
-            else
-              echo "::error::Could not determine version tag from filename: $filename"
-              echo "Expected pattern: *-v#.#[.#[.#]][-#-g<hash>].tar.xz"
-              exit 1
-            fi
-          else
-            echo "::error::No valid artifacts found"
-            echo "Available files in workspace:"
-            find . -type f | sort
-            exit 1
-          fi
       - name: Attest artifacts
         uses: actions/attest-build-provenance@v2
         with:
-          subject-name: ${{ github.repository }}@${{ steps.determine_tag.outputs.tag }}
+          subject-name: ${{ github.repository }}@${{ steps.find_artifacts.outputs.tag }}
           subject-checksums: ${{ steps.find_artifacts.outputs.sha256sums_file }}
           push-to-registry: false
       -
         name: Check if tag exists
         id: check_tag
         run: |
-          tag="${{ steps.determine_tag.outputs.tag }}"
+          tag="${{ steps.find_artifacts.outputs.tag }}"
           echo "Checking if tag exists: $tag"
           if gh release view "$tag" &>/dev/null; then
             echo "::error::Release for tag $tag already exists. This workflow is configured to fail if the release already exists."
@@ -185,8 +169,8 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          tag="${{ steps.determine_tag.outputs.tag }}"
-          is_prerelease="${{ steps.determine_tag.outputs.is_prerelease }}"
+          tag="${{ steps.find_artifacts.outputs.tag }}"
+          is_prerelease="${{ steps.find_artifacts.outputs.is_prerelease }}"
           release_name="$tag"
           # Create a temporary file for the release notes
           RELEASE_NOTES_FILE=$(mktemp)
@@ -212,11 +196,10 @@ jobs:
           sed -i "s|{signer_repo}|externpro/externpro|g" "$RELEASE_NOTES_FILE"
           # Append checksums section to release notes file
           cat << 'EOF' >> "$RELEASE_NOTES_FILE"
-          ### Checksums
+          ### Manifest
           ```
           EOF
-          # Include SHA256 for the SHA256SUMS file (uploaded as an asset)
-          echo "SHA256SUMS ${{ steps.find_artifacts.outputs.sha256sums_hash }}" >> "$RELEASE_NOTES_FILE"
+          echo "${{ steps.find_artifacts.outputs.manifest_file }} ${{ steps.find_artifacts.outputs.manifest_hash }}" >> "$RELEASE_NOTES_FILE"
           # Close the code block
           echo '```' >> "$RELEASE_NOTES_FILE"
           # Set flags based on release type
@@ -266,7 +249,7 @@ jobs:
       -
         name: Upload artifacts to release
         run: |
-          tag="${{ steps.determine_tag.outputs.tag }}"
+          tag="${{ steps.find_artifacts.outputs.tag }}"
           echo "Uploading artifacts to release: $tag"
           while IFS= read -r artifact; do
             if [ -n "$artifact" ] && [ -f "$artifact" ]; then
@@ -274,19 +257,19 @@ jobs:
               gh release upload "$tag" "$artifact" --clobber
             fi
           done <<< "${{ steps.find_artifacts.outputs.artifacts }}"
-          sha256sums_file="${{ steps.find_artifacts.outputs.sha256sums_file }}"
-          if [ -n "$sha256sums_file" ] && [ -f "$sha256sums_file" ]; then
-            echo "Uploading checksums file: $sha256sums_file"
-            gh release upload "$tag" "$sha256sums_file" --clobber
+          manifest_file="${{ steps.find_artifacts.outputs.manifest_file }}"
+          if [ -n "$manifest_file" ] && [ -f "$manifest_file" ]; then
+            echo "Uploading manifest file: $manifest_file"
+            gh release upload "$tag" "$manifest_file" --clobber
           else
-            echo "WARNING: SHA256SUMS file not found at: $sha256sums_file"
+            echo "WARNING: manifest file not found at: $manifest_file"
           fi
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       -
         name: List release assets
         run: |
-          tag="${{ steps.determine_tag.outputs.tag }}"
+          tag="${{ steps.find_artifacts.outputs.tag }}"
           echo "Release assets for $tag:"
           gh release view "$tag" --json assets | jq -r '.assets[] | "- \(.name) (\(.size) bytes)"'
         env:
