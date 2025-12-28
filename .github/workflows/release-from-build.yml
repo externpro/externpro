@@ -114,15 +114,17 @@ jobs:
           manifest_file="${manifest_files[0]}"
           if [ ${#manifest_files[@]} -gt 1 ]; then
             echo "Found ${#manifest_files[@]} manifest files; verifying they are identical"
-            ref_hash=$(sha256sum "${manifest_file}" | cut -d' ' -f1)
+            ref_hash=$(tr -d '\r' < "${manifest_file}" | sha256sum | cut -d' ' -f1)
             for f in "${manifest_files[@]}"; do
-              h=$(sha256sum "$f" | cut -d' ' -f1)
+              h=$(tr -d '\r' < "$f" | sha256sum | cut -d' ' -f1)
               if [ "$h" != "$ref_hash" ]; then
                 echo "::error::Manifest files differ: '$manifest_file' ($ref_hash) vs '$f' ($h)" >&2
                 exit 1
               fi
             done
           fi
+          tr -d '\r' < "${manifest_file}" > "${manifest_file}.lf"
+          mv "${manifest_file}.lf" "${manifest_file}"
           version_tag=$(grep -E '^set\(XP_MANIFEST_TAG ' "${manifest_file}" | head -1 | sed -E 's/^set\(XP_MANIFEST_TAG "?([^\)"]+)"?\).*/\1/')
           if [ -z "${version_tag}" ]; then
             echo "::error::Could not read XP_MANIFEST_TAG from manifest: ${manifest_file}"
