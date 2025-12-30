@@ -1113,9 +1113,11 @@ function(xpExternPackage)
   if(NOT DEFINED P_REPO_NAME)
     set(P_REPO_NAME ${CMAKE_PROJECT_NAME})
   endif()
-  string(TOUPPER ${P_REPO_NAME} PRJ)
-  string(TOLOWER ${P_REPO_NAME} NAME)
   xpGetVersionString(VER)
+  ###############
+  # use script
+  string(TOUPPER ${P_REPO_NAME} ucRepoName)
+  string(TOLOWER ${P_REPO_NAME} lcRepoName)
   if(DEFINED P_DEPS)
     list(JOIN P_DEPS " " deps) # list to string with spaces
     set(FIND_DEPS "xpFindPkg(PKGS ${deps}) # dependencies\n")
@@ -1147,8 +1149,8 @@ function(xpExternPackage)
     endif()
     list(JOIN P_LIBRARIES " " libs) # list to string with spaces
     string(JOIN "\n" LIBS
-      "set(${PRJ}_LIBRARIES ${libs})"
-      "list(APPEND reqVars ${PRJ}_LIBRARIES)"
+      "set(${ucRepoName}_LIBRARIES ${libs})"
+      "list(APPEND reqVars ${ucRepoName}_LIBRARIES)"
       ""
       )
   endif()
@@ -1169,21 +1171,23 @@ function(xpExternPackage)
       string(PREPEND P_EXE "${P_NAMESPACE}::")
     endif()
     string(JOIN "\n" EXE
-      "set(${PRJ}_EXE ${P_EXE})"
-      "list(APPEND reqVars ${PRJ}_EXE)"
+      "set(${ucRepoName}_EXE ${P_EXE})"
+      "list(APPEND reqVars ${ucRepoName}_EXE)"
       ""
       )
   elseif(DEFINED P_EXE_PATH)
     string(JOIN "\n" EXE
       "get_filename_component(PKG_ROOTDIR \${CMAKE_CURRENT_LIST_DIR}/../.. ABSOLUTE)"
       "get_filename_component(PKG_ROOTDIR \${PKG_ROOTDIR} ABSOLUTE) # remove relative parts"
-      "set(${PRJ}_EXE \${PKG_ROOTDIR}/${P_EXE_PATH}${CMAKE_EXECUTABLE_SUFFIX})"
-      "list(APPEND reqVars ${PRJ}_EXE)"
+      "set(${ucRepoName}_EXE \${PKG_ROOTDIR}/${P_EXE_PATH}${CMAKE_EXECUTABLE_SUFFIX})"
+      "list(APPEND reqVars ${ucRepoName}_EXE)"
       ""
       )
   endif()
-  set(xpuseFile ${CMAKE_CURRENT_BINARY_DIR}/xpuse-${NAME}-config.cmake)
+  set(xpuseFile ${CMAKE_CURRENT_BINARY_DIR}/xpuse-${lcRepoName}-config.cmake)
   configure_file(${xpThisDir}/xpuse.cmake.in ${xpuseFile} @ONLY NEWLINE_STYLE LF)
+  ###############
+  # manifest.cmake file
   set(xpmanifestFile ${CMAKE_CURRENT_BINARY_DIR}/${P_REPO_NAME}-${VER}.manifest.cmake)
   if(DEFINED P_DEPS)
     ipManifestDepsFromVars(MANIFEST_DEPS "${P_DEPS}")
@@ -1195,6 +1199,7 @@ function(xpExternPackage)
     "set(XP_MANIFEST_ARTIFACTS)\n"
     "${MANIFEST_DEPS}"
     )
+  ###############
   # sysinfo.txt file
   set(xpinfoFile ${CMAKE_CURRENT_BINARY_DIR}/sysinfo.txt)
   file(WRITE ${xpinfoFile} "${VER}\n")
@@ -1219,7 +1224,8 @@ function(xpExternPackage)
   endif()
   xpGetCompilerPrefix(compilerPrefix)
   file(APPEND ${xpinfoFile} "COMPILER_PREFIX: ${compilerPrefix}\n")
-  # install sysinfo.txt and xpuse-${NAME}-config.cmake
+  ###############
+  # install sysinfo.txt, xpuse-${lcRepoName}-config.cmake, and manifest.cmake
   if(NOT DEFINED CMAKE_INSTALL_DATADIR)
     include(GNUInstallDirs)
   endif()
@@ -1233,6 +1239,7 @@ function(xpExternPackage)
   install(FILES ${xpinfoFile} ${xpuseFile} ${xpmanifestFile}
     DESTINATION ${XP_INSTALL_CMAKEDIR} ${XP_COMPONENT}
     )
+  ###############
   # packaging
   unset(CPACK_PACKAGING_INSTALL_PREFIX)
   set(CPACK_GENERATOR TXZ)
