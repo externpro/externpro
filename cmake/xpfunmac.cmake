@@ -1096,13 +1096,53 @@ function(ipManifestDepsFromVars _out deps)
 endfunction()
 
 function(xpExternPackage)
-  # NOTE: if repository name doesn't match CMAKE_PROJECT_NAME (case sensitive),
-  #   use REPO_NAME parameter to specify the repository name
   # NOTE: if XP_INSTALL_CMAKEDIR is not defined, it will be set here
   #   and available in PARENT_SCOPE
   set(opts FIND_THREADS)
+  # FIND_THREADS is an optional parameter to indicate the use script
+  #   should find the Threads::Threads target (from Threads package)
   set(oneValueArgs ALIAS_NAMESPACE COMPONENT EXE EXE_PATH NAMESPACE REPO_NAME TARGETS_FILE)
-  set(multiValueArgs DEPS LIBRARIES)
+  # ALIAS_NAMESPACE is to specify an alternative (often well-known) CMake namespace
+  #   add_[executable|library] ALIAS[es] will be included in the use script for
+  #   EXE and LIBRARIES
+  # COMPONENT is for CPack/install component name (optional, used if project has COMPONENTs)
+  # EXE is for a CMake executable target name; included in the use script
+  # EXE_PATH is for executable path (relative to package root, alternative to EXE)
+  #   useful when the executable is not a CMake target, e.g. a binary built
+  #   elsewhere; included in the use script
+  # NAMESPACE is for CMake namespace and will be prependended to CMake target names
+  #   EXE and LIBRARIES in the use script
+  # REPO_NAME is for repository name; if repository name doesn't match
+  #   CMAKE_PROJECT_NAME (case sensitive), use REPO_NAME parameter to specify it
+  # TARGETS_FILE is for targets file name (see EXPORT parameter of install() command)
+  #   the targets file is included in the use script
+  list(APPEND oneValueArgs ATTRIBUTION BASE DESC LICENSE UPSTREAM WEB XPDIFF)
+  ### manifest - values that will be included in the generated manifest.cmake file
+  # ATTRIBUTION is for attribution text that should be included in the manifest;
+  #  some projects may not have attribution text, in which case this parameter
+  #  should be left undefined
+  # BASE is to specify the base git tag that commits were made on top of;
+  #  this is often an upstream release tag and the commits are usually mostly
+  #  externpro-related
+  # DESC is for a short project description
+  # LICENSE is for license information
+  # UPSTREAM is for upstream repository URL
+  # WEB is for project website URL
+  # XPDIFF describes the type of diff (patch/intro/auto/native/bin/fetch)
+  #  from the BASE tag to the current tag (externpro-related diff)
+  #    patch: diff modifies/patches existing cmake
+  #    intro: diff introduces cmake
+  #     auto: diff adds cmake to replace autotools/configure/make
+  #   native: diff adds cmake but uses existing build system
+  #      bin: diff adds cmake to repackage binaries built elsewhere
+  #    fetch: diff adds cmake and utilizes FetchContent
+  set(multiValueArgs DEPS LIBRARIES PVT_DEPS)
+  # DEPS are for library dependencies; leveraged by use script and manifest
+  # LIBRARIES are for CMake library targets; included in the use script
+  # PVT_DEPS are for private dependencies (often an executable or internal
+  #   dependency); part of manifest and NOT part of use script (a project
+  #   may have private dependencies that don't need to be found by projects
+  #   that use the project that has private dependencies)
   cmake_parse_arguments(P "${opts}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
   if(DEFINED P_COMPONENT)
     set(XP_COMPONENT COMPONENT ${P_COMPONENT})
@@ -1188,19 +1228,46 @@ function(xpExternPackage)
   configure_file(${xpThisDir}/xpuse.cmake.in ${xpuseFile} @ONLY NEWLINE_STYLE LF)
   ###############
   # manifest.cmake file
-  set(xpmanifestFile ${CMAKE_CURRENT_BINARY_DIR}/${P_REPO_NAME}-${VER}.manifest.cmake)
+  # NOTE: metadata in manifest file is consistent across all platforms
+  if(DEFINED P_ATTRIBUTION)
+    set(MANIFEST_VARS "${MANIFEST_VARS}\nset(XP_MANIFEST_ATTRIBUTION \"${P_ATTRIBUTION}\")")
+  endif()
+  if(DEFINED P_BASE)
+    set(MANIFEST_VARS "${MANIFEST_VARS}\nset(XP_MANIFEST_BASE ${P_BASE})")
+  endif()
+  if(DEFINED P_DESC)
+    set(MANIFEST_VARS "${MANIFEST_VARS}\nset(XP_MANIFEST_DESC \"${P_DESC}\")")
+  endif()
+  if(DEFINED P_LICENSE)
+    set(MANIFEST_VARS "${MANIFEST_VARS}\nset(XP_MANIFEST_LICENSE \"${P_LICENSE}\")")
+  endif()
+  if(DEFINED P_UPSTREAM)
+    set(MANIFEST_VARS "${MANIFEST_VARS}\nset(XP_MANIFEST_UPSTREAM \"${P_UPSTREAM}\")")
+  endif()
+  if(DEFINED P_WEB)
+    set(MANIFEST_VARS "${MANIFEST_VARS}\nset(XP_MANIFEST_WEB \"${P_WEB}\")")
+  endif()
+  if(DEFINED P_XPDIFF)
+    set(MANIFEST_VARS "${MANIFEST_VARS}\nset(XP_MANIFEST_XPDIFF \"${P_XPDIFF}\")")
+  endif()
+  if(DEFINED P_PVT_DEPS)
+    set(MANIFEST_VARS "${MANIFEST_VARS}\nset(XP_MANIFEST_PVT_DEPS \"${P_PVT_DEPS}\")")
+  endif()
   if(DEFINED P_DEPS)
     ipManifestDepsFromVars(MANIFEST_DEPS "${P_DEPS}")
   endif()
+  set(xpmanifestFile ${CMAKE_CURRENT_BINARY_DIR}/${P_REPO_NAME}-${VER}.manifest.cmake)
   file(WRITE ${xpmanifestFile}
     "set(XP_MANIFEST_VERSION 1)\n"
     "set(XP_MANIFEST_REPO \"${P_REPO_NAME}\")\n"
     "set(XP_MANIFEST_TAG \"${VER}\")\n"
     "set(XP_MANIFEST_ARTIFACTS)\n"
+    "${MANIFEST_VARS}\n"
     "${MANIFEST_DEPS}"
     )
   ###############
   # sysinfo.txt file
+  # NOTE: metadata in sysinfo file is different depending on platform
   set(xpinfoFile ${CMAKE_CURRENT_BINARY_DIR}/sysinfo.txt)
   file(WRITE ${xpinfoFile} "${VER}\n")
   execute_process(COMMAND uname -a
