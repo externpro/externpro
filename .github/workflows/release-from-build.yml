@@ -213,7 +213,9 @@ jobs:
           ### Manifest
           ```
           EOF
-          echo "${{ steps.find_artifacts.outputs.manifest_file }} ${{ steps.find_artifacts.outputs.manifest_hash }}" >> "$RELEASE_NOTES_FILE"
+          manifest_file="${{ steps.find_artifacts.outputs.manifest_file }}"
+          manifest_name=$(basename "${manifest_file}")
+          echo "${manifest_name} ${{ steps.find_artifacts.outputs.manifest_hash }}" >> "$RELEASE_NOTES_FILE"
           # Close the code block
           echo '```' >> "$RELEASE_NOTES_FILE"
           # Set flags based on release type
