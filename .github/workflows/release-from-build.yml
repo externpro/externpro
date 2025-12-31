@@ -137,7 +137,8 @@ jobs:
           else
             is_prerelease="false"
           fi
-          for entry in "${hashes[@]}"; do
+          mapfile -t sorted_hashes < <(printf '%s\n' "${hashes[@]}" | LC_ALL=C sort -k2,2)
+          for entry in "${sorted_hashes[@]}"; do
             hash="${entry%%  *}"
             fname="${entry#*  }"
             norm=$(printf '%s' "${fname}" | sed -E 's/[^A-Za-z0-9]/_/g')
