@@ -1261,9 +1261,9 @@ function(xpExternPackage)
     "set(XP_MANIFEST_VERSION 1)\n"
     "set(XP_MANIFEST_REPO \"${P_REPO_NAME}\")\n"
     "set(XP_MANIFEST_TAG \"${VER}\")\n"
-    "set(XP_MANIFEST_ARTIFACTS)\n"
     "${MANIFEST_VARS}\n"
-    "${MANIFEST_DEPS}"
+    "${MANIFEST_DEPS}\n"
+    "set(XP_MANIFEST_ARTIFACTS)\n"
     )
   ###############
   # sysinfo.txt file
