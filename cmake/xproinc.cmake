@@ -5,6 +5,11 @@ if(NOT DEFINED CMAKE_INSTALL_PREFIX)
     "Install path prefix, prepended onto install directories."
     )
 endif()
+if(NOT DEFINED XPRO_DIR)
+  set(XPRO_DIR ${CMAKE_BINARY_DIR}/_xpro CACHE PATH
+    "externpro working directory (downloaded manifests, pkgs; extracted xpro pkgs)"
+    )
+endif()
 list(FIND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR} idx)
 if(idx EQUAL -1)
   list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR})
