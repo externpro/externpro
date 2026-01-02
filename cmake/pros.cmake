@@ -632,15 +632,8 @@ set(xp_yasm REPO github.com/externpro/yasm TAG v1.3.0.1
   SHA256_Linux a6821e5b56afae7dd01341954aee5f911a419f74635149c66217c6384fb101dd
   SHA256_win64 a4c7249a4d4812251e8925c4b8fbc5e01e8af141acce9ae9aad7728b488751d6
   )
-set(xp_zlib REPO github.com/externpro/zlib TAG v1.3.1.1
-  XPBLD "patch" BASE v1.3.1
-  WEB "https://zlib.net 'zlib website'" UPSTREAM "github.com/madler/zlib"
-  DESC "compression library"
-  LICENSE "[permissive](https://zlib.net/zlib_license.html 'zlib/libpng license, see https://en.wikipedia.org/wiki/Zlib_License')"
-  SHA256_Darwin-arm64 abf7c8fb138a222999b3ea40c20520dd9411c5bbbd75183cd479b6452bb2f127
-  SHA256_Linux-arm64 b2acb61a5fd45f17e1ae75d28550260d6fd8454c600b20abb5f59eb5471555b5
-  SHA256_Linux c6b382c1586f8820e04fd1e298086e391797f54e6369d770e9256b51c35a58d7
-  SHA256_win64 41bd417795e6349e0cb71c6097d2c71ef1e30d274d0be0f1311e891e1f105749
+set(xp_zlib REPO github.com/externpro/zlib TAG v1.3.1.3
+  MANIFEST_SHA256 895215459d64227b6f6fbd6c9580cb5cf8e637db3d7c5e750760ff66324222c2
   )
 set(xp_zmqpp REPO github.com/externpro/zmqpp TAG v4.2.0-47.1
   XPBLD "patch" BASE 4.2.0-47 DEPS libzmq
