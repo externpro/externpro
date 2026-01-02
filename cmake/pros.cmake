@@ -48,15 +48,8 @@ set(xp_boost REPO github.com/externpro/boost TAG v1.76.0.3
   SHA256_Linux 0834719184aaa570747c97149a024bfd78b5363ead15b7440f3e4390f9bfb8e9
   SHA256_win64 05bccbfce1a27cceb0a77da0aa5de099e4bee1a4100e24854862adceaa3ba975
   )
-set(xp_bzip2 REPO github.com/externpro/bzip2 TAG v1.0.8.2
-  XPBLD "intro" BASE bzip2-1.0.8
-  WEB "https://sourceware.org/bzip2/" UPSTREAM "github.com/opencor/bzip2"
-  DESC "lossless block-sorting data compression library"
-  LICENSE "[bzip2-1.0.6](https://spdx.org/licenses/bzip2-1.0.6.html 'BSD-like, modified zlib license')"
-  SHA256_Darwin-arm64 0f374987ed8a6679715d7f2f45c4beeece7cfa8241fcd1be22f5f2c2d444b67d
-  SHA256_Linux-arm64 455f31331c9de2e23de817f217c1dade0cb6b24bd025ff0db8f284a2cef701de
-  SHA256_Linux 2a0e485c83d7c6c69dcfbe15409af4d896a4dc898b854f1e8812ea6d4d5e1d8c
-  SHA256_win64 cc9a1b482e6833a47020b2a9a18c38edb9a23f236ec4894598e761ed047d5b7e
+set(xp_bzip2 REPO github.com/externpro/bzip2 TAG v1.0.8.3
+  MANIFEST_SHA256 894cfae3e809b37ccbba4d54b499d6d57fa0c8d4a2e17bb11c6765cd6885d92d
   )
 set(xp_c-ares REPO github.com/externpro/c-ares TAG v1.18.1.1
   XPBLD "patch" BASE cares-1_18_1
