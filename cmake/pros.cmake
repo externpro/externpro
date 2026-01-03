@@ -521,15 +521,8 @@ set(xp_spatialite-tools REPO github.com/externpro/spatialite-tools TAG v5.1.0.5
   SHA256_Linux 14d9e25006371d2c64e866a0a021eaa721dad410bb8a5125a5019d09e1aee2a3
   SHA256_win64 1f3b86512e2f2a0b218a2db1eefddf121132304ac45f535b7d53940459b0214a
   )
-set(xp_spdlog REPO github.com/externpro/spdlog TAG v1.15.3.1
-  XPBLD "patch" BASE v1.15.3 DEPS fmt
-  WEB "https://github.com/gabime/spdlog/wiki" UPSTREAM "github.com/gabime/spdlog"
-  DESC "Fast C++ logging library"
-  LICENSE "[MIT](https://github.com/gabime/spdlog?tab=License-1-ov-file 'MIT License')"
-  SHA256_Darwin-arm64 1048b57b1a6506b47d7d97c2cf3b96422e5eb4d9736b9e49fe84a4beaf7b9d6b
-  SHA256_Linux-arm64 118cb9acbc0c7f34c87b2c9b16a3c4a9f6aa086f6226e51e22d2f0f959337000
-  SHA256_Linux a79a4cfb510a9080f920a84ed88d47499a2662dcd4f0a22d296966d63738d5c9
-  SHA256_win64 8812951049a04c5c9ab4e7d24de1ba6b9fca029e892da81f9429ac214f875014
+set(xp_spdlog REPO github.com/externpro/spdlog TAG v1.15.3.2
+  MANIFEST_SHA256 83adf051baf8cec968420c7ab3b83c72fe0fc191d6932c6dd1895f8aae7f1f96
   )
 set(xp_sqlite3 REPO github.com/externpro/SQLite3 TAG v3.38.2.1
   XPBLD "patch" BASE 3.38.2
