@@ -521,8 +521,8 @@ set(xp_spatialite-tools REPO github.com/externpro/spatialite-tools TAG v5.1.0.5
   SHA256_Linux 14d9e25006371d2c64e866a0a021eaa721dad410bb8a5125a5019d09e1aee2a3
   SHA256_win64 1f3b86512e2f2a0b218a2db1eefddf121132304ac45f535b7d53940459b0214a
   )
-set(xp_spdlog REPO github.com/externpro/spdlog TAG v1.15.3.2
-  MANIFEST_SHA256 83adf051baf8cec968420c7ab3b83c72fe0fc191d6932c6dd1895f8aae7f1f96
+set(xp_spdlog REPO github.com/externpro/spdlog TAG v1.15.3.3
+  MANIFEST_SHA256 8c42801aad4d13383fcf76d600a1c9d1699ac856e416f16a91ee2fedfef81d92
   )
 set(xp_sqlite3 REPO github.com/externpro/SQLite3 TAG v3.38.2.1
   XPBLD "patch" BASE 3.38.2
