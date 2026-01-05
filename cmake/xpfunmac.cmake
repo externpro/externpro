@@ -1241,11 +1241,13 @@ function(xpExternPackage)
     set(MANIFEST_VARS "${MANIFEST_VARS}\nset(XP_MANIFEST_XPDIFF \"${P_XPDIFF}\")")
   endif()
   if(DEFINED P_DEPS)
-    set(MANIFEST_VARS "${MANIFEST_VARS}\nset(XP_MANIFEST_DEPS ${P_DEPS})")
     ipManifestDepsFromVars(MANIFEST_DEPS "${P_DEPS}")
+    list(JOIN P_DEPS " " deps) # list to string with spaces
+    set(MANIFEST_VARS "${MANIFEST_VARS}\nset(XP_MANIFEST_DEPS ${deps})")
   endif()
   if(DEFINED P_PVT_DEPS)
-    set(MANIFEST_VARS "${MANIFEST_VARS}\nset(XP_MANIFEST_PVT_DEPS ${P_PVT_DEPS})")
+    list(JOIN P_PVT_DEPS " " pvtdeps) # list to string with spaces
+    set(MANIFEST_VARS "${MANIFEST_VARS}\nset(XP_MANIFEST_PVT_DEPS ${pvtdeps})")
   endif()
   set(xpmanifestFile ${CMAKE_CURRENT_BINARY_DIR}/${P_REPO_NAME}-${VER}.manifest.cmake)
   file(WRITE ${xpmanifestFile}
