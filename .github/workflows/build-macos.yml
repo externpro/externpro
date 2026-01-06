@@ -17,6 +17,13 @@ jobs:
     runs-on: macos-15
     steps:
       -
+        name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # fetches all history
+          fetch-tags: true # explicitly fetches tags
+          submodules: true
+      -
         name: CMake Build
         uses: ./.devcontainer/.github/actions/cmake-build
         with:

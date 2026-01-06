@@ -15,13 +15,6 @@ runs:
   using: composite
   steps:
     -
-      name: Checkout repo
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0   # fetches all history
-        fetch-tags: true # explicitly fetches tags
-        submodules: true
-    -
       name: CMake Configure
       shell: bash
       run: cmake --preset=${{ inputs.cmake-preset }}
