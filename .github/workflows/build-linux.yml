@@ -86,8 +86,6 @@ jobs:
       matrix:
         arch: ${{ fromJson(inputs.arch-list) }}
         buildpro_image: ${{ fromJson(inputs.buildpro-images) }}
-    env:
-      CMAKE_PRESET: Linux
     container:
       image: ${{ format('ghcr.io/{0}/bldimg-{1}-{2}:latest', needs.lc-repo-names.outputs.owner_repo, matrix.arch, matrix.buildpro_image) }}
       credentials:
@@ -95,78 +93,14 @@ jobs:
         password: ${{ secrets.GITHUB_TOKEN }}
     steps:
       -
-        name: Checkout repo
-        uses: actions/checkout@v4
+        name: CMake Build
+        uses: ./.devcontainer/.github/actions/cmake-build
         with:
-          fetch-depth: 0   # fetches all history
-          fetch-tags: true # explicitly fetches tags
-          submodules: true
-      -
-        name: CMake Configure
-        run: cmake --preset=${{ env.CMAKE_PRESET }}
-      -
-        name: Upload CMake logs
-        uses: actions/upload-artifact@v4
-        with:
-          name: cmake-logs-${{ env.CMAKE_PRESET }}-${{ runner.arch }}-${{ matrix.buildpro_image }}
-          path: |
-            _bld-${{ env.CMAKE_PRESET }}/CMakeFiles/CMakeConfigureLog.yaml
-      -
-        name: CMake Workflow
-        run: cmake --workflow --preset=${{ inputs.cmake-workflow-preset }}
-      -
-        name: Find package
-        id: find_package
-        if: ${{ inputs.cmake-workflow-preset != 'LinuxReleaseNoInstall' }}
-        shell: bash
-        run: |
-          file=$(pwd)/$(ls _bld-${{ env.CMAKE_PRESET }}/${{ inputs.artifact-pattern }})
-          if [[ ! -f "$file" ]]; then
-            echo "::error::Package not found!" >&2
-            exit 1
-          fi
-          echo "filepath=$file" >> $GITHUB_OUTPUT
-          echo "filename=$(basename $file)" >> $GITHUB_OUTPUT
-        working-directory: ${{ github.workspace }}
-      -
-        name: Upload package artifact
-        if: ${{ inputs.cmake-workflow-preset != 'LinuxReleaseNoInstall' }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ steps.find_package.outputs.filename }}
-          path: ${{ steps.find_package.outputs.filepath }}
-      -
-        name: Find manifest
-        id: find_manifest
-        if: ${{ inputs.cmake-workflow-preset != 'LinuxReleaseNoInstall' }}
-        shell: bash
-        run: |
-          file=$(pwd)/$(ls _bld-${{ env.CMAKE_PRESET }}/${{ github.event.repository.name }}-*.manifest.cmake | head -1)
-          if [[ ! -f "$file" ]]; then
-            echo "::error::Manifest not found!" >&2
-            ls -la _bld-${{ env.CMAKE_PRESET }} || true
-            exit 1
-          fi
-          echo "filepath=$file" >> $GITHUB_OUTPUT
-          echo "filename=$(basename $file)" >> $GITHUB_OUTPUT
-        working-directory: ${{ github.workspace }}
-      -
-        name: Upload manifest artifact
-        if: ${{ inputs.cmake-workflow-preset != 'LinuxReleaseNoInstall' }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ steps.find_manifest.outputs.filename }}-${{ env.CMAKE_PRESET }}-${{ runner.arch }}-${{ matrix.buildpro_image }}
-          path: ${{ steps.find_manifest.outputs.filepath }}
-      -
-        name: Check for dirty repo
-        shell: bash
-        run: |
-          if [ -n "$(git status --porcelain)" ]; then
-            echo "::error::Dirty repo detected!"
-            git status
-            git submodule foreach git status
-            exit 1
-          fi
+          artifact-pattern: ${{ inputs.artifact-pattern }}
+          cmake-workflow-preset: ${{ inputs.cmake-workflow-preset }}
+          cmake-preset: Linux
+          no-install-preset: LinuxReleaseNoInstall
+          name-suffix: -${{ matrix.buildpro_image }}
   clean-up:
     needs: [lc-repo-names, build-docker-image, build]
     if: ${{ needs.build.result == 'success' }}

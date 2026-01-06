@@ -15,89 +15,12 @@ on:
 jobs:
   build:
     runs-on: windows-2022
-    env:
-      CMAKE_PRESET: Windows
     steps:
       -
-        name: Checkout repo
-        uses: actions/checkout@v4
+        name: CMake Build
+        uses: ./.devcontainer/.github/actions/cmake-build
         with:
-          fetch-depth: 0   # fetches all history
-          fetch-tags: true # explicitly fetches tags
-          submodules: true
-      -
-        name: CMake Configure
-        run: cmake --preset=${{ env.CMAKE_PRESET }}
-      -
-        name: Upload CMake logs
-        uses: actions/upload-artifact@v4
-        with:
-          name: cmake-logs-${{ env.CMAKE_PRESET }}-${{ runner.arch }}
-          path: |
-            _bld-${{ env.CMAKE_PRESET }}/CMakeFiles/CMakeConfigureLog.yaml
-      -
-        name: CMake Workflow
-        run: cmake --workflow --preset=${{ inputs.cmake-workflow-preset }}
-      -
-        name: Find package
-        id: find_package
-        if: ${{ inputs.cmake-workflow-preset != 'WindowsReleaseNoInstall' }}
-        shell: bash
-        run: |
-          file=$(pwd)/$(ls _bld-${{ env.CMAKE_PRESET }}/${{ inputs.artifact-pattern }})
-          if [[ ! -f "$file" ]]; then
-            echo "::error::Package not found!" >&2
-            exit 1
-          fi
-          echo "filepath=$file" >> $GITHUB_OUTPUT
-          echo "filename=$(basename $file)" >> $GITHUB_OUTPUT
-        working-directory: ${{ github.workspace }}
-      -
-        name: Find manifest
-        id: find_manifest
-        if: ${{ inputs.cmake-workflow-preset != 'WindowsReleaseNoInstall' }}
-        shell: bash
-        run: |
-          file=$(pwd)/$(ls _bld-${{ env.CMAKE_PRESET }}/${{ github.event.repository.name }}-*.manifest.cmake | head -1)
-          if [[ ! -f "$file" ]]; then
-            echo "::error::Manifest not found!" >&2
-            ls -la _bld-${{ env.CMAKE_PRESET }} || true
-            exit 1
-          fi
-          echo "filepath=$file" >> $GITHUB_OUTPUT
-          echo "filename=$(basename $file)" >> $GITHUB_OUTPUT
-        working-directory: ${{ github.workspace }}
-      -
-        name: Convert Git Bash paths to Windows paths
-        id: convert_paths
-        if: ${{ inputs.cmake-workflow-preset != 'WindowsReleaseNoInstall' }}
-        shell: pwsh
-        run: |
-          $pkgWindowsPath = '${{ steps.find_package.outputs.filepath }}' -replace '^/([a-zA-Z])/', '$1:/' -replace '/', '\\'
-          $manifestWindowsPath = '${{ steps.find_manifest.outputs.filepath }}' -replace '^/([a-zA-Z])/', '$1:/' -replace '/', '\\'
-          echo "package_windows_path=$pkgWindowsPath" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
-          echo "manifest_windows_path=$manifestWindowsPath" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
-      -
-        name: Upload package artifact
-        if: ${{ inputs.cmake-workflow-preset != 'WindowsReleaseNoInstall' }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ steps.find_package.outputs.filename }}
-          path: ${{ steps.convert_paths.outputs.package_windows_path }}
-      -
-        name: Upload manifest artifact
-        if: ${{ inputs.cmake-workflow-preset != 'WindowsReleaseNoInstall' }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ steps.find_manifest.outputs.filename }}-${{ env.CMAKE_PRESET }}-${{ runner.arch }}
-          path: ${{ steps.convert_paths.outputs.manifest_windows_path }}
-      -
-        name: Check for dirty repo
-        shell: bash
-        run: |
-          if [ -n "$(git status --porcelain)" ]; then
-            echo "::error::Dirty repo detected!"
-            git status
-            git submodule foreach git status
-            exit 1
-          fi
+          artifact-pattern: ${{ inputs.artifact-pattern }}
+          cmake-workflow-preset: ${{ inputs.cmake-workflow-preset }}
+          cmake-preset: Windows
+          no-install-preset: WindowsReleaseNoInstall
