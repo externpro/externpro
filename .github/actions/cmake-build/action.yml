@@ -49,10 +49,12 @@ runs:
       if: ${{ inputs.cmake-workflow-preset != inputs.no-install-preset }}
       shell: bash
       run: |
-        file=$(pwd)/$(ls _bld-${{ inputs.cmake-preset }}/${{ github.event.repository.name }}-*.manifest.cmake | head -1)
+        build_dir=_bld-${{ inputs.cmake-preset }}
+        file=$(find "$build_dir" -type f -name "${{ github.event.repository.name }}-*.manifest.cmake" | head -1)
+        file=$(pwd)/$file
         if [[ ! -f "$file" ]]; then
           echo "::error::Manifest not found!" >&2
-          ls -la _bld-${{ inputs.cmake-preset }} || true
+          ls -la "$build_dir" || true
           exit 1
         fi
         echo "filepath=$file" >> $GITHUB_OUTPUT
