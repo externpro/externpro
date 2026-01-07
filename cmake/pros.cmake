@@ -573,15 +573,8 @@ set(xp_wxtlc REPO github.com/externpro/wxTLC
   DESC "a multi column tree control [submodule of: _wxx_]"
   LICENSE "[wxWindows](http://wxcode.sourceforge.net/ 'wxWindows Library License')"
   )
-set(xp_yasm REPO github.com/externpro/yasm TAG v1.3.0.1
-  XPBLD "patch" BASE v1.3.0
-  WEB "http://yasm.tortall.net/" UPSTREAM "github.com/yasm/yasm"
-  DESC "assembler and disassembler for the Intel x86 architecture"
-  LICENSE "[BSD-2-Clause](https://github.com/yasm/yasm/blob/v1.3.0/COPYING 'BSD 2-Clause Simplified License')"
-  SHA256_Darwin-arm64 683982fde538e42b0b4ac9555778003c46363780ab91ecdf4154a6948db1cd3e
-  SHA256_Linux-arm64 c92da80fae4cd9cfe5da16b9e4e87ddcd2023904f5078e230f33ca0d258e366b
-  SHA256_Linux a6821e5b56afae7dd01341954aee5f911a419f74635149c66217c6384fb101dd
-  SHA256_win64 a4c7249a4d4812251e8925c4b8fbc5e01e8af141acce9ae9aad7728b488751d6
+set(xp_yasm REPO github.com/externpro/yasm TAG v1.3.0.2
+  MANIFEST_SHA256 c2a6c8bed9feafbe6ac3972bad40fe36ec6bab51c9739f3b04f810f0e47016f4
   )
 set(xp_zlib REPO github.com/externpro/zlib TAG v1.3.1.3
   MANIFEST_SHA256 895215459d64227b6f6fbd6c9580cb5cf8e637db3d7c5e750760ff66324222c2
