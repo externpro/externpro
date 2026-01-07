@@ -343,15 +343,8 @@ set(xp_luabridge REPO github.com/externpro/LuaBridge TAG v2.10.3
   SHA256_Linux 481c33e6497c1b7358ae05aa067441dd5a77d501736cf6a75976f7084bc3ac93
   SHA256_win64 49c01bcfb4ae0c5f64cc43e08d13630209e242136e589726936594fa373e3723
   )
-set(xp_nasm REPO github.com/externpro/nasm TAG v2.14.02.2
-  XPBLD "bin" BASE v0
-  WEB "https://www.nasm.us/"
-  DESC "The Netwide Assembler - an 80x86 and x86-64 assembler (MSW-only)"
-  LICENSE "[BSD-2-Clause](https://www.nasm.us/ 'BSD 2-Clause Simplified License')"
-  SHA256_Darwin-arm64 381bcd1a5e7d98a8db694b6101349544a58510068a654e67d7244b38d70f222f
-  SHA256_Linux-arm64 6d2b1b6ebc8af910d7930fc324e4bb2d50fefb27283ac0a5694cdae47e9a82eb
-  SHA256_Linux 9a7a6e110d7a2187af79b7045f16320e022e7e9fed7113b7cde5f5d98e3aace8
-  SHA256_win64 d0e1791fb20264cc3d0a3e7f995c220afb326bc9d6cf983be23d63fd39ca48a2
+set(xp_nasm REPO github.com/externpro/nasm TAG v2.14.02.3
+  MANIFEST_SHA256 f381ee1a2b376fead6cacee9495456ddd9e01818e7184248a523ceb57be9357e
   )
 set(xp_nlohmann_json REPO github.com/externpro/nlohmann_json TAG v3.12.0.1
   XPBLD "patch" BASE v3.12.0
