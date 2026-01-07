@@ -1246,6 +1246,8 @@ function(xpExternPackage)
     set(MANIFEST_VARS "${MANIFEST_VARS}\nset(XP_MANIFEST_DEPS ${deps})")
   endif()
   if(DEFINED P_PVT_DEPS)
+    ipManifestDepsFromVars(MANIFEST_PVT_DEPS "${P_PVT_DEPS}")
+    set(MANIFEST_DEPS "${MANIFEST_DEPS}${MANIFEST_PVT_DEPS}")
     list(JOIN P_PVT_DEPS " " pvtdeps) # list to string with spaces
     set(MANIFEST_VARS "${MANIFEST_VARS}\nset(XP_MANIFEST_PVT_DEPS ${pvtdeps})")
   endif()
