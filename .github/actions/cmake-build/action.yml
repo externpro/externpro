@@ -1,4 +1,5 @@
 name: CMake Build
+description: Configure and build using CMake presets and upload build artifacts.
 inputs:
   artifact-pattern:
     required: true
