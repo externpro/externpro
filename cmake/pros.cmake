@@ -169,15 +169,8 @@ set(xp_glew REPO github.com/externpro/glew TAG v1.13.0.1
   SHA256_Linux de5619809f5b7f9e44c6b8b7dab814ff44a78aa1b82bdf7798b7e8229f4a23ad
   SHA256_win64 dd82830539c47e4933e59664108ac84472130482bfab25e651c3140240f711bc
   )
-set(xp_googletest REPO github.com/externpro/googletest TAG v1.16.0.1
-  XPBLD "patch" BASE v1.16.0
-  WEB "https://google.github.io/googletest/" UPSTREAM "github.com/google/googletest"
-  DESC "GoogleTest - Google Testing and Mocking Framework"
-  LICENSE "[BSD-3-Clause](https://github.com/google/googletest/blob/master/LICENSE 'BSD 3-Clause New or Revised License')"
-  SHA256_Darwin-arm64 43e5f07d68aef4d6f0f981d054e77bbe099214c22cc14fd3543c14a27808c01a
-  SHA256_Linux-arm64 23787bd9536a33003ad84cb756899ed4ac6e6ef287c66f50b7bc57433f929ed6
-  SHA256_Linux 9ca3f35c60306fbcd14038772b0cce5fd3e81c371beebf5472ae80a33887a431
-  SHA256_win64 479ab2c6dd7bccabe2c41cad27399d441d32667c563a1428f8fd154072bb8858
+set(xp_googletest REPO github.com/externpro/googletest TAG v1.16.0.2
+  MANIFEST_SHA256 3442fd80e8cb8bb0cdd300ef312d3c4a79b8d067e614f4a66ea7d511e6da96df
   )
 set(xp_hdf5 REPO github.com/externpro/hdf5 TAG v1.14.6.5
   XPBLD "patch" BASE hdf5_1.14.6 DEPS zlib
