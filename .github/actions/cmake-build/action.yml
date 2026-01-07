@@ -93,17 +93,13 @@ runs:
           git status
           echo "--- git diff --name-status"
           git --no-pager diff --name-status
+          echo "--- git diff --stat"
+          git --no-pager diff --stat
+          echo "--- git diff"
+          git --no-pager diff
 
-          if git diff --name-only | grep -q "^include/wx/stc/stc.h$"; then
-            echo "--- git diff -- include/wx/stc/stc.h"
-            git --no-pager diff -- include/wx/stc/stc.h
-          fi
-
-          echo "--- python3 --version"
-          python3 --version || true
-          echo "--- locale"
-          locale || true
-
-          git submodule foreach git status
+          echo "--- submodule status"
+          git submodule status --recursive || true
+          git submodule foreach --recursive 'echo "--- submodule: $name"; git status; git --no-pager diff --name-status; git --no-pager diff || true'
           exit 1
         fi
