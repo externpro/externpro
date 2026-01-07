@@ -303,15 +303,8 @@ set(xp_libssh2 REPO github.com/externpro/libssh2 TAG v1.9.0.2
   SHA256_Linux a8535f119c707fa65b95aa8ce942cc6cd2955f06108af85fd61f96d22ea92fcf
   SHA256_win64 0ef5a22c654338384c9a9e74e9632ea898a62c36e8f059021e4ab32cd2fd924d
   )
-set(xp_libstrophe REPO github.com/externpro/libstrophe TAG v0.9.1.3
-  XPBLD "intro" BASE 0.9.1 DEPS libexpat openssl
-  WEB "http://strophe.im/libstrophe/" UPSTREAM "github.com/strophe/libstrophe"
-  DESC "A simple, lightweight C library for writing XMPP client"
-  LICENSE "[MIT or GPL-3.0](https://github.com/strophe/libstrophe/blob/0.9.1/LICENSE.txt 'dual licensed under MIT and GPLv3 licenses')"
-  SHA256_Darwin-arm64 14c6c3cc2da5593f01b2101948cc5e1afe26d6d680cf0a2f1c6f7eec7c59fbd8
-  SHA256_Linux-arm64 bcf187d96c34be780162f04b3bbd8c88118f6d7a837a566edde9169ef7bb952c
-  SHA256_Linux b1324e9fcdc8978b4d6b8c4e93dd8fca4a6fe9e8f6cd5a3531280c39dedf0bd5
-  SHA256_win64 515c416d47203accebee1281178d4b17755f61a039b21936458c23d3cd039f0e
+set(xp_libstrophe REPO github.com/externpro/libstrophe TAG v0.9.1.4
+  MANIFEST_SHA256 dd90d3340f7cc1af5abcbaf5973ce0e3f841ee131bd894aa03d56eb33a16390b
   )
 set(xp_libzmq REPO github.com/externpro/libzmq TAG v4.3.4.2
   XPBLD "patch" BASE v4.3.4 DEPS libsodium
