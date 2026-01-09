@@ -85,6 +85,6 @@ and downloaded project manifest files
 |<a id='zlib' />[zlib](https://zlib.net 'zlib website')|[permissive](https://zlib.net/zlib_license.html 'zlib/libpng license, see https://en.wikipedia.org/wiki/Zlib_License')|compression library|[v1.3.1.3](https://github.com/externpro/zlib/releases/tag/v1.3.1.3 'release')|[repo](https://github.com/externpro/zlib 'github.com/externpro/zlib') [upstream](https://github.com/madler/zlib 'github.com/madler/zlib')|[diff](https://github.com/externpro/zlib/compare/v1.3.1...v1.3.1.3 'github.com/externpro/zlib/compare/v1.3.1...v1.3.1.3') [patch]|
 |<a id='zmqpp' />[zmqpp](https://zeromq.github.io/zmqpp/)|[MPL-2.0](https://github.com/zeromq/zmqpp/blob/develop/LICENSE 'Mozilla Public License 2.0')|high-level binding for libzmq [deps: _libzmq_]|[v4.2.0-47.1](https://github.com/externpro/zmqpp/releases/tag/v4.2.0-47.1 'release')|[repo](https://github.com/externpro/zmqpp 'github.com/externpro/zmqpp') [upstream](https://github.com/zeromq/zmqpp 'github.com/zeromq/zmqpp')|[diff](https://github.com/externpro/zmqpp/compare/4.2.0-47...v4.2.0-47.1 'github.com/externpro/zmqpp/compare/4.2.0-47...v4.2.0-47.1') [patch]|
 
-![deps](https://g.gravizo.com/g?url=https%3A%2F%2Fraw.githubusercontent.com%2Fexternpro%2Fexternpro%2Fmain%2Fcmake%2Fdeps.dot 'dependencies')
+![deps](https://g.gravizo.com/source/deps_graph?https%3A%2F%2Fraw.githubusercontent.com%2Fexternpro%2Fexternpro%2Fmain%2Fcmake%2Fdeps.dot 'dependencies')
 
 [How-to: modify a project to build with externpro](pros.md)

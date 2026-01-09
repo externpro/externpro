@@ -109,6 +109,7 @@ function(proDeps)
   set(rme "${rme}|\n" PARENT_SCOPE)
 endfunction()
 string(JOIN "\n" dot
+  "// deps_graph"
   "digraph GG {"
   "  node [fontsize=12]\;"
   ""
@@ -146,7 +147,8 @@ foreach(var ${vars})
   endif()
 endforeach()
 string(APPEND dot "}\n")
-string(APPEND rme "\n![deps](https://g.gravizo.com/g?url=https%3A%2F%2Fraw.githubusercontent.com%2Fexternpro%2Fexternpro%2Fmain%2Fcmake%2Fdeps.dot 'dependencies')\n")
+string(APPEND dot "// deps_graph\n")
+string(APPEND rme "\n![deps](https://g.gravizo.com/source/deps_graph?https%3A%2F%2Fraw.githubusercontent.com%2Fexternpro%2Fexternpro%2Fmain%2Fcmake%2Fdeps.dot 'dependencies')\n")
 string(APPEND rme "\n[How-to: modify a project to build with externpro](pros.md)\n")
 set(binDot ${CMAKE_BINARY_DIR}/deps.dot)
 set(binPng ${CMAKE_BINARY_DIR}/deps.png)

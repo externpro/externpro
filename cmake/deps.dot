@@ -1,3 +1,4 @@
+// deps_graph
 digraph GG {
   node [fontsize=12];
   "activemq-cpp" -> "apr";
@@ -39,3 +40,4 @@ digraph GG {
   "wxx" -> "wxwidgets";
   "zmqpp" -> "libzmq";
 }
+// deps_graph
