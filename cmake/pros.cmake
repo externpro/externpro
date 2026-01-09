@@ -1,12 +1,5 @@
-set(xp_activemq-cpp REPO github.com/externpro/activemq-cpp TAG v3.9.5.1
-  XPBLD "auto" BASE activemq-cpp-3.9.5 DEPS apr openssl
-  WEB "http://activemq.apache.org/cms/" UPSTREAM "github.com/apache/activemq-cpp"
-  DESC "ActiveMQ C++ Messaging Service (CMS) client library"
-  LICENSE "[Apache-2.0](http://www.apache.org/licenses/LICENSE-2.0.html 'Apache License, Version 2.0')"
-  SHA256_Darwin-arm64 4b08466bb07ef01d2aebf113ee6e559ffcfd2e8fcd54a98c5e4f735cf3999ff2
-  SHA256_Linux-arm64 f5511c8359470751cac3591e883ba1b313d8f318ab2fd96b6a322117d9c569b9
-  SHA256_Linux 84f3579a371fcdedb4e1159a02ccbd275ef43ecd601e96c4aacd6be861ee5d12
-  SHA256_win64 b1f84440e9caa920e422212a288fc777b093d5a3ff3f0d2a2d469d1e1bbdd9a0
+set(xp_activemq-cpp REPO github.com/externpro/activemq-cpp TAG v3.9.5.2
+  MANIFEST_SHA256 0151453f6b0031ad4c59a0b79719b2e97464a0fb72125399feeb512246195f9b
   )
 set(xp_apr REPO github.com/externpro/apr TAG v1.7.6.2
   MANIFEST_SHA256 0d2ebd3964c5965120615d5cd920902abe6447b3f5fa1118ac87d67506571fa7
