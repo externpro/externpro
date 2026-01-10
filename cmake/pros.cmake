@@ -236,15 +236,8 @@ set(xp_libgeotiff REPO github.com/externpro/libgeotiff TAG v1.2.4.2
   SHA256_Linux f8e3fdb6354b0c61eac50168c8823e6fb58bdb025964faa45c21f5ed9f6c5e5e
   SHA256_win64 8062b2f4a58a9747e981498cd5f251b8988ba493839162ae702b5af5ffc602b0
   )
-set(xp_libgit2 REPO github.com/externpro/libgit2 TAG v1.3.0.1
-  XPBLD "patch" BASE v1.3.0 DEPS libssh2
-  WEB "https://libgit2.github.com/" UPSTREAM "github.com/libgit2/libgit2"
-  DESC "portable, pure C implementation of the Git core methods"
-  LICENSE "[GPL-2.0 WITH le](https://github.com/libgit2/libgit2/blob/master/README.md#license 'GPL2 with linking exception')"
-  SHA256_Darwin-arm64 19a6e011b950d115b0469191a964ec40f1a467d96c4b8dc7a33390194c504efc
-  SHA256_Linux-arm64 031f65ddda057efde335cd622b89f5e7fd1b18481d6ee7f1997fa22d13d2e4e4
-  SHA256_Linux 274d7a92a1ba8011145edbbd6223d75d7a5b7859170f794e4073cef672440135
-  SHA256_win64 983dffde79a2ce3c83af178a0e43f646684b53172ba9d1bdd674dd10eda833bb
+set(xp_libgit2 REPO github.com/externpro/libgit2 TAG v1.3.0.2
+  MANIFEST_SHA256 2b34804488d10631ceb8d6dabaa181e843e697f9e1e35a983787451d64062e20
   )
 set(xp_libiconv REPO github.com/externpro/libiconv TAG v1.18.6
   XPBLD "bin" BASE v0
