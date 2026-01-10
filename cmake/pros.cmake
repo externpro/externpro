@@ -286,15 +286,8 @@ set(xp_libspatialite REPO github.com/externpro/libspatialite TAG v5.1.0.6
   SHA256_Linux 00549a7292e6f0391d585c1de642b142d0cb36f67bd01391fc0f89f6c622c506
   SHA256_win64 cb744298b24539e1cad2cb17db9909bbc9ee209bf34c018049b7a42ab767f832
   )
-set(xp_libssh2 REPO github.com/externpro/libssh2 TAG v1.9.0.2
-  XPBLD "patch" BASE libssh2-1.9.0 DEPS openssl zlib
-  WEB "http://www.libssh2.org/" UPSTREAM "github.com/libssh2/libssh2"
-  DESC "client-side C library implementing SSH2 protocol"
-  LICENSE "[BSD-3-Clause](http://www.libssh2.org/license.html 'BSD 3-Clause New or Revised License')"
-  SHA256_Darwin-arm64 d4b8c19309ae388a7b3e512139e1b3711e790bee42759fe46ea5a451b837df90
-  SHA256_Linux-arm64 50afe244694ce80e7e1f4ee234f918e32f9692db00d7b9983903cd2e372fa631
-  SHA256_Linux a8535f119c707fa65b95aa8ce942cc6cd2955f06108af85fd61f96d22ea92fcf
-  SHA256_win64 0ef5a22c654338384c9a9e74e9632ea898a62c36e8f059021e4ab32cd2fd924d
+set(xp_libssh2 REPO github.com/externpro/libssh2 TAG v1.9.0.3
+  MANIFEST_SHA256 44231b54b1b271766cc4c27ae5c0e925042fdd7ea9814da00681e3ae127a7c5e
   )
 set(xp_libstrophe REPO github.com/externpro/libstrophe TAG v0.9.1.4
   MANIFEST_SHA256 dd90d3340f7cc1af5abcbaf5973ce0e3f841ee131bd894aa03d56eb33a16390b
