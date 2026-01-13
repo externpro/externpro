@@ -65,9 +65,79 @@ Commit message:
 
 Where `<version-from-yml>` is the version referenced in the workflow file (e.g. `build-linux.yml@<version>`, `build-macos.yml@<version>`, `build-windows.yml@<version>`).
 
-## Outputs
-- Updated `.devcontainer`
-- Updated `.github/workflows`
+### Step 4: Update `CMakePresetsBase.json` if needed
+Compare the consumer repo's `CMakePresetsBase.json` against the externpro presets in `.devcontainer/cmake/presets/`.
 
-## Notes / Decisions to confirm
-- Should this workflow also include `git push` and opening a PR?
+```sh
+diff -u CMakePresetsBase.json .devcontainer/cmake/presets/CMakePresetsBase.json || true
+```
+
+Update `CMakePresetsBase.json` as needed:
+- Keep the `cacheVariables` under `configurePresets` intact.
+- If a `configurePresets.cacheVariables` entry exists for `XP_INSTALL_CMAKEDIR`, remove it and instead set `XP_NAMESPACE` to `xpro`.
+- Ensure `buildPresets` exists and matches what externpro provides in `.devcontainer/cmake/presets/` (some consumer repos may be missing `buildPresets` entirely).
+
+### Step 5: Remove `include(xpflags)` and `include(GNUInstallDirs)` if they were added
+From the Step 0 diff (`BASE...TAG`), if externpro added either of these lines, delete them in the local working copy:
+- `include(xpflags)`
+- `include(GNUInstallDirs)`
+
+### Step 6: Replace `xpPackageDevel()` with `xpExternPackage()`
+Update the project CMake to call `xpExternPackage()` instead of `xpPackageDevel()`.
+
+### Step 7: Add the correct `xpExternPackage()` parameters
+- If the project has a helper function that calls `xpPackageDevel()` (typically `callPackageDevel()`), remove that function and call `xpExternPackage()` directly.
+- If the project was setting `CMAKE_PROJECT_NAME` before calling `xpPackageDevel()`, remove that and use the `REPO_NAME` parameter on `xpExternPackage()` instead.
+- If you can infer the alias namespace, set `ALIAS_NAMESPACE` to whatever `CMAKE_NAMESPACE` is set to in the `else()` branch of `if(DEFINED XP_NAMESPACE)` (often `${PROJECT_NAME}`). Otherwise, set `ALIAS_NAMESPACE TODO:edit`.
+- If the project has `set(CMAKE_INSTALL_DEFAULT_COMPONENT_NAME ...)` or `set(XP_INSTALL_CMAKEDIR ...)`, remove them (obsolete with `xpExternPackage()`).
+- If the project has `set(XP_OPT_INSTALL <bool>)`, rename it to `set(CMAKE_OPT_INSTALL <bool>)` and update all uses.
+- If the project has `set(nameSpace ...)`, rename it to `set(CMAKE_NAMESPACE ...)` and store the raw namespace (no `::`). Append `::` only at call sites that require it (e.g. `install(EXPORT ... NAMESPACE "${CMAKE_NAMESPACE}::" ...)`, `export(... NAMESPACE ${CMAKE_NAMESPACE}:: ...)`).
+- Decide whether the `BASE` tag can be inferred from how the project determines its version in CMake (for example via `project(... VERSION ...)`, a `*_VERSION` variable, or a version header). If it can, use that to choose a correct upstream tag for `BASE`.
+- Copy the metadata from `.devcontainer/cmake/pros.cmake` for the `xp_<dep>` project being converted and make those `xpExternPackage()` parameters:
+  - `XPBLD` becomes `XPDIFF`
+  - `BASE`
+  - `DEPS`
+  - `WEB`
+  - `UPSTREAM`
+  - `DESC`
+  - `LICENSE`
+
+Parameter ordering/formatting:
+- First line: `xpExternPackage(REPO_NAME ... NAMESPACE ... ALIAS_NAMESPACE TODO:edit`
+- Second line: `TARGETS_FILE` then `EXE` then `LIBRARIES` (only those that exist; use `EXE_PATH` instead of `EXE` when applicable)
+- Third line: `BASE` then `XPDIFF` then `DEPS`
+- Fourth line: `WEB` then `UPSTREAM`
+- Fifth line: `DESC`
+- Sixth line: `LICENSE`
+- Closing `)`: indent like the parameter lines (two spaces beyond the `xpExternPackage(` start)
+
+### Step 8: Stage the minimal set of changes
+```sh
+git add -p
+```
+
+### Step 9: Review the full diff from upstream `BASE`
+Where `<BASE>` is the tag recorded in the `BASE` parameter of your `xpExternPackage()` call:
+```sh
+git diff <BASE>
+```
+Minimize the diff as much as possible so future externpro updates are easier.
+
+### Step 10: Commit the changes
+Suggested commit message:
+```sh
+git commit -m "cmake: xproinc enhancements and xpExternPackage()"
+```
+
+If `XP_` variables were renamed to `CMAKE_`, include this line in the commit message body:
+```sh
+git commit -m "cmake: xproinc enhancements and xpExternPackage()" \
+  -m "also rename XP_ variables to be more generic (CMAKE_)"
+```
+
+## Outputs
+- Updated `.devcontainer` submodule pointer
+- Updated `.github/workflows`
+- Updated project CMake to use `xpExternPackage()`
+- Staged changes (`git add -p`)
+- Commit created
