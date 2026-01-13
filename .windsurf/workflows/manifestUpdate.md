@@ -12,7 +12,7 @@ Update an externpro submodule checkout and its workflow templates in a consumer 
 - None.
 
 ## Preconditions
-- Working tree is clean.
+- Working tree does not have unrelated/uncommitted changes. A modified `.devcontainer` submodule pointer is expected after the pre-step.
 - You are in the consumer repo (the repo that vendors externpro as a submodule).
 - `.devcontainer` is a git submodule.
 - `.devcontainer` points to `https://github.com/externpro/externpro`.
@@ -155,11 +155,17 @@ Update the project CMake to call `xpExternPackage()` instead of `xpPackageDevel(
 - If there is no existing `else()` conditional for when `XP_NAMESPACE` is not defined, keep the prior pattern:
   - `set(nameSpace NAMESPACE ${XP_NAMESPACE}::)` when `XP_NAMESPACE` is defined
   - use `${nameSpace}` in `install(EXPORT ...)` so it is blank when `XP_NAMESPACE` is not defined
+- Prefer fewer conditional paths; keep the existing non-externpro behavior intact instead of adding new conditionals.
+- Prefer `set(nameSpace ...)` after the `xpExternPackage(...)` call (since `xpExternPackage()` does not use it) so it stays close to its `install(EXPORT ...)` usage.
+- Prefer `set(targetsFile ${PROJECT_NAME}-targets)`; do not introduce lowercasing unless the project already had it.
 - Since `xpExternPackage()` sets `XP_INSTALL_CMAKEDIR`, prefer this pattern so non-externpro builds still install exports correctly:
   - `if(DEFINED XP_NAMESPACE) ... xpExternPackage(...) ... elseif(NOT DEFINED XP_INSTALL_CMAKEDIR) set(XP_INSTALL_CMAKEDIR ${CMAKE_INSTALL_DATADIR}/cmake) endif()`
 - If the project has `set(CMAKE_INSTALL_DEFAULT_COMPONENT_NAME ...)` or `set(XP_INSTALL_CMAKEDIR ...)`, remove them (obsolete with `xpExternPackage()`).
 - If the project has `set(XP_OPT_INSTALL <bool>)`, rename it to `set(CMAKE_OPT_INSTALL <bool>)` and update all uses.
-- If the project has `set(nameSpace ...)`, rename it to `set(CMAKE_NAMESPACE ...)` and store the raw namespace (no `::`). Append `::` only at call sites that require it (e.g. `install(EXPORT ... NAMESPACE "${CMAKE_NAMESPACE}::" ...)`, `export(... NAMESPACE ${CMAKE_NAMESPACE}:: ...)`).
+- Prefer compact CMake style: avoid blank lines and avoid introducing extra namespace variables.
+- Only introduce a namespace helper variable (e.g. `CMAKE_NAMESPACE`) when the externpro diff is modifying existing CMake (e.g. `XPDIFF` is not `intro`) and preserving non-externpro behavior is important.
+- If CMake is being introduced (all CMake was added by the externpro diff, e.g. `XPDIFF` is `intro`), prefer the simpler `nameSpace` pattern and do not over-optimize the non-externpro path.
+- Assume `GNUInstallDirs` is already available via `.devcontainer/cmake/xproinc.cmake`; do not add conditional `include(GNUInstallDirs)` wrappers when converting.
 - Decide whether the `BASE` tag can be inferred from how the project determines its version in CMake (for example via `project(... VERSION ...)`, a `*_VERSION` variable, or a version header). If it can, use that to choose a correct upstream tag for `BASE`.
 - Copy the metadata from `.devcontainer/cmake/pros.cmake` for the `xp_<dep>` project being converted and make those `xpExternPackage()` parameters:
   - `XPBLD` becomes `XPDIFF`
