@@ -76,15 +76,8 @@ set(xp_eigen REPO github.com/externpro/eigen TAG v3.4.0.1
   SHA256_Linux 78a03eb8d1b3b6161b3d2de440172e456a13723cc9ae4730df5933589167f46e
   SHA256_win64 9bec874c71af9d899e0ab68f470d1ed2208004178a400ea04babe803358995cf
   )
-set(xp_fecpp REPO github.com/externpro/fecpp TAG v0.9.1
-  XPBLD "intro" BASE v0.9 EXE_DEPS boost
-  WEB "http://www.randombit.net/code/fecpp/" UPSTREAM "github.com/randombit/fecpp"
-  DESC "C++ forward error correction with SIMD optimizations"
-  LICENSE "[BSD-2-Clause](http://www.randombit.net/code/fecpp/ 'BSD 2-Clause Simplified License')"
-  SHA256_Darwin-arm64 a83651a12a7e5b04897fdf3668c55397e4691359b4054a9c852fc967f14bb083
-  SHA256_Linux-arm64 e50474c0fb088d2551070ae554566a60adaafaee832c3c3f139ca86fe0335310
-  SHA256_Linux ef1a3f8db144a49fde390bcaa2d6b137c764cd23880a365c94702d14f3bc31d1
-  SHA256_win64 90951863a61b1a7196caf00a66127736b5c9e7be003c4b4cc93c5c0a60dd73ad
+set(xp_fecpp REPO github.com/externpro/fecpp TAG v0.9.2
+  MANIFEST_SHA256 c177c19ef10be21fd1dd9bda8a20f21cb397dca7ca1e41f6cc7fbaf77d07ad50
   )
 set(xp_ffmpeg REPO github.com/externpro/FFmpeg TAG v4.3.1.1
   XPBLD "native(unix)" BASE n4.3.1 DEPS openh264 yasm
