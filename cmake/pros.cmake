@@ -463,15 +463,8 @@ set(xp_wxcmake REPO github.com/externpro/wxcmake
   DESC "build wxWidgets via cmake [submodule of: _wxwidgets_]"
   LICENSE "[wxWindows](https://wxwidgets.org/about/licence/ 'same as wxWidgets license')"
   )
-set(xp_wxinclude REPO github.com/externpro/wxInclude TAG v1.2.1
-  XPBLD "intro" BASE v1.0 EXE_DEPS boost
-  WEB "http://wiki.wxwidgets.org/Embedding_PNG_Images"
-  DESC "embed resources into cross-platform code"
-  LICENSE "[wxWindows](http://wiki.wxwidgets.org/Embedding_PNG_Images 'assumed wxWindows license, since source can be downloaded from wxWiki')"
-  SHA256_Darwin-arm64 554f46a0f13ce7d95871032f5dc2c68bd2f52104ba01d602b90fd2b61ec7987a
-  SHA256_Linux-arm64 cc3f86ad91f519407c8fdda2ca9a0df6b374085fbfc73cce086d6f166974d7f6
-  SHA256_Linux 3ce88bcb0204b5b5382a3445f849fb2eb0eaa8a7c67d2befb8492f5395bc9a8d
-  SHA256_win64 7c71aa6993197210ea2410f2e1447ae66b0d6ea834f481b9e49e05905de3e71e
+set(xp_wxinclude REPO github.com/externpro/wxInclude TAG v1.2.2
+  MANIFEST_SHA256 3675dab0351a9ef6cdd8addb8010948b2fae8022496da56e1e181dcbaaaf5b08
   )
 set(xp_wxtetris REPO github.com/smanders/wxTetris TAG v1.2.0
   XPBLD "intro" BASE v0 EXE_DEPS wxwidgets
