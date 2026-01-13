@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <defs>
+    <linearGradient id="gBase" x1="220" y1="140" x2="804" y2="884" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#2E9A67"/>
+      <stop offset="1" stop-color="#1F6F4A"/>
+    </linearGradient>
+    <linearGradient id="gFacetLight" x1="260" y1="250" x2="640" y2="640" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#38B875"/>
+      <stop offset="1" stop-color="#2E9A67"/>
+    </linearGradient>
+    <linearGradient id="gFacetMid" x1="360" y1="420" x2="760" y2="700" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#1F6F4A"/>
+      <stop offset="1" stop-color="#176244"/>
+    </linearGradient>
+    <linearGradient id="gFacetDark" x1="420" y1="520" x2="860" y2="900" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#124A32"/>
+      <stop offset="1" stop-color="#0F3E2B"/>
+    </linearGradient>
+    <filter id="softShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="14" stdDeviation="18" flood-color="#0B2A1C" flood-opacity="0.22"/>
+    </filter>
+  </defs>
+
+  <!-- Hex base -->
+  <path filter="url(#softShadow)"
+        d="M512 72
+           C548 72 582 86 608 111
+           L879 376
+           C905 402 920 437 920 474
+           L920 550
+           C920 587 905 622 879 648
+           L608 913
+           C582 938 548 952 512 952
+           L512 952
+           C476 952 442 938 416 913
+           L145 648
+           C119 622 104 587 104 550
+           L104 474
+           C104 437 119 402 145 376
+           L416 111
+           C442 86 476 72 512 72 Z"
+        fill="url(#gBase)"/>
+
+  <!-- Inner gem facets (more distinct than classic C++ diagonal split) -->
+  <!-- Top facet -->
+  <path d="M512 220 L726 420 L512 540 L298 420 Z"
+        fill="url(#gFacetLight)" opacity="0.98"/>
+
+  <!-- Left/bottom facet -->
+  <path d="M298 420 L512 540 L512 820 L270 600 Z"
+        fill="url(#gFacetMid)" opacity="0.98"/>
+
+  <!-- Right/bottom facet -->
+  <path d="M726 420 L754 600 L512 820 L512 540 Z"
+        fill="url(#gFacetDark)" opacity="0.98"/>
+
+  <!-- Subtle inner edge to increase crispness at small sizes -->
+  <path d="M512 98
+           C540 98 566 109 586 128
+           L846 382
+           C866 402 878 429 878 458
+           L878 566
+           C878 595 866 622 846 642
+           L586 896
+           C566 915 540 926 512 926
+           C484 926 458 915 438 896
+           L178 642
+           C158 622 146 595 146 566
+           L146 458
+           C146 429 158 402 178 382
+           L438 128
+           C458 109 484 98 512 98 Z"
+        fill="none" stroke="#0B2A1C" stroke-opacity="0.10" stroke-width="16"/>
+
+  <!-- xp text (white, heavy) -->
+  <!-- Using paths would be best for portability; this uses text for now. If you want, I can convert to path outlines. -->
+  <text x="512" y="610"
+        text-anchor="middle"
+        font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial"
+        font-size="260"
+        font-weight="800"
+        letter-spacing="-12"
+        fill="#FFFFFF">xp</text>
+</svg>
