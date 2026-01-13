@@ -6,6 +6,7 @@ Update an externpro submodule checkout and its workflow templates in a consumer 
 ## When to run
 - When you want to bring a repo that uses externpro (as a submodule) up to the latest `.devcontainer`.
 - When you want to refresh `.github/workflows` from externpro-provided templates.
+- When you want to modify cmake to use `xpExternPackage()` instead of `xpPackageDevel()` to generate a manifest file.
 
 ## Inputs
 - None.
@@ -16,8 +17,21 @@ Update an externpro submodule checkout and its workflow templates in a consumer 
 - `.devcontainer` is a git submodule.
 - `.devcontainer` points to `https://github.com/externpro/externpro`.
 
-## Workflow
-### Step 0: Identify the repo's `xp_<dep>` and review externpro changes
+## How to run in Windsurf
+In the Windsurf Cascade prompt, run:
+`/manifestUpdate`
+
+## User pre-step (do this before running `/manifestUpdate`)
+Update `.devcontainer` to the HEAD of `origin/main` so the workflow definitions and templates you are about to use are current.
+
+```sh
+cd .devcontainer
+git fetch --all
+git merge origin/main
+```
+
+Review externpro changes for the repo being updated.
+
 In consumer repos, the repository name (root source directory name) typically matches the externpro package variable in `.devcontainer/cmake/pros.cmake`:
 `set(xp_<dep> ...)` where `<dep>` is the lowercase repo name.
 
@@ -34,42 +48,85 @@ git diff <BASE>..<TAG>
 
 Note: `buildpro` is a special-case dev repo and is not expected to appear as an `xp_<dep>` entry in `pros.cmake`.
 
-### Step 1: Create a branch
+## Workflow
+### Step 1: Review the externpro diff for this repo
+This step is required so Cascade can apply the later steps correctly.
+
+Ask for explicit confirmation before running these commands.
+```sh
+git fetch --tags --all
+git diff <BASE>..<TAG>
+```
+
+### Step 2: Create a branch
+Ask for explicit confirmation before running these commands.
 ```sh
 git checkout -b manifestUpdate
 ```
 
-### Step 2: Update `.devcontainer` to the HEAD of `origin/main` and commit
+### Step 3: Commit the `.devcontainer` submodule pointer
+Ask for explicit confirmation before running these commands.
 ```sh
 cd .devcontainer
-git fetch --all
-git merge origin/main
-git describe --tags
+XP_TAG=$(git describe --tags)
+echo "externpro ${XP_TAG}"
 ```
-Save the output of `git describe --tags` for the next commit message.
-
+Ask for explicit confirmation before running this command.
 ```sh
 cd ..
-git commit -m "externpro <git describe --tags>" .devcontainer
+git commit -m "externpro ${XP_TAG}" .devcontainer
 ```
 
-### Step 3: Update `.github/workflows` from templates and commit
+### Step 4: Update `.github/workflows` from templates and commit
+Ask for explicit confirmation before running this command.
 ```sh
 cp .devcontainer/.github/wf-templates/xp*.yml .github/workflows/
 ```
 Review the changes.
 If the project uses `[Darwin|Linux|Windows]Release` presets, it may need to keep `cmake-workflow-preset`.
 
-Commit message:
-`workflows: externpro@<version-from-yml>`
+Ask for explicit confirmation before running these commands.
+```sh
+XP_WF_TAG=$(grep -hE "uses: externpro/externpro/.github/workflows/.*@" .github/workflows/xp*.yml | head -1 | sed -E 's/.*@([^ ]+).*/\1/')
+echo "workflows: externpro@${XP_WF_TAG}"
+git add .github/workflows/xp*.yml
+git commit -m "workflows: externpro@${XP_WF_TAG}"
+```
 
-Where `<version-from-yml>` is the version referenced in the workflow file (e.g. `build-linux.yml@<version>`, `build-macos.yml@<version>`, `build-windows.yml@<version>`).
-
-### Step 4: Update `CMakePresetsBase.json` if needed
+### Step 5: Update `CMakePresetsBase.json` if needed
 Compare the consumer repo's `CMakePresetsBase.json` against the externpro presets in `.devcontainer/cmake/presets/`.
 
+Ask for explicit confirmation before running this command.
 ```sh
 diff -u CMakePresetsBase.json .devcontainer/cmake/presets/CMakePresetsBase.json || true
+```
+
+If the diff is empty, no action is required.
+
+If the diff shows changes are needed:
+- Update the consumer repo presets to match externpro as closely as possible.
+- Keep the consumer repo's `configurePresets.cacheVariables` intact.
+- If the consumer repo still has `XP_INSTALL_CMAKEDIR` in `cacheVariables`, remove it and set `XP_NAMESPACE` to `xpro` instead.
+- Ensure `buildPresets` exists and matches what externpro provides (some consumer repos may be missing `buildPresets` entirely).
+
+Ask for explicit confirmation before running these commands.
+```sh
+git diff -- CMakePresets*.json
+```
+
+Ask the user to confirm the changes shown above are expected.
+
+Ask for explicit confirmation before running these commands.
+```sh
+git add CMakePresets*.json
+git diff --staged -- CMakePresets*.json
+```
+
+Ask the user to confirm the staged changes shown above are expected.
+
+Ask for explicit confirmation before running this command.
+```sh
+git commit -m "CMakePresets: updates from externpro cmake/presets"
 ```
 
 Update `CMakePresetsBase.json` as needed:
@@ -77,18 +134,29 @@ Update `CMakePresetsBase.json` as needed:
 - If a `configurePresets.cacheVariables` entry exists for `XP_INSTALL_CMAKEDIR`, remove it and instead set `XP_NAMESPACE` to `xpro`.
 - Ensure `buildPresets` exists and matches what externpro provides in `.devcontainer/cmake/presets/` (some consumer repos may be missing `buildPresets` entirely).
 
-### Step 5: Remove `include(xpflags)` and `include(GNUInstallDirs)` if they were added
-From the Step 0 diff (`BASE...TAG`), if externpro added either of these lines, delete them in the local working copy:
+### Step 6: Remove `include(xpflags)` and `include(GNUInstallDirs)` if they were added
+From the Step 1 diff (`BASE...TAG`), if externpro added either of these lines, delete them in the local working copy:
 - `include(xpflags)`
 - `include(GNUInstallDirs)`
 
-### Step 6: Replace `xpPackageDevel()` with `xpExternPackage()`
+If they were not added by externpro, leave them as-is.
+
+### Step 7: Replace `xpPackageDevel()` with `xpExternPackage()`
 Update the project CMake to call `xpExternPackage()` instead of `xpPackageDevel()`.
 
-### Step 7: Add the correct `xpExternPackage()` parameters
+### Step 8: Add the correct `xpExternPackage()` parameters
 - If the project has a helper function that calls `xpPackageDevel()` (typically `callPackageDevel()`), remove that function and call `xpExternPackage()` directly.
-- If the project was setting `CMAKE_PROJECT_NAME` before calling `xpPackageDevel()`, remove that and use the `REPO_NAME` parameter on `xpExternPackage()` instead.
-- If you can infer the alias namespace, set `ALIAS_NAMESPACE` to whatever `CMAKE_NAMESPACE` is set to in the `else()` branch of `if(DEFINED XP_NAMESPACE)` (often `${PROJECT_NAME}`). Otherwise, set `ALIAS_NAMESPACE TODO:edit`.
+- Omit `REPO_NAME` unless the repository name does not match `project()`/`CMAKE_PROJECT_NAME`.
+  - If the legacy CMake was forcing `CMAKE_PROJECT_NAME` to a value different from `project(...)`, remove that and use `REPO_NAME` only when needed to preserve the manifest repo name.
+- Do not invent namespace/alias policy. Infer from existing CMake structure.
+- Only pass `ALIAS_NAMESPACE` when there is an existing `else()` policy for when `XP_NAMESPACE` is not defined. If there is no `else()` conditional, do not pass `ALIAS_NAMESPACE`.
+- Do not introduce helper variables like `xpExternPackageArgs`. Prefer a direct `xpExternPackage(...)` call.
+- If there is no `else()` conditional for when `XP_NAMESPACE` is not defined, call `xpExternPackage(...)` only inside the `if(DEFINED XP_NAMESPACE)` block.
+- If there is no existing `else()` conditional for when `XP_NAMESPACE` is not defined, keep the prior pattern:
+  - `set(nameSpace NAMESPACE ${XP_NAMESPACE}::)` when `XP_NAMESPACE` is defined
+  - use `${nameSpace}` in `install(EXPORT ...)` so it is blank when `XP_NAMESPACE` is not defined
+- Since `xpExternPackage()` sets `XP_INSTALL_CMAKEDIR`, prefer this pattern so non-externpro builds still install exports correctly:
+  - `if(DEFINED XP_NAMESPACE) ... xpExternPackage(...) ... elseif(NOT DEFINED XP_INSTALL_CMAKEDIR) set(XP_INSTALL_CMAKEDIR ${CMAKE_INSTALL_DATADIR}/cmake) endif()`
 - If the project has `set(CMAKE_INSTALL_DEFAULT_COMPONENT_NAME ...)` or `set(XP_INSTALL_CMAKEDIR ...)`, remove them (obsolete with `xpExternPackage()`).
 - If the project has `set(XP_OPT_INSTALL <bool>)`, rename it to `set(CMAKE_OPT_INSTALL <bool>)` and update all uses.
 - If the project has `set(nameSpace ...)`, rename it to `set(CMAKE_NAMESPACE ...)` and store the raw namespace (no `::`). Append `::` only at call sites that require it (e.g. `install(EXPORT ... NAMESPACE "${CMAKE_NAMESPACE}::" ...)`, `export(... NAMESPACE ${CMAKE_NAMESPACE}:: ...)`).
@@ -97,13 +165,14 @@ Update the project CMake to call `xpExternPackage()` instead of `xpPackageDevel(
   - `XPBLD` becomes `XPDIFF`
   - `BASE`
   - `DEPS`
+  - `EXE_DEPS` becomes `PVT_DEPS`
   - `WEB`
   - `UPSTREAM`
   - `DESC`
   - `LICENSE`
 
 Parameter ordering/formatting:
-- First line: `xpExternPackage(REPO_NAME ... NAMESPACE ... ALIAS_NAMESPACE TODO:edit`
+- First line: `xpExternPackage(REPO_NAME ... NAMESPACE ... ALIAS_NAMESPACE TODO:edit` (omit `REPO_NAME` unless needed)
 - Second line: `TARGETS_FILE` then `EXE` then `LIBRARIES` (only those that exist; use `EXE_PATH` instead of `EXE` when applicable)
 - Third line: `BASE` then `XPDIFF` then `DEPS`
 - Fourth line: `WEB` then `UPSTREAM`
@@ -111,20 +180,22 @@ Parameter ordering/formatting:
 - Sixth line: `LICENSE`
 - Closing `)`: indent like the parameter lines (two spaces beyond the `xpExternPackage(` start)
 
-### Step 8: Stage the minimal set of changes
+### Step 9: Stage the minimal set of changes
+Ask for explicit confirmation before running this command.
 ```sh
 git add -p
 ```
 
-### Step 9: Review the full diff from upstream `BASE`
+### Step 10: Review the full diff from upstream `BASE`
 Where `<BASE>` is the tag recorded in the `BASE` parameter of your `xpExternPackage()` call:
 ```sh
 git diff <BASE>
 ```
 Minimize the diff as much as possible so future externpro updates are easier.
 
-### Step 10: Commit the changes
+### Step 11: Commit the changes
 Suggested commit message:
+Ask for explicit confirmation before running this command.
 ```sh
 git commit -m "cmake: xproinc enhancements and xpExternPackage()"
 ```
