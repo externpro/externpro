@@ -36,9 +36,30 @@ runs:
       continue-on-error: true
       run: cmake --workflow --preset=${{ inputs.cmake-workflow-preset }}
     -
+      name: Install tmate (on failure)
+      if: ${{ inputs.enable-tmate == 'true' && steps.cmake_workflow.outcome == 'failure' }}
+      shell: bash
+      run: |
+        if command -v tmate >/dev/null 2>&1; then
+          exit 0
+        fi
+        if command -v dnf >/dev/null 2>&1; then
+          sudo dnf -y install tmate openssh-clients || (sudo dnf -y install epel-release && sudo dnf -y install tmate openssh-clients)
+        elif command -v yum >/dev/null 2>&1; then
+          sudo yum -y install tmate openssh-clients || (sudo yum -y install epel-release && sudo yum -y install tmate openssh-clients)
+        elif command -v apt-get >/dev/null 2>&1; then
+          sudo apt-get update
+          sudo apt-get install -y tmate openssh-client
+        else
+          echo "No supported package manager found to install tmate" >&2
+          exit 1
+        fi
+    -
       name: Setup tmate session (on failure)
       if: ${{ inputs.enable-tmate == 'true' && steps.cmake_workflow.outcome == 'failure' }}
       uses: mxschmitt/action-tmate@v3
+      with:
+        install-dependencies: false
     -
       name: Fail if CMake Workflow failed
       if: ${{ steps.cmake_workflow.outcome == 'failure' }}
