@@ -231,15 +231,8 @@ set(xp_librttopo REPO github.com/externpro/librttopo TAG v1.1.0.3
   SHA256_Linux b62d3ba801f5d90086575a7947558c39b1629b9a90cc32d5df977ef9b706d729
   SHA256_win64 5f821543ffa68e59c3a1c075cbd94be3ebb3409b5aab7be3eb8af9f43a571209
   )
-set(xp_libsodium REPO github.com/externpro/libsodium TAG v1.0.18.221
-  XPBLD "auto" BASE jedisct1:aa099f5e82ae78175f9c1c48372a123cb634dd92
-  WEB "https://doc.libsodium.org/" UPSTREAM "github.com/jedisct1/libsodium"
-  DESC "library for encryption, decryption, signatures, password hashing and more"
-  LICENSE "[ISC](https://doc.libsodium.org/#license 'Internet Systems Consortium License, functionally equivalent to simplified BSD and MIT licenses')"
-  SHA256_Darwin-arm64 8b269b29ea6f389ccf8d457005a016019f6fa32f8fa70161dfb33a6403e06421
-  SHA256_Linux-arm64 b44dd44cbe5aa3b0d4dd777a83c9ed9c850096898dc9d134cd3a87f47137a110
-  SHA256_Linux ef476149bdaa409774cd6dda73e9fe8cdf5e7d0475a91a8a349ee8baa79dccd7
-  SHA256_win64 ba76566a2add1a1a5f43b87194d5ecc5b748616a29c3c995950e4e98ded46182
+set(xp_libsodium REPO github.com/externpro/libsodium TAG v1.0.18.227
+  MANIFEST_SHA256 b38e3e769f6cab01568878614a1871743993d6886e563454bea398582d919395
   )
 set(xp_libspatialite REPO github.com/externpro/libspatialite TAG v5.1.0.6
   XPBLD "auto" BASE 5.1.0 DEPS geos libiconv sqlite3 zlib
