@@ -111,15 +111,8 @@ set(xp_flatbuffers REPO github.com/externpro/flatbuffers TAG v25.2.10.1
 set(xp_fmt REPO github.com/externpro/fmt TAG v11.2.0.7
   MANIFEST_SHA256 a91f44f9147ea00163676f3f43099a4d522b2fc7c8f8a5a9742845ad3f552bb2
   )
-set(xp_geos REPO github.com/externpro/geos TAG v3.13.0.4
-  XPBLD "patch" BASE 3.13.0
-  WEB "https://libgeos.org" UPSTREAM "github.com/libgeos/geos"
-  DESC "C/C++ library for computational geometry with a focus on algorithms used in geographic information systems (GIS) software"
-  LICENSE "[LPGL-2.1](https://trac.osgeo.org/geos/ 'LGPL version 2.1')"
-  SHA256_Darwin-arm64 ada51bf5945990e63a7e3856545410e3af8c1f54a45ae75239ba20ec61166809
-  SHA256_Linux-arm64 08026046256fc7ba251932a1cf8ecb636a59ad92ba59bcbdbbde9f44a16c945f
-  SHA256_Linux 2853045a06fd25535bbd157cea19bf0d9073882c58f179b0eb790544d3ba9a34
-  SHA256_win64 bb776f18b782d4287db2b81dbd85831776836a06c4da344aaac7dbbffedea740
+set(xp_geos REPO github.com/externpro/geos TAG v3.13.0.5
+  MANIFEST_SHA256 d12a0ac3a9d39f45af369952673c9e94c232528f5cf45cfa7c21b8d85a9a9ee3
   )
 set(xp_geotranz REPO github.com/externpro/geotranz TAG v2.4.2.1
   XPBLD "intro" BASE v2.4.2
