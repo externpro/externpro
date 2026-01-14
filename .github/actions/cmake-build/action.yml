@@ -12,6 +12,9 @@ inputs:
   name-suffix:
     required: false
     default: ""
+  enable-tmate:
+    required: false
+    default: "false"
 runs:
   using: composite
   steps:
@@ -29,7 +32,18 @@ runs:
     -
       name: CMake Workflow
       shell: bash
+      id: cmake_workflow
+      continue-on-error: true
       run: cmake --workflow --preset=${{ inputs.cmake-workflow-preset }}
+    -
+      name: Setup tmate session (on failure)
+      if: ${{ inputs.enable-tmate == 'true' && steps.cmake_workflow.outcome == 'failure' }}
+      uses: mxschmitt/action-tmate@v3
+    -
+      name: Fail if CMake Workflow failed
+      if: ${{ steps.cmake_workflow.outcome == 'failure' }}
+      shell: bash
+      run: exit 1
     -
       name: Find package
       id: find_package

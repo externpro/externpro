@@ -22,6 +22,11 @@ on:
         type: string
         description: 'JSON array of buildpro images to build (e.g. ["rocky8-gcc9","rocky9-gcc13","rocky10-gcc15","ubuntu"])'
         default: '["rocky8-gcc9","rocky9-gcc13","rocky10-gcc15"]'
+      enable-tmate:
+        required: false
+        type: boolean
+        description: 'Start an interactive tmate session if the CMake workflow step fails (useful for debugging CI-only failures)'
+        default: false
 jobs:
   lc-repo-names:
     runs-on: ubuntu-latest
@@ -110,6 +115,7 @@ jobs:
           cmake-preset: Linux
           no-install-preset: LinuxReleaseNoInstall
           name-suffix: -${{ matrix.buildpro_image }}
+          enable-tmate: ${{ inputs.enable-tmate }}
   clean-up:
     needs: [lc-repo-names, build-docker-image, build]
     if: ${{ needs.build.result == 'success' }}
