@@ -41,6 +41,7 @@ jobs:
     needs: lc-repo-names
     runs-on: ${{ matrix.arch == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
     strategy:
+      fail-fast: false
       matrix:
         arch: ${{ fromJson(inputs.arch-list) }}
         buildpro_image: ${{ fromJson(inputs.buildpro-images) }}
@@ -83,6 +84,7 @@ jobs:
     if: ${{ needs.build-docker-image.result == 'success' }}
     runs-on: ${{ matrix.arch == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
     strategy:
+      fail-fast: false
       matrix:
         arch: ${{ fromJson(inputs.arch-list) }}
         buildpro_image: ${{ fromJson(inputs.buildpro-images) }}
