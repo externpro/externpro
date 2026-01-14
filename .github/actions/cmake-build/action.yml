@@ -43,15 +43,59 @@ runs:
         if command -v tmate >/dev/null 2>&1; then
           exit 0
         fi
+        install_tmate_static() {
+          local ver="2.4.0"
+          local arch
+          arch=$(uname -m)
+          local asset_arches
+          case "$arch" in
+            x86_64|amd64)
+              asset_arches=("amd64")
+              ;;
+            aarch64|arm64)
+              asset_arches=("arm64v8" "arm64")
+              ;;
+            *)
+              echo "Unsupported architecture for static tmate download: ${arch}" >&2
+              return 1
+              ;;
+          esac
+          local tmpdir
+          tmpdir=$(mktemp -d)
+          local asset_arch
+          for asset_arch in "${asset_arches[@]}"; do
+            local url="https://github.com/tmate-io/tmate/releases/download/${ver}/tmate-${ver}-static-linux-${asset_arch}.tar.xz"
+            if curl -fsSL "$url" -o "$tmpdir/tmate.tar.xz"; then
+              tar -xJf "$tmpdir/tmate.tar.xz" -C "$tmpdir"
+              local bin
+              bin=$(find "$tmpdir" -type f -name tmate -perm -u+x | head -1)
+              if [ -z "$bin" ]; then
+                echo "Could not locate extracted tmate binary" >&2
+                return 1
+              fi
+              sudo install -m 0755 "$bin" /usr/local/bin/tmate
+              tmate -V || true
+              return 0
+            fi
+          done
+          echo "Could not download a static tmate binary for arch ${arch} (tried: ${asset_arches[*]})" >&2
+          return 1
+        }
         if command -v dnf >/dev/null 2>&1; then
-          sudo dnf -y install tmate openssh-clients || (sudo dnf -y install epel-release && sudo dnf -y install tmate openssh-clients)
+          sudo dnf -y install openssh-clients || true
+          sudo dnf -y install tmate || (sudo dnf -y install epel-release && sudo dnf -y install tmate) || install_tmate_static
         elif command -v yum >/dev/null 2>&1; then
-          sudo yum -y install tmate openssh-clients || (sudo yum -y install epel-release && sudo yum -y install tmate openssh-clients)
+          sudo yum -y install openssh-clients || true
+          sudo yum -y install tmate || (sudo yum -y install epel-release && sudo yum -y install tmate) || install_tmate_static
         elif command -v apt-get >/dev/null 2>&1; then
           sudo apt-get update
           sudo apt-get install -y tmate openssh-client
         else
           echo "No supported package manager found to install tmate" >&2
+          exit 1
+        fi
+        if ! command -v tmate >/dev/null 2>&1; then
+          echo "tmate was not installed successfully" >&2
           exit 1
         fi
     -
