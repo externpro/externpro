@@ -172,7 +172,11 @@ Update the project CMake to call `xpExternPackage()` instead of `xpPackageDevel(
  - Prefer compact CMake style: avoid blank lines and avoid introducing extra namespace variables.
  - Only introduce a namespace helper variable (e.g. `CMAKE_NAMESPACE`) when the externpro diff is modifying existing CMake (e.g. `XPDIFF` is not `intro`) and preserving non-externpro behavior is important.
  - If CMake is being introduced (all CMake was added by the externpro diff, e.g. `XPDIFF` is `intro`), prefer the simpler `nameSpace` pattern so it can be empty when `XP_NAMESPACE` is not defined and can be used directly in `install(EXPORT ... NAMESPACE ${nameSpace})`.
-   - `if(DEFINED XP_NAMESPACE) set(nameSpace "${XP_NAMESPACE}::") else() set(nameSpace "") endif()`
+  - Prefer making `nameSpace` an *argument list* so you never emit `NAMESPACE ""`:
+    - `if(DEFINED XP_NAMESPACE) set(nameSpace NAMESPACE ${XP_NAMESPACE}::) endif()`
+    - `install(EXPORT ... ${nameSpace})`
+  - If you already have an `if(DEFINED XP_NAMESPACE)` block for `xpExternPackage(...)`, you can set `nameSpace` inside that block (before or after `xpExternPackage(...)`) so you don't need a second `if()` later:
+    - `if(DEFINED XP_NAMESPACE) ... xpExternPackage(...) ... set(nameSpace NAMESPACE ${XP_NAMESPACE}::) ... endif()`
  - Assume `GNUInstallDirs` is already available via `.devcontainer/cmake/xproinc.cmake`; do not add conditional `include(GNUInstallDirs)` wrappers when converting.
  - Decide whether the `BASE` tag can be inferred from how the project determines its version in CMake (for example via `project(... VERSION ...)`, a `*_VERSION` variable, or a version header). If it can, use that to choose a correct upstream tag for `BASE`.
  - Copy the metadata from `.devcontainer/cmake/pros.cmake` for the `xp_<dep>` project being converted and make those `xpExternPackage()` parameters:
