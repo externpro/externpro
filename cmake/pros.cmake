@@ -144,15 +144,8 @@ set(xp_glew REPO github.com/externpro/glew TAG v1.13.0.1
 set(xp_googletest REPO github.com/externpro/googletest TAG v1.16.0.2
   MANIFEST_SHA256 3442fd80e8cb8bb0cdd300ef312d3c4a79b8d067e614f4a66ea7d511e6da96df
   )
-set(xp_hdf5 REPO github.com/externpro/hdf5 TAG v1.14.6.5
-  XPBLD "patch" BASE hdf5_1.14.6 DEPS zlib
-  WEB "https://www.hdfgroup.org/solutions/hdf5/" UPSTREAM "github.com/HDFGroup/hdf5"
-  DESC "Utilize the HDF5 high performance data software library and file format to manage, process, and store your heterogeneous data. HDF5 is built for fast I/O processing and storage."
-  LICENSE "[BSD-3-Clause](https://github.com/HDFGroup/hdf5/blob/develop/LICENSE 'BSD 3-Clause New or Revised License')"
-  SHA256_Darwin-arm64 0e3b00aa64b989fc55047a01ac278a6938c22324394ea28e2173bbdccecc6d91
-  SHA256_Linux-arm64 a008859feae11aefbf9d475c62250b6ba44d5435b87a3ff110f8e90bd9ef3988
-  SHA256_Linux 8665645ce59162219df17b168e20b081d0b1224cc453322fd7aae13c9352fb34
-  SHA256_win64 3cbefc592730f8999897efc1b2c14930ed8f58549afe048f521e041930d471da
+set(xp_hdf5 REPO github.com/externpro/hdf5 TAG v1.14.6.6
+  MANIFEST_SHA256 8b32eb66af6242edce23bafe3e4f283b93434e6434d4a4a9a1144ccfa7dda28c
   )
 set(xp_jasper REPO github.com/externpro/jasper TAG v1.900.1.1
   XPBLD "auto" BASE version-1.900.1
