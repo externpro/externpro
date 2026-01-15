@@ -378,15 +378,8 @@ set(xp_spatialite-tools REPO github.com/externpro/spatialite-tools TAG v5.1.0.5
 set(xp_spdlog REPO github.com/externpro/spdlog TAG v1.15.3.3
   MANIFEST_SHA256 8c42801aad4d13383fcf76d600a1c9d1699ac856e416f16a91ee2fedfef81d92
   )
-set(xp_sqlite3 REPO github.com/externpro/SQLite3 TAG v3.38.2.1
-  XPBLD "patch" BASE 3.38.2
-  WEB "https://www.sqlite.org/index.html 'SQLite website'" UPSTREAM "github.com/azadkuh/sqlite-amalgamation"
-  DESC "C-language library that implements a small, fast, self-contained, high-reliability, full-featured, SQL database engine"
-  LICENSE "[public domain](https://www.sqlite.org/copyright.html 'open-source, not open-contribution')"
-  SHA256_Darwin-arm64 2845d6b59ddcb11e4c09e3d22a717b111953e80aa4df8a59227086a2d2bcb196
-  SHA256_Linux-arm64 3959e9542480cf65b0ca265f131b934641824ed92fac38df3b8bc401f54b02ad
-  SHA256_Linux 8cc51f5a86c75ed83956ede8e5aae6f076f213697009741765a5d402af3d4496
-  SHA256_win64 0b59fc70300618ebc6a4eaf01fc63a41d43e37e003317cf1db68270674f9d171
+set(xp_sqlite3 REPO github.com/externpro/SQLite3 TAG v3.38.2.2
+  MANIFEST_SHA256 7abab418a6f5b3c6bf482ff7806fa07d7fde7106e1f3479cbd611748bb8cd54d
   )
 set(xp_wirehair REPO github.com/externpro/wirehair TAG v23.12.02.1
   XPBLD "patch" BASE v23.12.02
