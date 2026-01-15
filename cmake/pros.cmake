@@ -243,15 +243,8 @@ set(xp_libssh2 REPO github.com/externpro/libssh2 TAG v1.9.0.3
 set(xp_libstrophe REPO github.com/externpro/libstrophe TAG v0.9.1.4
   MANIFEST_SHA256 dd90d3340f7cc1af5abcbaf5973ce0e3f841ee131bd894aa03d56eb33a16390b
   )
-set(xp_libzmq REPO github.com/externpro/libzmq TAG v4.3.4.2
-  XPBLD "patch" BASE v4.3.4 DEPS libsodium
-  WEB "https://zeromq.org/" UPSTREAM "github.com/zeromq/libzmq"
-  DESC "high-performance asynchronous messaging library"
-  LICENSE "[MPL-2.0](http://wiki.zeromq.org/area:licensing 'Mozilla Public License 2.0')"
-  SHA256_Darwin-arm64 8f4dd694dbec18ee51d37f10221b437c3246f78dc30f92822219ab6e678220f4
-  SHA256_Linux-arm64 a9d698de563710b5139815a39a04134816be7eeba760d2d85abde10c8919c523
-  SHA256_Linux b010329f58e199ffb01f3fbd016d4ed9acc2ce304c526162c75ea96bad870c05
-  SHA256_win64 24ee926b65966edceaba9e7df7a25885cee636f4b01b15c6b70744aacbcfe2a6
+set(xp_libzmq REPO github.com/externpro/libzmq TAG v4.3.4.3
+  MANIFEST_SHA256 3d928aff851cf38d0fcea8a138f7c2c592d6b3e738fd637d63a0e21ce7ea1fab
   )
 set(xp_lua REPO github.com/externpro/lua TAG v5.2.3.1
   XPBLD "patch" BASE v5.2.3
