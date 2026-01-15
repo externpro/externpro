@@ -14,15 +14,8 @@ set(xp_argon2 REPO github.com/externpro/argon2 TAG v20210625.1
   SHA256_Linux ea7a773da6aca9ec9766e6a1ae680b9375c068375bb2fdaee959745a4190a69c
   SHA256_win64 fa649f8c8975985f9714f11c500aef67468fc66801611aa067bbb489e9814da2
   )
-set(xp_azmq REPO github.com/externpro/azmq TAG v1.0.3.1
-  XPBLD "patch" BASE v1.0.3 DEPS boost libzmq
-  WEB "https://zeromq.org/" UPSTREAM "github.com/zeromq/azmq"
-  DESC "provides Boost Asio style bindings for ZeroMQ"
-  LICENSE "[BSL-1.0](https://github.com/zeromq/azmq/blob/master/LICENSE-BOOST_1_0 'Boost Software License 1.0')"
-  SHA256_Darwin-arm64 2951835ea4dd24d11d1d922212cb65319d2925641ce5beb4cd01363bf9a8c719
-  SHA256_Linux-arm64 3ff2ab1995e7ee9c954c7a8c2bebdf1ebf75dd87bda7d885762271948ddc503e
-  SHA256_Linux 33b12c2408f41480d47e4415ab6d9564d1d2c3da42913dbe2e6a5b8475723bac
-  SHA256_win64 3d3c92b9da136dcafec91ebc728743219d55a5be30cfa53d71bc3c56a2d81201
+set(xp_azmq REPO github.com/externpro/azmq TAG v1.0.3.2
+  MANIFEST_SHA256 64c7699cc04af1e663be4f4d80a2a892c023f4aa1a4a92b96c512201fd002a06
   )
 set(xp_boost REPO github.com/externpro/boost TAG v1.76.0.4
   MANIFEST_SHA256 9d6e095819fb155829b034759006e9aef3d7c4a761e5b0c9d1ebfa31064d5d7c
