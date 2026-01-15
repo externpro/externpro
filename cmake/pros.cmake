@@ -46,15 +46,8 @@ set(xp_clang-format REPO github.com/externpro/clang-format TAG v19.1.5.1
   SHA256_Linux 5ee07eddc025462bcfaa44e32547b43951ee03099b13b789866d0047a47e5524
   SHA256_win64 c75c1d540ff8ed273b140c2e2c6f13bc978a65539d57c6e35ec001e149d85b89
   )
-set(xp_cppzmq REPO github.com/externpro/cppzmq TAG v4.7.1.1
-  XPBLD "patch" BASE v4.7.1 DEPS libzmq
-  WEB "https://zeromq.org/" UPSTREAM "github.com/zeromq/cppzmq"
-  DESC "header-only C++ binding for libzmq"
-  LICENSE "[MPL-2.0](http://wiki.zeromq.org/area:licensing 'Mozilla Public License 2.0')"
-  SHA256_Darwin-arm64 94df12cccbe5df6c23e4c5135c92b0f7cd94b9fa5e5fb59838574b645baf1405
-  SHA256_Linux-arm64 f8781ad185cdec1e716d6b69df0008c20d72beb5e185cf4355e2e09e551978e7
-  SHA256_Linux 3c2c6a0881d294a8ebd6076db3da348161e39124276d403bffcc1556545036ef
-  SHA256_win64 ff5dc6f2f9dd946c45e2c26090d7586597ada4e3038822b7510dc50a7ef06f33
+set(xp_cppzmq REPO github.com/externpro/cppzmq TAG v4.7.1.2
+  MANIFEST_SHA256 3c4a5d3793906fd121562e7ce063f1977e90b8df079ae80749914f989c9be51b
   )
 set(xp_curl REPO github.com/externpro/curl TAG v7.80.0.2
   MANIFEST_SHA256 97b813cc7a7c3a403bccb5f33225f5940f26f64e97147098f19e27efedbcd5a5
