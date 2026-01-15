@@ -200,15 +200,8 @@ set(xp_libiconv REPO github.com/externpro/libiconv TAG v1.18.6
   SHA256_Linux 7c24a6ae1fad58ed8560aa3e39f5475483bad27719e51b77ec140a41e0b3d558
   SHA256_win64 2e196d43265bb2af3f419358b686f3a220ca76f08113e2d162dd3b334934985c
   )
-set(xp_librttopo REPO github.com/externpro/librttopo TAG v1.1.0.3
-  XPBLD "auto" BASE librttopo-1.1.0 DEPS geos
-  WEB "https://git.osgeo.org/gitea/rttopo/librttopo" UPSTREAM "github.com/CGX-GROUP/librttopo"
-  DESC "RT Topology Library exposes an API to create and manage standard topologies using user-provided data stores"
-  LICENSE "[GPL-2.0](https://github.com/CGX-GROUP/librttopo/blob/master/COPYING 'GNU General Public License v2.0 or later')"
-  SHA256_Darwin-arm64 9c90b0a8c6d4caeebbe7417ab7f4d346bb0607a070646b0ad568ed8b6e403246
-  SHA256_Linux-arm64 9ea762f2678c6ab0c12b9ddb4ad9db8d8012f7eda6abcfd6d0d587fb224391e4
-  SHA256_Linux b62d3ba801f5d90086575a7947558c39b1629b9a90cc32d5df977ef9b706d729
-  SHA256_win64 5f821543ffa68e59c3a1c075cbd94be3ebb3409b5aab7be3eb8af9f43a571209
+set(xp_librttopo REPO github.com/externpro/librttopo TAG v1.1.0.4
+  MANIFEST_SHA256 aa863a204754bf3a1d0fda77085df4864f3d5598fea681e74ea6e754ca6f8943
   )
 set(xp_libsodium REPO github.com/externpro/libsodium TAG v1.0.18.227
   MANIFEST_SHA256 b38e3e769f6cab01568878614a1871743993d6886e563454bea398582d919395
