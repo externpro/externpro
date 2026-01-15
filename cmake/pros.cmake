@@ -461,13 +461,6 @@ set(xp_yasm REPO github.com/externpro/yasm TAG v1.3.0.2
 set(xp_zlib REPO github.com/externpro/zlib TAG v1.3.1.3
   MANIFEST_SHA256 895215459d64227b6f6fbd6c9580cb5cf8e637db3d7c5e750760ff66324222c2
   )
-set(xp_zmqpp REPO github.com/externpro/zmqpp TAG v4.2.0-47.1
-  XPBLD "patch" BASE 4.2.0-47 DEPS libzmq
-  WEB "https://zeromq.github.io/zmqpp/" UPSTREAM "github.com/zeromq/zmqpp"
-  DESC "high-level binding for libzmq"
-  LICENSE "[MPL-2.0](https://github.com/zeromq/zmqpp/blob/develop/LICENSE 'Mozilla Public License 2.0')"
-  SHA256_Darwin-arm64 b5ad4175ff759f6aec23214ce4749586ead28cd6f7be89333e26ad0aae0ed65f
-  SHA256_Linux-arm64 848572b892b4e2a2cd3a24147ae20fd737437c9e6fa3e0d187250c32c58de896
-  SHA256_Linux 9d8872646aa7f8e1d83d11864e098473dfc28e1c6f4ee17f466abe78c98813d5
-  SHA256_win64 2303f474f05a28fe717deb889f1693284e2b8fea3ac8ceb48851bc75d48f42a0
+set(xp_zmqpp REPO github.com/externpro/zmqpp TAG v4.2.0-47.2
+  MANIFEST_SHA256 0f811e22abc512160582820ad4faf7e279de4774fcd050b94a76f6b0922fe5a2
   )
