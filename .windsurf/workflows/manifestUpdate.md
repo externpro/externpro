@@ -107,7 +107,15 @@ git commit -m "externpro ${XP_TAG}" .devcontainer
 cp .devcontainer/.github/wf-templates/xp*.yml .github/workflows/
 ```
 Review the changes.
-If the project uses `[Darwin|Linux|Windows]Release` presets and already has a `cmake-workflow-preset` workflow, it MUST be preserved.
+If the consumer repo uses non-default CMake workflow presets ending in `Release` (e.g. `LinuxRelease`, `DarwinRelease`, `WindowsRelease`) in its existing `xpbuild.yml`, preserve those values after copying the templates.
+
+Policy:
+- Do copy the templates (the template structure is authoritative; for example linux should typically be a single job).
+- After copying, re-apply only the consumer repo's non-default `cmake-workflow-preset` values that end in `Release`.
+- Do not add extra linux jobs (e.g. `linux-arm64`) solely to force architecture selection.
+- Do not set `arch-list` unless the consumer repo has a specific reason to deviate; the default should build the intended architectures.
+
+If the project has a `cmake-workflow-preset` workflow, it MUST be preserved.
 
 If `cmake-workflow-preset` exists, ensure it is not overwritten by the template copy step (restore it if needed) before staging `xp*.yml`.
 
