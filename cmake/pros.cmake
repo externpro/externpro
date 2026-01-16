@@ -26,15 +26,8 @@ set(xp_bzip2 REPO github.com/externpro/bzip2 TAG v1.0.8.3
 set(xp_c-ares REPO github.com/externpro/c-ares TAG v1.18.1.2
   MANIFEST_SHA256 8143097360c9312f0b0d015f251158e5a583be6d4d6184f41f3bac70c9878b12
   )
-set(xp_ceres-solver REPO github.com/externpro/ceres-solver TAG v2.2.0.2
-  XPBLD "patch" BASE 2.2.0 DEPS eigen
-  WEB "http://ceres-solver.org" UPSTREAM "github.com/ceres-solver/ceres-solver"
-  DESC "C++ library for modeling and solving large, complicated optimization problems"
-  LICENSE "[BSD-3-Clause](http://ceres-solver.org/license.html 'BSD 3-Clause New or Revised License')"
-  SHA256_Darwin-arm64 a34baea1b11de9550e21e0f0b7524961dd74b7a17369d7be18e64048a1d973c1
-  SHA256_Linux-arm64 06b6429c573e3b3266794c4ceac5501e8a1c0ffa3d430fce11bb9df39b8701f2
-  SHA256_Linux 7497798658fa914227d81f7b409705aa143f4ed2b3ee028e74f4894566807703
-  SHA256_win64 ccb00129f23e457b92435ca95f09fb56b25f29275eb750b8c722c7d9db21da40
+set(xp_ceres-solver REPO github.com/externpro/ceres-solver TAG v2.2.0.3
+  MANIFEST_SHA256 8df97cdcdcb658129687491e9163bbb643fdad4f502b5fd3d5797120082547c6
   )
 set(xp_clang-format REPO github.com/externpro/clang-format TAG v19.1.5.1
   XPBLD "fetch" BASE v0
