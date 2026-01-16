@@ -351,15 +351,8 @@ set(xp_shapelib REPO github.com/externpro/shapelib TAG v1.2.10.1
   SHA256_Linux 4d5ae021737aaea49295377c5040ae247a91d922a19200252bb76bd3aa42e3d0
   SHA256_win64 e2b4970d2d040d35fb145c42dfca758da29bf4bbfee5d7ac5dfa48ab65e46cc3
   )
-set(xp_spatialite-tools REPO github.com/externpro/spatialite-tools TAG v5.1.0.5
-  XPBLD "auto" BASE 5.1.0a EXE_DEPS libspatialite
-  WEB "https://www.gaia-gis.it/fossil/spatialite-tools/index"
-  DESC "collection of open source Command Line Interface (CLI) tools supporting SpatiaLite"
-  LICENSE "[GPL-3.0](https://www.gaia-gis.it/fossil/spatialite-tools/index 'GPL-3.0-or-later')"
-  SHA256_Darwin-arm64 b6e093fc07be5d28485d68423599ef26dd3cbb550e050200af3d2a0e9bace314
-  SHA256_Linux-arm64 46811c4d122e1ba8c00ea2e2d3cb1495ed763804fb4ea9b4499eb7338bb85fd7
-  SHA256_Linux 14d9e25006371d2c64e866a0a021eaa721dad410bb8a5125a5019d09e1aee2a3
-  SHA256_win64 1f3b86512e2f2a0b218a2db1eefddf121132304ac45f535b7d53940459b0214a
+set(xp_spatialite-tools REPO github.com/externpro/spatialite-tools TAG v5.1.0.6
+  MANIFEST_SHA256 d654decf8e84be8e3cb2ff7c99a3a48cc9d872209d4808660703a78d355088a0
   )
 set(xp_spdlog REPO github.com/externpro/spdlog TAG v1.15.3.3
   MANIFEST_SHA256 8c42801aad4d13383fcf76d600a1c9d1699ac856e416f16a91ee2fedfef81d92
