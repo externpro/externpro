@@ -1,3 +1,6 @@
+---
+auto_execution_mode: 3
+---
 # manifestUpdate
 
 ## Goal
@@ -49,54 +52,81 @@ git diff <BASE>..<TAG>
 Note: `buildpro` is a special-case dev repo and is not expected to appear as an `xp_<dep>` entry in `pros.cmake`.
 
 ## Workflow
+### Confirmation policy
+Run steps without stopping for confirmation until a commit is ready to be reviewed.
+
+Only stop at the commit gates (staged diff is available) and ask:
+`Proceed? (y/N)`
+
+Treat a reply of `y` as approval to continue.
+
 ### Step 1: Review the externpro diff for this repo
 This step is required so Cascade can apply the later steps correctly.
 
-Ask for explicit confirmation before running these commands.
+Determine `<BASE>` and `<TAG>` from `.devcontainer/cmake/pros.cmake` by locating the `xp_<dep>` entry for this repo.
+
+`<BASE>` may be overridden when it can be inferred reliably from how the project determines its version in CMake (for example via `project(... VERSION ...)`, a `*_VERSION` variable, or a version header). If you override `<BASE>`, ensure the chosen tag exists upstream and matches the inferred version.
+
 ```sh
 git fetch --tags --all
 git diff <BASE>..<TAG>
 ```
 
 ### Step 2: Create a branch
-Ask for explicit confirmation before running these commands.
 ```sh
 git checkout -b manifestUpdate
 ```
 
+Verify the working tree is clean except for the expected `.devcontainer` submodule pointer update.
+```sh
+git status
+```
+If unrelated files are modified, stop and ask the user how to proceed.
+
 ### Step 3: Commit the `.devcontainer` submodule pointer
-Ask for explicit confirmation before running these commands.
 ```sh
 cd .devcontainer
 XP_TAG=$(git describe --tags)
 echo "externpro ${XP_TAG}"
 ```
-Ask for explicit confirmation before running this command.
+
 ```sh
 cd ..
+git add .devcontainer
+git diff --staged -- .devcontainer
+```
+
+Ask the user to review the staged changes above and confirm `Proceed? (y/N)`.
+
+```sh
 git commit -m "externpro ${XP_TAG}" .devcontainer
 ```
 
 ### Step 4: Update `.github/workflows` from templates and commit
-Ask for explicit confirmation before running this command.
 ```sh
 cp .devcontainer/.github/wf-templates/xp*.yml .github/workflows/
 ```
 Review the changes.
-If the project uses `[Darwin|Linux|Windows]Release` presets, it may need to keep `cmake-workflow-preset`.
+If the project uses `[Darwin|Linux|Windows]Release` presets and already has a `cmake-workflow-preset` workflow, it MUST be preserved.
 
-Ask for explicit confirmation before running these commands.
+If `cmake-workflow-preset` exists, ensure it is not overwritten by the template copy step (restore it if needed) before staging `xp*.yml`.
+
 ```sh
 XP_WF_TAG=$(grep -hE "uses: externpro/externpro/.github/workflows/.*@" .github/workflows/xp*.yml | head -1 | sed -E 's/.*@([^ ]+).*/\1/')
 echo "workflows: externpro@${XP_WF_TAG}"
 git add .github/workflows/xp*.yml
+git diff --staged -- .github/workflows/xp*.yml
+```
+
+Ask the user to review the staged changes above and confirm `Proceed? (y/N)`.
+
+```sh
 git commit -m "workflows: externpro@${XP_WF_TAG}"
 ```
 
 ### Step 5: Update `CMakePresetsBase.json` if needed
 Compare the consumer repo's `CMakePresetsBase.json` against the externpro presets in `.devcontainer/cmake/presets/`.
 
-Ask for explicit confirmation before running this command.
 ```sh
 diff -u CMakePresetsBase.json .devcontainer/cmake/presets/CMakePresetsBase.json || true
 ```
@@ -108,32 +138,18 @@ If the diff shows changes are needed:
 - Keep the consumer repo's `configurePresets.cacheVariables` intact (do not delete or rewrite existing keys just because externpro's template differs).
   - In particular, do not remove `XP_NAMESPACE` here unless the consumer repo is already transitioning away from it for reasons outside this workflow.
 - If the consumer repo still has `XP_INSTALL_CMAKEDIR` in `cacheVariables`, remove it and set `XP_NAMESPACE` to `xpro` instead.
-- Ensure `buildPresets` exists and matches what externpro provides (some consumer repos may be missing `buildPresets` entirely).
+- Ensure `buildPresets` exists and matches what externpro provides in `.devcontainer/cmake/presets/` (some consumer repos may be missing `buildPresets` entirely).
 
-Ask for explicit confirmation before running these commands.
-```sh
-git diff -- CMakePresets*.json
-```
-
-Ask the user to confirm the changes shown above are expected.
-
-Ask for explicit confirmation before running these commands.
 ```sh
 git add CMakePresets*.json
 git diff --staged -- CMakePresets*.json
 ```
 
-Ask the user to confirm the staged changes shown above are expected.
+Ask the user to confirm the staged changes shown above are expected and confirm `Proceed? (y/N)`.
 
-Ask for explicit confirmation before running this command.
 ```sh
 git commit -m "CMakePresets: updates from externpro cmake/presets"
 ```
-
-Update `CMakePresetsBase.json` as needed:
-- Keep the `cacheVariables` under `configurePresets` intact.
-- If a `configurePresets.cacheVariables` entry exists for `XP_INSTALL_CMAKEDIR`, remove it and instead set `XP_NAMESPACE` to `xpro`.
-- Ensure `buildPresets` exists and matches what externpro provides in `.devcontainer/cmake/presets/` (some consumer repos may be missing `buildPresets` entirely).
 
 ### Step 6: Remove `include(xpflags)` and `include(GNUInstallDirs)` if they were added
 From the Step 1 diff (`BASE...TAG`), if externpro added either of these lines, delete them in the local working copy:
@@ -189,17 +205,43 @@ Update the project CMake to call `xpExternPackage()` instead of `xpPackageDevel(
   - `DESC`
   - `LICENSE`
 
+ Sourcing checklist (do this before editing the `xpExternPackage(...)` call):
+ - Copy values from `pros.cmake` verbatim, including quoting.
+ - Omit keys that do not exist for this project in `pros.cmake` (do not invent values).
+ - `BASE` is allowed to be overridden when it can be inferred reliably from the project version already determined in CMake (and the chosen tag exists upstream). If you override `BASE`, do not change other metadata unless it is also wrong.
+
  Parameter ordering/formatting:
  - First line: `xpExternPackage(REPO_NAME ... NAMESPACE ... ALIAS_NAMESPACE TODO:edit` (omit `REPO_NAME` unless needed)
  - Second line: start the line with `TARGETS_FILE` and keep `EXE` and `LIBRARIES` on the same line when present (only those that exist; use `EXE_PATH` instead of `EXE` when applicable)
- - Third line: `BASE` then `XPDIFF` then `DEPS`
+ - Third line: `BASE` then `XPDIFF` then `FIND_THREADS` then `DEPS`
  - Fourth line: `WEB` then `UPSTREAM`
  - Fifth line: `DESC`
  - Sixth line: `LICENSE`
  - Closing `)`: indent like the parameter lines (two spaces beyond the `xpExternPackage(` start)
 
+ Canonical template (match line breaks and ordering exactly; omit optional keys rather than reflowing lines):
+ ```cmake
+ xpExternPackage(REPO_NAME <repoName-if-needed> NAMESPACE <ns> ALIAS_NAMESPACE <alias-if-needed>
+   TARGETS_FILE <targetsFile> EXE <exe> LIBRARIES <libs>
+   BASE <baseTag> XPDIFF <xpDiff> FIND_THREADS DEPS <deps>
+   WEB <web> UPSTREAM <upstream>
+   DESC <desc>
+   LICENSE <license>
+   )
+ ```
+
+ Verification checklist (do this before `git add -p`):
+ - Confirm the `xpExternPackage(` call has exactly these 6 parameter lines (plus the closing `)` line).
+ - Confirm line 1 only contains `REPO_NAME` when required; otherwise it must start `xpExternPackage(NAMESPACE ...`.
+ - Confirm line 2 starts with `TARGETS_FILE` and keeps `EXE`/`EXE_PATH` and `LIBRARIES` on the same line.
+ - Confirm the `BASE/XPDIFF/DEPS` line appears before `WEB/UPSTREAM`.
+ - Confirm `FIND_THREADS` is treated as a flag (present/absent), not as `FIND_THREADS <bool>`.
+ - Confirm `DESC` and `LICENSE` are each on their own lines.
+
+ Recommended sanity build (run after the conversion, before `git add -p`):
+ - Configure and build using the repo's standard preset(s) (or at least a configure) to catch breakage before staging.
+
 ### Step 9: Stage the minimal set of changes
-Ask for explicit confirmation before running this command.
 ```sh
 git add -p
 ```
@@ -213,7 +255,13 @@ Minimize the diff as much as possible so future externpro updates are easier.
 
 ### Step 11: Commit the changes
 Suggested commit message:
-Ask for explicit confirmation before running this command.
+
+```sh
+git diff --staged
+```
+
+Ask the user to review the staged changes above and confirm `Proceed? (y/N)`.
+
 ```sh
 git commit -m "cmake: xproinc enhancements and xpExternPackage()"
 ```
