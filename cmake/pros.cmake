@@ -52,15 +52,8 @@ set(xp_cppzmq REPO github.com/externpro/cppzmq TAG v4.7.1.2
 set(xp_curl REPO github.com/externpro/curl TAG v7.80.0.2
   MANIFEST_SHA256 97b813cc7a7c3a403bccb5f33225f5940f26f64e97147098f19e27efedbcd5a5
   )
-set(xp_eigen REPO github.com/externpro/eigen TAG v3.4.0.1
-  XPBLD "patch" BASE 3.4.0
-  WEB "http://eigen.tuxfamily.org" UPSTREAM "gitlab.com/libeigen/eigen.git"
-  DESC "C++ template library for linear algebra"
-  LICENSE "[MPL-2.0](http://eigen.tuxfamily.org/index.php?title=Main_Page#License 'Mozilla Public License 2.0')"
-  SHA256_Darwin-arm64 28d72a94b2c5c4ef2786c2847c1d69d7e9d3c52d080b15339a2d93edcffa36c7
-  SHA256_Linux-arm64 235f7a351de94000ad7e2b46fe8f1f503c86ffb573d40a5d27377964d374299f
-  SHA256_Linux 78a03eb8d1b3b6161b3d2de440172e456a13723cc9ae4730df5933589167f46e
-  SHA256_win64 9bec874c71af9d899e0ab68f470d1ed2208004178a400ea04babe803358995cf
+set(xp_eigen REPO github.com/externpro/eigen TAG v3.4.0.2
+  MANIFEST_SHA256 e65fe3caf08c90d9e176c665c81c7ba548a8492a785e65c3468591e99faa5ccb
   )
 set(xp_fecpp REPO github.com/externpro/fecpp TAG v0.9.2
   MANIFEST_SHA256 c177c19ef10be21fd1dd9bda8a20f21cb397dca7ca1e41f6cc7fbaf77d07ad50
