@@ -163,15 +163,8 @@ set(xp_jxrlib REPO github.com/externpro/jxrlib TAG v2019.10.9.1
 set(xp_libexpat REPO github.com/externpro/libexpat TAG v2.2.5.2
   MANIFEST_SHA256 f0ea1c3300bc4a033343189b33698c23fdbb3f8808247c844f450e0e3126718b
   )
-set(xp_libgeotiff REPO github.com/externpro/libgeotiff TAG v1.2.4.2
-  XPBLD "intro" BASE 1.2.4 DEPS wxwidgets
-  WEB "http://trac.osgeo.org/geotiff/ 'GeoTIFF trac website'" UPSTREAM "github.com/OSGeo/libgeotiff"
-  DESC "georeferencing info embedded within TIFF file"
-  LICENSE "[MIT](https://github.com/OSGeo/libgeotiff/blob/master/libgeotiff/LICENSE 'MIT License or public domain')"
-  SHA256_Darwin-arm64 2a7cfa1d78c1200963d2a3cf2178a7d1e1e4cc70c7b35d4c29bc1e2cc189ff2a
-  SHA256_Linux-arm64 17d89a8ec4b758894df9d0197547e811fb36fcce7031a7a7dffd25f582b2c2ef
-  SHA256_Linux f8e3fdb6354b0c61eac50168c8823e6fb58bdb025964faa45c21f5ed9f6c5e5e
-  SHA256_win64 8062b2f4a58a9747e981498cd5f251b8988ba493839162ae702b5af5ffc602b0
+set(xp_libgeotiff REPO github.com/externpro/libgeotiff TAG v1.2.4.3
+  MANIFEST_SHA256 307ffe3d1f98e9c8f04bfaf2361733993ab1f5d9a33b53211578da79ba641c17
   )
 set(xp_libgit2 REPO github.com/externpro/libgit2 TAG v1.3.0.2
   MANIFEST_SHA256 2b34804488d10631ceb8d6dabaa181e843e697f9e1e35a983787451d64062e20
