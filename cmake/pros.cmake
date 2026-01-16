@@ -199,15 +199,8 @@ set(xp_librttopo REPO github.com/externpro/librttopo TAG v1.1.0.4
 set(xp_libsodium REPO github.com/externpro/libsodium TAG v1.0.18.227
   MANIFEST_SHA256 b38e3e769f6cab01568878614a1871743993d6886e563454bea398582d919395
   )
-set(xp_libspatialite REPO github.com/externpro/libspatialite TAG v5.1.0.6
-  XPBLD "auto" BASE 5.1.0 DEPS geos libiconv sqlite3 zlib
-  WEB "https://www.gaia-gis.it/fossil/libspatialite/home"
-  DESC "extends capabilities of SQLite, enabling ti to handle spatial data and perform spatial queries"
-  LICENSE "[MPL-1.1](https://www.gaia-gis.it/fossil/libspatialite/home 'MPL tri-license: choose MPL-1.1, GPL-2.0-or-later, LGPL-2.1-or-later')"
-  SHA256_Darwin-arm64 92f377721915436b02361a8e704f89f755e53e91b23913ebdd1a57ed4fd9a069
-  SHA256_Linux-arm64 f8829df95ddade662ad14f7006809a6c75be5cabfb7f51ffcd2a05edfcf72e47
-  SHA256_Linux 00549a7292e6f0391d585c1de642b142d0cb36f67bd01391fc0f89f6c622c506
-  SHA256_win64 cb744298b24539e1cad2cb17db9909bbc9ee209bf34c018049b7a42ab767f832
+set(xp_libspatialite REPO github.com/externpro/libspatialite TAG v5.1.0.7
+  MANIFEST_SHA256 b7b940c861d45a71451ff6551c3fb32085d5d9e38c1ec6780cf640380858088e
   )
 set(xp_libssh2 REPO github.com/externpro/libssh2 TAG v1.9.0.3
   MANIFEST_SHA256 44231b54b1b271766cc4c27ae5c0e925042fdd7ea9814da00681e3ae127a7c5e
