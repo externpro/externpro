@@ -371,15 +371,8 @@ set(xp_wxtetris REPO github.com/smanders/wxTetris TAG v1.2.0
   SHA256_Linux 984ed430f611b8bf03323902fa33a04ef8a28fc704fd5c32917bb26fe3912057
   SHA256_win64 b457f46b71d1787eb9e70fd5cf1ff16386937c53b021f5b70db79b2b61755ad7
   )
-set(xp_wxx REPO github.com/externpro/wxx TAG v25.01
-  XPBLD "intro" BASE v0 DEPS wxwidgets
-  WEB "https://github.com/externpro/wxx"
-  DESC "wxWidget-based extra components"
-  LICENSE "[wxWindows](http://wxcode.sourceforge.net/ 'wxWindows Library License')"
-  SHA256_Darwin-arm64 e560e75c34a6556300ce39a878a69af1c09c57d0c2689a60506aaf29bd61a99d
-  SHA256_Linux-arm64 fa37c7d8e52527c2c1c50e3fef701600df3faa83ac849f5df72993aff8e269aa
-  SHA256_Linux 996e5200e2c3bc3f447a60b34621ea3c95818cab8d59fb134aaf2d765190bf82
-  SHA256_win64 ed8c03460ffbdd66bdede8afc2b6b71c296adab2351a7128851745599a449f54
+set(xp_wxx REPO github.com/externpro/wxx TAG v26.01
+  MANIFEST_SHA256 6fe2736f1cdddf1f1b2df85e1e42ae2bad27c7e551ed083b54ca5ff54ffe4579
   )
 set(xp_wxplotctrl REPO github.com/externpro/wxplotctrl
   BASE v2006.04.28 BRANCH dev
