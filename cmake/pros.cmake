@@ -190,15 +190,8 @@ set(xp_libgeotiff REPO github.com/externpro/libgeotiff TAG v1.2.4.2
 set(xp_libgit2 REPO github.com/externpro/libgit2 TAG v1.3.0.2
   MANIFEST_SHA256 2b34804488d10631ceb8d6dabaa181e843e697f9e1e35a983787451d64062e20
   )
-set(xp_libiconv REPO github.com/externpro/libiconv TAG v1.18.6
-  XPBLD "bin" BASE v0
-  WEB "https://www.gnu.org/software/libiconv/" UPSTREAM "github.com/pffang/libiconv-for-Windows/releases/tag/1.18-eed6782"
-  DESC "character set conversion library"
-  LICENSE "[LGPL-2.1](https://savannah.gnu.org/projects/libiconv/ 'LGPL version 2.1')"
-  SHA256_Darwin-arm64 8208515a4331ae73483bcbb0a7b718e2a8a4f85caddf857c11a047a3153af392
-  SHA256_Linux-arm64 a49a6558cca5bc66050c8034d7120145344a5fcfa98f8859762ca7e32c53622d
-  SHA256_Linux 7c24a6ae1fad58ed8560aa3e39f5475483bad27719e51b77ec140a41e0b3d558
-  SHA256_win64 2e196d43265bb2af3f419358b686f3a220ca76f08113e2d162dd3b334934985c
+set(xp_libiconv REPO github.com/externpro/libiconv TAG v1.18.7
+  MANIFEST_SHA256 aa52d10023ad64f4afb691aa7a518cb6dff4d88fadcb8bea77e3eb8e822f5012
   )
 set(xp_librttopo REPO github.com/externpro/librttopo TAG v1.1.0.4
   MANIFEST_SHA256 aa863a204754bf3a1d0fda77085df4864f3d5598fea681e74ea6e754ca6f8943
