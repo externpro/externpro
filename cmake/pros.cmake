@@ -361,15 +361,8 @@ set(xp_wxcmake REPO github.com/externpro/wxcmake
 set(xp_wxinclude REPO github.com/externpro/wxInclude TAG v1.2.2
   MANIFEST_SHA256 3675dab0351a9ef6cdd8addb8010948b2fae8022496da56e1e181dcbaaaf5b08
   )
-set(xp_wxtetris REPO github.com/smanders/wxTetris TAG v1.2.0
-  XPBLD "intro" BASE v0 EXE_DEPS wxwidgets
-  WEB "https://github.com/smanders/wxTetris"
-  DESC "wxWidgets Tetris game"
-  LICENSE "[MIT](https://github.com/smanders/wxTetris/blob/dev/LICENSE 'MIT License')"
-  SHA256_Darwin-arm64 6aeace636c56f72746cef5acefe98ca859b14243f6178bc49fb4bbac2574af72
-  SHA256_Linux-arm64 a2543dfcb6d3343724b3fed6f8cab70efd0631af30ede45443f91de6d5533008
-  SHA256_Linux 984ed430f611b8bf03323902fa33a04ef8a28fc704fd5c32917bb26fe3912057
-  SHA256_win64 b457f46b71d1787eb9e70fd5cf1ff16386937c53b021f5b70db79b2b61755ad7
+set(xp_wxtetris REPO github.com/smanders/wxTetris TAG v1.3.0
+  MANIFEST_SHA256 7223c92eba8722709ef70a6c88c0755540216b55301b630f1e434a1c2c92b97c
   )
 set(xp_wxx REPO github.com/externpro/wxx TAG v26.01
   MANIFEST_SHA256 6fe2736f1cdddf1f1b2df85e1e42ae2bad27c7e551ed083b54ca5ff54ffe4579
