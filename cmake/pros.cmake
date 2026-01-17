@@ -190,15 +190,8 @@ set(xp_libstrophe REPO github.com/externpro/libstrophe TAG v0.9.1.4
 set(xp_libzmq REPO github.com/externpro/libzmq TAG v4.3.4.3
   MANIFEST_SHA256 3d928aff851cf38d0fcea8a138f7c2c592d6b3e738fd637d63a0e21ce7ea1fab
   )
-set(xp_lua REPO github.com/externpro/lua TAG v5.2.3.1
-  XPBLD "patch" BASE v5.2.3
-  WEB "http://www.lua.org/" UPSTREAM "github.com/lua/lua"
-  DESC "a powerful, fast, lightweight, embeddable scripting language"
-  LICENSE "[MIT](http://www.lua.org/license.html 'MIT License')"
-  SHA256_Darwin-arm64 598f90f0fc383f056507326dedf44ad7ff75f67480879ec52a67735854de197b
-  SHA256_Linux-arm64 d34d2a722900d8035ace261d6cb04bcf2336c24e0cecb542197752c0f755477e
-  SHA256_Linux f73fb7d78ea4d66522e660df1dc0e52fa45a97affb92a67497cd75b12758895e
-  SHA256_win64 18dd0d950beed3e1df142f77015a0498a50c2292d4b51a0c2844bb8b867d78a9
+set(xp_lua REPO github.com/externpro/lua TAG v5.2.3.2
+  MANIFEST_SHA256 0841d9901eeb1a10a481fd0d7393a0daed14ea6c751e843937f4ed0b95165289
   )
 set(xp_luabridge REPO github.com/externpro/LuaBridge TAG v2.10.3
   XPBLD "patch" BASE 2.10 DEPS lua
