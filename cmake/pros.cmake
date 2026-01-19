@@ -239,15 +239,9 @@ set(xp_nodeng REPO github.com/externpro/nodeng TAG v22.19.0.1
   SHA256_Linux 60210d3228bee5c4f1e75edd6b42fa2a01e1b2d19a8bf6a968ff499984ffcd3f
   SHA256_win64 a3c990d9de9ebb29f4967b10dd9ae66472f8bf37e45c899d80914d5d25d2c890
   )
-set(xp_nodexp REPO github.com/externpro/nodexp TAG v22.19.0.1
-  XPBLD "bin" BASE v0 # TRICKY: nodexp, openssl versions coordinated
-  WEB "https://nodejs.org/en/blog/release/v22.19.0/"
-  DESC "node/npm development platform and runtime executable bundled as externpro devel package to build addons"
-  LICENSE "[MIT](https://raw.githubusercontent.com/nodejs/node/v22.19.0/LICENSE 'MIT License')"
-  SHA256_Darwin-arm64 8041f0516a5f40ad2845e188ceac2aa34f1c08e7229d8e9d0322ba77c734c52b
-  SHA256_Linux-arm64 129d55ca8046fab214b8e41278e43fd2e450a497548081424820fcb2828026df
-  SHA256_Linux c1c9bf87b6a6eee4010dfcbd8fbca8d8142ca707a53cd6e4617f0a559334014c
-  SHA256_win64 220446e3ba9e5aa83bc7e970062922f066e0803bbc78de0e2568dddfaec8dfc7
+# TRICKY: nodexp, openssl versions coordinated
+set(xp_nodexp REPO github.com/externpro/nodexp TAG v22.19.0.2
+  MANIFEST_SHA256 e6cacde21135da5d876cb794b67a41f4cafdf6539b6a6f509f9ac20ccb4f3e5d
   )
 set(xp_nvjpeg2000 REPO github.com/externpro/nvJPEG2000 TAG v0.8.1.3
   XPBLD "bin" BASE v0
