@@ -209,15 +209,8 @@ set(xp_nlohmann_json REPO github.com/externpro/nlohmann_json TAG v3.12.0.1
   SHA256_Linux 4960bad21fc64c0e05af8879421f1b60c6a5af965e4690641eb9b793474678eb
   SHA256_win64 cbcc1cdb845dda2e5f26d73d77cd66206b28cba03bc22b6dbb43b567d759b528
   )
-set(xp_node-addon-api REPO github.com/externpro/node-addon-api TAG v8.5.0.1
-  XPBLD "intro" BASE v8.5.0 DEPS nodexp
-  WEB "https://github.com/nodejs/node-addon-api" UPSTREAM "github.com/nodejs/node-addon-api"
-  DESC "Module for using N-API from C++"
-  LICENSE "[MIT](https://github.com/nodejs/node-addon-api/blob/v8.5.0/LICENSE.md 'MIT License')"
-  SHA256_Darwin-arm64 fcb719626222afcccf912c87c44c7aa7bc3ab673e627471b260af28698d6270b
-  SHA256_Linux-arm64 2c084a7833644cbb1f510b0699572f873b9edbfd9b030a59098a3b58a4bdfe66
-  SHA256_Linux 2a9b1ada4a0df02333e4204194c8449be23f136d92d25a583a9c3fb4b1c8489c
-  SHA256_win64 8cb379185c546648d8f23ea12247919294db4229e2d05a486a4f72a911ac1d49
+set(xp_node-addon-api REPO github.com/externpro/node-addon-api TAG v8.5.0.2
+  MANIFEST_SHA256 fcf59bb2da499109ba9f96d3d029f8c71aec0b199411c43ed4af2fe9ce87b39b
   )
 set(xp_nodeng DIST_DIR /bpvol/src/pros/nodeng/_bld-Linux/dist/) # override with local dist directory
 set(xp_nodeng # override with locally built devel package (cmake --preset=Linux; cmake --workflow --preset=LinuxRelease)
