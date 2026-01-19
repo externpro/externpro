@@ -246,15 +246,8 @@ set(xp_nvjpeg2000 REPO github.com/externpro/nvJPEG2000 TAG v0.8.1.3
   SHA256_Linux 3af2f9f73f79941b8a7ed12d1b158f1c2222b96b4857eb41bf0bda79e816d016
   SHA256_win64 86a810f9feb0495130c7b093a4e004b5764f57821f8e2f7739a973d5bb445e67
   )
-set(xp_openh264 REPO github.com/externpro/openh264 TAG v1.4.0.1
-  XPBLD "intro" BASE v1.4.0 DEPS yasm
-  WEB "http://www.openh264.org/" UPSTREAM "github.com/cisco/openh264"
-  DESC "a codec library which supports H.264 encoding and decoding"
-  LICENSE "[BSD-2-Clause](http://www.openh264.org/faq.html 'BSD 2-Clause Simplified License')"
-  SHA256_Darwin-arm64 893b7db45ce7c535ad1eab767e0987a879a425e99f81594feafba9150d029b46
-  SHA256_Linux-arm64 99ade5a99d79da5ef7e9ae0ee89941c9fab03859ab847d1a6c7c83c85ae7de08
-  SHA256_Linux 93e09307fef110a4cb51e21c7ddc986f65af14cec26c756da1b0514c8d32a563
-  SHA256_win64 fdb01196f8ce0a16af3a78e1f42936d533a28a69e3b3fd12875217e6d776c012
+set(xp_openh264 REPO github.com/externpro/openh264 TAG v1.4.0.2
+  MANIFEST_SHA256 cad1529fe3f5e61510a7b6dbbddf7f8f77eca9af5170fc2abad33d53e95c3c90
   )
 # TRICKY: nodexp, openssl versions coordinated
 set(xp_openssl REPO github.com/externpro/openssl TAG v1.1.1l.3
