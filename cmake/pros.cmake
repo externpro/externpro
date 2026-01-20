@@ -51,14 +51,9 @@ set(xp_eigen REPO github.com/externpro/eigen TAG v3.4.0.2
 set(xp_fecpp REPO github.com/externpro/fecpp TAG v0.9.2
   MANIFEST_SHA256 c177c19ef10be21fd1dd9bda8a20f21cb397dca7ca1e41f6cc7fbaf77d07ad50
   )
-set(xp_ffmpeg REPO github.com/externpro/FFmpeg TAG v4.3.1.1
-  XPBLD "native(unix)" BASE n4.3.1 DEPS openh264 yasm
-  WEB "https://www.ffmpeg.org/" UPSTREAM "github.com/FFmpeg/FFmpeg"
-  DESC "complete, cross-platform solution to record, convert and stream audio and video (pre-release: no windows package)"
-  LICENSE "[LGPL-2.1](https://www.ffmpeg.org/legal.html 'LGPL version 2.1 or later')"
-  SHA256_Darwin-arm64 e6eaa0d3bdb1c2b381306a19f6597ae8c79ad8d98e1803d3af0671e695538519
-  SHA256_Linux-arm64 7f11c8790f21d67716ea25c5b6b49ba202f8bf9f94e235fa0d5c33cd89dfd225
-  SHA256_Linux 5e6121f9471742e37a41080afccbd21c701f601db6a9c6cbce8a8354275af34e
+# pre-release: no windows package
+set(xp_ffmpeg REPO github.com/externpro/FFmpeg TAG v4.3.1.3
+  MANIFEST_SHA256 e60806efc9f146109506ee5a0c8e5823d282453af61d384c0cc40d0b5d174dbd
   )
 set(xp_ffmpeg REPO github.com/externpro/FFmpeg TAG v2.6.2.3
   MANIFEST_SHA256 9436f3155ee2ff4e637de1fe94c5b0d78cdfe806bdc4dc1d60e5b1986f0b3962
