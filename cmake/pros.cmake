@@ -60,15 +60,8 @@ set(xp_ffmpeg REPO github.com/externpro/FFmpeg TAG v4.3.1.1
   SHA256_Linux-arm64 7f11c8790f21d67716ea25c5b6b49ba202f8bf9f94e235fa0d5c33cd89dfd225
   SHA256_Linux 5e6121f9471742e37a41080afccbd21c701f601db6a9c6cbce8a8354275af34e
   )
-set(xp_ffmpeg REPO github.com/externpro/FFmpeg TAG v2.6.2.2
-  XPBLD "bin(msw), native(unix)" BASE n2.6.2 DEPS openh264 yasm
-  WEB "https://www.ffmpeg.org/" UPSTREAM "github.com/FFmpeg/FFmpeg"
-  DESC "complete, cross-platform solution to record, convert and stream audio and video"
-  LICENSE "[LGPL-2.1](https://www.ffmpeg.org/legal.html 'LGPL version 2.1 or later')"
-  SHA256_Darwin-arm64 6624fbdca192d88f0e163f36e47d19a1aa2286beeec630285bed242475f2db84
-  SHA256_Linux-arm64 7f84e517475d6dc6fb139d826f578eaf128719327ff44e35bf8272f17dc65953
-  SHA256_Linux 8ba9439fff1f92e34d84cc45fc12699e47ce148b2e3f9680dffb105f7611fafa
-  SHA256_win64 79399ed5b6ad4361ae629aeeb861fb71d0691fb4f34fe04ef27d91edeb5c0a8e
+set(xp_ffmpeg REPO github.com/externpro/FFmpeg TAG v2.6.2.3
+  MANIFEST_SHA256 9436f3155ee2ff4e637de1fe94c5b0d78cdfe806bdc4dc1d60e5b1986f0b3962
   )
 set(xp_flatbuffers REPO github.com/externpro/flatbuffers TAG v25.2.10.1
   XPBLD "patch" BASE v25.2.10
