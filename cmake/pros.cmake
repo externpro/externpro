@@ -4,15 +4,8 @@ set(xp_activemq-cpp REPO github.com/externpro/activemq-cpp TAG v3.9.5.2
 set(xp_apr REPO github.com/externpro/apr TAG v1.7.6.2
   MANIFEST_SHA256 0d2ebd3964c5965120615d5cd920902abe6447b3f5fa1118ac87d67506571fa7
   )
-set(xp_argon2 REPO github.com/externpro/argon2 TAG v20210625.1
-  XPBLD "intro" BASE 20210625
-  WEB "https://www.password-hashing.net" UPSTREAM "github.com/P-H-C/phc-winner-argon2"
-  DESC "The reference C implementation of the Argon2, the password-hashing function that won the Password Hashing Competition (PHC)"
-  LICENSE "[CC0-1.0 or Apache-2.0](https://github.com/P-H-C/phc-winner-argon2/blob/master/LICENSE 'dual licensed under Creative Commons Zero v1.0 Universal and Apache License, Version 2.0')"
-  SHA256_Darwin-arm64 1682cf01eb81cd6131dd47f9d4e7799b594882bda5f1f034cd52939134c2d03a
-  SHA256_Linux-arm64 55587523e38ac32ad52500f0c374505f16caec80c92c231ab1e8b7ed432ee2d3
-  SHA256_Linux ea7a773da6aca9ec9766e6a1ae680b9375c068375bb2fdaee959745a4190a69c
-  SHA256_win64 fa649f8c8975985f9714f11c500aef67468fc66801611aa067bbb489e9814da2
+set(xp_argon2 REPO github.com/externpro/argon2 TAG v20210625.2
+  MANIFEST_SHA256 5a08456a903972f6f22469ccfa5b4bd03adf7b59c166d549884b59eb18022e78
   )
 set(xp_azmq REPO github.com/externpro/azmq TAG v1.0.3.2
   MANIFEST_SHA256 64c7699cc04af1e663be4f4d80a2a892c023f4aa1a4a92b96c512201fd002a06
