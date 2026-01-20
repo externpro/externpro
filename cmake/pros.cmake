@@ -187,15 +187,8 @@ set(xp_luabridge REPO github.com/externpro/LuaBridge TAG v2.10.4
 set(xp_nasm REPO github.com/externpro/nasm TAG v2.14.02.3
   MANIFEST_SHA256 f381ee1a2b376fead6cacee9495456ddd9e01818e7184248a523ceb57be9357e
   )
-set(xp_nlohmann_json REPO github.com/externpro/nlohmann_json TAG v3.12.0.1
-  XPBLD "patch" BASE v3.12.0
-  WEB "https://json.nlohmann.me" UPSTREAM "github.com/nlohmann/json"
-  DESC "JSON for Modern C++"
-  LICENSE "[MIT](https://github.com/nlohmann/json/blob/develop/LICENSE.MIT 'MIT License')"
-  SHA256_Darwin-arm64 b5631660b006ccc13f282be4c30f41ddf18ed0f2ab6c56b9c7176377dd51a472
-  SHA256_Linux-arm64 be2efc38fd6585c4b50ec8878fe411bc6c443c13d2e60f5192236abf8931703d
-  SHA256_Linux 4960bad21fc64c0e05af8879421f1b60c6a5af965e4690641eb9b793474678eb
-  SHA256_win64 cbcc1cdb845dda2e5f26d73d77cd66206b28cba03bc22b6dbb43b567d759b528
+set(xp_nlohmann_json REPO github.com/externpro/nlohmann_json TAG v3.12.0.2
+  MANIFEST_SHA256 83447ac24840cb6b0f0ad12a6fcd7069bfddf0d72baeadf785797275146f8879
   )
 set(xp_node-addon-api REPO github.com/externpro/node-addon-api TAG v8.5.0.2
   MANIFEST_SHA256 fcf59bb2da499109ba9f96d3d029f8c71aec0b199411c43ed4af2fe9ce87b39b
