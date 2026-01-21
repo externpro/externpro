@@ -68,15 +68,8 @@ set(xp_hdf5 REPO github.com/externpro/hdf5 TAG v1.14.6.6
 set(xp_jasper REPO github.com/externpro/jasper TAG v1.900.1.2
   MANIFEST_SHA256 c7b8b024035b08e3f4b4fe297f6d2f80d191c5986709faf94b7087252496a290
   )
-set(xp_jpegxp REPO github.com/externpro/jpegxp TAG v6.25.1
-  XPBLD "intro" BASE jxp.240125
-  WEB "http://www.ijg.org/"
-  DESC "JPEG codec with mods for Lossless, 12-bit lossy (XP)"
-  LICENSE "[IJG](https://github.com/externpro/libjpeg/blob/upstream/README 'Independent JPEG Group License, see LEGAL ISSUES in README')"
-  SHA256_Linux 13f5b648a9d7cf63017521541241a8476da27f0197f3952c28904aa45975df60
-  SHA256_Linux-arm64 48cc74c37ade055d45a2b8b6b0e5e73a8f58222ae88565956272811c5519077a
-  SHA256_win64 2a18e83a8f670a1dfaa89f821f31e8886adb82e8627c2e68c029f9d17cb0013b
-  SHA256_Darwin-arm64 88f6659543c0ab6a88c48007262e35a6253aa245dacd33c44dcbfa2b99a2a93c
+set(xp_jpegxp REPO github.com/externpro/jpegxp TAG v6.25.2
+  MANIFEST_SHA256 9983274826385e9adc1f8ca2e6ba78a7af84055e89b4bb36c4e9df010a59925c
   )
 set(xp_jpeglossless REPO github.com/externpro/libjpeg VER 62.1
   BASE eccc424 BRANCH lossless.6b
