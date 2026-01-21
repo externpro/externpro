@@ -51,15 +51,8 @@ set(xp_ffmpeg REPO github.com/externpro/FFmpeg TAG v4.3.1.3
 set(xp_ffmpeg REPO github.com/externpro/FFmpeg TAG v2.6.2.3
   MANIFEST_SHA256 9436f3155ee2ff4e637de1fe94c5b0d78cdfe806bdc4dc1d60e5b1986f0b3962
   )
-set(xp_flatbuffers REPO github.com/externpro/flatbuffers TAG v25.2.10.1
-  XPBLD "patch" BASE v25.2.10
-  WEB "http://google.github.io/flatbuffers/" UPSTREAM "github.com/google/flatbuffers"
-  DESC "efficient cross platform serialization library"
-  LICENSE "[Apache-2.0](https://github.com/google/flatbuffers/blob/v25.2.10/LICENSE 'Apache License, Version 2.0')"
-  SHA256_Darwin-arm64 16bacbf0607ff852a8c6d5d13464d73eb377db2e792cc68b63806b580f5120ec
-  SHA256_Linux-arm64 8f77592551594a04ee8d2f85cf9164ad1c39ffed3bf3f9dba82cadaec82271b2
-  SHA256_Linux 952061515c851ce9c89500a7311a72d7d7494627dc52f588a66df76d386adf5e
-  SHA256_win64 650f5866d26ad36f06166b18f371dd46c76ee2c68dd7f094fcefb77d347d60a8
+set(xp_flatbuffers REPO github.com/externpro/flatbuffers TAG v25.2.10.2
+  MANIFEST_SHA256 c25455a14057a2c9cff851713356178c750be56bd2b33018c6cf4377ad8b3a86
   )
 set(xp_fmt REPO github.com/externpro/fmt TAG v11.2.0.7
   MANIFEST_SHA256 a91f44f9147ea00163676f3f43099a4d522b2fc7c8f8a5a9742845ad3f552bb2
