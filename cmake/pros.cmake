@@ -89,15 +89,8 @@ set(xp_jpeglossy8 REPO github.com/externpro/libjpeg VER 6b
   DESC "lossy 8-bit encode and decode [submodule of: _jpegxp_]"
   LICENSE "[IJG](https://github.com/externpro/libjpeg/blob/upstream/README 'Independent JPEG Group License, see LEGAL ISSUES in README')"
   )
-set(xp_jxrlib REPO github.com/externpro/jxrlib TAG v2019.10.9.1
-  XPBLD "intro" BASE v2019.10.9
-  WEB "https://github.com/4creators/jxrlib" UPSTREAM "github.com/4creators/jxrlib"
-  DESC "JPEG XR Image Codec reference implementation library released by Microsoft"
-  LICENSE "[BSD-2-Clause](https://github.com/4creators/jxrlib/blob/master/LICENSE 'BSD 2-Clause Simplified License')"
-  SHA256_Darwin-arm64 42a7f5889774f4ba141b59ef3bbfa7ca27928a19238163273a3c2d53983a7f59
-  SHA256_Linux-arm64 bbd1e172e91e77598a47f48d5b950b7c7417180268e92590f0674be50cbb9f93
-  SHA256_Linux 2e79d179fb0ae0ee5347f346bc017f7f94240f79af241aeb90dd520451d57d49
-  SHA256_win64 505f1984cd8950cf1d4a52a95b76340c334632318cb59e83ba05fac7d6050df0
+set(xp_jxrlib REPO github.com/externpro/jxrlib TAG v2019.10.9.2
+  MANIFEST_SHA256 109b50a26f140ec454fedd91cdd7d56ad0de18146ad027b3d1e7aa65cc88fad2
   )
 set(xp_libexpat REPO github.com/externpro/libexpat TAG v2.2.5.2
   MANIFEST_SHA256 f0ea1c3300bc4a033343189b33698c23fdbb3f8808247c844f450e0e3126718b
