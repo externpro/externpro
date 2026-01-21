@@ -53,15 +53,8 @@ set(xp_fmt REPO github.com/externpro/fmt TAG v11.2.0.7
 set(xp_geos REPO github.com/externpro/geos TAG v3.13.0.5
   MANIFEST_SHA256 d12a0ac3a9d39f45af369952673c9e94c232528f5cf45cfa7c21b8d85a9a9ee3
   )
-set(xp_geotranz REPO github.com/externpro/geotranz TAG v2.4.2.1
-  XPBLD "intro" BASE v2.4.2
-  WEB "https://earth-info.nga.mil"
-  DESC "geographic translator (convert coordinates)"
-  LICENSE "[public domain](https://github.com/externpro/geotranz 'see GEOTRANS Terms of Use in README or download https://earth-info.nga.mil/php/download.php?file=wgs-terms')"
-  SHA256_Darwin-arm64 35bc276cafb52bacf1b232c36a990e709a1a6bebad066c4a8e657b4026149af5
-  SHA256_Linux-arm64 52afe07b245405d7c7ec093c68377cf2eec636268ca40b7b536536b212aec688
-  SHA256_Linux 22aa67e65c8c9034ae060fd34a09238328bfc9a55d1bfd4b6d4d6b0bef03fb2e
-  SHA256_win64 687cee720040645ba293d51c2c8d1353fd256fe9e7058198324493f9dbc7db2b
+set(xp_geotranz REPO github.com/externpro/geotranz TAG v2.4.2.2
+  MANIFEST_SHA256 6867073fd444d1a46f9823d368811698e148fea30850268a7793b0e8159e52ad
   )
 set(xp_glew REPO github.com/externpro/glew TAG v1.13.0.1
   XPBLD "patch" BASE glew-1.13.0
