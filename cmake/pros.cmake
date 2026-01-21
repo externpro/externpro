@@ -56,15 +56,8 @@ set(xp_geos REPO github.com/externpro/geos TAG v3.13.0.5
 set(xp_geotranz REPO github.com/externpro/geotranz TAG v2.4.2.2
   MANIFEST_SHA256 6867073fd444d1a46f9823d368811698e148fea30850268a7793b0e8159e52ad
   )
-set(xp_glew REPO github.com/externpro/glew TAG v1.13.0.1
-  XPBLD "patch" BASE glew-1.13.0
-  WEB "http://glew.sourceforge.net" UPSTREAM "github.com/nigels-com/glew"
-  DESC "The OpenGL Extension Wrangler Library"
-  LICENSE "[MIT](https://github.com/nigels-com/glew/blob/master/LICENSE.txt 'Modified BSD, Mesa 3D (renamed X11/MIT), Khronos (renamed X11/MIT)')"
-  SHA256_Darwin-arm64 b5546d5d186746ed62f5ef64176fa28880a31286fa060159d7872e22a0ebff81
-  SHA256_Linux-arm64 9b75c245b7ae8120203f4fcc639380adecfe7d0b749462823bfe87bffe278d42
-  SHA256_Linux de5619809f5b7f9e44c6b8b7dab814ff44a78aa1b82bdf7798b7e8229f4a23ad
-  SHA256_win64 dd82830539c47e4933e59664108ac84472130482bfab25e651c3140240f711bc
+set(xp_glew REPO github.com/externpro/glew TAG v1.13.0.2
+  MANIFEST_SHA256 29808e42bf989521f1bc0666e010af21f0b674b62de2ae18ebe9176082a7cc06
   )
 set(xp_googletest REPO github.com/externpro/googletest TAG v1.16.0.2
   MANIFEST_SHA256 3442fd80e8cb8bb0cdd300ef312d3c4a79b8d067e614f4a66ea7d511e6da96df
