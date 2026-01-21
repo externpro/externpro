@@ -65,15 +65,8 @@ set(xp_googletest REPO github.com/externpro/googletest TAG v1.16.0.2
 set(xp_hdf5 REPO github.com/externpro/hdf5 TAG v1.14.6.6
   MANIFEST_SHA256 8b32eb66af6242edce23bafe3e4f283b93434e6434d4a4a9a1144ccfa7dda28c
   )
-set(xp_jasper REPO github.com/externpro/jasper TAG v1.900.1.1
-  XPBLD "auto" BASE version-1.900.1
-  WEB "https://jasper-software.github.io/jasper/" UPSTREAM "github.com/jasper-software/jasper"
-  DESC "JasPer is a software toolkit for the handling of image data. It was initially developed as a reference implementation of the JPEG 2000 Part-1 codec."
-  LICENSE "[JasPer-2.0](https://github.com/jasper-software/jasper/blob/master/LICENSE.txt 'JasPer software license based on MIT License')"
-  SHA256_Darwin-arm64 59acfce4e6bd7b2de6facae10fd086f137e567e13dc925bcfe289d7355525ee3
-  SHA256_Linux-arm64 c3de594a78c3c97178e582ee353d1cadb4fb9d337a42eae86fc75861d6881521
-  SHA256_Linux 0f6ac4aade72a0d0cbecbd5cdd4113486051edfc99516927fd0f33e632a68378
-  SHA256_win64 a3c516004b010fd280c342e1c3f42bed9b1752b6b47bb3882d40d62315a2c56b
+set(xp_jasper REPO github.com/externpro/jasper TAG v1.900.1.2
+  MANIFEST_SHA256 c7b8b024035b08e3f4b4fe297f6d2f80d191c5986709faf94b7087252496a290
   )
 set(xp_jpegxp REPO github.com/externpro/jpegxp TAG v6.25.1
   XPBLD "intro" BASE jxp.240125
