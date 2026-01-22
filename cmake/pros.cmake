@@ -176,15 +176,8 @@ set(xp_rapidjson REPO github.com/externpro/rapidjson TAG v1.1.0-763.2
 set(xp_rapidxml REPO github.com/externpro/rapidxml TAG v1.13.2
   MANIFEST_SHA256 57b27180d35d9f6e75f8fce86c802228fd0a8e16ada580307646b71eb969f4de
   )
-set(xp_shapelib REPO github.com/externpro/shapelib TAG v1.2.10.1
-  XPBLD "intro" BASE 1.2.10
-  WEB "http://shapelib.maptools.org/" UPSTREAM "github.com/OSGeo/shapelib"
-  DESC "reading, writing, updating ESRI Shapefiles"
-  LICENSE "[MIT or LGPL](http://shapelib.maptools.org/license.html 'MIT or LGPL License')"
-  SHA256_Darwin-arm64 a9396c58ef8ae2375eb392d11e773eca78361a7f1c6c630ae1a17dd15bf1067c
-  SHA256_Linux-arm64 b16e1ed28ef47b2ea477df7f204b9c28e1c40d6e6f6891c7d95aafbb63d36f83
-  SHA256_Linux 4d5ae021737aaea49295377c5040ae247a91d922a19200252bb76bd3aa42e3d0
-  SHA256_win64 e2b4970d2d040d35fb145c42dfca758da29bf4bbfee5d7ac5dfa48ab65e46cc3
+set(xp_shapelib REPO github.com/externpro/shapelib TAG v1.2.10.2
+  MANIFEST_SHA256 5ecf7769180dedd09950d48ab92136fff338641d273a4fa2e71d33c5a32cd48b
   )
 set(xp_spatialite-tools REPO github.com/externpro/spatialite-tools TAG v5.1.0.6
   MANIFEST_SHA256 d654decf8e84be8e3cb2ff7c99a3a48cc9d872209d4808660703a78d355088a0
