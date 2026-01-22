@@ -71,24 +71,6 @@ set(xp_jasper REPO github.com/externpro/jasper TAG v1.900.1.2
 set(xp_jpegxp REPO github.com/externpro/jpegxp TAG v6.25.2
   MANIFEST_SHA256 9983274826385e9adc1f8ca2e6ba78a7af84055e89b4bb36c4e9df010a59925c
   )
-set(xp_jpeglossless REPO github.com/externpro/libjpeg VER 62.1
-  BASE eccc424 BRANCH lossless.6b
-  WEB "https://en.wikipedia.org/wiki/Lossless_JPEG#cite_note-1" UPSTREAM "github.com/LuaDist/libjpeg"
-  DESC "lossless decode [submodule of: _jpegxp_]"
-  LICENSE "[IJG](https://github.com/externpro/libjpeg/blob/upstream/README 'Independent JPEG Group License, see LEGAL ISSUES in README')"
-  )
-set(xp_jpeglossy12 REPO github.com/externpro/libjpeg VER 6b
-  BASE 09a4003 BRANCH lossy12.6b
-  WEB "https://libjpeg.sourceforge.net" UPSTREAM "github.com/LuaDist/libjpeg"
-  DESC "lossy 12-bit encode and decode [submodule of: _jpegxp_]"
-  LICENSE "[IJG](https://github.com/externpro/libjpeg/blob/upstream/README 'Independent JPEG Group License, see LEGAL ISSUES in README')"
-  )
-set(xp_jpeglossy8 REPO github.com/externpro/libjpeg VER 6b
-  BASE 09a4003 BRANCH lossy8.6b
-  WEB "https://libjpeg.sourceforge.net" UPSTREAM "github.com/LuaDist/libjpeg"
-  DESC "lossy 8-bit encode and decode [submodule of: _jpegxp_]"
-  LICENSE "[IJG](https://github.com/externpro/libjpeg/blob/upstream/README 'Independent JPEG Group License, see LEGAL ISSUES in README')"
-  )
 set(xp_jxrlib REPO github.com/externpro/jxrlib TAG v2019.10.9.2
   MANIFEST_SHA256 109b50a26f140ec454fedd91cdd7d56ad0de18146ad027b3d1e7aa65cc88fad2
   )
