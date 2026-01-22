@@ -164,15 +164,8 @@ set(xp_openh264 REPO github.com/externpro/openh264 TAG v1.4.0.2
 set(xp_openssl REPO github.com/externpro/openssl TAG v1.1.1l.3
   MANIFEST_SHA256 074219f553d0b095d73a5be1ae471cf48709cf062bfdcdaa7b3f8376f848fc1e
   )
-set(xp_patch REPO github.com/externpro/patch TAG v2.7.6.4
-  XPBLD "bin(msw), native(unix)" BASE v0
-  WEB "https://savannah.gnu.org/projects/patch/" UPSTREAM "git.savannah.gnu.org/cgit/patch.git"
-  DESC "takes a patch file containing a difference listing produced by the diff program and applies those differences to one or more original files, producing patched versions"
-  LICENSE "[GPL-3.0](https://savannah.gnu.org/projects/patch/ 'GNU General Public License v3 or later')"
-  SHA256_Darwin-arm64 ca3fb3bdfe73367de3713abfe2b8a61ebcb718e7d90a842676939cfb51d35773
-  SHA256_Linux-arm64 896510084c48565a2069fff5e0362b8d469a8822aa551990597f333591776159
-  SHA256_Linux 28a0698ec9881d6a8414409d36b59f000f6113559a76fe2e68dc88142c75a92b
-  SHA256_win64 aab7af2d24e547946aa0d4468ca2bee2487970175ce10c595954fa782e3f7c32
+set(xp_patch REPO github.com/externpro/patch TAG v2.7.6.5
+  MANIFEST_SHA256 5484efbcc8e5f7dc8e11f2d2141b0693141a045f7029b80e0453bbb1479c39b6
   )
 set(xp_protobuf REPO github.com/externpro/protobuf TAG v3.14.0.2
   MANIFEST_SHA256 28fca57139e1367e2823560211846d28f0f487e43fb0abfe60710c29a7f26854
