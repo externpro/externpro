@@ -173,15 +173,8 @@ set(xp_protobuf REPO github.com/externpro/protobuf TAG v3.14.0.2
 set(xp_rapidjson REPO github.com/externpro/rapidjson TAG v1.1.0-763.2
   MANIFEST_SHA256 3ba7cb2d9d83c73c4bf2edf40dd78a34ab52cb4cb6b2bf3c42690fe4f512337c
   )
-set(xp_rapidxml REPO github.com/externpro/rapidxml TAG v1.13.1
-  XPBLD "intro" BASE v1.13
-  WEB "http://rapidxml.sourceforge.net/"
-  DESC "fast XML parser"
-  LICENSE "[BSL-1.0 or MIT](http://rapidxml.sourceforge.net/license.txt 'Boost Software License or MIT License')"
-  SHA256_Darwin-arm64 4d00947669c5cf97561f180cf28b0c2b6f7fe91b95ef0fbc04545b55c49915a9
-  SHA256_Linux-arm64 63e96a732bce5f38b11f5d5ccfcedb21849777f71c2051f98af54e8e37254cf5
-  SHA256_Linux 127c9ca42df99ee61c7dce7263ec1d42ce0e154e26ad742c15e7f4a6c5dd04f7
-  SHA256_win64 13ad304b798725f9084a8f39ab5b205f0afa5b7e0048a04ab9d1331798173118
+set(xp_rapidxml REPO github.com/externpro/rapidxml TAG v1.13.2
+  MANIFEST_SHA256 57b27180d35d9f6e75f8fce86c802228fd0a8e16ada580307646b71eb969f4de
   )
 set(xp_shapelib REPO github.com/externpro/shapelib TAG v1.2.10.1
   XPBLD "intro" BASE 1.2.10
