@@ -154,15 +154,8 @@ set(xp_nodeng REPO github.com/externpro/nodeng TAG v22.19.0.2
 set(xp_nodexp REPO github.com/externpro/nodexp TAG v22.19.0.2
   MANIFEST_SHA256 e6cacde21135da5d876cb794b67a41f4cafdf6539b6a6f509f9ac20ccb4f3e5d
   )
-set(xp_nvjpeg2000 REPO github.com/externpro/nvJPEG2000 TAG v0.8.1.3
-  XPBLD "bin" BASE v0
-  WEB "https://developer.nvidia.com/nvjpeg"
-  DESC "high-performance GPU-accelerated library for decoding JPEG 2000 format images (not available on macOS)"
-  LICENSE "[NVIDIA](https://docs.nvidia.com/cuda/nvjpeg2000/license.html 'NVIDIA Software License Agreement')"
-  SHA256_Darwin-arm64 f509fa5b26e97fa4c3a72d8a871a811182f958086dd93dff741c1de5accb27da
-  SHA256_Linux-arm64 77b374aab05acc02fbaffa0c50476b30e9c2a0446922498786216d9ab58964df
-  SHA256_Linux 3af2f9f73f79941b8a7ed12d1b158f1c2222b96b4857eb41bf0bda79e816d016
-  SHA256_win64 86a810f9feb0495130c7b093a4e004b5764f57821f8e2f7739a973d5bb445e67
+set(xp_nvjpeg2000 REPO github.com/externpro/nvJPEG2000 TAG v0.8.1.4
+  MANIFEST_SHA256 12218f85ef658b03f28574df9a733f537e90f0280c44ae1485d62b5e33cb8a5c
   )
 set(xp_openh264 REPO github.com/externpro/openh264 TAG v1.4.0.2
   MANIFEST_SHA256 cad1529fe3f5e61510a7b6dbbddf7f8f77eca9af5170fc2abad33d53e95c3c90
