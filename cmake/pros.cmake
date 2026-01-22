@@ -188,15 +188,8 @@ set(xp_spdlog REPO github.com/externpro/spdlog TAG v1.15.3.3
 set(xp_sqlite3 REPO github.com/externpro/SQLite3 TAG v3.38.2.2
   MANIFEST_SHA256 7abab418a6f5b3c6bf482ff7806fa07d7fde7106e1f3479cbd611748bb8cd54d
   )
-set(xp_wirehair REPO github.com/externpro/wirehair TAG v23.12.02.1
-  XPBLD "patch" BASE v23.12.02
-  WEB "https://github.com/catid/wirehair" UPSTREAM "github.com/catid/wirehair"
-  DESC "fast and portable fountain codes in C"
-  LICENSE "[BSD-3-Clause](https://github.com/catid/wirehair/blob/master/LICENSE 'BSD 3-Clause New or Revised License')"
-  SHA256_Darwin-arm64 2950704bfd0b032b01a91a6c2c3397954b45047cdc25f33228105e186097631e
-  SHA256_Linux-arm64 6d691b82afc5bba40ba778b78b07f7e69b7bf6b3c5be92552bc8b8b766715601
-  SHA256_Linux bea56e35e2292b620532aab17058165e968c53c37bd7e6e660c7c4e1394d7f94
-  SHA256_win64 c768565e46ac9aa99e04d19be7f84b6572dd389c741683769e4f4ffc01a75dd5
+set(xp_wirehair REPO github.com/externpro/wirehair TAG v23.12.02.2
+  MANIFEST_SHA256 4cc016a80ca1713056021e338f147cb1efa96458d4f1172d724af877afdabe0d
   )
 set(xp_wxwidgets REPO github.com/externpro/wxWidgets TAG v3.1.0.5
   MANIFEST_SHA256 b8ccadd45baafe5af3342e03dff0331440d58b5c6d8df19559fad736ba736deb
