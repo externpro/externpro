@@ -170,15 +170,8 @@ set(xp_patch REPO github.com/externpro/patch TAG v2.7.6.5
 set(xp_protobuf REPO github.com/externpro/protobuf TAG v3.14.0.2
   MANIFEST_SHA256 28fca57139e1367e2823560211846d28f0f487e43fb0abfe60710c29a7f26854
   )
-set(xp_rapidjson REPO github.com/externpro/rapidjson TAG v1.1.0-763.1
-  XPBLD "patch" BASE v1.1.0-763
-  WEB "http://Tencent.github.io/rapidjson/" UPSTREAM "github.com/Tencent/rapidjson"
-  DESC "A fast JSON parser/generator for C++ with both SAX/DOM style API"
-  LICENSE "[MIT](https://raw.githubusercontent.com/Tencent/rapidjson/master/license.txt 'MIT License')"
-  SHA256_Darwin-arm64 360657595f6aaef3856578dbefcc3445673ff8827c5019d0b38b9eefc49ab4ce
-  SHA256_Linux-arm64 37b38fc1ea0a2a098e4d2fd1c02617f605a230656eeda1c6d424bf8e13238950
-  SHA256_Linux 6941459e00591d97b52cf3e50aae16c09c4de288f17ae1bf50ab8c4f0398bcf0
-  SHA256_win64 b4029d033a9f41b54009e38824ec177d849138a2add3b02462480a2eff0dfbea
+set(xp_rapidjson REPO github.com/externpro/rapidjson TAG v1.1.0-763.2
+  MANIFEST_SHA256 3ba7cb2d9d83c73c4bf2edf40dd78a34ab52cb4cb6b2bf3c42690fe4f512337c
   )
 set(xp_rapidxml REPO github.com/externpro/rapidxml TAG v1.13.1
   XPBLD "intro" BASE v1.13
