@@ -191,24 +191,6 @@ set(xp_wxtetris REPO github.com/smanders/wxTetris TAG v1.3.0
 set(xp_wxx REPO github.com/externpro/wxx TAG v26.01
   MANIFEST_SHA256 6fe2736f1cdddf1f1b2df85e1e42ae2bad27c7e551ed083b54ca5ff54ffe4579
   )
-set(xp_wxplotctrl REPO github.com/externpro/wxplotctrl
-  BASE v2006.04.28 BRANCH dev
-  WEB "https://sourceforge.net/projects/wxcode/files/Components/wxPlotCtrl/"
-  DESC "interactive xy data plotting widgets [submodule of: _wxx_]"
-  LICENSE "[wxWindows](http://wxcode.sourceforge.net/ 'wxWindows Library License')"
-  )
-set(xp_wxthings REPO github.com/externpro/wxthings
-  BASE v2006.04.28 BRANCH dev
-  WEB "https://sourceforge.net/projects/wxcode/files/Components/wxThings/"
-  DESC "a variety of data containers and controls [submodule of: _wxx_]"
-  LICENSE "[wxWindows](http://wxcode.sourceforge.net/ 'wxWindows Library License')"
-  )
-set(xp_wxtlc REPO github.com/externpro/wxTLC
-  BASE v1208 BRANCH dev
-  WEB "https://sourceforge.net/projects/wxcode/files/Components/treelistctrl/"
-  DESC "a multi column tree control [submodule of: _wxx_]"
-  LICENSE "[wxWindows](http://wxcode.sourceforge.net/ 'wxWindows Library License')"
-  )
 set(xp_yasm REPO github.com/externpro/yasm TAG v1.3.0.2
   MANIFEST_SHA256 c2a6c8bed9feafbe6ac3972bad40fe36ec6bab51c9739f3b04f810f0e47016f4
   )
