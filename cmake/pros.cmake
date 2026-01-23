@@ -176,12 +176,6 @@ set(xp_wirehair REPO github.com/externpro/wirehair TAG v23.12.02.2
 set(xp_wxwidgets REPO github.com/externpro/wxWidgets TAG v3.1.0.5
   MANIFEST_SHA256 b8ccadd45baafe5af3342e03dff0331440d58b5c6d8df19559fad736ba736deb
   )
-set(xp_wxcmake REPO github.com/externpro/wxcmake
-  BASE wx0 BRANCH dev
-  WEB "https://github.com/externpro/wxcmake 'wxcmake repo on github'"
-  DESC "build wxWidgets via cmake [submodule of: _wxwidgets_]"
-  LICENSE "[wxWindows](https://wxwidgets.org/about/licence/ 'same as wxWidgets license')"
-  )
 set(xp_wxinclude REPO github.com/externpro/wxInclude TAG v1.2.2
   MANIFEST_SHA256 3675dab0351a9ef6cdd8addb8010948b2fae8022496da56e1e181dcbaaaf5b08
   )
