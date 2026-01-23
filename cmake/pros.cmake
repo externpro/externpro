@@ -119,16 +119,18 @@ set(xp_nlohmann_json REPO github.com/externpro/nlohmann_json TAG v3.12.0.2
 set(xp_node-addon-api REPO github.com/externpro/node-addon-api TAG v8.5.0.2
   MANIFEST_SHA256 fcf59bb2da499109ba9f96d3d029f8c71aec0b199411c43ed4af2fe9ce87b39b
   )
-set(xp_nodeng DIST_DIR /bpvol/src/pros/nodeng/_bld-Linux/dist/) # override with local dist directory
-set(xp_nodeng # override with locally built devel package (cmake --preset=Linux; cmake --workflow --preset=LinuxRelease)
-  URL_Linux-arm64 /bpvol/src/pros/nodeng/_bld-Linux/nodeng-v22.16.0.2-dr-Linux-arm64-devel.tar.xz
-  SHA256_Linux-arm64 be77536fdc26105651e7920d2b993e48ad8f972591e27e20b73c9154ac9bdd7d
+# override xp_nodeng with local dist directory
+set(xp_nodeng DIST_DIR /bpvol/workspace/nodeng/_bld-Linux/dist/)
+# override xp_nodeng with locally built xpro package (cmake --preset=Linux; cmake --workflow --preset=LinuxRelease)
+set(xp_nodeng
+  XPRO_PATH /bpvol/workspace/nodeng/_bld-Linux/nodeng-v22.19.0.2-2-g2e296c8-gcc13-Linux-arm64-xpro.tar.xz
+  MANIFEST_FILE /bpvol/workspace/nodeng/_bld-Linux/nodeng-v22.19.0.2-2-g2e296c8.manifest.cmake
   )
-set(xp_nodeng REPO github.com/externpro/nodeng TAG v22.16.0.2-2-ge210ba4 # override with pre-release from CI built devel package
-  SHA256_Linux-arm64 c29d0219f7e6dfb048df7e945013f48d1e0899c0e300400ff96c0b1f8d7ac2fe
-  SHA256_Linux 0abd6e07dcc94bb2809dd903cbd2b1a60ffe8bed3c8fda532751c6c73f833966
-  SHA256_win64 88b003f7d3d60f090a7ec30f77e8c0174caedf9eec670a74018d7c5d7ba26d5f
+# override xp_nodeng with pre-release from CI-built xpro package
+set(xp_nodeng REPO github.com/externpro/nodeng TAG v22.19.0.2-2-g3a430c8
+  MANIFEST_SHA256 60f9d99fb469a6f013924b938be607f6258b8337711eeb0b93e8d1ff1ee28772
   )
+# last xp_nodeng set is used
 set(xp_nodeng REPO github.com/externpro/nodeng TAG v22.19.0.2
   MANIFEST_SHA256 d43049ea27d8d4145d19c6f8e42bc4e57188d1de7d2ccac480c266a852d70d56
   )
