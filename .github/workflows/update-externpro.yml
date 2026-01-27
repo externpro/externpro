@@ -98,9 +98,9 @@ jobs:
           # Check if target_ref is a tag or branch
           if git rev-parse --verify "origin/$TARGET_REF" >/dev/null 2>&1; then
             # It's a branch
-            LATEST_HEAD=$(git rev-parse origin/"$TARGET_REF")
             TARGET_TYPE="branch"
             echo "target_type=branch" >> $GITHUB_OUTPUT
+            LATEST_HEAD=$(git rev-parse origin/"$TARGET_REF")
           elif git rev-parse --verify "$TARGET_REF" >/dev/null 2>&1; then
             # It's a tag or commit
             LATEST_HEAD=$(git rev-parse "$TARGET_REF")
@@ -121,7 +121,11 @@ jobs:
             echo "externpro needs update"
             echo "update_needed=true" >> $GITHUB_OUTPUT
             # Update to target
-            git checkout "$LATEST_HEAD"
+            if [ "$TARGET_TYPE" = "branch" ]; then
+              git checkout -B "$TARGET_REF" "origin/$TARGET_REF"
+            else
+              git checkout --detach "$LATEST_HEAD"
+            fi
           fi
       -
         name: Get externpro version tag
@@ -144,7 +148,7 @@ jobs:
       -
         name: Update caller workflows
         id: update_workflows
-        if: inputs.create_pr == 'true'
+        if: ${{ always() && inputs.create_pr }}
         run: |
           echo "Analyzing workflow template updates..."
           WORKFLOW_DIR=".github/workflows"
@@ -318,7 +322,7 @@ jobs:
       -
         name: Determine if PR is needed
         id: pr_needed
-        if: inputs.create_pr == 'true'
+        if: inputs.create_pr
         run: |
           if git diff --cached --quiet; then
             echo "pr_needed=false" >> $GITHUB_OUTPUT
@@ -330,7 +334,7 @@ jobs:
       -
         name: Create branch
         id: branch
-        if: inputs.create_pr == 'true' && steps.pr_needed.outputs.pr_needed == 'true'
+        if: inputs.create_pr && steps.pr_needed.outputs.pr_needed == 'true'
         run: |
           # Create branch using describe (instead of timestamp)
           DESCRIBE="${{ steps.version.outputs.describe }}"
@@ -340,14 +344,14 @@ jobs:
           echo "branch_name=$BRANCH_NAME" >> $GITHUB_OUTPUT
       -
         name: Commit submodule update
-        if: steps.update.outputs.update_needed == 'true' && inputs.create_pr == 'true' && steps.pr_needed.outputs.pr_needed == 'true'
+        if: steps.update.outputs.update_needed == 'true' && inputs.create_pr && steps.pr_needed.outputs.pr_needed == 'true'
         run: |
           COMMIT_MSG="externpro ${{ steps.version.outputs.describe }}"
           git commit -m "$COMMIT_MSG" -- "${{ steps.validate.outputs.submodule_path }}"
           echo "Commit created: $COMMIT_MSG"
       -
         name: Commit and push workflow updates
-        if: inputs.create_pr == 'true' && steps.pr_needed.outputs.pr_needed == 'true'
+        if: inputs.create_pr && steps.pr_needed.outputs.pr_needed == 'true'
         run: |
           if ! git diff --cached --quiet; then
             COMMIT_MSG="externpro ${{ steps.version.outputs.describe }} workflow updates"
@@ -357,7 +361,7 @@ jobs:
           git push --set-upstream origin "${{ steps.branch.outputs.branch_name }}"
       -
         name: Create Pull Request
-        if: inputs.create_pr == 'true' && steps.pr_needed.outputs.pr_needed == 'true'
+        if: inputs.create_pr && steps.pr_needed.outputs.pr_needed == 'true'
         uses: peter-evans/create-pull-request@v6
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
