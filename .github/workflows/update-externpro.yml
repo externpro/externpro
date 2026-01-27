@@ -270,10 +270,14 @@ jobs:
             echo "Performing diff analysis..."
             DIFF_OUTPUT=$(diff -u "$workflow_file.backup" "$workflow_file" || true)
             if [ -n "$DIFF_OUTPUT" ]; then
-              echo "Changes detected:"
-              echo "$DIFF_OUTPUT"
               # Analyze the diff to ensure only expected changes
               VERSION_ONLY_DIFF=$(diff -u "$workflow_file.backup" "$workflow_file" | grep -E "^\+.*@|^\-.*@" || true)
+              BRANCHES_BEFORE_JSON=$(yq eval -o=json '.on.push.branches // []' "$workflow_file.backup" 2>/dev/null)
+              BRANCHES_AFTER_JSON=$(yq eval -o=json '.on.push.branches // []' "$workflow_file" 2>/dev/null)
+              BRANCHES_CHANGED=false
+              if [ -n "$BRANCHES_BEFORE_JSON" ] && [ -n "$BRANCHES_AFTER_JSON" ] && [ "$BRANCHES_BEFORE_JSON" != "$BRANCHES_AFTER_JSON" ]; then
+                BRANCHES_CHANGED=true
+              fi
               BRANCHES_DIFF=$(diff -u "$workflow_file.backup" "$workflow_file" | grep -E "^\+.*branches|^\-.*branches" || true)
               # Exclude known customizations from "unexpected diffs" using dynamic pattern
               OTHER_DIFF=$(diff -u "$workflow_file.backup" "$workflow_file" \
@@ -283,6 +287,16 @@ jobs:
                 | grep -v -E 'branches' \
                 | grep -v -E "$DYNAMIC_EXCLUSION_PATTERN" \
                 || true)
+              echo "Changes detected:"
+              if [ -n "$VERSION_ONLY_DIFF" ]; then
+                echo "$VERSION_ONLY_DIFF"
+              fi
+              if [ "$BRANCHES_CHANGED" = true ] && [ -n "$BRANCHES_DIFF" ]; then
+                echo "$BRANCHES_DIFF"
+              fi
+              if [ -n "$OTHER_DIFF" ]; then
+                echo "$OTHER_DIFF"
+              fi
               if [ -n "$OTHER_DIFF" ] && [ "${{ inputs.preserve_existing_branches }}" = "true" ]; then
                 echo "WARNING: Unexpected changes detected in $template_name"
                 echo "$OTHER_DIFF"
@@ -303,7 +317,7 @@ jobs:
                 echo "✓ Version updated: $CURRENT_VERSION → $TEMPLATE_VERSION"
                 REPORT="$REPORT✓ $template_name: Version updated $CURRENT_VERSION → $TEMPLATE_VERSION\n"
               fi
-              if [ -n "$BRANCHES_DIFF" ] && [ "${{ inputs.preserve_existing_branches }}" != "true" ]; then
+              if [ "$BRANCHES_CHANGED" = true ] && [ "${{ inputs.preserve_existing_branches }}" != "true" ]; then
                 echo "✓ Branches updated from template"
                 REPORT="$REPORT✓ $template_name: Branches updated from template\n"
               fi
