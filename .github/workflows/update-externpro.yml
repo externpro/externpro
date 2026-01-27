@@ -437,14 +437,16 @@ jobs:
           echo "---" >> "$BODY_FILE"
           echo >> "$BODY_FILE"
           echo "*This PR was created automatically by GitHub Actions*" >> "$BODY_FILE"
-          if gh pr view "$HEAD_BRANCH" --json number --jq .number >/dev/null 2>&1; then
-            echo "PR already exists for $HEAD_BRANCH"
-            exit 0
-          fi
-          gh pr create \
+          if gh pr view "$HEAD_BRANCH" --json url --jq .url >/dev/null 2>&1; then
+            PR_URL=$(gh pr view "$HEAD_BRANCH" --json url --jq .url)
+            echo "PR already exists for $HEAD_BRANCH: $PR_URL"
+          else
+            PR_URL=$(gh pr create \
             --base "$BASE_BRANCH" \
             --head "$HEAD_BRANCH" \
             --title "$TITLE" \
-            --body-file "$BODY_FILE" \
-            --label "dependencies" \
-            --label "externpro"
+            --body-file "$BODY_FILE")
+            echo "Created PR: $PR_URL"
+          fi
+          gh pr edit "$PR_URL" --add-label "dependencies" >/dev/null 2>&1 || echo "Label 'dependencies' not found; skipping"
+          gh pr edit "$PR_URL" --add-label "externpro" >/dev/null 2>&1 || echo "Label 'externpro' not found; skipping"
