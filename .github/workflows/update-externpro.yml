@@ -22,6 +22,10 @@ on:
         required: false
         type: boolean
         default: true
+    secrets:
+      workflow_write_token:
+        description: 'Optional token with permission to update .github/workflows (PAT or fine-grained token). If not set, uses GITHUB_TOKEN.'
+        required: false
 jobs:
   update-externpro:
     runs-on: ubuntu-latest
@@ -36,7 +40,7 @@ jobs:
           fetch-depth: 0   # fetches all history
           fetch-tags: true # explicitly fetches tags
           submodules: true
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.workflow_write_token || github.token }}
       -
         name: Configure Git
         run: |
@@ -364,7 +368,7 @@ jobs:
         if: inputs.create_pr && steps.pr_needed.outputs.pr_needed == 'true'
         uses: peter-evans/create-pull-request@v6
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.workflow_write_token || github.token }}
           branch: ${{ steps.branch.outputs.branch_name }}
           title: "externpro ${{ steps.version.outputs.describe }}"
           body: |
