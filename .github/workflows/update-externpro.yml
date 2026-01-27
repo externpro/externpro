@@ -27,7 +27,7 @@ on:
         description: 'Optional token with permission to update .github/workflows (PAT or fine-grained token). If not set, uses GITHUB_TOKEN.'
         required: false
 jobs:
-  update-externpro:
+  externpro:
     runs-on: ubuntu-latest
     permissions:
       contents: write
