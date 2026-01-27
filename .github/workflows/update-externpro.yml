@@ -12,8 +12,8 @@ on:
         required: false
         type: string
         default: 'main'
-      update_branches_from_templates:
-        description: 'Whether to update branches from wf-templates (default: preserve existing branches)'
+      preserve_existing_branches:
+        description: 'Whether to preserve existing branches in caller workflows (default: use branches from wf-templates)'
         required: false
         type: boolean
         default: false
@@ -99,17 +99,19 @@ jobs:
           if git rev-parse --verify "origin/$TARGET_REF" >/dev/null 2>&1; then
             # It's a branch
             LATEST_HEAD=$(git rev-parse origin/"$TARGET_REF")
+            TARGET_TYPE="branch"
             echo "target_type=branch" >> $GITHUB_OUTPUT
           elif git rev-parse --verify "$TARGET_REF" >/dev/null 2>&1; then
             # It's a tag or commit
             LATEST_HEAD=$(git rev-parse "$TARGET_REF")
+            TARGET_TYPE="tag"
             echo "target_type=tag" >> $GITHUB_OUTPUT
           else
             echo "Error: Target ref '$TARGET_REF' not found"
             exit 1
           fi
           echo "latest_head=$LATEST_HEAD" >> $GITHUB_OUTPUT
-          echo "Target ref: $TARGET_REF ($target_type)"
+          echo "Target ref: $TARGET_REF ($TARGET_TYPE)"
           echo "Latest externpro HEAD: $LATEST_HEAD"
           # Check if update is needed
           if [ "${{ steps.current_head.outputs.current_head }}" = "$LATEST_HEAD" ]; then
@@ -124,7 +126,6 @@ jobs:
       -
         name: Get externpro version tag
         id: version
-        if: steps.update.outputs.update_needed == 'true'
         run: |
           cd "${{ steps.validate.outputs.submodule_path }}"
           VERSION_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "no-tag")
@@ -135,40 +136,15 @@ jobs:
           echo "externpro describe: $DESCRIBE"
       -
         name: Stage submodule update
-        id: commit
+        id: stage_submodule
         if: steps.update.outputs.update_needed == 'true'
         run: |
           # Stage submodule changes
           git add "${{ steps.validate.outputs.submodule_path }}"
-          # Check if there are staged changes
-          if git diff --cached --quiet; then
-            echo "No changes to commit"
-            echo "commit_needed=false" >> $GITHUB_OUTPUT
-          else
-            echo "commit_needed=true" >> $GITHUB_OUTPUT
-          fi
-      -
-        name: Create branch
-        id: branch
-        if: steps.commit.outputs.commit_needed == 'true' && inputs.create_pr == 'true'
-        run: |
-          # Create branch using describe (instead of timestamp)
-          DESCRIBE="${{ steps.version.outputs.describe }}"
-          # Clean describe for branch name (remove invalid chars)
-          BRANCH_NAME="externpro-update-$(echo "$DESCRIBE" | sed 's/[^a-zA-Z0-9.-]/-/g')"
-          git checkout -b "$BRANCH_NAME"
-          echo "branch_name=$BRANCH_NAME" >> $GITHUB_OUTPUT
-      -
-        name: Commit submodule update
-        if: steps.commit.outputs.commit_needed == 'true' && inputs.create_pr == 'true'
-        run: |
-          COMMIT_MSG="externpro ${{ steps.version.outputs.describe }}"
-          git commit -m "$COMMIT_MSG" -- "${{ steps.validate.outputs.submodule_path }}"
-          echo "Commit created: $COMMIT_MSG"
       -
         name: Update caller workflows
         id: update_workflows
-        if: steps.commit.outputs.commit_needed == 'true' && inputs.create_pr == 'true'
+        if: inputs.create_pr == 'true'
         run: |
           echo "Analyzing workflow template updates..."
           WORKFLOW_DIR=".github/workflows"
@@ -245,8 +221,8 @@ jobs:
                 fi
               fi
             done <<< "$WITH_KEYS"
-            # Extract and compare branches if not updating from template
-            if [ "${{ inputs.update_branches_from_templates }}" != "true" ]; then
+            # Extract and compare branches if preserving existing branches
+            if [ "${{ inputs.preserve_existing_branches }}" = "true" ]; then
               CURRENT_BRANCHES=$(yq eval '.on.push.branches[]' "$workflow_file.backup" 2>/dev/null | tr '\n' ', ' | sed 's/,$//')
               TEMPLATE_BRANCHES=$(yq eval '.on.push.branches[]' "$template_file" 2>/dev/null | tr '\n' ', ' | sed 's/,$//')
               if [ -n "$CURRENT_BRANCHES" ] && [ -n "$TEMPLATE_BRANCHES" ] && [ "$CURRENT_BRANCHES" != "$TEMPLATE_BRANCHES" ]; then
@@ -258,13 +234,13 @@ jobs:
             fi
             # Update version tag
             yq eval ".jobs.*.uses |= sub(\"@.*\", \"@$TEMPLATE_VERSION\")" -i "$workflow_file"
-            # Update branches if requested
-            if [ "${{ inputs.update_branches_from_templates }}" = "true" ]; then
+            # Update branches unless preserving existing branches
+            if [ "${{ inputs.preserve_existing_branches }}" != "true" ]; then
               echo "Updating branches from template..."
               TEMPLATE_BRANCHES=$(yq eval '.on.push.branches[]' "$template_file" 2>/dev/null | tr '\n' ',' | sed 's/,$//')
               if [ -n "$TEMPLATE_BRANCHES" ]; then
-                yq eval ".on.push.branches = [$(echo "$TEMPLATE_BRANCHES" | sed 's/,/, /g')]" -i "$workflow_file"
-                yq eval ".on.pull_request.branches = [$(echo "$TEMPLATE_BRANCHES" | sed 's/,/, /g')]" -i "$workflow_file"
+                yq eval ".on.push.branches = [$(echo \"$TEMPLATE_BRANCHES\" | sed 's/,/, /g')]" -i "$workflow_file"
+                yq eval ".on.pull_request.branches = [$(echo \"$TEMPLATE_BRANCHES\" | sed 's/,/, /g')]" -i "$workflow_file"
                 echo "Updated branches to: $TEMPLATE_BRANCHES"
               fi
             fi
@@ -279,12 +255,12 @@ jobs:
               BRANCHES_DIFF=$(diff -u "$workflow_file.backup" "$workflow_file" | grep -E "^\+.*branches|^\-.*branches" || true)
               # Exclude known customizations from "unexpected diffs" using dynamic pattern
               OTHER_DIFF=$(diff -u "$workflow_file.backup" "$workflow_file" | grep -E "^\+.*[^\+@branches]|^\-.*[^\-@branches]" | grep -v -E "^[\+\-]{3}|^[\+\-]{2}" | grep -v -E "$DYNAMIC_EXCLUSION_PATTERN" || true)
-              if [ -n "$OTHER_DIFF" ] && [ "${{ inputs.update_branches_from_templates }}" != "true" ]; then
+              if [ -n "$OTHER_DIFF" ] && [ "${{ inputs.preserve_existing_branches }}" = "true" ]; then
                 echo "WARNING: Unexpected changes detected in $template_name"
                 echo "$OTHER_DIFF"
                 REPORT="$REPORT⚠️ $template_name: Unexpected structural differences detected\n"
                 UNEXPECTED_DIFFS=true
-              elif [ -n "$OTHER_DIFF" ] && [ "${{ inputs.update_branches_from_templates }}" = "true" ]; then
+              elif [ -n "$OTHER_DIFF" ] && [ "${{ inputs.preserve_existing_branches }}" != "true" ]; then
                 # Filter out branch changes from "other" diff
                 FILTERED_OTHER=$(echo "$OTHER_DIFF" | grep -v -E "branches|^\-\-\-|^\+\+\+")
                 if [ -n "$FILTERED_OTHER" ]; then
@@ -299,7 +275,7 @@ jobs:
                 echo "✓ Version updated: $CURRENT_VERSION → $TEMPLATE_VERSION"
                 REPORT="$REPORT✓ $template_name: Version updated $CURRENT_VERSION → $TEMPLATE_VERSION\n"
               fi
-              if [ -n "$BRANCHES_DIFF" ] && [ "${{ inputs.update_branches_from_templates }}" = "true" ]; then
+              if [ -n "$BRANCHES_DIFF" ] && [ "${{ inputs.preserve_existing_branches }}" != "true" ]; then
                 echo "✓ Branches updated from template"
                 REPORT="$REPORT✓ $template_name: Branches updated from template\n"
               fi
@@ -340,8 +316,38 @@ jobs:
             echo "No workflow updates needed"
           fi
       -
+        name: Determine if PR is needed
+        id: pr_needed
+        if: inputs.create_pr == 'true'
+        run: |
+          if git diff --cached --quiet; then
+            echo "pr_needed=false" >> $GITHUB_OUTPUT
+            echo "No staged changes (no PR needed)"
+          else
+            echo "pr_needed=true" >> $GITHUB_OUTPUT
+            echo "Staged changes detected (PR needed)"
+          fi
+      -
+        name: Create branch
+        id: branch
+        if: inputs.create_pr == 'true' && steps.pr_needed.outputs.pr_needed == 'true'
+        run: |
+          # Create branch using describe (instead of timestamp)
+          DESCRIBE="${{ steps.version.outputs.describe }}"
+          # Clean describe for branch name (remove invalid chars)
+          BRANCH_NAME="externpro-update-$(echo "$DESCRIBE" | sed 's/[^a-zA-Z0-9.-]/-/g')"
+          git checkout -b "$BRANCH_NAME"
+          echo "branch_name=$BRANCH_NAME" >> $GITHUB_OUTPUT
+      -
+        name: Commit submodule update
+        if: steps.update.outputs.update_needed == 'true' && inputs.create_pr == 'true' && steps.pr_needed.outputs.pr_needed == 'true'
+        run: |
+          COMMIT_MSG="externpro ${{ steps.version.outputs.describe }}"
+          git commit -m "$COMMIT_MSG" -- "${{ steps.validate.outputs.submodule_path }}"
+          echo "Commit created: $COMMIT_MSG"
+      -
         name: Commit and push workflow updates
-        if: inputs.create_pr == 'true' && steps.branch.outputs.branch_name != ''
+        if: inputs.create_pr == 'true' && steps.pr_needed.outputs.pr_needed == 'true'
         run: |
           if ! git diff --cached --quiet; then
             COMMIT_MSG="externpro ${{ steps.version.outputs.describe }} workflow updates"
@@ -351,7 +357,7 @@ jobs:
           git push --set-upstream origin "${{ steps.branch.outputs.branch_name }}"
       -
         name: Create Pull Request
-        if: steps.commit.outputs.commit_needed == 'true' && inputs.create_pr == 'true'
+        if: inputs.create_pr == 'true' && steps.pr_needed.outputs.pr_needed == 'true'
         uses: peter-evans/create-pull-request@v6
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
