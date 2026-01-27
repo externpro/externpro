@@ -63,8 +63,12 @@ jobs:
             exit 1
           fi
           # Check if it's actually a git repository (submodule)
-          if [ ! -d "$SUBMODULE_PATH/.git" ]; then
+          if [ ! -e "$SUBMODULE_PATH/.git" ]; then
             echo "Error: $SUBMODULE_PATH is not a git submodule"
+            exit 1
+          fi
+          if ! git -C "$SUBMODULE_PATH" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+            echo "Error: $SUBMODULE_PATH is not a valid git work tree"
             exit 1
           fi
           # Get submodule URL to verify it's externpro
