@@ -400,30 +400,51 @@ jobs:
       -
         name: Create Pull Request
         if: inputs.create_pr && steps.pr_needed.outputs.pr_needed == 'true'
-        uses: peter-evans/create-pull-request@v6
-        with:
-          token: ${{ secrets.workflow_write_token || github.token }}
-          base: ${{ github.event.repository.default_branch }}
-          branch: ${{ steps.branch.outputs.branch_name }}
-          title: "externpro ${{ steps.version.outputs.describe }}"
-          body: |
-            ## Summary
-
-            Update externpro submodule to `${{ steps.version.outputs.describe }}`
-
-            ## Changes
-
-            - Updated `${{ steps.validate.outputs.submodule_path }}` to externpro `${{ steps.version.outputs.describe }}`
-            - Previous HEAD: `${{ steps.current_head.outputs.current_head }}`
-            - New HEAD: `${{ steps.update.outputs.latest_head }}`
-            ${{ steps.update_workflows.outputs.workflows_updated == 'true' && format('- Updated caller workflows to match templates') || '' }}
-
-            ${{ steps.update_workflows.outputs.workflow_report != '' && format('### Workflow Update Report\n\n${{ steps.update_workflows.outputs.workflow_report }}') || '' }}
-
-            ---
-
-            *This PR was created automatically by GitHub Actions*
-          labels: |
-            dependencies
-            externpro
-          draft: false
+        env:
+          GH_TOKEN: ${{ secrets.workflow_write_token || github.token }}
+        run: |
+          set -euo pipefail
+          BASE_BRANCH="${{ github.event.repository.default_branch }}"
+          HEAD_BRANCH="${{ steps.branch.outputs.branch_name }}"
+          TITLE="externpro ${{ steps.version.outputs.describe }}"
+          BODY_FILE="/tmp/pr-body.md"
+          : > "$BODY_FILE"
+          echo "## Summary" >> "$BODY_FILE"
+          echo >> "$BODY_FILE"
+          if [ "${{ steps.update.outputs.update_needed }}" = "true" ]; then
+            echo "Update externpro submodule to \`${{ steps.version.outputs.describe }}\`" >> "$BODY_FILE"
+          else
+            echo "Sync caller workflows from templates" >> "$BODY_FILE"
+          fi
+          echo >> "$BODY_FILE"
+          echo "## Changes" >> "$BODY_FILE"
+          echo >> "$BODY_FILE"
+          if [ "${{ steps.update.outputs.update_needed }}" = "true" ]; then
+            echo "- Updated \`${{ steps.validate.outputs.submodule_path }}\` to externpro \`${{ steps.version.outputs.describe }}\`" >> "$BODY_FILE"
+            echo "- Previous HEAD: \`${{ steps.current_head.outputs.current_head }}\`" >> "$BODY_FILE"
+            echo "- New HEAD: \`${{ steps.update.outputs.latest_head }}\`" >> "$BODY_FILE"
+          fi
+          if [ "${{ steps.update_workflows.outputs.workflows_updated }}" = "true" ]; then
+            echo "- Updated caller workflows to match templates" >> "$BODY_FILE"
+          fi
+          if [ -n "${{ steps.update_workflows.outputs.workflow_report }}" ]; then
+            echo >> "$BODY_FILE"
+            echo "### Workflow Update Report" >> "$BODY_FILE"
+            echo >> "$BODY_FILE"
+            echo "${{ steps.update_workflows.outputs.workflow_report }}" >> "$BODY_FILE"
+          fi
+          echo >> "$BODY_FILE"
+          echo "---" >> "$BODY_FILE"
+          echo >> "$BODY_FILE"
+          echo "*This PR was created automatically by GitHub Actions*" >> "$BODY_FILE"
+          if gh pr view "$HEAD_BRANCH" --json number --jq .number >/dev/null 2>&1; then
+            echo "PR already exists for $HEAD_BRANCH"
+            exit 0
+          fi
+          gh pr create \
+            --base "$BASE_BRANCH" \
+            --head "$HEAD_BRANCH" \
+            --title "$TITLE" \
+            --body-file "$BODY_FILE" \
+            --label "dependencies" \
+            --label "externpro"
