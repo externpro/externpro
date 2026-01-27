@@ -119,10 +119,10 @@ jobs:
           echo "Latest externpro HEAD: $LATEST_HEAD"
           # Check if update is needed
           if [ "${{ steps.current_head.outputs.current_head }}" = "$LATEST_HEAD" ]; then
-            echo "externpro is already at target ref"
+            echo "externpro submodule is already at target ref"
             echo "update_needed=false" >> $GITHUB_OUTPUT
           else
-            echo "externpro needs update"
+            echo "externpro submodule needs update"
             echo "update_needed=true" >> $GITHUB_OUTPUT
             # Update to target
             if [ "$TARGET_TYPE" = "branch" ]; then
@@ -149,6 +149,11 @@ jobs:
         run: |
           # Stage submodule changes
           git add "${{ steps.validate.outputs.submodule_path }}"
+          if git diff --cached --quiet -- "${{ steps.validate.outputs.submodule_path }}"; then
+            echo "✓ No submodule changes staged for ${{ steps.validate.outputs.submodule_path }}"
+          else
+            echo "✓ Staged submodule update for ${{ steps.validate.outputs.submodule_path }}"
+          fi
       -
         name: Update caller workflows
         id: update_workflows
@@ -208,6 +213,9 @@ jobs:
             PRESERVED_REPORT=""
             # Dynamically extract all with: keys to create exclusion pattern
             WITH_KEYS=$(yq eval '.jobs.*.with | keys | .[]' "$workflow_file.backup" 2>/dev/null | grep -v null || true)
+            if [ "$template_name" = "xprelease.yml" ]; then
+              WITH_KEYS=$(echo "$WITH_KEYS" | grep -v '^workflow_run_url$' || true)
+            fi
             if [ -n "$WITH_KEYS" ]; then
               echo "Found with: customization keys:"
               echo "$WITH_KEYS"
@@ -245,11 +253,17 @@ jobs:
             # Update branches unless preserving existing branches
             if [ "${{ inputs.preserve_existing_branches }}" != "true" ]; then
               echo "Updating branches from template..."
-              TEMPLATE_BRANCHES=$(yq eval '.on.push.branches[]' "$template_file" 2>/dev/null | tr '\n' ',' | sed 's/,$//')
-              if [ -n "$TEMPLATE_BRANCHES" ]; then
-                yq eval ".on.push.branches = [$(echo \"$TEMPLATE_BRANCHES\" | sed 's/,/, /g')]" -i "$workflow_file"
-                yq eval ".on.pull_request.branches = [$(echo \"$TEMPLATE_BRANCHES\" | sed 's/,/, /g')]" -i "$workflow_file"
-                echo "Updated branches to: $TEMPLATE_BRANCHES"
+              CURRENT_BRANCHES_JSON=$(yq eval -o=json '.on.push.branches // []' "$workflow_file.backup" 2>/dev/null)
+              TEMPLATE_BRANCHES_JSON=$(yq eval -o=json '.on.push.branches // []' "$template_file" 2>/dev/null)
+              if [ -n "$CURRENT_BRANCHES_JSON" ] && [ -n "$TEMPLATE_BRANCHES_JSON" ] && [ "$CURRENT_BRANCHES_JSON" = "$TEMPLATE_BRANCHES_JSON" ]; then
+                echo "Branches already match template"
+              else
+                TEMPLATE_BRANCHES=$(yq eval '.on.push.branches[]' "$template_file" 2>/dev/null | tr '\n' ',' | sed 's/,$//')
+                if [ -n "$TEMPLATE_BRANCHES" ]; then
+                  yq eval ".on.push.branches = [$(echo \"$TEMPLATE_BRANCHES\" | sed 's/,/, /g')]" -i "$workflow_file"
+                  yq eval ".on.pull_request.branches = [$(echo \"$TEMPLATE_BRANCHES\" | sed 's/,/, /g')]" -i "$workflow_file"
+                  echo "Updated branches to: $TEMPLATE_BRANCHES"
+                fi
               fi
             fi
             # Perform diff analysis
@@ -262,7 +276,13 @@ jobs:
               VERSION_ONLY_DIFF=$(diff -u "$workflow_file.backup" "$workflow_file" | grep -E "^\+.*@|^\-.*@" || true)
               BRANCHES_DIFF=$(diff -u "$workflow_file.backup" "$workflow_file" | grep -E "^\+.*branches|^\-.*branches" || true)
               # Exclude known customizations from "unexpected diffs" using dynamic pattern
-              OTHER_DIFF=$(diff -u "$workflow_file.backup" "$workflow_file" | grep -E "^\+.*[^\+@branches]|^\-.*[^\-@branches]" | grep -v -E "^[\+\-]{3}|^[\+\-]{2}" | grep -v -E "$DYNAMIC_EXCLUSION_PATTERN" || true)
+              OTHER_DIFF=$(diff -u "$workflow_file.backup" "$workflow_file" \
+                | grep -E '^[\+\-]' \
+                | grep -v -E '^[\+\-]{2,3}' \
+                | grep -v -E '@' \
+                | grep -v -E 'branches' \
+                | grep -v -E "$DYNAMIC_EXCLUSION_PATTERN" \
+                || true)
               if [ -n "$OTHER_DIFF" ] && [ "${{ inputs.preserve_existing_branches }}" = "true" ]; then
                 echo "WARNING: Unexpected changes detected in $template_name"
                 echo "$OTHER_DIFF"
