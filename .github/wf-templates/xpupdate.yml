@@ -1,0 +1,10 @@
+name: Update externpro
+permissions:
+  contents: write
+  pull-requests: write
+on:
+  workflow_dispatch:
+jobs:
+  update:
+    uses: externpro/externpro/.github/workflows/update-externpro.yml@main
+    secrets: inherit
