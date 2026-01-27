@@ -248,8 +248,34 @@ jobs:
                 PRESERVED_REPORT="$PRESERVED_REPORT🌿 branches: $CURRENT_BRANCHES (template: $TEMPLATE_BRANCHES)\n"
               fi
             fi
-            # Update version tag
-            yq eval ".jobs.*.uses |= sub(\"@.*\", \"@$TEMPLATE_VERSION\")" -i "$workflow_file"
+            # Update version tag (targeted edit to avoid reformatting YAML)
+            python3 - "$workflow_file" "$TEMPLATE_VERSION" <<'PY'
+            import re
+            import sys
+
+            path = sys.argv[1]
+            new_ref = sys.argv[2]
+
+            with open(path, 'r', encoding='utf-8') as f:
+              lines = f.readlines()
+
+            # Replace the ref portion of any "uses: ...@<ref>" line while preserving formatting.
+            # This avoids yq rewriting the entire YAML and causing cosmetic diffs (e.g. branches spacing).
+            uses_re = re.compile(r'^(\s*uses:\s*[^#\n]*?)@([^\s#]+)(.*)$')
+            changed = False
+            out = []
+            for line in lines:
+              m = uses_re.match(line)
+              if m:
+                out.append(f"{m.group(1)}@{new_ref}{m.group(3)}")
+                changed = True
+              else:
+                out.append(line)
+
+            if changed:
+              with open(path, 'w', encoding='utf-8') as f:
+                f.writelines(out)
+            PY
             # Update branches unless preserving existing branches
             if [ "${{ inputs.preserve_existing_branches }}" != "true" ]; then
               echo "Updating branches from template..."
