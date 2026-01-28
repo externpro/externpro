@@ -1,0 +1,35 @@
+name: Sync Caller Workflows
+description: Sync .github/workflows from templates while preserving project-specific customizations.
+inputs:
+  workflow_dir:
+    description: Path to caller workflows directory
+    required: true
+  template_dir:
+    description: Path to workflow template directory
+    required: true
+  preserve_existing_branches:
+    description: Whether to preserve existing branches in caller workflows
+    required: false
+    default: "false"
+outputs:
+  workflows_updated:
+    description: Whether any workflow files were staged for update
+    value: ${{ steps.sync.outputs.workflows_updated }}
+  workflow_report:
+    description: Text report of workflow changes
+    value: ${{ steps.sync.outputs.workflow_report }}
+  unexpected_diffs:
+    description: Whether unexpected diffs were detected
+    value: ${{ steps.sync.outputs.unexpected_diffs }}
+runs:
+  using: composite
+  steps:
+    -
+      name: Sync workflows
+      id: sync
+      shell: bash
+      run: bash ${{ github.action_path }}/sync.sh
+      env:
+        WORKFLOW_DIR: ${{ inputs.workflow_dir }}
+        TEMPLATE_DIR: ${{ inputs.template_dir }}
+        PRESERVE_EXISTING_BRANCHES: ${{ inputs.preserve_existing_branches }}
