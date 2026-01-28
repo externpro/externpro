@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+trap 'echo "sync-caller-workflows failed at line $LINENO" >&2' ERR
+
 echo "Analyzing workflow template updates..."
 WORKFLOW_DIR="${WORKFLOW_DIR:?}"
 TEMPLATE_DIR="${TEMPLATE_DIR:?}"
@@ -141,8 +143,14 @@ PY
   if [ -n "$DIFF_OUTPUT" ]; then
     # Analyze the diff to ensure only expected changes
     VERSION_ONLY_DIFF=$(echo "$DIFF_OUTPUT" | grep -E "^\+.*@|^\-.*@" || true)
-    BRANCHES_BEFORE_JSON=$(yq eval -o=json '.on.push.branches // []' "$workflow_file.backup" 2>/dev/null)
-    BRANCHES_AFTER_JSON=$(yq eval -o=json '.on.push.branches // []' "$workflow_file" 2>/dev/null)
+    BRANCHES_BEFORE_JSON=$(yq eval -o=json '.on.push.branches // []' "$workflow_file.backup" 2>/dev/null || true)
+    BRANCHES_AFTER_JSON=$(yq eval -o=json '.on.push.branches // []' "$workflow_file" 2>/dev/null || true)
+    if [ -z "$BRANCHES_BEFORE_JSON" ]; then
+      BRANCHES_BEFORE_JSON='[]'
+    fi
+    if [ -z "$BRANCHES_AFTER_JSON" ]; then
+      BRANCHES_AFTER_JSON='[]'
+    fi
     BRANCHES_CHANGED=false
     if [ -n "$BRANCHES_BEFORE_JSON" ] && [ -n "$BRANCHES_AFTER_JSON" ] && [ "$BRANCHES_BEFORE_JSON" != "$BRANCHES_AFTER_JSON" ]; then
       BRANCHES_CHANGED=true
