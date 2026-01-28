@@ -4,9 +4,9 @@ permissions:
   pull-requests: write
 on:
   push:
-    branches: [ "xpro" ]
+    tags: ["v*"]
   pull_request:
-    branches: [ "xpro" ]
+    branches: [xpro]
   workflow_dispatch:
 jobs:
   linux:
