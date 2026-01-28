@@ -98,7 +98,8 @@ for template_file in "$TEMPLATE_DIR"/*.yml; do
     fi
   fi
   # Update version tag (targeted edit to avoid reformatting YAML)
-  python3 - "$workflow_file" "$TEMPLATE_VERSION" <<'PY'
+  if [ "$TEMPLATE_VERSION" != "$CURRENT_VERSION" ]; then
+    python3 - "$workflow_file" "$TEMPLATE_VERSION" <<'PY'
 import re
 import sys
 path = sys.argv[1]
@@ -111,16 +112,21 @@ uses_re = re.compile(r'^(\s*uses:\s*[^#\n]*?)@([^\s#]+)(.*)$')
 changed = False
 out = []
 for line in lines:
+  nl = '\n' if line.endswith('\n') else ''
   m = uses_re.match(line)
   if m:
-    out.append(f"{m.group(1)}@{new_ref}{m.group(3)}")
-    changed = True
+    if m.group(2) != new_ref:
+      out.append(f"{m.group(1)}@{new_ref}{m.group(3)}{nl}")
+      changed = True
+    else:
+      out.append(line)
   else:
     out.append(line)
 if changed:
   with open(path, 'w', encoding='utf-8') as f:
     f.writelines(out)
 PY
+  fi
   # Update branches unless preserving existing branches
   if [ "$PRESERVE_EXISTING_BRANCHES" != "true" ]; then
     echo "Updating branches from template..."
