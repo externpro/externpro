@@ -7,61 +7,48 @@ echo "Analyzing workflow template updates..."
 WORKFLOW_DIR="${WORKFLOW_DIR:?}"
 TEMPLATE_DIR="${TEMPLATE_DIR:?}"
 PRESERVE_EXISTING_BRANCHES="${PRESERVE_EXISTING_BRANCHES:-false}"
+GITHUB_OUTPUT="${GITHUB_OUTPUT:-/dev/null}"
+CREATE_MISSING_WORKFLOWS="${CREATE_MISSING_WORKFLOWS:-false}"
 WORKFLOWS_UPDATED=false
 UNEXPECTED_DIFFS=false
 REPORT=""
-# Check if template directory exists
-if [ ! -d "$TEMPLATE_DIR" ]; then
-  echo "No workflow templates found in $TEMPLATE_DIR"
-  echo "workflows_updated=false" >> "$GITHUB_OUTPUT"
-  exit 0
-fi
-# Install yq for YAML processing
-if ! command -v yq &> /dev/null; then
-  echo "Installing yq..."
-  wget -qO /tmp/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
-  chmod +x /tmp/yq
-  export PATH="/tmp:$PATH"
-fi
-# Process each template file
-for template_file in "$TEMPLATE_DIR"/*.yml; do
-  if [ ! -f "$template_file" ]; then
-    continue
+
+ensure_template_dir() {
+  # Check if template directory exists
+  if [ ! -d "$TEMPLATE_DIR" ]; then
+    echo "No workflow templates found in $TEMPLATE_DIR"
+    echo "workflows_updated=false" >> "$GITHUB_OUTPUT"
+    exit 0
   fi
-  template_name=$(basename "$template_file")
-  workflow_file="$WORKFLOW_DIR/$template_name"
-  echo "=== Analyzing $template_name ==="
-  # Check if workflow file exists - if not, copy from template
-  if [ ! -f "$workflow_file" ]; then
-    echo "Workflow $template_name not found, copying from template..."
-    cp "$template_file" "$workflow_file"
-    echo "✓ Created new workflow $template_name from template"
-    REPORT="$REPORT✓ $template_name: Created new workflow from template\n"
-    git add "$workflow_file"
-    WORKFLOWS_UPDATED=true
-    continue
+}
+
+ensure_yq() {
+  # Install yq for YAML processing
+  if ! command -v yq &> /dev/null; then
+    echo "Installing yq..."
+    wget -qO /tmp/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+    chmod +x /tmp/yq
+    export PATH="/tmp:$PATH"
   fi
-  # Extract version from template
+}
+
+extract_uses_ref() {
+  local path="$1"
   set +o pipefail
-  TEMPLATE_VERSION=$(yq eval '.jobs.*.uses | sub(".*@", "")' "$template_file" 2>/dev/null | head -1)
+  local ref
+  ref=$(grep -E '^\s*uses:\s*[^#]+@' "$path" 2>/dev/null | head -1 | sed 's/.*@//' || true)
   set -o pipefail
-  if [ -z "$TEMPLATE_VERSION" ]; then
-    echo "No version tag found in template $template_name, skipping"
-    continue
-  fi
-  echo "Template version: $TEMPLATE_VERSION"
-  # Get current version from workflow
-  set +o pipefail
-  CURRENT_VERSION=$(yq eval '.jobs.*.uses | sub(".*@", "")' "$workflow_file" 2>/dev/null | head -1)
-  set -o pipefail
-  echo "Current version: $CURRENT_VERSION"
-  # Create backup
-  cp "$workflow_file" "$workflow_file.backup"
-  # Extract and report preserved customizations before updating
+  echo "$ref"
+}
+
+extract_preserved_customizations() {
+  local template_name="$1"
+  local workflow_backup="$2"
+  local template_file="$3"
   echo "Extracting preserved customizations..."
   PRESERVED_REPORT=""
   # Dynamically extract all with: keys to create exclusion pattern
-  WITH_KEYS=$(yq eval '.jobs.*.with | keys | .[]' "$workflow_file.backup" 2>/dev/null | grep -v null || true)
+  WITH_KEYS=$(yq eval '.jobs.*.with | keys | .[]' "$workflow_backup" 2>/dev/null | grep -v null || true)
   if [ "$template_name" = "xprelease.yml" ]; then
     WITH_KEYS=$(echo "$WITH_KEYS" | grep -v '^workflow_run_url$' || true)
   fi
@@ -78,28 +65,31 @@ for template_file in "$TEMPLATE_DIR"/*.yml; do
   # Extract values for each found key (for reporting)
   while IFS= read -r key; do
     if [ -n "$key" ]; then
-      VALUES=$(yq eval ".jobs.*.with.$key" "$workflow_file.backup" 2>/dev/null | grep -v null || true)
+      VALUES=$(yq eval ".jobs.*.with.$key" "$workflow_backup" 2>/dev/null | grep -v null || true)
       if [ -n "$VALUES" ]; then
         echo "Found $key customizations:"
         echo "$VALUES"
-        PRESERVED_REPORT="$PRESERVED_REPORT🔧 $key: $(echo "$VALUES" | tr '\n' ', ' | sed 's/,$//')\n"
+        PRESERVED_REPORT="${PRESERVED_REPORT}🔧 $key: $(echo "$VALUES" | tr '\n' ', ' | sed 's/,$//')\n"
       fi
     fi
   done <<< "$WITH_KEYS"
   # Extract and compare branches if preserving existing branches
   if [ "$PRESERVE_EXISTING_BRANCHES" = "true" ]; then
-    CURRENT_BRANCHES=$(yq eval '.on.push.branches // [] | .[]' "$workflow_file.backup" 2>/dev/null | tr '\n' ', ' | sed 's/,$//' || true)
+    CURRENT_BRANCHES=$(yq eval '.on.push.branches // [] | .[]' "$workflow_backup" 2>/dev/null | tr '\n' ', ' | sed 's/,$//' || true)
     TEMPLATE_BRANCHES=$(yq eval '.on.push.branches // [] | .[]' "$template_file" 2>/dev/null | tr '\n' ', ' | sed 's/,$//' || true)
     if [ -n "$CURRENT_BRANCHES" ] && [ -n "$TEMPLATE_BRANCHES" ] && [ "$CURRENT_BRANCHES" != "$TEMPLATE_BRANCHES" ]; then
       echo "Branches differ from template:"
       echo "  Current: $CURRENT_BRANCHES"
       echo "  Template: $TEMPLATE_BRANCHES"
-      PRESERVED_REPORT="$PRESERVED_REPORT🌿 branches: $CURRENT_BRANCHES (template: $TEMPLATE_BRANCHES)\n"
+      PRESERVED_REPORT="${PRESERVED_REPORT}🌿 branches: $CURRENT_BRANCHES (template: $TEMPLATE_BRANCHES)\n"
     fi
   fi
-  # Update version tag (targeted edit to avoid reformatting YAML)
-  if [ "$TEMPLATE_VERSION" != "$CURRENT_VERSION" ]; then
-    python3 - "$workflow_file" "$TEMPLATE_VERSION" <<'PY'
+}
+
+update_version_ref_in_place() {
+  local workflow_file="$1"
+  local new_ref="$2"
+  python3 - "$workflow_file" "$new_ref" <<'PY'
 import re
 import sys
 path = sys.argv[1]
@@ -126,119 +116,359 @@ if changed:
   with open(path, 'w', encoding='utf-8') as f:
     f.writelines(out)
 PY
+}
+
+sync_triggers_from_template() {
+  local workflow_file="$1"
+  local template_file="$2"
+  if [ "$PRESERVE_EXISTING_BRANCHES" = "true" ]; then
+    return 0
   fi
-  # Update branches unless preserving existing branches
-  if [ "$PRESERVE_EXISTING_BRANCHES" != "true" ]; then
-    echo "Updating branches from template..."
-    CURRENT_BRANCHES_JSON=$(yq eval -o=json '.on.push.branches // []' "$workflow_file.backup" 2>/dev/null)
-    TEMPLATE_BRANCHES_JSON=$(yq eval -o=json '.on.push.branches // []' "$template_file" 2>/dev/null)
-    if [ -n "$CURRENT_BRANCHES_JSON" ] && [ -n "$TEMPLATE_BRANCHES_JSON" ] && [ "$CURRENT_BRANCHES_JSON" = "$TEMPLATE_BRANCHES_JSON" ]; then
-      echo "Branches already match template"
-    else
-      TEMPLATE_BRANCHES=$(yq eval '.on.push.branches // [] | .[]' "$template_file" 2>/dev/null | tr '\n' ',' | sed 's/,$//' || true)
-      if [ -n "$TEMPLATE_BRANCHES" ]; then
-        yq eval ".on.push.branches = [$(echo \"$TEMPLATE_BRANCHES\" | sed 's/,/, /g')]" -i "$workflow_file"
-        yq eval ".on.pull_request.branches = [$(echo \"$TEMPLATE_BRANCHES\" | sed 's/,/, /g')]" -i "$workflow_file"
-        echo "Updated branches to: $TEMPLATE_BRANCHES"
-      fi
-    fi
+  echo "Updating triggers from template..."
+  # push.branches
+  TEMPLATE_PUSH_BRANCHES_JSON=$(yq eval -o=json '.on.push.branches // []' "$template_file" 2>/dev/null || true)
+  if [ -z "$TEMPLATE_PUSH_BRANCHES_JSON" ]; then
+    TEMPLATE_PUSH_BRANCHES_JSON='[]'
   fi
-  # Perform diff analysis
+  if [ "$TEMPLATE_PUSH_BRANCHES_JSON" != "[]" ]; then
+    yq eval ".on.push.branches = $TEMPLATE_PUSH_BRANCHES_JSON" -i "$workflow_file"
+  else
+    # Remove push.branches if the template does not specify it.
+    yq eval 'del(.on.push.branches)' -i "$workflow_file" 2>/dev/null || true
+  fi
+  # push.tags
+  TEMPLATE_PUSH_TAGS_JSON=$(yq eval -o=json '.on.push.tags // []' "$template_file" 2>/dev/null || true)
+  if [ -z "$TEMPLATE_PUSH_TAGS_JSON" ]; then
+    TEMPLATE_PUSH_TAGS_JSON='[]'
+  fi
+  if [ "$TEMPLATE_PUSH_TAGS_JSON" != "[]" ]; then
+    yq eval ".on.push.tags = $TEMPLATE_PUSH_TAGS_JSON" -i "$workflow_file"
+  else
+    yq eval 'del(.on.push.tags)' -i "$workflow_file" 2>/dev/null || true
+  fi
+  # pull_request.branches
+  TEMPLATE_PR_BRANCHES_JSON=$(yq eval -o=json '.on.pull_request.branches // []' "$template_file" 2>/dev/null || true)
+  if [ -z "$TEMPLATE_PR_BRANCHES_JSON" ]; then
+    TEMPLATE_PR_BRANCHES_JSON='[]'
+  fi
+  if [ "$TEMPLATE_PR_BRANCHES_JSON" != "[]" ]; then
+    yq eval ".on.pull_request.branches = $TEMPLATE_PR_BRANCHES_JSON" -i "$workflow_file"
+  else
+    yq eval 'del(.on.pull_request.branches)' -i "$workflow_file" 2>/dev/null || true
+  fi
+}
+
+normalize_trigger_formatting() {
+  local workflow_file="$1"
+  local template_file="$2"
+  if [ "$PRESERVE_EXISTING_BRANCHES" = "true" ]; then
+    return 0
+  fi
+  # Normalize trigger formatting to match the template as closely as possible.
+  # yq may rewrite single-item arrays into different styles (block vs flow) and may drop quotes.
+  python3 - "$workflow_file" "$template_file" <<'PY'
+import re
+import sys
+workflow_path = sys.argv[1]
+template_path = sys.argv[2]
+with open(template_path, 'r', encoding='utf-8') as f:
+  t_lines = f.readlines()
+# Capture the exact, single-line formatting from the template (if present).
+template_push_tags_line = None
+template_pr_branches_line = None
+for line in t_lines:
+  if template_push_tags_line is None and re.match(r'^\s+tags:\s*\[.*\]\s*$', line):
+    template_push_tags_line = line.rstrip('\n')
+  if template_pr_branches_line is None and re.match(r'^\s+branches:\s*\[.*\]\s*$', line) and 'pull_request' in ''.join(t_lines[max(0, t_lines.index(line)-3):t_lines.index(line)+1]):
+    template_pr_branches_line = line.rstrip('\n')
+with open(workflow_path, 'r', encoding='utf-8') as f:
+  w_lines = f.readlines()
+def indent_len(s: str) -> int:
+  return len(s) - len(s.lstrip(' '))
+out = []
+i = 0
+in_on = False
+in_push = False
+in_pr = False
+on_indent = None
+push_indent = None
+pr_indent = None
+while i < len(w_lines):
+  line = w_lines[i]
+  # Track whether we're inside the on: section.
+  if re.match(r'^\s*on:\s*$', line):
+    in_on = True
+    on_indent = indent_len(line)
+    in_push = False
+    in_pr = False
+    out.append(line)
+    i += 1
+    continue
+  if in_on:
+    # Leaving on: section when indentation decreases.
+    if line.strip() and indent_len(line) <= (on_indent or 0) and not re.match(r'^\s*(push|pull_request|workflow_dispatch):', line):
+      in_on = False
+      in_push = False
+      in_pr = False
+      on_indent = None
+  if in_on and re.match(r'^\s*push:\s*$', line):
+    in_push = True
+    in_pr = False
+    push_indent = indent_len(line)
+    out.append(line)
+    i += 1
+    continue
+  if in_on and re.match(r'^\s*pull_request:\s*$', line):
+    in_pr = True
+    in_push = False
+    pr_indent = indent_len(line)
+    out.append(line)
+    i += 1
+    continue
+  # Rewrite push.tags to match template formatting; skip any block-list form that yq wrote.
+  if in_push and re.match(r'^\s*tags:\s*', line):
+    if template_push_tags_line is not None:
+      tags_indent = indent_len(line)
+      out.append(' ' * tags_indent + template_push_tags_line.strip() + '\n')
+      i += 1
+      # If tags was written as a block sequence, skip its items.
+      while i < len(w_lines):
+        nxt = w_lines[i]
+        if nxt.strip() == '':
+          out.append(nxt)
+          i += 1
+          continue
+        if indent_len(nxt) <= tags_indent:
+          break
+        i += 1
+      continue
+  # Rewrite pull_request.branches similarly.
+  if in_pr and re.match(r'^\s*branches:\s*', line):
+    if template_pr_branches_line is not None:
+      b_indent = indent_len(line)
+      out.append(' ' * b_indent + template_pr_branches_line.strip() + '\n')
+      i += 1
+      # Skip any block sequence items.
+      while i < len(w_lines):
+        nxt = w_lines[i]
+        if nxt.strip() == '':
+          out.append(nxt)
+          i += 1
+          continue
+        if indent_len(nxt) <= b_indent:
+          break
+        i += 1
+      continue
+  out.append(line)
+  i += 1
+with open(workflow_path, 'w', encoding='utf-8') as f:
+  f.writelines(out)
+PY
+}
+
+analyze_diff_and_stage() {
+  local template_name="$1"
+  local workflow_file="$2"
+  local current_version="$3"
+  local template_version="$4"
   echo "Performing diff analysis..."
   DIFF_OUTPUT=$(diff -u "$workflow_file.backup" "$workflow_file" || true)
-  if [ -n "$DIFF_OUTPUT" ]; then
-    # Analyze the diff to ensure only expected changes
-    VERSION_ONLY_DIFF=$(echo "$DIFF_OUTPUT" | grep -E "^\+.*@|^\-.*@" || true)
-    BRANCHES_BEFORE_JSON=$(yq eval -o=json '.on.push.branches // []' "$workflow_file.backup" 2>/dev/null || true)
-    BRANCHES_AFTER_JSON=$(yq eval -o=json '.on.push.branches // []' "$workflow_file" 2>/dev/null || true)
-    if [ -z "$BRANCHES_BEFORE_JSON" ]; then
-      BRANCHES_BEFORE_JSON='[]'
-    fi
-    if [ -z "$BRANCHES_AFTER_JSON" ]; then
-      BRANCHES_AFTER_JSON='[]'
-    fi
-    BRANCHES_CHANGED=false
-    if [ -n "$BRANCHES_BEFORE_JSON" ] && [ -n "$BRANCHES_AFTER_JSON" ] && [ "$BRANCHES_BEFORE_JSON" != "$BRANCHES_AFTER_JSON" ]; then
-      BRANCHES_CHANGED=true
-    fi
-    BRANCHES_DIFF=$(echo "$DIFF_OUTPUT" | grep -E "^\+.*branches|^\-.*branches" || true)
-    # Exclude known customizations from "unexpected diffs" using dynamic pattern
-    OTHER_DIFF=$(echo "$DIFF_OUTPUT" \
-      | grep -E '^[\+\-]' \
-      | grep -v -E '^[\+\-]{2,3}' \
-      | grep -v -E '@' \
-      | grep -v -E 'branches' \
-      | grep -v -E "$DYNAMIC_EXCLUSION_PATTERN" \
-      || true)
-    echo "Changes detected:"
-    if [ -n "$VERSION_ONLY_DIFF" ]; then
-      echo "$VERSION_ONLY_DIFF"
-    fi
-    if [ "$BRANCHES_CHANGED" = true ] && [ -n "$BRANCHES_DIFF" ]; then
-      echo "$BRANCHES_DIFF"
-    fi
-    if [ -n "$OTHER_DIFF" ]; then
-      echo "$OTHER_DIFF"
-    fi
-    if [ -n "$OTHER_DIFF" ] && [ "$PRESERVE_EXISTING_BRANCHES" = "true" ]; then
-      echo "WARNING: Unexpected changes detected in $template_name"
-      echo "$OTHER_DIFF"
-      REPORT="$REPORT⚠️ $template_name: Unexpected structural differences detected\n"
-      UNEXPECTED_DIFFS=true
-    elif [ -n "$OTHER_DIFF" ] && [ "$PRESERVE_EXISTING_BRANCHES" != "true" ]; then
-      # Filter out branch changes from "other" diff
-      FILTERED_OTHER=$(echo "$OTHER_DIFF" | grep -v -E "branches|^\-\-\-|^\+\+\+" || true)
-      if [ -n "$FILTERED_OTHER" ]; then
-        echo "WARNING: Unexpected changes detected in $template_name (excluding branches)"
-        echo "$FILTERED_OTHER"
-        REPORT="$REPORT⚠️ $template_name: Unexpected structural differences detected\n"
-        UNEXPECTED_DIFFS=true
-      fi
-    fi
-    # Report expected changes
-    if [ -n "$VERSION_ONLY_DIFF" ]; then
-      echo "✓ Version updated: $CURRENT_VERSION → $TEMPLATE_VERSION"
-      REPORT="$REPORT✓ $template_name: Version updated $CURRENT_VERSION → $TEMPLATE_VERSION\n"
-    fi
-    if [ "$BRANCHES_CHANGED" = true ] && [ "$PRESERVE_EXISTING_BRANCHES" != "true" ]; then
-      echo "✓ Branches updated from template"
-      REPORT="$REPORT✓ $template_name: Branches updated from template\n"
-    fi
-    # Report preserved customizations
-    if [ -n "$PRESERVED_REPORT" ]; then
-      echo "🔧 Preserved customizations:"
-      echo -e "$PRESERVED_REPORT"
-      REPORT="$REPORT\n### Preserved Customizations\n$PRESERVED_REPORT"
-    fi
-    git add "$workflow_file"
-    WORKFLOWS_UPDATED=true
-    rm "$workflow_file.backup"
-  else
+  if [ -z "$DIFF_OUTPUT" ]; then
     echo "No changes needed for $template_name"
     mv "$workflow_file.backup" "$workflow_file"
+    return 0
   fi
-done
-# Generate final report
-if [ -n "$REPORT" ]; then
-  echo "=== Workflow Update Report ==="
-  echo -e "$REPORT"
-  echo "================================"
-fi
-# Fail if unexpected diffs were found
-if [ "$UNEXPECTED_DIFFS" = true ]; then
-  echo "ERROR: Unexpected structural differences detected. Manual review required."
-  echo "unexpected_diffs=true" >> "$GITHUB_OUTPUT"
-  exit 1
-fi
-if [ "$WORKFLOWS_UPDATED" = true ]; then
-  echo "workflows_updated=true" >> "$GITHUB_OUTPUT"
-  echo "workflow_report<<EOF" >> "$GITHUB_OUTPUT"
-  echo -e "$REPORT" >> "$GITHUB_OUTPUT"
-  echo "EOF" >> "$GITHUB_OUTPUT"
-  echo "unexpected_diffs=false" >> "$GITHUB_OUTPUT"
-  echo "Workflow updates staged successfully"
-else
-  echo "workflows_updated=false" >> "$GITHUB_OUTPUT"
-  echo "unexpected_diffs=false" >> "$GITHUB_OUTPUT"
-  echo "No workflow updates needed"
-fi
+  # Analyze the diff to ensure only expected changes
+  VERSION_ONLY_DIFF=$(echo "$DIFF_OUTPUT" | grep -E "^\+.*@|^\-.*@" || true)
+  BRANCHES_BEFORE_JSON=$(yq eval -o=json '.on.push.branches // []' "$workflow_file.backup" 2>/dev/null || true)
+  BRANCHES_AFTER_JSON=$(yq eval -o=json '.on.push.branches // []' "$workflow_file" 2>/dev/null || true)
+  TAGS_BEFORE_JSON=$(yq eval -o=json '.on.push.tags // []' "$workflow_file.backup" 2>/dev/null || true)
+  TAGS_AFTER_JSON=$(yq eval -o=json '.on.push.tags // []' "$workflow_file" 2>/dev/null || true)
+  PR_BRANCHES_BEFORE_JSON=$(yq eval -o=json '.on.pull_request.branches // []' "$workflow_file.backup" 2>/dev/null || true)
+  PR_BRANCHES_AFTER_JSON=$(yq eval -o=json '.on.pull_request.branches // []' "$workflow_file" 2>/dev/null || true)
+  if [ -z "$BRANCHES_BEFORE_JSON" ]; then
+    BRANCHES_BEFORE_JSON='[]'
+  fi
+  if [ -z "$BRANCHES_AFTER_JSON" ]; then
+    BRANCHES_AFTER_JSON='[]'
+  fi
+  if [ -z "$TAGS_BEFORE_JSON" ]; then
+    TAGS_BEFORE_JSON='[]'
+  fi
+  if [ -z "$TAGS_AFTER_JSON" ]; then
+    TAGS_AFTER_JSON='[]'
+  fi
+  if [ -z "$PR_BRANCHES_BEFORE_JSON" ]; then
+    PR_BRANCHES_BEFORE_JSON='[]'
+  fi
+  if [ -z "$PR_BRANCHES_AFTER_JSON" ]; then
+    PR_BRANCHES_AFTER_JSON='[]'
+  fi
+  BRANCHES_CHANGED=false
+  if [ -n "$BRANCHES_BEFORE_JSON" ] && [ -n "$BRANCHES_AFTER_JSON" ] && [ "$BRANCHES_BEFORE_JSON" != "$BRANCHES_AFTER_JSON" ]; then
+    BRANCHES_CHANGED=true
+  fi
+  BRANCHES_DIFF=$(echo "$DIFF_OUTPUT" | grep -E "^\+.*branches|^\-.*branches" || true)
+  TAGS_CHANGED=false
+  if [ -n "$TAGS_BEFORE_JSON" ] && [ -n "$TAGS_AFTER_JSON" ] && [ "$TAGS_BEFORE_JSON" != "$TAGS_AFTER_JSON" ]; then
+    TAGS_CHANGED=true
+  fi
+  TAGS_DIFF=$(echo "$DIFF_OUTPUT" | grep -E "^\+.*tags|^\-.*tags" || true)
+  PR_BRANCHES_CHANGED=false
+  if [ -n "$PR_BRANCHES_BEFORE_JSON" ] && [ -n "$PR_BRANCHES_AFTER_JSON" ] && [ "$PR_BRANCHES_BEFORE_JSON" != "$PR_BRANCHES_AFTER_JSON" ]; then
+    PR_BRANCHES_CHANGED=true
+  fi
+  PR_BRANCHES_DIFF=$(echo "$DIFF_OUTPUT" | grep -E "^\+.*pull_request|^\-.*pull_request|^\+.*branches|^\-.*branches" || true)
+  # Exclude known customizations from "unexpected diffs" using dynamic pattern
+  OTHER_DIFF=$(echo "$DIFF_OUTPUT" \
+    | grep -E '^[\+\-]' \
+    | grep -v -E '^[\+\-]{2,3}' \
+    | grep -v -E '@' \
+    | grep -v -E 'branches' \
+    | grep -v -E 'tags' \
+    | grep -v -E "$DYNAMIC_EXCLUSION_PATTERN" \
+    || true)
+  echo "Changes detected:"
+  if [ -n "$VERSION_ONLY_DIFF" ]; then
+    echo "$VERSION_ONLY_DIFF"
+  fi
+  if [ "$BRANCHES_CHANGED" = true ] && [ -n "$BRANCHES_DIFF" ]; then
+    echo "$BRANCHES_DIFF"
+  fi
+  if [ "$TAGS_CHANGED" = true ] && [ -n "$TAGS_DIFF" ]; then
+    echo "$TAGS_DIFF"
+  fi
+  if [ -n "$OTHER_DIFF" ]; then
+    echo "$OTHER_DIFF"
+  fi
+  if [ -n "$OTHER_DIFF" ] && [ "$PRESERVE_EXISTING_BRANCHES" = "true" ]; then
+    echo "WARNING: Unexpected changes detected in $template_name"
+    echo "$OTHER_DIFF"
+    REPORT="${REPORT}⚠️ $template_name: Unexpected structural differences detected\n"
+    UNEXPECTED_DIFFS=true
+  elif [ -n "$OTHER_DIFF" ] && [ "$PRESERVE_EXISTING_BRANCHES" != "true" ]; then
+    # Filter out branch changes from "other" diff
+    FILTERED_OTHER=$(echo "$OTHER_DIFF" | grep -v -E "branches|tags|^[\+\-]\s*-\s*|^\-\-\-|^\+\+\+" || true)
+    if [ -n "$FILTERED_OTHER" ]; then
+      echo "WARNING: Unexpected changes detected in $template_name (excluding branches)"
+      echo "$FILTERED_OTHER"
+      REPORT="${REPORT}⚠️ $template_name: Unexpected structural differences detected\n"
+      UNEXPECTED_DIFFS=true
+    fi
+  fi
+  # Report expected changes
+  if [ -n "$VERSION_ONLY_DIFF" ]; then
+    echo "✓ Version updated: $current_version → $template_version"
+    REPORT="${REPORT}✓ $template_name: Version updated $current_version → $template_version\n"
+  fi
+  if [ "$PRESERVE_EXISTING_BRANCHES" != "true" ]; then
+    if [ "$BRANCHES_CHANGED" = true ]; then
+      echo "✓ push.branches updated from template"
+      REPORT="${REPORT}✓ $template_name: push.branches updated from template\n"
+    fi
+    if [ "$TAGS_CHANGED" = true ]; then
+      echo "✓ push.tags updated from template"
+      REPORT="${REPORT}✓ $template_name: push.tags updated from template\n"
+    fi
+    if [ "$PR_BRANCHES_CHANGED" = true ]; then
+      echo "✓ pull_request.branches updated from template"
+      REPORT="${REPORT}✓ $template_name: pull_request.branches updated from template\n"
+    fi
+  fi
+  # Report preserved customizations
+  if [ -n "$PRESERVED_REPORT" ]; then
+    echo "🔧 Preserved customizations:"
+    echo -e "$PRESERVED_REPORT"
+    REPORT="${REPORT}\n### Preserved Customizations\n${PRESERVED_REPORT}"
+  fi
+  git add "$workflow_file"
+  WORKFLOWS_UPDATED=true
+  rm "$workflow_file.backup"
+}
+
+finalize_report_and_outputs() {
+  # Generate final report
+  if [ -n "$REPORT" ]; then
+    echo "=== Workflow Update Report ==="
+    echo -e "$REPORT"
+    echo "================================"
+  fi
+  # Fail if unexpected diffs were found
+  if [ "$UNEXPECTED_DIFFS" = true ]; then
+    echo "ERROR: Unexpected structural differences detected. Manual review required."
+    echo "unexpected_diffs=true" >> "$GITHUB_OUTPUT"
+    exit 1
+  fi
+  if [ "$WORKFLOWS_UPDATED" = true ]; then
+    echo "workflows_updated=true" >> "$GITHUB_OUTPUT"
+    echo "workflow_report<<EOF" >> "$GITHUB_OUTPUT"
+    echo -e "$REPORT" >> "$GITHUB_OUTPUT"
+    echo "EOF" >> "$GITHUB_OUTPUT"
+    echo "unexpected_diffs=false" >> "$GITHUB_OUTPUT"
+    echo "Workflow updates staged successfully"
+  else
+    echo "workflows_updated=false" >> "$GITHUB_OUTPUT"
+    echo "unexpected_diffs=false" >> "$GITHUB_OUTPUT"
+    echo "No workflow updates needed"
+  fi
+}
+
+process_template_file() {
+  local template_file="$1"
+  if [ ! -f "$template_file" ]; then
+    return 0
+  fi
+  local template_name
+  template_name=$(basename "$template_file")
+  local workflow_file
+  workflow_file="$WORKFLOW_DIR/$template_name"
+  echo "=== Analyzing $template_name ==="
+  # Check if workflow file exists - if not, copy from template
+  if [ ! -f "$workflow_file" ]; then
+    if [ "$CREATE_MISSING_WORKFLOWS" = "true" ]; then
+      echo "Workflow $template_name not found, copying from template..."
+      cp "$template_file" "$workflow_file"
+      echo "✓ Created new workflow $template_name from template"
+      REPORT="${REPORT}✓ $template_name: Created new workflow from template\n"
+      git add "$workflow_file"
+      WORKFLOWS_UPDATED=true
+      return 0
+    fi
+    echo "Workflow $template_name not found, skipping (CREATE_MISSING_WORKFLOWS=false)"
+    return 0
+  fi
+  TEMPLATE_VERSION=$(extract_uses_ref "$template_file")
+  if [ -z "$TEMPLATE_VERSION" ]; then
+    echo "No version tag found in template $template_name, skipping"
+    return 0
+  fi
+  echo "Template version: $TEMPLATE_VERSION"
+  CURRENT_VERSION=$(extract_uses_ref "$workflow_file")
+  echo "Current version: $CURRENT_VERSION"
+  # Create backup
+  cp "$workflow_file" "$workflow_file.backup"
+  extract_preserved_customizations "$template_name" "$workflow_file.backup" "$template_file"
+  # Update version tag (targeted edit to avoid reformatting YAML)
+  if [ "$TEMPLATE_VERSION" != "$CURRENT_VERSION" ]; then
+    update_version_ref_in_place "$workflow_file" "$TEMPLATE_VERSION"
+  fi
+  # Update triggers unless preserving existing branches
+  # Notes:
+  # - Some workflows (e.g. xpbuild) intentionally migrate from push.branches -> push.tags.
+  # - pull_request.branches should follow the template (often differs from push.*).
+  sync_triggers_from_template "$workflow_file" "$template_file"
+  normalize_trigger_formatting "$workflow_file" "$template_file"
+  analyze_diff_and_stage "$template_name" "$workflow_file" "$CURRENT_VERSION" "$TEMPLATE_VERSION"
+}
+
+main() {
+  ensure_template_dir
+  ensure_yq
+  # Process each template file
+  for template_file in "$TEMPLATE_DIR"/*.yml; do
+    process_template_file "$template_file"
+  done
+  finalize_report_and_outputs
+}
+
+main
