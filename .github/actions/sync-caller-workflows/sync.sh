@@ -40,14 +40,18 @@ for template_file in "$TEMPLATE_DIR"/*.yml; do
     continue
   fi
   # Extract version from template
+  set +o pipefail
   TEMPLATE_VERSION=$(yq eval '.jobs.*.uses | sub(".*@", "")' "$template_file" 2>/dev/null | head -1)
+  set -o pipefail
   if [ -z "$TEMPLATE_VERSION" ]; then
     echo "No version tag found in template $template_name, skipping"
     continue
   fi
   echo "Template version: $TEMPLATE_VERSION"
   # Get current version from workflow
+  set +o pipefail
   CURRENT_VERSION=$(yq eval '.jobs.*.uses | sub(".*@", "")' "$workflow_file" 2>/dev/null | head -1)
+  set -o pipefail
   echo "Current version: $CURRENT_VERSION"
   # Create backup
   cp "$workflow_file" "$workflow_file.backup"
