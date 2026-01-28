@@ -140,16 +140,16 @@ PY
   DIFF_OUTPUT=$(diff -u "$workflow_file.backup" "$workflow_file" || true)
   if [ -n "$DIFF_OUTPUT" ]; then
     # Analyze the diff to ensure only expected changes
-    VERSION_ONLY_DIFF=$(diff -u "$workflow_file.backup" "$workflow_file" | grep -E "^\+.*@|^\-.*@" || true)
+    VERSION_ONLY_DIFF=$(echo "$DIFF_OUTPUT" | grep -E "^\+.*@|^\-.*@" || true)
     BRANCHES_BEFORE_JSON=$(yq eval -o=json '.on.push.branches // []' "$workflow_file.backup" 2>/dev/null)
     BRANCHES_AFTER_JSON=$(yq eval -o=json '.on.push.branches // []' "$workflow_file" 2>/dev/null)
     BRANCHES_CHANGED=false
     if [ -n "$BRANCHES_BEFORE_JSON" ] && [ -n "$BRANCHES_AFTER_JSON" ] && [ "$BRANCHES_BEFORE_JSON" != "$BRANCHES_AFTER_JSON" ]; then
       BRANCHES_CHANGED=true
     fi
-    BRANCHES_DIFF=$(diff -u "$workflow_file.backup" "$workflow_file" | grep -E "^\+.*branches|^\-.*branches" || true)
+    BRANCHES_DIFF=$(echo "$DIFF_OUTPUT" | grep -E "^\+.*branches|^\-.*branches" || true)
     # Exclude known customizations from "unexpected diffs" using dynamic pattern
-    OTHER_DIFF=$(diff -u "$workflow_file.backup" "$workflow_file" \
+    OTHER_DIFF=$(echo "$DIFF_OUTPUT" \
       | grep -E '^[\+\-]' \
       | grep -v -E '^[\+\-]{2,3}' \
       | grep -v -E '@' \
