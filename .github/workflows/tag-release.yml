@@ -1,0 +1,104 @@
+name: Tag Release
+on:
+  workflow_call:
+    inputs:
+      merge_sha:
+        required: true
+        type: string
+      pr_number:
+        required: true
+        type: number
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+    steps:
+      -
+        name: Checkout merge commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.merge_sha }}
+          fetch-depth: 0
+          fetch-tags: true
+      -
+        name: Install yq
+        shell: bash
+        run: |
+          if command -v yq >/dev/null 2>&1; then
+            exit 0
+          fi
+          wget -qO /tmp/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+          chmod +x /tmp/yq
+          echo "/tmp" >> $GITHUB_PATH
+      -
+        name: Validate release intent
+        id: intent
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ ! -f .github/release-tag.yml ]; then
+            echo "intent_missing=true" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          TAG=$(yq eval '.tag // ""' .github/release-tag.yml)
+          MESSAGE=$(yq eval '.message // ""' .github/release-tag.yml)
+          TAG=$(echo "$TAG" | tr -d '\r' | xargs)
+          MESSAGE=$(echo "$MESSAGE" | tr -d '\r')
+          if [ -z "$TAG" ]; then
+            echo "release-tag.yml missing 'tag'" >&2
+            exit 1
+          fi
+          if [ -z "$MESSAGE" ]; then
+            echo "release-tag.yml missing 'message'" >&2
+            exit 1
+          fi
+          if ! [[ "$TAG" =~ ^v[0-9A-Za-z][0-9A-Za-z._-]*$ ]]; then
+            echo "Invalid tag format: $TAG" >&2
+            exit 1
+          fi
+          echo "intent_missing=false" >> $GITHUB_OUTPUT
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          printf 'message<<EOF\n%s\nEOF\n' "$MESSAGE" >> $GITHUB_OUTPUT
+      -
+        name: Comment on PR (missing release intent)
+        if: ${{ steps.intent.outputs.intent_missing == 'true' }}
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const body = [
+              'Missing `.github/release-tag.yml` in the merge commit.',
+              '',
+              'To enable tagging on merge, add this file to the PR:',
+              '',
+              '```yaml',
+              'tag: v11.2.0.8',
+              'message: "version 11.2.0.8 tag"',
+              '```',
+              '',
+              'Then ensure the PR has the `release:tag` label before merging into `xpro`.'
+            ].join('\n');
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: Number('${{ inputs.pr_number }}'),
+              body,
+            });
+      -
+        name: Fail (missing release intent)
+        if: ${{ steps.intent.outputs.intent_missing == 'true' }}
+        shell: bash
+        run: exit 1
+      -
+        name: Create and push tag
+        shell: bash
+        env:
+          TAG: ${{ steps.intent.outputs.tag }}
+          MESSAGE: ${{ steps.intent.outputs.message }}
+        run: |
+          set -euo pipefail
+          git fetch --tags --force
+          if git rev-parse -q --verify "refs/tags/$TAG" >/dev/null; then
+            echo "Tag already exists: $TAG" >&2
+            exit 1
+          fi
+          git tag -a "$TAG" "${{ inputs.merge_sha }}" -m "$MESSAGE"
+          git push origin "refs/tags/$TAG"
