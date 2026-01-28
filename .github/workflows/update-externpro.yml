@@ -17,6 +17,11 @@ on:
         required: false
         type: boolean
         default: false
+      create_missing_workflows:
+        description: 'Whether to create new workflow files in the caller repo when templates add them'
+        required: false
+        type: boolean
+        default: true
       create_pr:
         description: 'Whether to create a pull request'
         required: false
@@ -163,6 +168,7 @@ jobs:
           workflow_dir: .github/workflows
           template_dir: ${{ steps.validate.outputs.submodule_path }}/.github/wf-templates
           preserve_existing_branches: ${{ inputs.preserve_existing_branches }}
+          create_missing_workflows: ${{ inputs.create_missing_workflows }}
       -
         name: Determine if PR is needed
         id: pr_needed

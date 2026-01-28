@@ -11,6 +11,10 @@ inputs:
     description: Whether to preserve existing branches in caller workflows
     required: false
     default: "false"
+  create_missing_workflows:
+    description: Whether to create new workflow files in the caller repo when templates add them
+    required: false
+    default: "true"
 outputs:
   workflows_updated:
     description: Whether any workflow files were staged for update
@@ -33,3 +37,4 @@ runs:
         WORKFLOW_DIR: ${{ inputs.workflow_dir }}
         TEMPLATE_DIR: ${{ inputs.template_dir }}
         PRESERVE_EXISTING_BRANCHES: ${{ inputs.preserve_existing_branches }}
+        CREATE_MISSING_WORKFLOWS: ${{ inputs.create_missing_workflows }}
