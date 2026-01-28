@@ -86,8 +86,8 @@ for template_file in "$TEMPLATE_DIR"/*.yml; do
   done <<< "$WITH_KEYS"
   # Extract and compare branches if preserving existing branches
   if [ "$PRESERVE_EXISTING_BRANCHES" = "true" ]; then
-    CURRENT_BRANCHES=$(yq eval '.on.push.branches[]' "$workflow_file.backup" 2>/dev/null | tr '\n' ', ' | sed 's/,$//')
-    TEMPLATE_BRANCHES=$(yq eval '.on.push.branches[]' "$template_file" 2>/dev/null | tr '\n' ', ' | sed 's/,$//')
+    CURRENT_BRANCHES=$(yq eval '.on.push.branches // [] | .[]' "$workflow_file.backup" 2>/dev/null | tr '\n' ', ' | sed 's/,$//' || true)
+    TEMPLATE_BRANCHES=$(yq eval '.on.push.branches // [] | .[]' "$template_file" 2>/dev/null | tr '\n' ', ' | sed 's/,$//' || true)
     if [ -n "$CURRENT_BRANCHES" ] && [ -n "$TEMPLATE_BRANCHES" ] && [ "$CURRENT_BRANCHES" != "$TEMPLATE_BRANCHES" ]; then
       echo "Branches differ from template:"
       echo "  Current: $CURRENT_BRANCHES"
@@ -127,7 +127,7 @@ PY
     if [ -n "$CURRENT_BRANCHES_JSON" ] && [ -n "$TEMPLATE_BRANCHES_JSON" ] && [ "$CURRENT_BRANCHES_JSON" = "$TEMPLATE_BRANCHES_JSON" ]; then
       echo "Branches already match template"
     else
-      TEMPLATE_BRANCHES=$(yq eval '.on.push.branches[]' "$template_file" 2>/dev/null | tr '\n' ',' | sed 's/,$//')
+      TEMPLATE_BRANCHES=$(yq eval '.on.push.branches // [] | .[]' "$template_file" 2>/dev/null | tr '\n' ',' | sed 's/,$//' || true)
       if [ -n "$TEMPLATE_BRANCHES" ]; then
         yq eval ".on.push.branches = [$(echo \"$TEMPLATE_BRANCHES\" | sed 's/,/, /g')]" -i "$workflow_file"
         yq eval ".on.pull_request.branches = [$(echo \"$TEMPLATE_BRANCHES\" | sed 's/,/, /g')]" -i "$workflow_file"
@@ -173,7 +173,7 @@ PY
       UNEXPECTED_DIFFS=true
     elif [ -n "$OTHER_DIFF" ] && [ "$PRESERVE_EXISTING_BRANCHES" != "true" ]; then
       # Filter out branch changes from "other" diff
-      FILTERED_OTHER=$(echo "$OTHER_DIFF" | grep -v -E "branches|^\-\-\-|^\+\+\+")
+      FILTERED_OTHER=$(echo "$OTHER_DIFF" | grep -v -E "branches|^\-\-\-|^\+\+\+" || true)
       if [ -n "$FILTERED_OTHER" ]; then
         echo "WARNING: Unexpected changes detected in $template_name (excluding branches)"
         echo "$FILTERED_OTHER"
