@@ -1048,7 +1048,7 @@ function(ipManifestDepsFromVars _out deps)
 endfunction()
 
 function(xpExternPackage)
-  # NOTE: if XP_INSTALL_CMAKEDIR is not defined, it will be set here
+  # NOTE: if CMAKE_INSTALL_CMAKEDIR is not defined, it will be set here
   #   and available in PARENT_SCOPE
   set(opts FIND_THREADS)
   # FIND_THREADS is an optional parameter to indicate the use script
@@ -1253,15 +1253,15 @@ function(xpExternPackage)
   if(NOT DEFINED CMAKE_INSTALL_DATADIR)
     include(GNUInstallDirs)
   endif()
-  if(NOT DEFINED XP_INSTALL_CMAKEDIR)
-    # NOTE: if your project is overriding XP_INSTALL_CMAKEDIR
-    # be aware that xpFindPkg() (really, ipGetProPath()) expects
-    # to find the xpuse file in ${FETCHCONTENT_BASE_DIR}/${pkgdir}/share/cmake
-    set(XP_INSTALL_CMAKEDIR ${CMAKE_INSTALL_DATADIR}/cmake)
-    set(XP_INSTALL_CMAKEDIR ${XP_INSTALL_CMAKEDIR} PARENT_SCOPE)
+  if(NOT DEFINED CMAKE_INSTALL_CMAKEDIR)
+    # NOTE: if your project is overriding CMAKE_INSTALL_CMAKEDIR
+    # be aware that xpFindPkg() (really, ipDownloadExtract()) expects
+    # to find the xpuse file in ${XPRO_DIR}/xpx/${pkgbase}[-xpro]/share/cmake
+    set(CMAKE_INSTALL_CMAKEDIR ${CMAKE_INSTALL_DATADIR}/cmake)
+    set(CMAKE_INSTALL_CMAKEDIR ${CMAKE_INSTALL_CMAKEDIR} PARENT_SCOPE)
   endif()
   install(FILES ${xpinfoFile} ${xpuseFile} ${xpmanifestFile}
-    DESTINATION ${XP_INSTALL_CMAKEDIR} ${XP_COMPONENT}
+    DESTINATION ${CMAKE_INSTALL_CMAKEDIR} ${XP_COMPONENT}
     )
   ###############
   # packaging
