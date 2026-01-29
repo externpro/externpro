@@ -186,10 +186,12 @@ jobs:
         id: branch
         if: inputs.create_pr && steps.pr_needed.outputs.pr_needed == 'true'
         run: |
-          # Create branch using describe (instead of timestamp)
           DESCRIBE="${{ steps.version.outputs.describe }}"
           # Clean describe for branch name (remove invalid chars)
-          BRANCH_NAME="externpro-update-$(echo "$DESCRIBE" | sed 's/[^a-zA-Z0-9.-]/-/g')"
+          CLEAN_DESCRIBE="$(echo "$DESCRIBE" | sed 's/[^a-zA-Z0-9.-]/-/g')"
+          # Include a unique suffix so reruns don't collide on the same describe.
+          UNIQUE_SUFFIX="${{ github.run_id }}-${{ github.run_attempt }}"
+          BRANCH_NAME="externpro-update-${CLEAN_DESCRIBE}-${UNIQUE_SUFFIX}"
           git checkout -b "$BRANCH_NAME"
           echo "branch_name=$BRANCH_NAME" >> $GITHUB_OUTPUT
       -
