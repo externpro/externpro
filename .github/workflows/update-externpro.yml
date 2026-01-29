@@ -263,14 +263,16 @@ jobs:
             --body-file "$BODY_FILE")
             echo "Created PR: $PR_URL"
           fi
+          gh label create "dependencies" --color "0B3D2E" --description "dependency updates" >/dev/null 2>&1 || true
+          gh label create "externpro" --color "0B3D2E" --description "externpro updates" >/dev/null 2>&1 || true
           gh pr edit "$PR_URL" --add-label "dependencies" >/dev/null 2>&1 || echo "Label 'dependencies' not found; skipping"
           gh pr edit "$PR_URL" --add-label "externpro" >/dev/null 2>&1 || echo "Label 'externpro' not found; skipping"
           # Close superseded PRs from previous runs.
           # Criteria:
           # - head branch name starts with externpro-update-
-          # - author is github-actions[bot]
+          # - label includes externpro (if labels are available), or PR body contains the automation marker
           # - head branch is not the current HEAD_BRANCH
-          SUPERSEDED_PR_NUMBERS=$(gh pr list --state open --json number,headRefName,author --jq '.[] | select(.headRefName | startswith("externpro-update-")) | select(.author.login == "github-actions[bot]") | select(.headRefName != env.HEAD_BRANCH) | .number')
+          SUPERSEDED_PR_NUMBERS=$(gh pr list --state open --json number,headRefName,labels,body --jq '.[] | select(.headRefName | startswith("externpro-update-")) | select(.headRefName != env.HEAD_BRANCH) | select(((.labels // []) | map(.name) | index("externpro")) != null or ((.body // "") | contains("This PR was created automatically by GitHub Actions"))) | .number')
           if [ -n "$SUPERSEDED_PR_NUMBERS" ]; then
             for PR_NUMBER in $SUPERSEDED_PR_NUMBERS; do
               gh pr close "$PR_NUMBER" --comment "Superseded by $PR_URL" >/dev/null 2>&1 || echo "Failed to close PR #$PR_NUMBER"
