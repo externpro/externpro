@@ -220,6 +220,7 @@ jobs:
           set -euo pipefail
           BASE_BRANCH="${{ github.event.repository.default_branch }}"
           HEAD_BRANCH="${{ steps.branch.outputs.branch_name }}"
+          export HEAD_BRANCH
           TITLE="externpro ${{ steps.version.outputs.describe }}"
           BODY_FILE="/tmp/pr-body.md"
           : > "$BODY_FILE"
@@ -264,3 +265,14 @@ jobs:
           fi
           gh pr edit "$PR_URL" --add-label "dependencies" >/dev/null 2>&1 || echo "Label 'dependencies' not found; skipping"
           gh pr edit "$PR_URL" --add-label "externpro" >/dev/null 2>&1 || echo "Label 'externpro' not found; skipping"
+          # Close superseded PRs from previous runs.
+          # Criteria:
+          # - head branch name starts with externpro-update-
+          # - author is github-actions[bot]
+          # - head branch is not the current HEAD_BRANCH
+          SUPERSEDED_PR_NUMBERS=$(gh pr list --state open --json number,headRefName,author --jq '.[] | select(.headRefName | startswith("externpro-update-")) | select(.author.login == "github-actions[bot]") | select(.headRefName != env.HEAD_BRANCH) | .number')
+          if [ -n "$SUPERSEDED_PR_NUMBERS" ]; then
+            for PR_NUMBER in $SUPERSEDED_PR_NUMBERS; do
+              gh pr close "$PR_NUMBER" --comment "Superseded by $PR_URL" >/dev/null 2>&1 || echo "Failed to close PR #$PR_NUMBER"
+            done
+          fi
