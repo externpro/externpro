@@ -220,7 +220,17 @@ jobs:
             --volume "$GITHUB_WORKSPACE:/work" \
             --workdir /work \
             "${IMAGE}" \
-            bash -lc "cmake --preset=Linux" 2>&1 | tee /tmp/cmake-configure.log
+            bash -lc "set -euo pipefail; \
+              echo '=== cmake configure: begin ==='; \
+              echo \"user=$(id -u):$(id -g)\"; \
+              echo \"pwd=$(pwd)\"; \
+              ls -la; \
+              echo '--- cmake diagnostics'; \
+              command -v cmake || { echo 'cmake not found in container' >&2; exit 127; }; \
+              cmake --version; \
+              echo '--- running: cmake --preset=Linux --log-level=VERBOSE'; \
+              cmake --preset=Linux --log-level=VERBOSE; \
+              echo '=== cmake configure: end ==='" 2>&1 | tee /tmp/cmake-configure.log
           echo "--- xprodeps files after"
           ls -la xprodeps.md xprodeps.dot xprodeps.svg 2>/dev/null || true
           echo "--- repo dirtiness after configure (before staging)"
@@ -234,7 +244,6 @@ jobs:
           git status --porcelain || true
           echo "--- staged changes (name-status)"
           git diff --cached --name-status -- xprodeps.md xprodeps.dot xprodeps.svg || true
-
           XPRODEPS_FILES=$(git diff --cached --name-only -- xprodeps.md xprodeps.dot xprodeps.svg || true)
           if [ -n "$XPRODEPS_FILES" ]; then
             echo "xprodeps_updated=true" >> "$GITHUB_OUTPUT"
