@@ -215,12 +215,14 @@ jobs:
           fi
           echo "--- xprodeps files before"
           ls -la xprodeps.md xprodeps.dot xprodeps.svg 2>/dev/null || true
+          set +e
           docker run --rm \
+            --entrypoint bash \
             --user "$(id -u):$(id -g)" \
             --volume "$GITHUB_WORKSPACE:/work" \
             --workdir /work \
             "${IMAGE}" \
-            bash -lc "set -euo pipefail; \
+            -lc "set -euo pipefail; \
               echo '=== cmake configure: begin ==='; \
               echo \"user=$(id -u):$(id -g)\"; \
               echo \"pwd=$(pwd)\"; \
@@ -231,6 +233,12 @@ jobs:
               echo '--- running: cmake --preset=Linux --log-level=VERBOSE'; \
               cmake --preset=Linux --log-level=VERBOSE; \
               echo '=== cmake configure: end ==='" 2>&1 | tee /tmp/cmake-configure.log
+          DOCKER_RC=${PIPESTATUS[0]}
+          echo "docker run exit code: ${DOCKER_RC}"
+          set -e
+          if [ "${DOCKER_RC}" -ne 0 ]; then
+            exit "${DOCKER_RC}"
+          fi
           echo "--- xprodeps files after"
           ls -la xprodeps.md xprodeps.dot xprodeps.svg 2>/dev/null || true
           echo "--- repo dirtiness after configure (before staging)"
