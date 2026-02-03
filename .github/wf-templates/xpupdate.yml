@@ -2,6 +2,7 @@ name: Update externpro
 permissions:
   contents: write
   pull-requests: write
+  packages: read
 on:
   workflow_dispatch:
 jobs:
