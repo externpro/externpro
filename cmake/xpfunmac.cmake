@@ -1047,9 +1047,19 @@ function(ipProDepsInit)
     )
   set(dot "${dot}" PARENT_SCOPE)
   if(DEFINED xpdepsFile AND DEFINED P_REPO_NAME)
-    # these should be DEFINED when this function is called from
+    # P_REPO_NAME should be DEFINED when this function is called from
     # xpExternPackage() but not when called from xpProDeps()
     file(WRITE ${xpdepsFile} "# ${P_REPO_NAME} dependencies\n")
+  elseif(DEFINED xpdepsFile)
+    string(JOIN "\n" hdr
+      "# projects"
+      "this README.md, the [deps.dot](deps.dot), and [deps.svg](deps.svg)"
+      "files are generated from the contents of [pros.cmake](pros.cmake),"
+      "any independently set or overridden `xp_` variables,"
+      "and downloaded project manifest files"
+      ""
+      )
+    file(WRITE ${xpdepsFile} "${hdr}")
   endif()
   string(JOIN "\n" rme
     "|project|license [^_l]|description [dependencies]|version|source|diff [^_d]|"
@@ -1228,15 +1238,17 @@ endfunction()
 
 function(ipProDepsEnd)
   string(APPEND dot "}\n")
-  set(binDot ${CMAKE_CURRENT_BINARY_DIR}/xprodeps.dot)
-  file(WRITE ${binDot} "${dot}")
+  if(NOT DEFINED xpdepsDot)
+    set(xpdepsDot ${CMAKE_CURRENT_BINARY_DIR}/xprodeps.dot)
+  endif()
+  file(WRITE ${xpdepsDot} "${dot}")
   find_program(XP_DOT_PATH "dot")
   mark_as_advanced(XP_DOT_PATH)
-  if(XP_DOT_PATH AND EXISTS ${binDot} AND DEFINED xpdepsGraph)
+  if(XP_DOT_PATH AND EXISTS ${xpdepsDot} AND DEFINED xpdepsGraph)
     cmake_path(GET xpdepsGraph EXTENSION LAST_ONLY ext) # ext like ".svg"
     string(SUBSTRING "${ext}" 1 -1 fmt) # fmt like "svg"
     string(TOLOWER "${fmt}" fmt)
-    execute_process(COMMAND ${XP_DOT_PATH} -T${fmt} -o ${xpdepsGraph} ${binDot})
+    execute_process(COMMAND ${XP_DOT_PATH} -T${fmt} -o ${xpdepsGraph} ${xpdepsDot})
     cmake_path(GET xpdepsGraph FILENAME fname)
     string(JOIN "\n" rmeGraph
       ""
@@ -1270,6 +1282,46 @@ function(ipProDepsEnd)
   string(APPEND rme "${footer}")
   if(DEFINED xpdepsFile)
     file(APPEND ${xpdepsFile} "${rme}")
+  endif()
+endfunction()
+
+function(xpProDeps)
+  set(xpdepsFile ${CMAKE_CURRENT_BINARY_DIR}/README.md)
+  set(xpdepsDot ${CMAKE_CURRENT_BINARY_DIR}/deps.dot)
+  set(xpdepsGraph ${CMAKE_CURRENT_BINARY_DIR}/deps.svg)
+  # https://stackoverflow.com/q/9298278/
+  get_cmake_property(pros VARIABLES)
+  # xp_ variables from pros.cmake, included by xproinc.cmake
+  list(FILTER pros INCLUDE REGEX "^xp_")
+  list(SORT pros)
+  ipProDepsInit()
+  foreach(pro ${pros})
+    string(REGEX REPLACE "^xp_" "" pkg ${pro})
+    ipProDepsRow(PKG ${pkg} ${${pro}})
+  endforeach()
+  ipProDepsEnd()
+  file(APPEND ${xpdepsFile} "\n[How-to: modify a project to build with externpro](pros.md)\n")
+  # copy files to source directory
+  set(srcRme ${xpThisDir}/README.md)
+  set(srcDot ${xpThisDir}/deps.dot)
+  set(srcSvg ${xpThisDir}/deps.svg)
+  if(EXISTS ${xpdepsFile} AND NOT CMAKE_SYSTEM_NAME STREQUAL "Windows")
+    execute_process(COMMAND ${CMAKE_COMMAND} -E copy_if_different ${xpdepsFile} ${srcRme})
+  endif()
+  if(EXISTS ${xpdepsDot} AND NOT CMAKE_SYSTEM_NAME STREQUAL "Windows")
+    execute_process(COMMAND ${CMAKE_COMMAND} -E copy_if_different ${xpdepsDot} ${srcDot})
+  endif()
+  set(isCi FALSE)
+  if(DEFINED ENV{CI} AND NOT "$ENV{CI}" STREQUAL "")
+    set(isCi TRUE)
+  endif()
+  if(DEFINED ENV{GITHUB_ACTIONS} AND NOT "$ENV{GITHUB_ACTIONS}" STREQUAL "")
+    set(isCi TRUE)
+  endif()
+  if(APPLE AND NOT isCi)
+    if(EXISTS ${xpdepsGraph})
+      execute_process(COMMAND ${CMAKE_COMMAND} -E copy_if_different ${xpdepsGraph} ${srcSvg})
+    endif()
   endif()
 endfunction()
 
