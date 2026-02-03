@@ -22,6 +22,11 @@ on:
         required: false
         type: boolean
         default: true
+      build_container:
+        description: 'Build container image ghcr.io/{owner_repo}/bldimg-{arch}-{build_container}:latest'
+        required: false
+        type: string
+        default: 'rocky9-gcc13'
       create_pr:
         description: 'Whether to create a pull request'
         required: false
@@ -37,6 +42,7 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
+      packages: read
     steps:
       -
         name: Checkout repository
@@ -170,6 +176,64 @@ jobs:
           preserve_existing_branches: ${{ inputs.preserve_existing_branches }}
           create_missing_workflows: ${{ inputs.create_missing_workflows }}
       -
+        name: Lowercase repository names (for container image)
+        id: names
+        run: |
+          OWN_REPO_NAME=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')
+          echo "owner_repo=${OWN_REPO_NAME}" >> "$GITHUB_OUTPUT"
+      -
+        name: Log in to GitHub Container Registry (for CMake configure)
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.workflow_write_token || github.token }}
+      -
+        name: CMake Configure (container)
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "runner.arch=${{ runner.arch }}"
+          case "${{ runner.arch }}" in
+            X64)
+              ARCH=amd64
+              ;;
+            ARM64)
+              ARCH=arm64
+              ;;
+            *)
+              echo "Unsupported runner.arch '${{ runner.arch }}' (expected X64 or ARM64)" >&2
+              exit 1
+              ;;
+          esac
+          IMAGE="ghcr.io/${{ steps.names.outputs.owner_repo }}/bldimg-${ARCH}-${{ inputs.build_container }}:latest"
+          echo "Running CMake configure in container: ${IMAGE}"
+          if ! docker manifest inspect "${IMAGE}" >/dev/null 2>&1; then
+            echo "Container image not found or not accessible: ${IMAGE}" >&2
+            exit 1
+          fi
+          echo "--- xprodeps files before"
+          ls -la xprodeps.md xprodeps.dot xprodeps.svg 2>/dev/null || true
+          docker run --rm \
+            --user "$(id -u):$(id -g)" \
+            --volume "$GITHUB_WORKSPACE:/work" \
+            --workdir /work \
+            "${IMAGE}" \
+            bash -lc "cmake --preset=Linux"
+          echo "--- xprodeps files after"
+          ls -la xprodeps.md xprodeps.dot xprodeps.svg 2>/dev/null || true
+          echo "--- repo dirtiness after configure (before staging)"
+          git status --porcelain || true
+          for file in xprodeps.md xprodeps.dot xprodeps.svg; do
+            if [ -e "$file" ]; then
+              git add "$file"
+            fi
+          done
+          echo "--- repo dirtiness after staging xprodeps"
+          git status --porcelain || true
+          echo "--- staged changes (name-status)"
+          git diff --cached --name-status -- xprodeps.md xprodeps.dot xprodeps.svg || true
+      -
         name: Determine if PR is needed
         id: pr_needed
         if: inputs.create_pr
@@ -201,6 +265,16 @@ jobs:
           COMMIT_MSG="externpro ${{ steps.version.outputs.describe }}"
           git commit -m "$COMMIT_MSG" -- "${{ steps.validate.outputs.submodule_path }}"
           echo "Commit created: $COMMIT_MSG"
+      -
+        name: Commit xprodeps updates
+        if: inputs.create_pr && steps.pr_needed.outputs.pr_needed == 'true'
+        run: |
+          FILES=$(git diff --cached --name-only -- xprodeps.md xprodeps.dot xprodeps.svg || true)
+          if [ -z "$FILES" ]; then
+            echo "No xprodeps changes staged"
+            exit 0
+          fi
+          git commit -m "xprodeps updates" -- $FILES
       -
         name: Commit and push workflow updates
         if: inputs.create_pr && steps.pr_needed.outputs.pr_needed == 'true'
