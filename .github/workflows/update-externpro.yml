@@ -190,6 +190,7 @@ jobs:
           password: ${{ secrets.workflow_write_token || github.token }}
       -
         name: CMake Configure (container)
+        id: cmake_configure
         shell: bash
         run: |
           set -euo pipefail
@@ -219,7 +220,7 @@ jobs:
             --volume "$GITHUB_WORKSPACE:/work" \
             --workdir /work \
             "${IMAGE}" \
-            bash -lc "cmake --preset=Linux"
+            bash -lc "cmake --preset=Linux" 2>&1 | tee /tmp/cmake-configure.log
           echo "--- xprodeps files after"
           ls -la xprodeps.md xprodeps.dot xprodeps.svg 2>/dev/null || true
           echo "--- repo dirtiness after configure (before staging)"
@@ -233,6 +234,16 @@ jobs:
           git status --porcelain || true
           echo "--- staged changes (name-status)"
           git diff --cached --name-status -- xprodeps.md xprodeps.dot xprodeps.svg || true
+
+          XPRODEPS_FILES=$(git diff --cached --name-only -- xprodeps.md xprodeps.dot xprodeps.svg || true)
+          if [ -n "$XPRODEPS_FILES" ]; then
+            echo "xprodeps_updated=true" >> "$GITHUB_OUTPUT"
+            echo "xprodeps_files<<EOF" >> "$GITHUB_OUTPUT"
+            echo "$XPRODEPS_FILES" >> "$GITHUB_OUTPUT"
+            echo "EOF" >> "$GITHUB_OUTPUT"
+          else
+            echo "xprodeps_updated=false" >> "$GITHUB_OUTPUT"
+          fi
       -
         name: Determine if PR is needed
         id: pr_needed
@@ -312,6 +323,15 @@ jobs:
             echo "- Updated \`${{ steps.validate.outputs.submodule_path }}\` to externpro \`${{ steps.version.outputs.describe }}\`" >> "$BODY_FILE"
             echo "- Previous HEAD: \`${{ steps.current_head.outputs.current_head }}\`" >> "$BODY_FILE"
             echo "- New HEAD: \`${{ steps.update.outputs.latest_head }}\`" >> "$BODY_FILE"
+          fi
+          if [ "${{ steps.cmake_configure.outputs.xprodeps_updated }}" = "true" ]; then
+            echo "- Updated xprodeps files" >> "$BODY_FILE"
+            if [ -n "${{ steps.cmake_configure.outputs.xprodeps_files }}" ]; then
+              echo "  - Files:" >> "$BODY_FILE"
+              while IFS= read -r f; do
+                [ -n "$f" ] && echo "    - \`$f\`" >> "$BODY_FILE"
+              done < <(printf '%s\n' "${{ steps.cmake_configure.outputs.xprodeps_files }}")
+            fi
           fi
           if [ "${{ steps.update_workflows.outputs.workflows_updated }}" = "true" ]; then
             echo "- Updated caller workflows to match templates" >> "$BODY_FILE"
