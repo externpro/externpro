@@ -1034,6 +1034,245 @@ function(xpGetVersionString verString)
   set(${verString} ${gitDescribe} PARENT_SCOPE)
 endfunction()
 
+function(ipProDepsInit)
+  set(slate "\"#64748b\"")
+  string(JOIN "\n" dot
+    "digraph GG {"
+    "  bgcolor=\"transparent\";"
+    "  graph [fontcolor=${slate}, color=${slate}];"
+    "  node  [fontcolor=${slate}, color=${slate}];"
+    "  edge  [fontcolor=${slate}, color=${slate}];"
+    "  node  [fontsize=10];"
+    ""
+    )
+  set(dot "${dot}" PARENT_SCOPE)
+  if(DEFINED xpdepsFile AND DEFINED P_REPO_NAME)
+    # these should be DEFINED when this function is called from
+    # xpExternPackage() but not when called from xpProDeps()
+    file(WRITE ${xpdepsFile} "# ${P_REPO_NAME} dependencies\n")
+  endif()
+  string(JOIN "\n" rme
+    "|project|license [^_l]|description [dependencies]|version|source|diff [^_d]|"
+    "|-------|-------------|--------------------------|-------|------|----------|"
+    ""
+    )
+  set(rme "${rme}" PARENT_SCOPE)
+  set(depsCheckCount 0 PARENT_SCOPE)
+  set(depsMismatchCount 0 PARENT_SCOPE)
+  set(depsMismatchReport "" PARENT_SCOPE)
+endfunction()
+
+function(ipProDepsKey _out _spec)
+  set(oneValueArgs REPO TAG MANIFEST_SHA256)
+  cmake_parse_arguments(P "" "${oneValueArgs}" "" ${_spec})
+  set(${_out} "REPO=${P_REPO};TAG=${P_TAG};MANIFEST_SHA256=${P_MANIFEST_SHA256}" PARENT_SCOPE)
+endfunction()
+
+function(ipProDepsTrack)
+  set(oneValueArgs PKG)
+  set(multiValueArgs DEPS)
+  cmake_parse_arguments(P "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+  block(PROPAGATE depsCheckCount depsMismatchCount depsMismatchReport)
+    foreach(dep ${P_DEPS})
+      if(DEFINED xp_${dep} AND DEFINED xp_${dep}_${P_PKG})
+        math(EXPR depsCheckCount "${depsCheckCount} + 1")
+        ipProDepsKey(_pinned_key ${xp_${dep}})
+        ipProDepsKey(_parent_key ${xp_${dep}_${P_PKG}})
+        if(NOT _pinned_key STREQUAL _parent_key)
+          math(EXPR depsMismatchCount "${depsMismatchCount} + 1")
+          string(APPEND depsMismatchReport "- ${P_PKG} -> ${dep}: pinned '${_pinned_key}' differs from manifest '${_parent_key}'\n")
+        endif()
+      endif()
+    endforeach()
+  endblock()
+  set(depsCheckCount "${depsCheckCount}" PARENT_SCOPE)
+  set(depsMismatchCount "${depsMismatchCount}" PARENT_SCOPE)
+  set(depsMismatchReport "${depsMismatchReport}" PARENT_SCOPE)
+endfunction()
+
+function(ipProDepsRow)
+  set(oneValueArgs PKG REPO TAG MANIFEST_SHA256 DIST_DIR XPRO_PATH MANIFEST_FILE OUT_DEPS)
+  cmake_parse_arguments(P "" "${oneValueArgs}" "" ${ARGN})
+  block(PROPAGATE deps dot rme depsCheckCount depsMismatchCount depsMismatchReport)
+    # manifest
+    if(DEFINED P_MANIFEST_SHA256 AND DEFINED P_REPO AND DEFINED P_TAG)
+      string(REGEX REPLACE ".*/" "" PKG_NAME ${P_REPO})
+      set(dst ${XPRO_DIR}/xpd/manifests/${PKG_NAME}-${P_TAG}.manifest.cmake)
+      if(NOT EXISTS ${dst})
+        ipDownload(https://${P_REPO}/releases/download/${P_TAG}/${PKG_NAME}-${P_TAG}.manifest.cmake ${P_MANIFEST_SHA256} ${dst})
+      endif()
+      include(${dst})
+    endif()
+    if(DEFINED P_MANIFEST_FILE AND EXISTS ${P_MANIFEST_FILE})
+      include(${P_MANIFEST_FILE})
+    endif()
+    # track dependencies
+    set(deps ${XP_MANIFEST_DEPS} ${XP_MANIFEST_PVT_DEPS})
+    ipProDepsTrack(PKG ${P_PKG} DEPS ${deps})
+    # dot
+    foreach(dep ${XP_MANIFEST_DEPS})
+      string(APPEND dot "  \"${P_PKG}\" -> \"${dep}\";\n")
+    endforeach()
+    foreach(dep ${XP_MANIFEST_PVT_DEPS})
+      string(APPEND dot "  \"${P_PKG}\" -> \"${dep}\" [style=dashed];\n")
+    endforeach()
+    # README project
+    if(DEFINED XP_MANIFEST_WEB)
+      string(APPEND rme "|<a id='${P_PKG}' />[${P_PKG}](${XP_MANIFEST_WEB})")
+    else()
+      string(APPEND rme "|<a id='${P_PKG}' />${P_PKG}")
+    endif()
+    # README license
+    if(DEFINED XP_MANIFEST_LICENSE)
+      string(APPEND rme "|${XP_MANIFEST_LICENSE}")
+    else()
+      string(APPEND rme "| ")
+    endif()
+    # README description [dependencies]
+    if(DEFINED XP_MANIFEST_DESC)
+      string(APPEND rme "|${XP_MANIFEST_DESC}")
+      if(DEFINED XP_MANIFEST_DEPS)
+        list(JOIN XP_MANIFEST_DEPS ", " deps_str)
+        string(APPEND rme " [deps: _${deps_str}_]")
+      endif()
+      if(DEFINED XP_MANIFEST_PVT_DEPS)
+        list(JOIN XP_MANIFEST_PVT_DEPS ", " deps_str)
+        string(APPEND rme " [pvt deps: _${deps_str}_]")
+      endif()
+    else()
+      string(APPEND rme "| ")
+    endif()
+    # README version
+    if(DEFINED P_REPO AND DEFINED P_TAG)
+      string(APPEND rme "|[${P_TAG}](https://${P_REPO}/releases/tag/${P_TAG} 'release')")
+    else()
+      string(APPEND rme "| ")
+    endif()
+    # README source
+    if(DEFINED P_REPO)
+      string(APPEND rme "|[repo](https://${P_REPO} '${P_REPO}')")
+      if(DEFINED XP_MANIFEST_UPSTREAM)
+        string(APPEND rme " [upstream](https://${XP_MANIFEST_UPSTREAM} '${XP_MANIFEST_UPSTREAM}')")
+      endif()
+    elseif(DEFINED XP_MANIFEST_UPSTREAM)
+      string(APPEND rme "|[upstream](https://${XP_MANIFEST_UPSTREAM} '${XP_MANIFEST_UPSTREAM}')")
+    else()
+      string(APPEND rme "| ")
+    endif()
+    # README diff
+    if(DEFINED P_REPO AND DEFINED XP_MANIFEST_BASE AND DEFINED P_TAG)
+      string(APPEND rme "|[diff](https://${P_REPO}/compare/${XP_MANIFEST_BASE}...${P_TAG} '${P_REPO}/compare/${XP_MANIFEST_BASE}...${P_TAG}')")
+    else()
+      string(APPEND rme "| ")
+    endif()
+    # append XPDIFF to 'diff' cell
+    if(DEFINED XP_MANIFEST_XPDIFF)
+      string(APPEND rme " [${XP_MANIFEST_XPDIFF}]")
+    endif()
+    set(rme "${rme}|\n")
+  endblock()
+  if(DEFINED P_OUT_DEPS)
+    set(${P_OUT_DEPS} "${deps}" PARENT_SCOPE)
+  endif()
+  set(dot "${dot}" PARENT_SCOPE)
+  set(rme "${rme}" PARENT_SCOPE)
+  set(depsCheckCount "${depsCheckCount}" PARENT_SCOPE)
+  set(depsMismatchCount "${depsMismatchCount}" PARENT_SCOPE)
+  set(depsMismatchReport "${depsMismatchReport}" PARENT_SCOPE)
+endfunction()
+
+function(ipProDepsWalk)
+  set(oneValueArgs PKG MANIFEST_FILE)
+  cmake_parse_arguments(P "" "${oneValueArgs}" "" ${ARGN})
+  set(visited)
+  set(queue)
+  list(APPEND visited "${P_PKG}")
+  # seed with the root package first
+  set(root_deps)
+  ipProDepsRow(OUT_DEPS root_deps PKG ${P_PKG} MANIFEST_FILE ${P_MANIFEST_FILE})
+  foreach(dep ${root_deps})
+    list(APPEND queue "${P_PKG}|${dep}")
+  endforeach()
+  while(queue)
+    list(POP_FRONT queue item)
+    string(REPLACE "|" ";" itemParts "${item}")
+    list(GET itemParts 0 parent)
+    list(GET itemParts 1 dep)
+    list(FIND visited "${dep}" idx)
+    if(NOT idx EQUAL -1)
+      continue()
+    endif()
+    list(APPEND visited "${dep}")
+    unset(_spec)
+    if(DEFINED xp_${dep})
+      set(_spec ${xp_${dep}})
+    elseif(DEFINED xp_${dep}_${parent})
+      set(_spec ${xp_${dep}_${parent}})
+    endif()
+    if(DEFINED _spec)
+      set(child_deps)
+      ipProDepsRow(OUT_DEPS child_deps PKG ${dep} ${_spec})
+      if(child_deps)
+        foreach(ch ${child_deps})
+          list(APPEND queue "${dep}|${ch}")
+        endforeach()
+      endif()
+    endif()
+  endwhile()
+  set(dot "${dot}" PARENT_SCOPE)
+  set(rme "${rme}" PARENT_SCOPE)
+  set(depsCheckCount "${depsCheckCount}" PARENT_SCOPE)
+  set(depsMismatchCount "${depsMismatchCount}" PARENT_SCOPE)
+  set(depsMismatchReport "${depsMismatchReport}" PARENT_SCOPE)
+endfunction()
+
+function(ipProDepsEnd)
+  string(APPEND dot "}\n")
+  set(binDot ${CMAKE_CURRENT_BINARY_DIR}/xprodeps.dot)
+  file(WRITE ${binDot} "${dot}")
+  find_program(XP_DOT_PATH "dot")
+  mark_as_advanced(XP_DOT_PATH)
+  if(XP_DOT_PATH AND EXISTS ${binDot} AND DEFINED xpdepsGraph)
+    cmake_path(GET xpdepsGraph EXTENSION LAST_ONLY ext) # ext like ".svg"
+    string(SUBSTRING "${ext}" 1 -1 fmt) # fmt like "svg"
+    string(TOLOWER "${fmt}" fmt)
+    execute_process(COMMAND ${XP_DOT_PATH} -T${fmt} -o ${xpdepsGraph} ${binDot})
+    cmake_path(GET xpdepsGraph FILENAME fname)
+    string(JOIN "\n" rmeGraph
+      ""
+      "![deps](${fname} 'dependencies')"
+      ""
+      )
+    string(APPEND rme "${rmeGraph}")
+  endif()
+  if(DEFINED depsCheckCount AND depsCheckCount GREATER 0)
+    if(DEFINED depsMismatchCount AND depsMismatchCount EQUAL 0)
+      string(APPEND rme "\nDependency version check: all ${depsCheckCount} parent-manifest versions match pinned versions.\n")
+    elseif(NOT "${depsMismatchReport}" STREQUAL "")
+      string(APPEND rme "\nDependency version mismatches (pinned vs parent manifest):\n${depsMismatchReport}\n")
+    endif()
+  endif()
+  string(JOIN "\n" footer
+    ""
+    "|diff  |description|"
+    "|------|-----------|"
+    "|patch |diff modifies/patches existing cmake|"
+    "|intro |diff introduces cmake|"
+    "|auto  |diff adds cmake to replace autotools/configure/make|"
+    "|native|diff adds cmake but uses existing build system|"
+    "|bin   |diff adds cmake to repackage binaries built elsewhere|"
+    "|fetch |diff adds cmake and utilizes FetchContent|"
+    ""
+    "[^_l]: see [SPDX License List](https://spdx.org/licenses/ '') for a list of commonly found licenses"
+    "[^_d]: see table above with description of diff"
+    ""
+    )
+  string(APPEND rme "${footer}")
+  if(DEFINED xpdepsFile)
+    file(APPEND ${xpdepsFile} "${rme}")
+  endif()
+endfunction()
+
 function(ipManifestDepsFromVars _out deps)
   foreach(dep ${deps})
     string(TOLOWER "${dep}" dep_lc)
@@ -1203,11 +1442,13 @@ function(xpExternPackage)
     set(MANIFEST_VARS "${MANIFEST_VARS}\nset(XP_MANIFEST_XPDIFF \"${P_XPDIFF}\")")
   endif()
   if(DEFINED P_DEPS)
+    list(TRANSFORM P_DEPS TOLOWER)
     ipManifestDepsFromVars(MANIFEST_DEPS "${P_DEPS}")
     list(JOIN P_DEPS " " deps) # list to string with spaces
     set(MANIFEST_VARS "${MANIFEST_VARS}\nset(XP_MANIFEST_DEPS ${deps})")
   endif()
   if(DEFINED P_PVT_DEPS)
+    list(TRANSFORM P_PVT_DEPS TOLOWER)
     ipManifestDepsFromVars(MANIFEST_PVT_DEPS "${P_PVT_DEPS}")
     set(MANIFEST_DEPS "${MANIFEST_DEPS}${MANIFEST_PVT_DEPS}")
     list(JOIN P_PVT_DEPS " " pvtdeps) # list to string with spaces
@@ -1249,6 +1490,15 @@ function(xpExternPackage)
   xpGetCompilerPrefix(compilerPrefix)
   file(APPEND ${xpinfoFile} "COMPILER_PREFIX: ${compilerPrefix}\n")
   ###############
+  # xpdeps files
+  if(DEFINED P_DEPS OR DEFINED P_PVT_DEPS)
+    set(xpdepsFile ${CMAKE_CURRENT_BINARY_DIR}/xprodeps.md)
+    set(xpdepsGraph ${CMAKE_CURRENT_BINARY_DIR}/xprodeps.svg)
+    ipProDepsInit()
+    ipProDepsWalk(PKG ${lcRepoName} MANIFEST_FILE ${xpmanifestFile})
+    ipProDepsEnd()
+  endif()
+  ###############
   # install sysinfo.txt, xpuse-${lcRepoName}-config.cmake, and manifest.cmake
   if(NOT DEFINED CMAKE_INSTALL_DATADIR)
     include(GNUInstallDirs)
@@ -1260,7 +1510,7 @@ function(xpExternPackage)
     set(CMAKE_INSTALL_CMAKEDIR ${CMAKE_INSTALL_DATADIR}/cmake)
     set(CMAKE_INSTALL_CMAKEDIR ${CMAKE_INSTALL_CMAKEDIR} PARENT_SCOPE)
   endif()
-  install(FILES ${xpinfoFile} ${xpuseFile} ${xpmanifestFile}
+  install(FILES ${xpinfoFile} ${xpuseFile} ${xpmanifestFile} ${xpdepsFile} ${xpdepsGraph}
     DESTINATION ${CMAKE_INSTALL_CMAKEDIR} ${XP_COMPONENT}
     )
   ###############
