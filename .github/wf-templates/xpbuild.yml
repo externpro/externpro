@@ -4,7 +4,7 @@ permissions:
   pull-requests: write
 on:
   push:
-    tags: ["v*"]
+    tags: ["xpv*"]
   pull_request:
     branches: ["xpro"]
   workflow_dispatch:

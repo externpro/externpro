@@ -113,7 +113,7 @@ permissions:
 - `is_prerelease`: Whether the release is marked as a prerelease
 
 **Features:**
-- Automatically detects release tag from artifact filenames (e.g., `v1.2.3` or `v1.2.3-4-g1234abc`)
+- Automatically detects release tag from artifact filenames (e.g., `xpv1.2.3` or `xpv1.2.3-4-g1234abc`)
 - Determines prerelease status based on tag format (tags with `-#-g<hash>` suffix are prereleases)
 - Always creates a release and fails if it already exists (strict release creation)
 - Always creates releases as drafts
@@ -252,7 +252,7 @@ jobs:
 
 ### Prerelease Detection
 
-Note: Prerelease status is automatically determined from the tag format. Tags with `-#-g<hash>` suffix (like `v1.2.3-4-g1234abc`) are marked as prereleases. All releases are created as drafts regardless of prerelease status.
+Note: Prerelease status is automatically determined from the tag format. Tags with `-#-g<hash>` suffix (like `xpv1.2.3-4-g1234abc`) are marked as prereleases. All releases are created as drafts regardless of prerelease status.
 
 ## Requirements
 
@@ -269,8 +269,8 @@ Note: Prerelease status is automatically determined from the tag format. Tags wi
    - Delete the existing release or use a different build with different version tags
 
 2. **"Could not determine version tag from filename" error:**
-   - Ensure artifact filenames contain version tags in the format `v#.#.#` or `v#.#.#.#`
-   - Version tags can also include git hash suffixes like `v1.2.3-4-g1234abc`
+   - Ensure artifact filenames contain version tags in the format `xpv#.#.#` or `xpv#.#.#.#`
+   - Version tags can also include git hash suffixes like `xpv1.2.3-4-g1234abc`
    - Check the artifact names in the Actions tab
 
 3. **"Artifact not found" error:**

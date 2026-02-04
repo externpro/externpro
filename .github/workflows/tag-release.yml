@@ -51,9 +51,12 @@ jobs:
             echo "release-tag.yml missing 'message'" >&2
             exit 1
           fi
-          if ! [[ "$TAG" =~ ^v[0-9A-Za-z][0-9A-Za-z._-]*$ ]]; then
+          if ! [[ "$TAG" =~ ^(xpv|v)[0-9A-Za-z][0-9A-Za-z._-]*$ ]]; then
             echo "Invalid tag format: $TAG" >&2
             exit 1
+          fi
+          if [[ "$TAG" =~ ^v[0-9A-Za-z] ]]; then
+            echo "WARNING: legacy 'v' tag prefix detected; prefer 'xpv' for new externpro tags" >&2
           fi
           echo "intent_missing=false" >> $GITHUB_OUTPUT
           echo "tag=$TAG" >> $GITHUB_OUTPUT
@@ -70,8 +73,8 @@ jobs:
               'To enable tagging on merge, add this file to the PR:',
               '',
               '```yaml',
-              'tag: v11.2.0.8',
-              'message: "version 11.2.0.8 tag"',
+              'tag: xpv11.2.0.8',
+              'message: "externpro version 11.2.0.8 tag"',
               '```',
               '',
               'Then ensure the PR has the `release:tag` label before merging into `xpro`.'
