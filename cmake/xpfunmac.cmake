@@ -1598,6 +1598,11 @@ function(xpExternPackage)
             "To avoid churn, it is only copied when running on Linux CI AND when ${srcDot} is updated. "
             "If you want ${srcSvg} updated locally, copy it manually (preferably from the Linux container)."
             )
+          message(STATUS "isDotDiff: ${isDotDiff}")
+          message(STATUS "isCi: ${isCi}")
+          message(STATUS "CMAKE_SYSTEM_NAME: ${CMAKE_SYSTEM_NAME}")
+          message(STATUS "To update ${srcSvg} locally, run: "
+            "${CMAKE_COMMAND} -E copy ${xpdepsGraph} ${srcSvg}")
         endif()
       endif()
     endif()
