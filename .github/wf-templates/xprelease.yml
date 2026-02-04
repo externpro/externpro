@@ -6,12 +6,21 @@ on:
         description: 'URL of the workflow run containing artifacts to upload (e.g., https://github.com/owner/repo/actions/runs/123456789)'
         required: true
         type: string
+  workflow_run:
+    workflows: ["Build"]
+    types: [completed]
 jobs:
   # Upload build artifacts as release assets
   release-from-build:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (
+        github.event.workflow_run.conclusion == 'success' &&
+        startsWith(github.event.workflow_run.head_branch, 'xpv')
+      )
     uses: externpro/externpro/.github/workflows/release-from-build.yml@25.07.4
     with:
-      workflow_run_url: ${{ github.event.inputs.workflow_run_url }}
+      workflow_run_url: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.workflow_run_url || github.event.workflow_run.html_url }}
     permissions:
       contents: write
       id-token: write
