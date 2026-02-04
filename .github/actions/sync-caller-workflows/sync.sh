@@ -115,7 +115,8 @@ extract_preserved_customizations() {
       if [ -n "$VALUES" ]; then
         echo "Found $key customizations:"
         echo "$VALUES"
-        PRESERVED_REPORT="${PRESERVED_REPORT}🔧 $key: $(echo "$VALUES" | tr '\n' ', ' | sed 's/,$//')\n"
+        VALUES_ESCAPED=$(echo "$VALUES" | sed 's/\$/\\\$/g')
+        PRESERVED_REPORT="${PRESERVED_REPORT}🔧 $key: $(echo "$VALUES_ESCAPED" | tr '\n' ', ' | sed 's/,$//')\n"
       fi
     fi
   done <<< "$WITH_KEYS"
@@ -468,8 +469,9 @@ finalize_report_and_outputs() {
     echo "No workflow updates needed"
   fi
   if [ -n "$REPORT" ]; then
+    SAFE_REPORT=$(printf "%b" "$REPORT" | sed 's/\$/\\\$/g')
     echo "workflow_report<<EOF" >> "$GITHUB_OUTPUT"
-    echo -e "$REPORT" >> "$GITHUB_OUTPUT"
+    echo "$SAFE_REPORT" >> "$GITHUB_OUTPUT"
     echo "EOF" >> "$GITHUB_OUTPUT"
   fi
   echo "unexpected_diffs=false" >> "$GITHUB_OUTPUT"
