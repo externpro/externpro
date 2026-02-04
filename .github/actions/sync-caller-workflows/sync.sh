@@ -11,6 +11,7 @@ GITHUB_OUTPUT="${GITHUB_OUTPUT:-/dev/null}"
 CREATE_MISSING_WORKFLOWS="${CREATE_MISSING_WORKFLOWS:-true}"
 WORKFLOWS_UPDATED=false
 UNEXPECTED_DIFFS=false
+DRIFT_DETECTED=false
 REPORT=""
 
 ensure_template_dir() {
@@ -44,6 +45,27 @@ sync_job_secrets_from_template() {
       yq eval ".jobs.${job}.secrets = ${tmpl_secrets_json}" -i "$workflow_file"
     fi
   done <<< "$jobs"
+}
+
+detect_template_drift() {
+  local template_name="$1"
+  local workflow_file="$2"
+  local template_file="$3"
+  local tmp_t
+  local tmp_w
+  tmp_t=$(mktemp)
+  tmp_w=$(mktemp)
+  # Preserve caller-specific customizations: we intentionally do not force-template jobs.*.with values.
+  yq eval -o=json 'del(.jobs.*.with)' "$template_file" > "$tmp_t" 2>/dev/null || echo "{}" > "$tmp_t"
+  yq eval -o=json 'del(.jobs.*.with)' "$workflow_file" > "$tmp_w" 2>/dev/null || echo "{}" > "$tmp_w"
+  local drift_diff
+  drift_diff=$(diff -u "$tmp_t" "$tmp_w" || true)
+  rm -f "$tmp_t" "$tmp_w"
+  if [ -n "$drift_diff" ]; then
+    echo "WARNING: Template drift detected in $template_name (outside preserved customizations)"
+    REPORT="${REPORT}⚠️ $template_name: Template drift detected (outside preserved customizations)\n"
+    DRIFT_DETECTED=true
+  fi
 }
 
 ensure_yq() {
@@ -293,9 +315,11 @@ PY
 analyze_diff_and_stage() {
   local template_name="$1"
   local workflow_file="$2"
-  local current_version="$3"
-  local template_version="$4"
+  local template_file="$3"
+  local current_version="$4"
+  local template_version="$5"
   echo "Performing diff analysis..."
+  detect_template_drift "$template_name" "$workflow_file" "$template_file"
   DIFF_OUTPUT=$(diff -u "$workflow_file.backup" "$workflow_file" || true)
   if [ -z "$DIFF_OUTPUT" ]; then
     echo "No changes needed for $template_name"
@@ -438,16 +462,18 @@ finalize_report_and_outputs() {
   fi
   if [ "$WORKFLOWS_UPDATED" = true ]; then
     echo "workflows_updated=true" >> "$GITHUB_OUTPUT"
-    echo "workflow_report<<EOF" >> "$GITHUB_OUTPUT"
-    echo -e "$REPORT" >> "$GITHUB_OUTPUT"
-    echo "EOF" >> "$GITHUB_OUTPUT"
-    echo "unexpected_diffs=false" >> "$GITHUB_OUTPUT"
     echo "Workflow updates staged successfully"
   else
     echo "workflows_updated=false" >> "$GITHUB_OUTPUT"
-    echo "unexpected_diffs=false" >> "$GITHUB_OUTPUT"
     echo "No workflow updates needed"
   fi
+  if [ -n "$REPORT" ]; then
+    echo "workflow_report<<EOF" >> "$GITHUB_OUTPUT"
+    echo -e "$REPORT" >> "$GITHUB_OUTPUT"
+    echo "EOF" >> "$GITHUB_OUTPUT"
+  fi
+  echo "unexpected_diffs=false" >> "$GITHUB_OUTPUT"
+  echo "drift_detected=${DRIFT_DETECTED}" >> "$GITHUB_OUTPUT"
 }
 
 process_template_file() {
@@ -496,7 +522,7 @@ process_template_file() {
   sync_triggers_from_template "$workflow_file" "$template_file"
   sync_job_secrets_from_template "$workflow_file" "$template_file"
   normalize_trigger_formatting "$workflow_file" "$template_file"
-  analyze_diff_and_stage "$template_name" "$workflow_file" "$CURRENT_VERSION" "$TEMPLATE_VERSION"
+  analyze_diff_and_stage "$template_name" "$workflow_file" "$template_file" "$CURRENT_VERSION" "$TEMPLATE_VERSION"
 }
 
 main() {
