@@ -104,7 +104,6 @@ jobs:
           # Create SHA256SUMS file (kept for attestations, but not uploaded)
           sha256sums_file="./artifacts/SHA256SUMS"
           printf '%s\n' "${hashes[@]}" | LC_ALL=C sort -k2,2 > "${sha256sums_file}"
-          sha256sums_hash=$(sha256sum "${sha256sums_file}" | cut -d' ' -f1)
           mapfile -t manifest_files < <(find ./artifacts -name "*.manifest.cmake" -type f | sort)
           if [ ${#manifest_files[@]} -eq 0 ]; then
             echo "::error::No manifest file found in downloaded artifacts (expected: *.manifest.cmake)"
@@ -146,6 +145,10 @@ jobs:
             printf 'set(XP_ARTIFACT_SHA256__%s "%s")\n' "${norm}" "${hash}" >> "${manifest_file}"
           done
           manifest_hash=$(sha256sum "${manifest_file}" | cut -d' ' -f1)
+          manifest_name=$(basename "${manifest_file}")
+          printf '%s  %s\n' "${manifest_hash}" "${manifest_name}" >> "${sha256sums_file}"
+          LC_ALL=C sort -k2,2 -o "${sha256sums_file}" "${sha256sums_file}"
+          sha256sums_hash=$(sha256sum "${sha256sums_file}" | cut -d' ' -f1)
           # Set outputs - use environment file method for better reliability
           {
             echo "artifacts<<EOF"
