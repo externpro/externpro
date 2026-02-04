@@ -8,9 +8,15 @@ on:
       pr_number:
         required: true
         type: number
+    secrets:
+      workflow_write_token:
+        description: 'Optional token to push tags and trigger downstream workflows. If not set, uses GITHUB_TOKEN (note: GITHUB_TOKEN pushes do not trigger other workflows).'
+        required: false
 jobs:
   tag:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       -
         name: Checkout merge commit
@@ -19,6 +25,7 @@ jobs:
           ref: ${{ inputs.merge_sha }}
           fetch-depth: 0
           fetch-tags: true
+          token: ${{ secrets.workflow_write_token || github.token }}
       -
         name: Install yq
         shell: bash
