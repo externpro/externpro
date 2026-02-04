@@ -184,9 +184,11 @@ jobs:
           if [ -z "${BASE_TAG}" ]; then
             BASE_TAG="xpv0.0.0"
           fi
+          BASE_VERSION="${BASE_TAG#xpv}"
+          BASE_VERSION="${BASE_VERSION#v}"
           {
             echo "tag: ${BASE_TAG}"
-            echo "message: \"externpro version ${BASE_TAG} tag\""
+            echo "message: \"externpro version ${BASE_VERSION} tag\""
           } > "${INTENT_FILE}"
           git add "${INTENT_FILE}"
           echo "intent_created=true" >> "$GITHUB_OUTPUT"
