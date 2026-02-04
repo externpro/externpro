@@ -1,4 +1,4 @@
-name: Release
+name: xpRelease
 on:
   workflow_dispatch:
     inputs:
@@ -7,7 +7,7 @@ on:
         required: true
         type: string
   workflow_run:
-    workflows: ["Build"]
+    workflows: ["xpBuild"]
     types: [completed]
 jobs:
   # Upload build artifacts as release assets

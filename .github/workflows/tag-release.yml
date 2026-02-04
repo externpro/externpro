@@ -13,7 +13,7 @@ on:
         description: 'Optional token to push tags and trigger downstream workflows. If not set, uses GITHUB_TOKEN (note: GITHUB_TOKEN pushes do not trigger other workflows).'
         required: false
 jobs:
-  tag:
+  release:
     runs-on: ubuntu-latest
     permissions:
       contents: write

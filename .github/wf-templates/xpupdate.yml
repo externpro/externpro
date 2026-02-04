@@ -1,4 +1,4 @@
-name: Update externpro
+name: xpUpdate externpro
 permissions:
   contents: write
   pull-requests: write

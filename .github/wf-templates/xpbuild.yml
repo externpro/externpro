@@ -1,4 +1,4 @@
-name: Build
+name: xpBuild
 permissions:
   contents: read
   pull-requests: write

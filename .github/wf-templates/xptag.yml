@@ -1,4 +1,4 @@
-name: Tag Release
+name: xpTag
 permissions:
   contents: write
   issues: write
