@@ -22,6 +22,30 @@ ensure_template_dir() {
   fi
 }
 
+sync_job_secrets_from_template() {
+  local workflow_file="$1"
+  local template_file="$2"
+  echo "Updating job secrets from template..."
+  local jobs
+  jobs=$(yq eval '.jobs | keys | .[]' "$template_file" 2>/dev/null | grep -v null || true)
+  if [ -z "$jobs" ]; then
+    return 0
+  fi
+  while IFS= read -r job; do
+    [ -z "$job" ] && continue
+    local has_uses
+    has_uses=$(yq eval ".jobs.${job}.uses // \"\"" "$workflow_file" 2>/dev/null || true)
+    if [ -z "$has_uses" ] || [ "$has_uses" = "null" ]; then
+      continue
+    fi
+    local tmpl_secrets_json
+    tmpl_secrets_json=$(yq eval -o=json ".jobs.${job}.secrets // null" "$template_file" 2>/dev/null || true)
+    if [ -n "$tmpl_secrets_json" ] && [ "$tmpl_secrets_json" != "null" ]; then
+      yq eval ".jobs.${job}.secrets = ${tmpl_secrets_json}" -i "$workflow_file"
+    fi
+  done <<< "$jobs"
+}
+
 ensure_yq() {
   # Install yq for YAML processing
   if ! command -v yq &> /dev/null; then
@@ -319,6 +343,11 @@ analyze_diff_and_stage() {
     PR_BRANCHES_CHANGED=true
   fi
   PR_BRANCHES_DIFF=$(echo "$DIFF_OUTPUT" | grep -E "^\+.*pull_request|^\-.*pull_request|^\+.*branches|^\-.*branches" || true)
+  SECRETS_CHANGED=false
+  SECRETS_DIFF=$(echo "$DIFF_OUTPUT" | grep -E "^\+.*secrets|^\-.*secrets" || true)
+  if [ -n "$SECRETS_DIFF" ]; then
+    SECRETS_CHANGED=true
+  fi
   # Exclude known customizations from "unexpected diffs" using dynamic pattern
   OTHER_DIFF=$(echo "$DIFF_OUTPUT" \
     | grep -E '^[\+\-]' \
@@ -326,6 +355,7 @@ analyze_diff_and_stage() {
     | grep -v -E '@' \
     | grep -v -E 'branches' \
     | grep -v -E 'tags' \
+    | grep -v -E 'secrets' \
     | grep -v -E "$DYNAMIC_EXCLUSION_PATTERN" \
     || true)
   echo "Changes detected:"
@@ -337,6 +367,9 @@ analyze_diff_and_stage() {
   fi
   if [ "$TAGS_CHANGED" = true ] && [ -n "$TAGS_DIFF" ]; then
     echo "$TAGS_DIFF"
+  fi
+  if [ "$SECRETS_CHANGED" = true ] && [ -n "$SECRETS_DIFF" ]; then
+    echo "$SECRETS_DIFF"
   fi
   if [ -n "$OTHER_DIFF" ]; then
     echo "$OTHER_DIFF"
@@ -374,6 +407,10 @@ analyze_diff_and_stage() {
       echo "✓ pull_request.branches updated from template"
       REPORT="${REPORT}✓ $template_name: pull_request.branches updated from template\n"
     fi
+  fi
+  if [ "$SECRETS_CHANGED" = true ]; then
+    echo "✓ job secrets updated from template"
+    REPORT="${REPORT}✓ $template_name: job secrets updated from template\n"
   fi
   # Report preserved customizations
   if [ -n "$PRESERVED_REPORT" ]; then
@@ -457,6 +494,7 @@ process_template_file() {
   # - Some workflows (e.g. xpbuild) intentionally migrate from push.branches -> push.tags.
   # - pull_request.branches should follow the template (often differs from push.*).
   sync_triggers_from_template "$workflow_file" "$template_file"
+  sync_job_secrets_from_template "$workflow_file" "$template_file"
   normalize_trigger_formatting "$workflow_file" "$template_file"
   analyze_diff_and_stage "$template_name" "$workflow_file" "$CURRENT_VERSION" "$TEMPLATE_VERSION"
 }
