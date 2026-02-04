@@ -461,5 +461,26 @@ jobs:
           if [ -n "$SUPERSEDED_PR_NUMBERS" ]; then
             for PR_NUMBER in $SUPERSEDED_PR_NUMBERS; do
               gh pr close "$PR_NUMBER" --comment "Superseded by $PR_URL" >/dev/null 2>&1 || echo "Failed to close PR #$PR_NUMBER"
+              SUPERSEDED_HEAD_REF=$(gh pr view "$PR_NUMBER" --json headRefName --jq .headRefName 2>/dev/null || true)
+              if [ -z "$SUPERSEDED_HEAD_REF" ]; then
+                echo "Could not determine head branch for superseded PR #$PR_NUMBER; skipping branch delete"
+                continue
+              fi
+              if [ "$SUPERSEDED_HEAD_REF" = "$HEAD_BRANCH" ]; then
+                continue
+              fi
+              case "$SUPERSEDED_HEAD_REF" in
+                externpro-update-*)
+                  REF_ENC=$(printf '%s' "$SUPERSEDED_HEAD_REF" | sed 's|/|%2F|g')
+                  if gh api -X DELETE "repos/${{ github.repository }}/git/refs/heads/${REF_ENC}" >/dev/null 2>&1; then
+                    echo "Deleted superseded branch: $SUPERSEDED_HEAD_REF"
+                  else
+                    echo "Could not delete branch '$SUPERSEDED_HEAD_REF' (missing/protected/insufficient permissions); skipping"
+                  fi
+                  ;;
+                *)
+                  echo "Refusing to delete non-automation branch '$SUPERSEDED_HEAD_REF' from superseded PR #$PR_NUMBER"
+                  ;;
+              esac
             done
           fi
