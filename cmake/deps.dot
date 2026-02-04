@@ -1,5 +1,9 @@
 digraph GG {
-  node [fontsize=12];
+  bgcolor="transparent";
+  graph [fontcolor="#64748b", color="#64748b"];
+  node  [fontcolor="#64748b", color="#64748b"];
+  edge  [fontcolor="#64748b", color="#64748b"];
+  node  [fontsize=10];
   "activemq-cpp" -> "apr";
   "activemq-cpp" -> "openssl";
   "azmq" -> "boost";
@@ -10,9 +14,9 @@ digraph GG {
   "cppzmq" -> "libzmq";
   "curl" -> "c-ares";
   "curl" -> "libssh2";
-  "fecpp" -> "boost";
+  "fecpp" -> "boost" [style=dashed];
   "ffmpeg" -> "openh264";
-  "ffmpeg" -> "yasm";
+  "ffmpeg" -> "yasm" [style=dashed];
   "hdf5" -> "zlib";
   "libgeotiff" -> "wxwidgets";
   "libgit2" -> "libssh2";
@@ -28,14 +32,14 @@ digraph GG {
   "libzmq" -> "libsodium";
   "luabridge" -> "lua";
   "node-addon-api" -> "nodexp";
-  "openh264" -> "yasm";
-  "openssl" -> "nasm";
-  "openssl" -> "yasm";
+  "openh264" -> "yasm" [style=dashed];
+  "openssl" -> "nasm" [style=dashed];
+  "openssl" -> "yasm" [style=dashed];
   "protobuf" -> "zlib";
-  "spatialite-tools" -> "libspatialite";
+  "spatialite-tools" -> "libspatialite" [style=dashed];
   "spdlog" -> "fmt";
-  "wxinclude" -> "boost";
-  "wxtetris" -> "wxwidgets";
+  "wxinclude" -> "boost" [style=dashed];
+  "wxtetris" -> "wxwidgets" [style=dashed];
   "wxx" -> "wxwidgets";
   "zmqpp" -> "libzmq";
 }
