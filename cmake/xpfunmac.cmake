@@ -1620,7 +1620,7 @@ function(xpExternPackage)
     set(CMAKE_INSTALL_CMAKEDIR ${CMAKE_INSTALL_DATADIR}/cmake)
     set(CMAKE_INSTALL_CMAKEDIR ${CMAKE_INSTALL_CMAKEDIR} PARENT_SCOPE)
   endif()
-  install(FILES ${xpinfoFile} ${xpuseFile} ${xpmanifestFile} ${xpdepsFile} ${xpdepsGraph}
+  install(FILES ${xpinfoFile} ${xpuseFile} ${xpmanifestFile}
     DESTINATION ${CMAKE_INSTALL_CMAKEDIR} ${XP_COMPONENT}
     )
   ###############
