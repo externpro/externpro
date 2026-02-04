@@ -219,6 +219,9 @@ jobs:
           docker run --rm \
             --entrypoint bash \
             --user "$(id -u):$(id -g)" \
+            --env GITHUB_ACTIONS \
+            --env GITHUB_RUN_ID \
+            --env CI \
             --volume "$GITHUB_WORKSPACE:/work" \
             --workdir /work \
             "${IMAGE}" \
