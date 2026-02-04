@@ -165,7 +165,9 @@ jobs:
         uses: actions/attest-build-provenance@v2
         with:
           subject-name: ${{ github.repository }}@${{ steps.find_artifacts.outputs.tag }}
-          subject-checksums: ${{ steps.find_artifacts.outputs.sha256sums_file }}
+          subject-path: |
+            ./artifacts/**/*.tar.xz
+            ./artifacts/**/*.manifest.cmake
           push-to-registry: false
       -
         name: Check if tag exists
