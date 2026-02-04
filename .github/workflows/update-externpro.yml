@@ -156,6 +156,43 @@ jobs:
           echo "externpro version: $VERSION_TAG"
           echo "externpro describe: $DESCRIBE"
       -
+        name: Create release-tag intent (if missing)
+        id: release_intent
+        if: ${{ always() && inputs.create_pr }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          INTENT_FILE=".github/release-tag.yml"
+          if [ -f "${INTENT_FILE}" ]; then
+            echo "intent_created=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          mkdir -p .github
+          set +e
+          BASE_TAG=$(git describe --tags --abbrev=0 --match 'xpv*' 2>/dev/null)
+          RC=$?
+          set -e
+          if [ $RC -ne 0 ] || [ -z "${BASE_TAG}" ]; then
+            set +e
+            BASE_TAG=$(git describe --tags --abbrev=0 --match 'v*' 2>/dev/null)
+            RC=$?
+            set -e
+          fi
+          if [ $RC -ne 0 ] || [ -z "${BASE_TAG}" ]; then
+            BASE_TAG=$(git describe --tags --abbrev=0 2>/dev/null || true)
+          fi
+          if [ -z "${BASE_TAG}" ]; then
+            BASE_TAG="xpv0.0.0"
+          fi
+          {
+            echo "tag: ${BASE_TAG}"
+            echo "message: \"externpro version ${BASE_TAG} tag\""
+          } > "${INTENT_FILE}"
+          git add "${INTENT_FILE}"
+          echo "intent_created=true" >> "$GITHUB_OUTPUT"
+          echo "intent_file=${INTENT_FILE}" >> "$GITHUB_OUTPUT"
+          echo "intent_tag=${BASE_TAG}" >> "$GITHUB_OUTPUT"
+      -
         name: Stage submodule update
         id: stage_submodule
         if: steps.update.outputs.update_needed == 'true'
@@ -307,6 +344,20 @@ jobs:
           fi
           git commit -m "xprodeps updates" -- $FILES
       -
+        name: Commit release-tag intent
+        if: inputs.create_pr && steps.pr_needed.outputs.pr_needed == 'true' && steps.release_intent.outputs.intent_created == 'true'
+        run: |
+          INTENT_FILE="${{ steps.release_intent.outputs.intent_file }}"
+          if [ -z "${INTENT_FILE}" ] || [ ! -f "${INTENT_FILE}" ]; then
+            echo "release-tag intent file missing; nothing to commit"
+            exit 0
+          fi
+          if git diff --cached --quiet -- "${INTENT_FILE}"; then
+            echo "release-tag intent not staged; nothing to commit"
+            exit 0
+          fi
+          git commit -m "add release-tag intent" -- "${INTENT_FILE}"
+      -
         name: Commit and push workflow updates
         if: inputs.create_pr && steps.pr_needed.outputs.pr_needed == 'true'
         run: |
@@ -353,6 +404,9 @@ jobs:
               done < <(printf '%s\n' "${{ steps.cmake_configure.outputs.xprodeps_files }}")
             fi
           fi
+          if [ "${{ steps.release_intent.outputs.intent_created }}" = "true" ]; then
+            echo "- Created \`.github/release-tag.yml\` (tag: \`${{ steps.release_intent.outputs.intent_tag }}\`)" >> "$BODY_FILE"
+          fi
           if [ "${{ steps.update_workflows.outputs.workflows_updated }}" = "true" ]; then
             echo "- Updated caller workflows to match templates" >> "$BODY_FILE"
           fi
@@ -379,6 +433,7 @@ jobs:
           fi
           gh label create "dependencies" --color "0B3D2E" --description "dependency updates" >/dev/null 2>&1 || true
           gh label create "externpro" --color "0B3D2E" --description "externpro updates" >/dev/null 2>&1 || true
+          gh label create "release:tag" --color "FF6A00" --description "Tag release on merge" >/dev/null 2>&1 || true
           gh pr edit "$PR_URL" --add-label "dependencies" >/dev/null 2>&1 || echo "Label 'dependencies' not found; skipping"
           gh pr edit "$PR_URL" --add-label "externpro" >/dev/null 2>&1 || echo "Label 'externpro' not found; skipping"
           # Close superseded PRs from previous runs.
