@@ -1297,6 +1297,26 @@ function(xpDetermineIsCi boolVar)
   set(${boolVar} ${isCi} PARENT_SCOPE)
 endfunction()
 
+function(xpHostnameMatches hname boolVar)
+  set(matches FALSE)
+  if(NOT "${hname}" STREQUAL "")
+    find_program(hostnameCmd hostname)
+    if(hostnameCmd)
+      execute_process(
+        COMMAND ${hostnameCmd}
+        RESULT_VARIABLE rc
+        OUTPUT_VARIABLE hostnameOut
+        ERROR_QUIET
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        )
+      if(rc EQUAL 0 AND NOT "${hostnameOut}" STREQUAL "" AND "${hostnameOut}" MATCHES "${hname}")
+        set(matches TRUE)
+      endif()
+    endif()
+  endif()
+  set(${boolVar} ${matches} PARENT_SCOPE)
+endfunction()
+
 function(xpFilesDifferent file1 file2 boolDiff)
   set(isDiff FALSE)
   if(EXISTS ${file1})
@@ -1569,42 +1589,38 @@ function(xpExternPackage)
   # xpdeps files
   if(DEFINED P_DEPS OR DEFINED P_PVT_DEPS)
     set(xpdepsFile ${CMAKE_CURRENT_BINARY_DIR}/xprodeps.md)
-    set(xpdepsDot ${CMAKE_CURRENT_BINARY_DIR}/xprodeps.dot)
     set(xpdepsGraph ${CMAKE_CURRENT_BINARY_DIR}/xprodeps.svg)
     ipProDepsInit()
     ipProDepsWalk(PKG ${lcRepoName} MANIFEST_FILE ${xpmanifestFile})
     ipProDepsEnd()
-    # copy files to source directory
+    # linux is the only platform where we can ensure graphviz
+    # (dot executable) is available, both locally and in CI, so
+    # only copy files to source directory with linux build
+    # container used by update-externpro workflow
+    set(build_container "rocky9-gcc13")
+    xpHostnameMatches(${build_container} copyToSrc)
     set(srcRme ${CMAKE_SOURCE_DIR}/xprodeps.md)
-    set(srcDot ${CMAKE_SOURCE_DIR}/xprodeps.dot)
     set(srcSvg ${CMAKE_SOURCE_DIR}/xprodeps.svg)
-    if(EXISTS ${xpdepsFile} AND NOT CMAKE_SYSTEM_NAME STREQUAL "Windows")
+    xpFilesDifferent(${xpdepsFile} ${srcRme} isRmeDiff)
+    xpFilesDifferent(${xpdepsGraph} ${srcSvg} isSvgDiff)
+    if(copyToSrc)
       execute_process(COMMAND ${CMAKE_COMMAND} -E copy_if_different ${xpdepsFile} ${srcRme})
-    endif()
-    if(EXISTS ${xpdepsDot} AND NOT CMAKE_SYSTEM_NAME STREQUAL "Windows")
-      xpFilesDifferent(${xpdepsDot} ${srcDot} isDotDiff)
-      if(isDotDiff)
-        execute_process(COMMAND ${CMAKE_COMMAND} -E copy ${xpdepsDot} ${srcDot})
+      execute_process(COMMAND ${CMAKE_COMMAND} -E copy_if_different ${xpdepsGraph} ${srcSvg})
+    elseif(isRmeDiff OR isDotDiff OR isSvgDiff)
+      message(STATUS "NOTE: xprodeps files in binary and source directory differ, "
+        "but should be copied from binary to source directory in ${build_container} "
+        "build container, where graphviz is installed and version controlled. "
+        "(graphviz version is recorded in .svg file and different versions generate other diffs too)."
+        )
+      if(isRmeDiff)
+        cmake_path(RELATIVE_PATH xpdepsFile BASE_DIRECTORY ${CMAKE_SOURCE_DIR} OUTPUT_VARIABLE relXpdepsFile)
+        cmake_path(RELATIVE_PATH srcRme BASE_DIRECTORY ${CMAKE_SOURCE_DIR} OUTPUT_VARIABLE relSrcRme)
+        message(STATUS "  * ${relXpdepsFile} -> ${relSrcRme}")
       endif()
-    endif()
-    if(EXISTS ${xpdepsGraph} AND NOT CMAKE_SYSTEM_NAME STREQUAL "Windows")
-      xpFilesDifferent(${xpdepsGraph} ${srcSvg} isSvgDiff)
       if(isSvgDiff)
-        xpDetermineIsCi(isCi)
-        if(isDotDiff AND isCi AND CMAKE_SYSTEM_NAME STREQUAL "Linux")
-          execute_process(COMMAND ${CMAKE_COMMAND} -E copy ${xpdepsGraph} ${srcSvg})
-        else()
-          message(STATUS "NOTE: not copying ${xpdepsGraph} -> ${srcSvg} "
-            "because this file is platform/graphviz-version dependent. "
-            "To avoid churn, it is only copied when running on Linux CI AND when ${srcDot} is updated. "
-            "If you want ${srcSvg} updated locally, copy it manually (preferably from the Linux container)."
-            )
-          message(STATUS "isDotDiff: ${isDotDiff}")
-          message(STATUS "isCi: ${isCi}")
-          message(STATUS "CMAKE_SYSTEM_NAME: ${CMAKE_SYSTEM_NAME}")
-          message(STATUS "To update ${srcSvg} locally, run: "
-            "${CMAKE_COMMAND} -E copy ${xpdepsGraph} ${srcSvg}")
-        endif()
+        cmake_path(RELATIVE_PATH xpdepsGraph BASE_DIRECTORY ${CMAKE_SOURCE_DIR} OUTPUT_VARIABLE relXpdepsGraph)
+        cmake_path(RELATIVE_PATH srcSvg BASE_DIRECTORY ${CMAKE_SOURCE_DIR} OUTPUT_VARIABLE relSrcSvg)
+        message(STATUS "  * ${relXpdepsGraph} -> ${relSrcSvg}")
       endif()
     endif()
   endif()
