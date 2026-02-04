@@ -43,6 +43,8 @@ jobs:
       contents: write
       pull-requests: write
       packages: read
+    env:
+      XPRODEPS_FILES: "xprodeps.md xprodeps.svg"
     steps:
       -
         name: Checkout repository
@@ -214,7 +216,7 @@ jobs:
             exit 1
           fi
           echo "--- xprodeps files before"
-          ls -la xprodeps.md xprodeps.dot xprodeps.svg 2>/dev/null || true
+          ls -la $XPRODEPS_FILES 2>/dev/null || true
           set +e
           docker run --rm \
             --entrypoint bash \
@@ -241,10 +243,10 @@ jobs:
             exit "${DOCKER_RC}"
           fi
           echo "--- xprodeps files after"
-          ls -la xprodeps.md xprodeps.dot xprodeps.svg 2>/dev/null || true
+          ls -la $XPRODEPS_FILES 2>/dev/null || true
           echo "--- repo dirtiness after configure (before staging)"
           git status --porcelain || true
-          for file in xprodeps.md xprodeps.dot xprodeps.svg; do
+          for file in $XPRODEPS_FILES; do
             if [ -e "$file" ]; then
               git add "$file"
             fi
@@ -252,12 +254,12 @@ jobs:
           echo "--- repo dirtiness after staging xprodeps"
           git status --porcelain || true
           echo "--- staged changes (name-status)"
-          git diff --cached --name-status -- xprodeps.md xprodeps.dot xprodeps.svg || true
-          XPRODEPS_FILES=$(git diff --cached --name-only -- xprodeps.md xprodeps.dot xprodeps.svg || true)
-          if [ -n "$XPRODEPS_FILES" ]; then
+          git diff --cached --name-status -- $XPRODEPS_FILES || true
+          XPRODEPS_STAGED_FILES=$(git diff --cached --name-only -- $XPRODEPS_FILES || true)
+          if [ -n "$XPRODEPS_STAGED_FILES" ]; then
             echo "xprodeps_updated=true" >> "$GITHUB_OUTPUT"
             echo "xprodeps_files<<EOF" >> "$GITHUB_OUTPUT"
-            echo "$XPRODEPS_FILES" >> "$GITHUB_OUTPUT"
+            echo "$XPRODEPS_STAGED_FILES" >> "$GITHUB_OUTPUT"
             echo "EOF" >> "$GITHUB_OUTPUT"
           else
             echo "xprodeps_updated=false" >> "$GITHUB_OUTPUT"
@@ -298,7 +300,7 @@ jobs:
         name: Commit xprodeps updates
         if: inputs.create_pr && steps.pr_needed.outputs.pr_needed == 'true'
         run: |
-          FILES=$(git diff --cached --name-only -- xprodeps.md xprodeps.dot xprodeps.svg || true)
+          FILES=$(git diff --cached --name-only -- $XPRODEPS_FILES || true)
           if [ -z "$FILES" ]; then
             echo "No xprodeps changes staged"
             exit 0
