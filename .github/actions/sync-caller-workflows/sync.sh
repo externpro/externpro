@@ -393,6 +393,13 @@ analyze_diff_and_stage() {
     TAGS_CHANGED=true
   fi
   TAGS_DIFF=$(echo "$DIFF_OUTPUT" | grep -E "^\+.*tags|^\-.*tags" || true)
+  NAME_BEFORE=$(yq eval '.name // ""' "$workflow_file.backup" 2>/dev/null || true)
+  NAME_AFTER=$(yq eval '.name // ""' "$workflow_file" 2>/dev/null || true)
+  NAME_CHANGED=false
+  if [ -n "$NAME_BEFORE" ] && [ -n "$NAME_AFTER" ] && [ "$NAME_BEFORE" != "$NAME_AFTER" ]; then
+    NAME_CHANGED=true
+  fi
+  NAME_DIFF=$(echo "$DIFF_OUTPUT" | grep -E "^[\+\-]name:" || true)
   PR_BRANCHES_CHANGED=false
   if [ -n "$PR_BRANCHES_BEFORE_JSON" ] && [ -n "$PR_BRANCHES_AFTER_JSON" ] && [ "$PR_BRANCHES_BEFORE_JSON" != "$PR_BRANCHES_AFTER_JSON" ]; then
     PR_BRANCHES_CHANGED=true
@@ -403,6 +410,7 @@ analyze_diff_and_stage() {
     | grep -E '^[\+\-]' \
     | grep -v -E '^[\+\-]{2,3}' \
     | grep -v -E '@' \
+    | grep -v -E '^[\+\-]name:' \
     | grep -v -E 'branches' \
     | grep -v -E 'tags' \
     | grep -v -E "$DYNAMIC_EXCLUSION_PATTERN" \
@@ -410,6 +418,9 @@ analyze_diff_and_stage() {
   echo "Changes detected:"
   if [ -n "$VERSION_ONLY_DIFF" ]; then
     echo "$VERSION_ONLY_DIFF"
+  fi
+  if [ "$NAME_CHANGED" = true ] && [ -n "$NAME_DIFF" ]; then
+    echo "$NAME_DIFF"
   fi
   if [ "$BRANCHES_CHANGED" = true ] && [ -n "$BRANCHES_DIFF" ]; then
     echo "$BRANCHES_DIFF"
@@ -441,6 +452,10 @@ analyze_diff_and_stage() {
     REPORT="${REPORT}✓ $template_name: Version updated $current_version → $template_version\n"
   fi
   if [ "$PRESERVE_EXISTING_BRANCHES" != "true" ]; then
+    if [ "$NAME_CHANGED" = true ]; then
+      echo "✓ workflow name updated from template"
+      REPORT="${REPORT}✓ $template_name: workflow name updated from template\n"
+    fi
     if [ "$BRANCHES_CHANGED" = true ]; then
       echo "✓ push.branches updated from template"
       REPORT="${REPORT}✓ $template_name: push.branches updated from template\n"
