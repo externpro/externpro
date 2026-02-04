@@ -67,6 +67,16 @@ restore_preserved_with_keys() {
   done <<< "$jobs"
 }
 
+sync_workflow_name_from_template() {
+  local workflow_file="$1"
+  local template_file="$2"
+  local tmpl_name
+  tmpl_name=$(yq eval '.name // ""' "$template_file" 2>/dev/null || true)
+  if [ -n "$tmpl_name" ] && [ "$tmpl_name" != "null" ]; then
+    yq eval ".name = \"${tmpl_name}\"" -i "$workflow_file"
+  fi
+}
+
 detect_template_drift() {
   local template_name="$1"
   local workflow_file="$2"
@@ -533,6 +543,7 @@ process_template_file() {
   # Notes:
   # - Some workflows (e.g. xpbuild) intentionally migrate from push.branches -> push.tags.
   # - pull_request.branches should follow the template (often differs from push.*).
+  sync_workflow_name_from_template "$workflow_file" "$template_file"
   sync_triggers_from_template "$workflow_file" "$template_file"
   normalize_trigger_formatting "$workflow_file" "$template_file"
   restore_preserved_with_keys "$workflow_file" "$workflow_file.backup"
