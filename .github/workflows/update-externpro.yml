@@ -61,11 +61,6 @@ jobs:
           submodules: true
           token: ${{ secrets.workflow_write_token || github.token }}
       -
-        name: Configure Git
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-      -
         name: Validate externpro submodule
         id: validate
         run: |
@@ -102,6 +97,13 @@ jobs:
           fi
           echo "✓ externpro submodule validation passed"
           echo "submodule_path=$SUBMODULE_PATH" >> $GITHUB_OUTPUT
+      -
+        name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git -C "${{ steps.validate.outputs.submodule_path }}" config user.name "github-actions[bot]"
+          git -C "${{ steps.validate.outputs.submodule_path }}" config user.email "github-actions[bot]@users.noreply.github.com"
       -
         name: Get current externpro HEAD
         id: current_head
