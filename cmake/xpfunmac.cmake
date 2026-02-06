@@ -1053,15 +1053,15 @@ function(ipProDepsInit)
   elseif(DEFINED xpdepsFile)
     string(JOIN "\n" hdr
       "# projects"
-      "this README.md, the [deps.dot](deps.dot), and [deps.svg](deps.svg)"
-      "files are generated from the contents of [pros.cmake](pros.cmake),"
-      "any independently set or overridden `xp_` variables,"
-      "and downloaded project manifest files"
+      "this README.md and the [deps.svg](deps.svg) files are generated"
+      " from the contents of [pros.cmake](pros.cmake), any independently set"
+      " or overridden `xp_` variables, and downloaded project manifest files"
       ""
       )
     file(WRITE ${xpdepsFile} "${hdr}")
   endif()
   string(JOIN "\n" rme
+    ""
     "|project|license [^_l]|description [dependencies]|version|source|diff [^_d]|"
     "|-------|-------------|--------------------------|-------|------|----------|"
     ""
@@ -1285,18 +1285,6 @@ function(ipProDepsEnd)
   endif()
 endfunction()
 
-function(xpDetermineIsCi boolVar)
-  set(isCi FALSE)
-  if(DEFINED ENV{GITHUB_ACTIONS} AND "$ENV{GITHUB_ACTIONS}" MATCHES "^(1|ON|YES|TRUE|Y)$")
-    set(isCi TRUE)
-  elseif(DEFINED ENV{GITHUB_RUN_ID} AND NOT "$ENV{GITHUB_RUN_ID}" STREQUAL "")
-    set(isCi TRUE)
-  elseif(DEFINED ENV{CI} AND "$ENV{CI}" MATCHES "^(1|ON|YES|TRUE|Y)$")
-    set(isCi TRUE)
-  endif()
-  set(${boolVar} ${isCi} PARENT_SCOPE)
-endfunction()
-
 function(xpHostnameMatches hname boolVar)
   set(matches FALSE)
   if(NOT "${hname}" STREQUAL "")
@@ -1335,9 +1323,39 @@ function(xpFilesDifferent file1 file2 boolDiff)
   set(${boolDiff} ${isDiff} PARENT_SCOPE)
 endfunction()
 
+function(xpCopyFilesToSrc readme graph)
+  # linux is the only platform where we can ensure graphviz
+  # (dot executable) is available, both locally and in CI, so
+  # only copy files to source directory with linux build
+  # container used by update-externpro workflow
+  set(build_container "rocky9-gcc13")
+  xpHostnameMatches(${build_container} copyToSrc)
+  xpFilesDifferent(${xpdepsFile} ${readme} isRdmeDiff)
+  xpFilesDifferent(${xpdepsGraph} ${graph} isGraphDiff)
+  if(copyToSrc)
+    execute_process(COMMAND ${CMAKE_COMMAND} -E copy_if_different ${xpdepsFile} ${readme})
+    execute_process(COMMAND ${CMAKE_COMMAND} -E copy_if_different ${xpdepsGraph} ${graph})
+  elseif(isRdmeDiff OR isGraphDiff)
+    message(STATUS "NOTE: files in binary and source directory differ, "
+      "but should be copied from binary to source directory in ${build_container} "
+      "build container, where graphviz is installed and version controlled. "
+      "(graphviz version is recorded in .svg file and different versions generate other diffs too)."
+      )
+    if(isRdmeDiff)
+      cmake_path(RELATIVE_PATH xpdepsFile BASE_DIRECTORY ${CMAKE_SOURCE_DIR} OUTPUT_VARIABLE relXpdepsFile)
+      cmake_path(RELATIVE_PATH readme BASE_DIRECTORY ${CMAKE_SOURCE_DIR} OUTPUT_VARIABLE relSrcRdme)
+      message(STATUS "  * ${relXpdepsFile} -> ${relSrcRdme}")
+    endif()
+    if(isGraphDiff)
+      cmake_path(RELATIVE_PATH xpdepsGraph BASE_DIRECTORY ${CMAKE_SOURCE_DIR} OUTPUT_VARIABLE relXpdepsGraph)
+      cmake_path(RELATIVE_PATH graph BASE_DIRECTORY ${CMAKE_SOURCE_DIR} OUTPUT_VARIABLE relSrcGraph)
+      message(STATUS "  * ${relXpdepsGraph} -> ${relSrcGraph}")
+    endif()
+  endif()
+endfunction()
+
 function(xpProDeps)
   set(xpdepsFile ${CMAKE_CURRENT_BINARY_DIR}/README.md)
-  set(xpdepsDot ${CMAKE_CURRENT_BINARY_DIR}/deps.dot)
   set(xpdepsGraph ${CMAKE_CURRENT_BINARY_DIR}/deps.svg)
   # https://stackoverflow.com/q/9298278/
   get_cmake_property(pros VARIABLES)
@@ -1351,22 +1369,7 @@ function(xpProDeps)
   endforeach()
   ipProDepsEnd()
   file(APPEND ${xpdepsFile} "\n[How-to: modify a project to build with externpro](pros.md)\n")
-  # copy files to source directory
-  set(srcRme ${xpThisDir}/README.md)
-  set(srcDot ${xpThisDir}/deps.dot)
-  set(srcSvg ${xpThisDir}/deps.svg)
-  if(EXISTS ${xpdepsFile} AND NOT CMAKE_SYSTEM_NAME STREQUAL "Windows")
-    execute_process(COMMAND ${CMAKE_COMMAND} -E copy_if_different ${xpdepsFile} ${srcRme})
-  endif()
-  if(EXISTS ${xpdepsDot} AND NOT CMAKE_SYSTEM_NAME STREQUAL "Windows")
-    execute_process(COMMAND ${CMAKE_COMMAND} -E copy_if_different ${xpdepsDot} ${srcDot})
-  endif()
-  xpDetermineIsCi(isCi)
-  if(APPLE AND NOT isCi)
-    if(EXISTS ${xpdepsGraph})
-      execute_process(COMMAND ${CMAKE_COMMAND} -E copy_if_different ${xpdepsGraph} ${srcSvg})
-    endif()
-  endif()
+  xpCopyFilesToSrc(${xpThisDir}/README.md ${xpThisDir}/deps.svg)
 endfunction()
 
 function(ipManifestDepsFromVars _out deps)
@@ -1593,36 +1596,7 @@ function(xpExternPackage)
     ipProDepsInit()
     ipProDepsWalk(PKG ${lcRepoName} MANIFEST_FILE ${xpmanifestFile})
     ipProDepsEnd()
-    # linux is the only platform where we can ensure graphviz
-    # (dot executable) is available, both locally and in CI, so
-    # only copy files to source directory with linux build
-    # container used by update-externpro workflow
-    set(build_container "rocky9-gcc13")
-    xpHostnameMatches(${build_container} copyToSrc)
-    set(srcRme ${CMAKE_SOURCE_DIR}/xprodeps.md)
-    set(srcSvg ${CMAKE_SOURCE_DIR}/xprodeps.svg)
-    xpFilesDifferent(${xpdepsFile} ${srcRme} isRmeDiff)
-    xpFilesDifferent(${xpdepsGraph} ${srcSvg} isSvgDiff)
-    if(copyToSrc)
-      execute_process(COMMAND ${CMAKE_COMMAND} -E copy_if_different ${xpdepsFile} ${srcRme})
-      execute_process(COMMAND ${CMAKE_COMMAND} -E copy_if_different ${xpdepsGraph} ${srcSvg})
-    elseif(isRmeDiff OR isDotDiff OR isSvgDiff)
-      message(STATUS "NOTE: xprodeps files in binary and source directory differ, "
-        "but should be copied from binary to source directory in ${build_container} "
-        "build container, where graphviz is installed and version controlled. "
-        "(graphviz version is recorded in .svg file and different versions generate other diffs too)."
-        )
-      if(isRmeDiff)
-        cmake_path(RELATIVE_PATH xpdepsFile BASE_DIRECTORY ${CMAKE_SOURCE_DIR} OUTPUT_VARIABLE relXpdepsFile)
-        cmake_path(RELATIVE_PATH srcRme BASE_DIRECTORY ${CMAKE_SOURCE_DIR} OUTPUT_VARIABLE relSrcRme)
-        message(STATUS "  * ${relXpdepsFile} -> ${relSrcRme}")
-      endif()
-      if(isSvgDiff)
-        cmake_path(RELATIVE_PATH xpdepsGraph BASE_DIRECTORY ${CMAKE_SOURCE_DIR} OUTPUT_VARIABLE relXpdepsGraph)
-        cmake_path(RELATIVE_PATH srcSvg BASE_DIRECTORY ${CMAKE_SOURCE_DIR} OUTPUT_VARIABLE relSrcSvg)
-        message(STATUS "  * ${relXpdepsGraph} -> ${relSrcSvg}")
-      endif()
-    endif()
+    xpCopyFilesToSrc(${CMAKE_SOURCE_DIR}/xprodeps.md ${CMAKE_SOURCE_DIR}/xprodeps.svg)
   endif()
   ###############
   # install sysinfo.txt, xpuse-${lcRepoName}-config.cmake, and manifest.cmake
