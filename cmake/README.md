@@ -1,8 +1,8 @@
 # projects
-this README.md, the [deps.dot](deps.dot), and [deps.svg](deps.svg)
-files are generated from the contents of [pros.cmake](pros.cmake),
-any independently set or overridden `xp_` variables,
-and downloaded project manifest files
+this README.md and the [deps.svg](deps.svg) files are generated
+ from the contents of [pros.cmake](pros.cmake), any independently set
+ or overridden `xp_` variables, and downloaded project manifest files
+
 |project|license [^_l]|description [dependencies]|version|source|diff [^_d]|
 |-------|-------------|--------------------------|-------|------|----------|
 |<a id='activemq-cpp' />[activemq-cpp](http://activemq.apache.org/cms/)|[Apache-2.0](http://www.apache.org/licenses/LICENSE-2.0.html 'Apache License, Version 2.0')|ActiveMQ C++ Messaging Service (CMS) client library [deps: _apr, openssl_]|[v3.9.5.2](https://github.com/externpro/activemq-cpp/releases/tag/v3.9.5.2 'release')|[repo](https://github.com/externpro/activemq-cpp 'github.com/externpro/activemq-cpp') [upstream](https://github.com/apache/activemq-cpp 'github.com/apache/activemq-cpp')|[diff](https://github.com/externpro/activemq-cpp/compare/activemq-cpp-3.9.5...v3.9.5.2 'github.com/externpro/activemq-cpp/compare/activemq-cpp-3.9.5...v3.9.5.2') [auto]|
