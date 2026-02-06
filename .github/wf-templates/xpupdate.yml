@@ -7,6 +7,6 @@ on:
   workflow_dispatch:
 jobs:
   update:
-    uses: externpro/externpro/.github/workflows/update-externpro.yml@25.07.5
+    uses: externpro/externpro/.github/workflows/update-externpro.yml@main
     secrets:
       workflow_write_token: ${{ secrets.XPUPDATE_TOKEN }}
