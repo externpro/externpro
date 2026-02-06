@@ -32,6 +32,11 @@ on:
         required: false
         type: boolean
         default: true
+      submodule_dependency_push_target:
+        description: 'Where to push externpro submodule dependency artifact commits: "automation" (default) or "main"'
+        required: false
+        type: string
+        default: 'automation'
     secrets:
       workflow_write_token:
         description: 'Optional token with permission to update .github/workflows (PAT or fine-grained token). If not set, uses GITHUB_TOKEN.'
@@ -45,6 +50,7 @@ jobs:
       packages: read
     env:
       DEPENDENCY_FILES: "xprodeps.md xprodeps.svg"
+      SUBMODULE_DEP_FILES: "cmake/README.md cmake/deps.svg"
     steps:
       -
         name: Checkout repository
@@ -225,6 +231,45 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.workflow_write_token || github.token }}
       -
+        name: Snapshot submodule dependency artifacts (pre-configure)
+        id: submodule_deps_pre
+        if: ${{ inputs.create_pr }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          SUBMODULE_PATH="${{ steps.validate.outputs.submodule_path }}"
+          hash_files() {
+            local base="$1"
+            shift
+            local files=("$@")
+            local tmp
+            tmp=$(mktemp)
+            : > "$tmp"
+            for rel in "${files[@]}"; do
+              local p="$base/$rel"
+              if [ ! -f "$p" ]; then
+                printf '%s\n' "$rel:MISSING" >> "$tmp"
+                continue
+              fi
+              if command -v sha256sum >/dev/null 2>&1; then
+                printf '%s\n' "$rel:$(sha256sum "$p" | awk '{print $1}')" >> "$tmp"
+              else
+                printf '%s\n' "$rel:$(shasum -a 256 "$p" | awk '{print $1}')" >> "$tmp"
+              fi
+            done
+            if command -v sha256sum >/dev/null 2>&1; then
+              sha256sum "$tmp" | awk '{print $1}'
+            else
+              shasum -a 256 "$tmp" | awk '{print $1}'
+            fi
+            rm -f "$tmp"
+          }
+          read -r -a DEP_ARR <<< "${SUBMODULE_DEP_FILES}"
+          PRE_HASH=$(hash_files "$SUBMODULE_PATH" "${DEP_ARR[@]}")
+          echo "pre_hash_sha256=$PRE_HASH" >> "$GITHUB_OUTPUT"
+          echo "submodule_dep_files=${SUBMODULE_DEP_FILES}" >> "$GITHUB_OUTPUT"
+          echo "pre-configure submodule combined hash: $PRE_HASH"
+      -
         name: CMake Configure (container)
         id: cmake_configure
         shell: bash
@@ -278,6 +323,10 @@ jobs:
           fi
           echo "--- dependency files after"
           ls -la $DEPENDENCY_FILES 2>/dev/null || true
+          echo "--- submodule dirtiness after configure"
+          git -C "${{ steps.validate.outputs.submodule_path }}" status --porcelain || true
+          echo "--- submodule diff after configure (name-status)"
+          git -C "${{ steps.validate.outputs.submodule_path }}" diff --name-status -- ${SUBMODULE_DEP_FILES} 2>/dev/null || true
           echo "--- repo dirtiness after configure (before staging)"
           git status --porcelain || true
           for file in $DEPENDENCY_FILES; do
@@ -301,13 +350,53 @@ jobs:
       -
         name: Commit dependency artifacts in submodule
         id: commit_submodule_dependencies
-        if: ${{ always() && inputs.create_pr }}
+        if: ${{ inputs.create_pr && steps.cmake_configure.outcome == 'success' }}
         shell: bash
         run: |
           set -euo pipefail
           SUBMODULE_PATH="${{ steps.validate.outputs.submodule_path }}"
           # xpProDeps()-specific case: generated dependency artifacts live in the externpro submodule
-          SUBMODULE_DEP_FILES="cmake/README.md cmake/deps.svg"
+          SUBMODULE_DEP_FILES="${{ steps.submodule_deps_pre.outputs.submodule_dep_files }}"
+          hash_files() {
+            local base="$1"
+            shift
+            local files=("$@")
+            local tmp
+            tmp=$(mktemp)
+            : > "$tmp"
+            for rel in "${files[@]}"; do
+              local p="$base/$rel"
+              if [ ! -f "$p" ]; then
+                printf '%s\n' "$rel:MISSING" >> "$tmp"
+                continue
+              fi
+              if command -v sha256sum >/dev/null 2>&1; then
+                printf '%s\n' "$rel:$(sha256sum "$p" | awk '{print $1}')" >> "$tmp"
+              else
+                printf '%s\n' "$rel:$(shasum -a 256 "$p" | awk '{print $1}')" >> "$tmp"
+              fi
+            done
+            if command -v sha256sum >/dev/null 2>&1; then
+              sha256sum "$tmp" | awk '{print $1}'
+            else
+              shasum -a 256 "$tmp" | awk '{print $1}'
+            fi
+            rm -f "$tmp"
+          }
+          read -r -a DEP_ARR <<< "${SUBMODULE_DEP_FILES}"
+          PRE_HASH="${{ steps.submodule_deps_pre.outputs.pre_hash_sha256 }}"
+          POST_HASH=$(hash_files "$SUBMODULE_PATH" "${DEP_ARR[@]}")
+          if [ "$PRE_HASH" = "$POST_HASH" ]; then
+            echo "No submodule dependency artifact changes produced by configure"
+            echo "submodule_dependency_commit=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "--- submodule dirtiness at commit time"
+          git -C "$SUBMODULE_PATH" status --porcelain || true
+          echo "--- submodule diff at commit time (name-status)"
+          git -C "$SUBMODULE_PATH" diff --name-status -- $SUBMODULE_DEP_FILES 2>/dev/null || true
+          echo "--- submodule README header at commit time"
+          sed -n '1,8p' "$SUBMODULE_PATH/cmake/README.md" 2>/dev/null || true
           echo "--- submodule dependency files before"
           (cd "$SUBMODULE_PATH" && ls -la $SUBMODULE_DEP_FILES 2>/dev/null) || true
           if git -C "$SUBMODULE_PATH" diff --quiet -- $SUBMODULE_DEP_FILES 2>/dev/null && git -C "$SUBMODULE_PATH" diff --cached --quiet -- $SUBMODULE_DEP_FILES 2>/dev/null; then
@@ -324,6 +413,31 @@ jobs:
           git -C "$SUBMODULE_PATH" commit -m "dependency updates" -- $SUBMODULE_DEP_FILES
           echo "submodule_dependency_commit=true" >> "$GITHUB_OUTPUT"
           echo "✓ committed dependency artifacts in submodule"
+          PUSH_TARGET="${{ inputs.submodule_dependency_push_target }}"
+          SUBMODULE_PUSH_TOKEN="${{ secrets.workflow_write_token || github.token }}"
+          if [ -z "${SUBMODULE_PUSH_TOKEN}" ]; then
+            echo "Error: missing token for pushing submodule commit (workflow_write_token/github.token empty)" >&2
+            exit 1
+          fi
+          git -C "$SUBMODULE_PATH" remote set-url origin "https://x-access-token:${SUBMODULE_PUSH_TOKEN}@github.com/externpro/externpro.git"
+          case "$PUSH_TARGET" in
+            main)
+              if [ "${{ inputs.target_ref }}" != "main" ] || [ "${{ steps.update.outputs.target_type }}" != "branch" ]; then
+                echo "Error: submodule_dependency_push_target=main requires inputs.target_ref=main (branch)" >&2
+                exit 1
+              fi
+              echo "Pushing submodule commit to origin/main"
+              git -C "$SUBMODULE_PATH" push origin HEAD:refs/heads/main
+              echo "submodule_dependency_push_ref=main" >> "$GITHUB_OUTPUT"
+              ;;
+            automation|*)
+              SUB_BRANCH="xpupdate-deps-${{ github.run_id }}-${{ github.run_attempt }}"
+              echo "submodule_dependency_branch=$SUB_BRANCH" >> "$GITHUB_OUTPUT"
+              echo "Pushing submodule commit to origin as branch '$SUB_BRANCH'"
+              git -C "$SUBMODULE_PATH" push origin HEAD:refs/heads/"$SUB_BRANCH"
+              echo "submodule_dependency_push_ref=$SUB_BRANCH" >> "$GITHUB_OUTPUT"
+              ;;
+          esac
       -
         name: Get final externpro version/head
         id: final_version
@@ -456,6 +570,9 @@ jobs:
                 [ -n "$f" ] && echo "    - \`$f\`" >> "$BODY_FILE"
               done < <(printf '%s\n' "${{ steps.cmake_configure.outputs.dependency_files }}")
             fi
+          fi
+          if [ "${{ steps.commit_submodule_dependencies.outputs.submodule_dependency_commit }}" = "true" ]; then
+            echo "- Updated externpro submodule dependency artifacts (pushed to \`${{ steps.commit_submodule_dependencies.outputs.submodule_dependency_push_ref }}\`)" >> "$BODY_FILE"
           fi
           if [ "${{ steps.release_intent.outputs.intent_created }}" = "true" ]; then
             echo "- Created \`.github/release-tag.yml\` (tag: \`${{ steps.release_intent.outputs.intent_tag }}\`)" >> "$BODY_FILE"
