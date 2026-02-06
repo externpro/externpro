@@ -123,16 +123,19 @@ extract_preserved_customizations() {
   local template_file="$3"
   echo "Extracting preserved customizations..."
   PRESERVED_REPORT=""
-  # Dynamically extract all with: keys to create exclusion pattern
+  # Extract caller with: keys (preserved customizations)
   WITH_KEYS=$(yq eval '.jobs.*.with | keys | .[]' "$workflow_backup" 2>/dev/null | grep -v null || true)
+  # Also extract template with: keys so new template options don't trip "unexpected diffs"
+  TEMPLATE_WITH_KEYS=$(yq eval '.jobs.*.with | keys | .[]' "$template_file" 2>/dev/null | grep -v null || true)
+  EXCLUSION_WITH_KEYS=$(printf '%s\n%s\n' "${WITH_KEYS}" "${TEMPLATE_WITH_KEYS}" | sort -u | grep -v '^$' || true)
   if [ "$template_name" = "xprelease.yml" ]; then
     WITH_KEYS=$(echo "$WITH_KEYS" | grep -v '^workflow_run_url$' || true)
   fi
-  if [ -n "$WITH_KEYS" ]; then
+  if [ -n "$EXCLUSION_WITH_KEYS" ]; then
     echo "Found with: customization keys:"
     echo "$WITH_KEYS"
     # Create dynamic exclusion pattern for all with: keys
-    DYNAMIC_EXCLUSION_PATTERN="with:|$(echo "$WITH_KEYS" | sed 's/$/:/' | tr '\n' '|')"
+    DYNAMIC_EXCLUSION_PATTERN="with:|$(echo "$EXCLUSION_WITH_KEYS" | sed 's/$/:/' | tr '\n' '|')"
     DYNAMIC_EXCLUSION_PATTERN=$(echo "$DYNAMIC_EXCLUSION_PATTERN" | sed 's/|$//') # Remove trailing |
     echo "Dynamic exclusion pattern: $DYNAMIC_EXCLUSION_PATTERN"
   else
