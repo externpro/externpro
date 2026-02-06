@@ -44,7 +44,7 @@ jobs:
       pull-requests: write
       packages: read
     env:
-      XPRODEPS_FILES: "xprodeps.md xprodeps.svg"
+      DEPENDENCY_FILES: "xprodeps.md xprodeps.svg"
     steps:
       -
         name: Checkout repository
@@ -202,18 +202,6 @@ jobs:
             echo "intent_tag_exists=false" >> "$GITHUB_OUTPUT"
           fi
       -
-        name: Stage submodule update
-        id: stage_submodule
-        if: steps.update.outputs.update_needed == 'true'
-        run: |
-          # Stage submodule changes
-          git add "${{ steps.validate.outputs.submodule_path }}"
-          if git diff --cached --quiet -- "${{ steps.validate.outputs.submodule_path }}"; then
-            echo "✓ No submodule changes staged for ${{ steps.validate.outputs.submodule_path }}"
-          else
-            echo "✓ Staged submodule update for ${{ steps.validate.outputs.submodule_path }}"
-          fi
-      -
         name: Update caller workflows
         id: update_workflows
         if: ${{ always() && inputs.create_pr }}
@@ -261,8 +249,8 @@ jobs:
             echo "Container image not found or not accessible: ${IMAGE}" >&2
             exit 1
           fi
-          echo "--- xprodeps files before"
-          ls -la $XPRODEPS_FILES 2>/dev/null || true
+          echo "--- dependency files before"
+          ls -la $DEPENDENCY_FILES 2>/dev/null || true
           set +e
           docker run --rm \
             --entrypoint bash \
@@ -288,27 +276,79 @@ jobs:
           if [ "${DOCKER_RC}" -ne 0 ]; then
             exit "${DOCKER_RC}"
           fi
-          echo "--- xprodeps files after"
-          ls -la $XPRODEPS_FILES 2>/dev/null || true
+          echo "--- dependency files after"
+          ls -la $DEPENDENCY_FILES 2>/dev/null || true
           echo "--- repo dirtiness after configure (before staging)"
           git status --porcelain || true
-          for file in $XPRODEPS_FILES; do
+          for file in $DEPENDENCY_FILES; do
             if [ -e "$file" ]; then
               git add "$file"
             fi
           done
-          echo "--- repo dirtiness after staging xprodeps"
+          echo "--- repo dirtiness after staging dependency files"
           git status --porcelain || true
           echo "--- staged changes (name-status)"
-          git diff --cached --name-status -- $XPRODEPS_FILES || true
-          XPRODEPS_STAGED_FILES=$(git diff --cached --name-only -- $XPRODEPS_FILES || true)
-          if [ -n "$XPRODEPS_STAGED_FILES" ]; then
-            echo "xprodeps_updated=true" >> "$GITHUB_OUTPUT"
-            echo "xprodeps_files<<EOF" >> "$GITHUB_OUTPUT"
-            echo "$XPRODEPS_STAGED_FILES" >> "$GITHUB_OUTPUT"
+          git diff --cached --name-status -- $DEPENDENCY_FILES || true
+          DEPENDENCY_STAGED_FILES=$(git diff --cached --name-only -- $DEPENDENCY_FILES || true)
+          if [ -n "$DEPENDENCY_STAGED_FILES" ]; then
+            echo "dependency_updated=true" >> "$GITHUB_OUTPUT"
+            echo "dependency_files<<EOF" >> "$GITHUB_OUTPUT"
+            echo "$DEPENDENCY_STAGED_FILES" >> "$GITHUB_OUTPUT"
             echo "EOF" >> "$GITHUB_OUTPUT"
           else
-            echo "xprodeps_updated=false" >> "$GITHUB_OUTPUT"
+            echo "dependency_updated=false" >> "$GITHUB_OUTPUT"
+          fi
+      -
+        name: Commit dependency artifacts in submodule
+        id: commit_submodule_dependencies
+        if: ${{ always() && inputs.create_pr }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          SUBMODULE_PATH="${{ steps.validate.outputs.submodule_path }}"
+          # xpProDeps()-specific case: generated dependency artifacts live in the externpro submodule
+          SUBMODULE_DEP_FILES="cmake/README.md cmake/deps.svg"
+          echo "--- submodule dependency files before"
+          (cd "$SUBMODULE_PATH" && ls -la $SUBMODULE_DEP_FILES 2>/dev/null) || true
+          if git -C "$SUBMODULE_PATH" diff --quiet -- $SUBMODULE_DEP_FILES 2>/dev/null && git -C "$SUBMODULE_PATH" diff --cached --quiet -- $SUBMODULE_DEP_FILES 2>/dev/null; then
+            echo "No submodule dependency artifact changes detected"
+            echo "submodule_dependency_commit=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          git -C "$SUBMODULE_PATH" add -- $SUBMODULE_DEP_FILES || true
+          if git -C "$SUBMODULE_PATH" diff --cached --quiet -- $SUBMODULE_DEP_FILES; then
+            echo "No submodule dependency artifact changes staged"
+            echo "submodule_dependency_commit=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          git -C "$SUBMODULE_PATH" commit -m "dependency updates" -- $SUBMODULE_DEP_FILES
+          echo "submodule_dependency_commit=true" >> "$GITHUB_OUTPUT"
+          echo "✓ committed dependency artifacts in submodule"
+      -
+        name: Get final externpro version/head
+        id: final_version
+        run: |
+          cd "${{ steps.validate.outputs.submodule_path }}"
+          FINAL_HEAD=$(git rev-parse HEAD)
+          VERSION_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "no-tag")
+          DESCRIBE=$(git describe --tags 2>/dev/null || git rev-parse --short HEAD)
+          echo "final_head=$FINAL_HEAD" >> $GITHUB_OUTPUT
+          echo "version_tag=$VERSION_TAG" >> $GITHUB_OUTPUT
+          echo "describe=$DESCRIBE" >> $GITHUB_OUTPUT
+          echo "externpro final head: $FINAL_HEAD"
+          echo "externpro final version: $VERSION_TAG"
+          echo "externpro final describe: $DESCRIBE"
+      -
+        name: Stage submodule pointer update
+        id: stage_submodule
+        if: ${{ always() && inputs.create_pr }}
+        run: |
+          # Stage submodule pointer update after any submodule commits (and/or after switching target ref)
+          git add "${{ steps.validate.outputs.submodule_path }}"
+          if git diff --cached --quiet -- "${{ steps.validate.outputs.submodule_path }}"; then
+            echo "✓ No submodule pointer changes staged for ${{ steps.validate.outputs.submodule_path }}"
+          else
+            echo "✓ Staged submodule pointer update for ${{ steps.validate.outputs.submodule_path }}"
           fi
       -
         name: Determine if PR is needed
@@ -327,7 +367,7 @@ jobs:
         id: branch
         if: inputs.create_pr && steps.pr_needed.outputs.pr_needed == 'true'
         run: |
-          DESCRIBE="${{ steps.version.outputs.describe }}"
+          DESCRIBE="${{ steps.final_version.outputs.describe }}"
           # Clean describe for branch name (remove invalid chars)
           CLEAN_DESCRIBE="$(echo "$DESCRIBE" | sed 's/[^a-zA-Z0-9.-]/-/g')"
           # Include a unique suffix so reruns don't collide on the same describe.
@@ -339,19 +379,19 @@ jobs:
         name: Commit submodule update
         if: steps.update.outputs.update_needed == 'true' && inputs.create_pr && steps.pr_needed.outputs.pr_needed == 'true'
         run: |
-          COMMIT_MSG="externpro ${{ steps.version.outputs.describe }}"
+          COMMIT_MSG="externpro ${{ steps.final_version.outputs.describe }}"
           git commit -m "$COMMIT_MSG" -- "${{ steps.validate.outputs.submodule_path }}"
           echo "Commit created: $COMMIT_MSG"
       -
-        name: Commit xprodeps updates
+        name: Commit dependency updates
         if: inputs.create_pr && steps.pr_needed.outputs.pr_needed == 'true'
         run: |
-          FILES=$(git diff --cached --name-only -- $XPRODEPS_FILES || true)
+          FILES=$(git diff --cached --name-only -- $DEPENDENCY_FILES || true)
           if [ -z "$FILES" ]; then
-            echo "No xprodeps changes staged"
+            echo "No dependency changes staged"
             exit 0
           fi
-          git commit -m "xprodeps updates" -- $FILES
+          git commit -m "dependency updates" -- $FILES
       -
         name: Commit release-tag intent
         if: inputs.create_pr && steps.pr_needed.outputs.pr_needed == 'true' && steps.release_intent.outputs.intent_created == 'true'
@@ -371,7 +411,7 @@ jobs:
         if: inputs.create_pr && steps.pr_needed.outputs.pr_needed == 'true'
         run: |
           if ! git diff --cached --quiet; then
-            COMMIT_MSG="externpro ${{ steps.version.outputs.describe }} workflow updates"
+            COMMIT_MSG="externpro ${{ steps.final_version.outputs.describe }} workflow updates"
             git commit -m "$COMMIT_MSG"
             echo "Commit created: $COMMIT_MSG"
           fi
@@ -387,13 +427,13 @@ jobs:
           BASE_BRANCH="${{ github.event.repository.default_branch }}"
           HEAD_BRANCH="${{ steps.branch.outputs.branch_name }}"
           export HEAD_BRANCH
-          TITLE="externpro ${{ steps.version.outputs.describe }}"
+          TITLE="externpro ${{ steps.final_version.outputs.describe }}"
           BODY_FILE="/tmp/pr-body.md"
           : > "$BODY_FILE"
           echo "## Summary" >> "$BODY_FILE"
           echo >> "$BODY_FILE"
           if [ "${{ steps.update.outputs.update_needed }}" = "true" ]; then
-            echo "Update externpro submodule to \`${{ steps.version.outputs.describe }}\`" >> "$BODY_FILE"
+            echo "Update externpro submodule to \`${{ steps.final_version.outputs.describe }}\`" >> "$BODY_FILE"
           else
             echo "Sync caller workflows from templates" >> "$BODY_FILE"
           fi
@@ -401,17 +441,20 @@ jobs:
           echo "## Changes" >> "$BODY_FILE"
           echo >> "$BODY_FILE"
           if [ "${{ steps.update.outputs.update_needed }}" = "true" ]; then
-            echo "- Updated \`${{ steps.validate.outputs.submodule_path }}\` to externpro \`${{ steps.version.outputs.describe }}\`" >> "$BODY_FILE"
+            echo "- Updated \`${{ steps.validate.outputs.submodule_path }}\` to externpro \`${{ steps.final_version.outputs.describe }}\`" >> "$BODY_FILE"
             echo "- Previous HEAD: \`${{ steps.current_head.outputs.current_head }}\`" >> "$BODY_FILE"
-            echo "- New HEAD: \`${{ steps.update.outputs.latest_head }}\`" >> "$BODY_FILE"
+            echo "- New HEAD: \`${{ steps.final_version.outputs.final_head }}\`" >> "$BODY_FILE"
+            if [ "${{ steps.final_version.outputs.final_head }}" != "${{ steps.update.outputs.latest_head }}" ]; then
+              echo "  - Target ref HEAD: \`${{ steps.update.outputs.latest_head }}\`" >> "$BODY_FILE"
+            fi
           fi
-          if [ "${{ steps.cmake_configure.outputs.xprodeps_updated }}" = "true" ]; then
-            echo "- Updated xprodeps files" >> "$BODY_FILE"
-            if [ -n "${{ steps.cmake_configure.outputs.xprodeps_files }}" ]; then
+          if [ "${{ steps.cmake_configure.outputs.dependency_updated }}" = "true" ]; then
+            echo "- Updated dependency files" >> "$BODY_FILE"
+            if [ -n "${{ steps.cmake_configure.outputs.dependency_files }}" ]; then
               echo "  - Files:" >> "$BODY_FILE"
               while IFS= read -r f; do
                 [ -n "$f" ] && echo "    - \`$f\`" >> "$BODY_FILE"
-              done < <(printf '%s\n' "${{ steps.cmake_configure.outputs.xprodeps_files }}")
+              done < <(printf '%s\n' "${{ steps.cmake_configure.outputs.dependency_files }}")
             fi
           fi
           if [ "${{ steps.release_intent.outputs.intent_created }}" = "true" ]; then
