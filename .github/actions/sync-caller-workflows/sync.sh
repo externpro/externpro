@@ -545,6 +545,14 @@ process_template_file() {
   # Create backup
   cp "$workflow_file" "$workflow_file.backup"
   if [ "$template_name" != "xpbuild.yml" ]; then
+    if [ "$template_name" = "xpupdate.yml" ]; then
+      echo "$template_name is authoritative; syncing from template (preserving caller with: customizations)"
+      extract_preserved_customizations "$template_name" "$workflow_file.backup" "$template_file"
+      cp "$template_file" "$workflow_file"
+      restore_preserved_with_keys "$workflow_file" "$workflow_file.backup"
+      analyze_diff_and_stage "$template_name" "$workflow_file" "$template_file" "$CURRENT_VERSION" "$TEMPLATE_VERSION"
+      return 0
+    fi
     echo "$template_name is authoritative; syncing from template"
     stage_authoritative_copy "$template_name" "$workflow_file" "$template_file"
     return 0
