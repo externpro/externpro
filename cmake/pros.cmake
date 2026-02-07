@@ -38,8 +38,8 @@ set(xp_fecpp REPO github.com/externpro/fecpp TAG v0.9.2
   MANIFEST_SHA256 c177c19ef10be21fd1dd9bda8a20f21cb397dca7ca1e41f6cc7fbaf77d07ad50
   )
 # pre-release: no windows package
-set(xp_ffmpeg REPO github.com/externpro/FFmpeg TAG v4.3.1.3
-  MANIFEST_SHA256 e60806efc9f146109506ee5a0c8e5823d282453af61d384c0cc40d0b5d174dbd
+set(xp_ffmpeg REPO github.com/externpro/FFmpeg TAG xpv4.3.1.4
+  MANIFEST_SHA256 ac239ba1ec1d33f56ddfb7dd819dfa3f77436b5def4ebf593cf9aaa9f647e8d2
   )
 set(xp_ffmpeg REPO github.com/externpro/FFmpeg TAG v2.6.2.3
   MANIFEST_SHA256 9436f3155ee2ff4e637de1fe94c5b0d78cdfe806bdc4dc1d60e5b1986f0b3962
