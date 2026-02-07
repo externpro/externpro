@@ -145,8 +145,8 @@ set(xp_openh264 REPO github.com/externpro/openh264 TAG xpv1.4.0.3
   MANIFEST_SHA256 6864f5d1e04313ffdd9b34099b0c08802e482e298657df53d0a8f0be25998b4e
   )
 # TRICKY: nodexp, openssl versions coordinated
-set(xp_openssl REPO github.com/externpro/openssl TAG v1.1.1l.3
-  MANIFEST_SHA256 074219f553d0b095d73a5be1ae471cf48709cf062bfdcdaa7b3f8376f848fc1e
+set(xp_openssl REPO github.com/externpro/openssl TAG xpv1.1.1l.4
+  MANIFEST_SHA256 7c65fa87cd7692947e31933ac18799ca29b10831fcefc2d31af2d22e9183886a
   )
 set(xp_patch REPO github.com/externpro/patch TAG v2.7.6.5
   MANIFEST_SHA256 5484efbcc8e5f7dc8e11f2d2141b0693141a045f7029b80e0453bbb1479c39b6
