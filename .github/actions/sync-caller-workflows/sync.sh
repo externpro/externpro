@@ -46,9 +46,6 @@ restore_preserved_with_keys() {
   local workflow_file="$1"
   local workflow_backup="$2"
 
-  if [ -z "${WITH_KEYS:-}" ]; then
-    return 0
-  fi
   local jobs
   jobs=$(yq eval '.jobs | keys | .[]' "$workflow_backup" 2>/dev/null | grep -v null || true)
   if [ -z "$jobs" ]; then
@@ -56,14 +53,15 @@ restore_preserved_with_keys() {
   fi
   while IFS= read -r job; do
     [ -z "$job" ] && continue
-    while IFS= read -r key; do
-      [ -z "$key" ] && continue
-      local preserved_json
-      preserved_json=$(yq eval -o=json ".jobs.${job}.with.${key} // null" "$workflow_backup" 2>/dev/null || true)
-      if [ -n "$preserved_json" ] && [ "$preserved_json" != "null" ]; then
-        yq eval ".jobs.${job}.with.${key} = ${preserved_json}" -i "$workflow_file"
-      fi
-    done <<< "$WITH_KEYS"
+    local preserved_with_json
+    preserved_with_json=$(yq eval -o=json ".jobs.${job}.with // {}" "$workflow_backup" 2>/dev/null || true)
+    if [ -z "$preserved_with_json" ] || [ "$preserved_with_json" = "null" ]; then
+      preserved_with_json='{}'
+    fi
+    # Merge caller backup with: into the copied template.
+    # - Template keys remain if caller doesn't specify them.
+    # - Caller values override template values when both exist.
+    yq eval ".jobs.${job}.with = ((.jobs.${job}.with // {}) *+ ${preserved_with_json})" -i "$workflow_file"
   done <<< "$jobs"
 }
 
