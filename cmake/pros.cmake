@@ -141,8 +141,8 @@ set(xp_nodexp REPO github.com/externpro/nodexp TAG v22.19.0.2
 set(xp_nvjpeg2000 REPO github.com/externpro/nvJPEG2000 TAG v0.8.1.4
   MANIFEST_SHA256 12218f85ef658b03f28574df9a733f537e90f0280c44ae1485d62b5e33cb8a5c
   )
-set(xp_openh264 REPO github.com/externpro/openh264 TAG v1.4.0.2
-  MANIFEST_SHA256 cad1529fe3f5e61510a7b6dbbddf7f8f77eca9af5170fc2abad33d53e95c3c90
+set(xp_openh264 REPO github.com/externpro/openh264 TAG xpv1.4.0.3
+  MANIFEST_SHA256 6864f5d1e04313ffdd9b34099b0c08802e482e298657df53d0a8f0be25998b4e
   )
 # TRICKY: nodexp, openssl versions coordinated
 set(xp_openssl REPO github.com/externpro/openssl TAG v1.1.1l.3
