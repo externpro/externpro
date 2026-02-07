@@ -9,6 +9,6 @@ jobs:
   update:
     uses: externpro/externpro/.github/workflows/update-externpro.yml@main
     with:
-      submodule_dependency_push_target: automation
+      submodule_dependency_push_target: main
     secrets:
       workflow_write_token: ${{ secrets.XPUPDATE_TOKEN }}
