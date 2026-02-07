@@ -53,15 +53,32 @@ restore_preserved_with_keys() {
   fi
   while IFS= read -r job; do
     [ -z "$job" ] && continue
+    local current_with_json
+    current_with_json=$(yq eval -o=json ".jobs.${job}.with // {}" "$workflow_file" 2>/dev/null || true)
+    if [ -z "$current_with_json" ] || [ "$current_with_json" = "null" ]; then
+      current_with_json='{}'
+    fi
     local preserved_with_json
     preserved_with_json=$(yq eval -o=json ".jobs.${job}.with // {}" "$workflow_backup" 2>/dev/null || true)
     if [ -z "$preserved_with_json" ] || [ "$preserved_with_json" = "null" ]; then
       preserved_with_json='{}'
     fi
+    if [ "$current_with_json" = "{}" ] && [ "$preserved_with_json" = "{}" ]; then
+      continue
+    fi
     # Merge caller backup with: into the copied template.
     # - Template keys remain if caller doesn't specify them.
     # - Caller values override template values when both exist.
     yq eval ".jobs.${job}.with = ((.jobs.${job}.with // {}) *+ ${preserved_with_json})" -i "$workflow_file"
+    yq eval ".jobs.${job}.with = (.jobs.${job}.with | sort_keys(.))" -i "$workflow_file" 2>/dev/null || true
+    local merged_with_json
+    merged_with_json=$(yq eval -o=json ".jobs.${job}.with // {}" "$workflow_file" 2>/dev/null || true)
+    if [ -z "$merged_with_json" ] || [ "$merged_with_json" = "null" ]; then
+      merged_with_json='{}'
+    fi
+    if [ "$merged_with_json" = "{}" ]; then
+      yq eval "del(.jobs.${job}.with)" -i "$workflow_file" 2>/dev/null || true
+    fi
   done <<< "$jobs"
 }
 
