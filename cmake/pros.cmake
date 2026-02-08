@@ -98,8 +98,8 @@ set(xp_libspatialite REPO github.com/externpro/libspatialite TAG v5.1.0.7
 set(xp_libssh2 REPO github.com/externpro/libssh2 TAG v1.9.0.3
   MANIFEST_SHA256 44231b54b1b271766cc4c27ae5c0e925042fdd7ea9814da00681e3ae127a7c5e
   )
-set(xp_libstrophe REPO github.com/externpro/libstrophe TAG v0.9.1.4
-  MANIFEST_SHA256 dd90d3340f7cc1af5abcbaf5973ce0e3f841ee131bd894aa03d56eb33a16390b
+set(xp_libstrophe REPO github.com/externpro/libstrophe TAG xpv0.9.1.5
+  MANIFEST_SHA256 c2c92a6e94deb2b72a1a9b653543fbd552c85eb3a4ca3c6c076157adb26bb49d
   )
 set(xp_libzmq REPO github.com/externpro/libzmq TAG v4.3.4.3
   MANIFEST_SHA256 3d928aff851cf38d0fcea8a138f7c2c592d6b3e738fd637d63a0e21ce7ea1fab
