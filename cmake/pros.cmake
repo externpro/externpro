@@ -28,8 +28,8 @@ set(xp_clang-format REPO github.com/externpro/clang-format TAG v19.1.5.2
 set(xp_cppzmq REPO github.com/externpro/cppzmq TAG v4.7.1.2
   MANIFEST_SHA256 3c4a5d3793906fd121562e7ce063f1977e90b8df079ae80749914f989c9be51b
   )
-set(xp_curl REPO github.com/externpro/curl TAG v7.80.0.2
-  MANIFEST_SHA256 97b813cc7a7c3a403bccb5f33225f5940f26f64e97147098f19e27efedbcd5a5
+set(xp_curl REPO github.com/externpro/curl TAG xpv7.80.0.3
+  MANIFEST_SHA256 b568656b6e1d22d56d57bcbe6c12fa5d5901dde671923c38af3b133406c06856
   )
 set(xp_eigen REPO github.com/externpro/eigen TAG v3.4.0.2
   MANIFEST_SHA256 e65fe3caf08c90d9e176c665c81c7ba548a8492a785e65c3468591e99faa5ccb
