@@ -172,8 +172,8 @@ set(xp_spdlog REPO github.com/externpro/spdlog TAG xpv1.15.3.4
 set(xp_sqlite3 REPO github.com/externpro/SQLite3 TAG v3.38.2.2
   MANIFEST_SHA256 7abab418a6f5b3c6bf482ff7806fa07d7fde7106e1f3479cbd611748bb8cd54d
   )
-set(xp_wirehair REPO github.com/externpro/wirehair TAG v23.12.02.2
-  MANIFEST_SHA256 4cc016a80ca1713056021e338f147cb1efa96458d4f1172d724af877afdabe0d
+set(xp_wirehair REPO github.com/externpro/wirehair TAG xpv23.12.02.3
+  MANIFEST_SHA256 8d0617549ee6e5d07df73d2336d78e46ee34ddc0d3f6660fdfccfee3b5238266
   )
 set(xp_wxwidgets REPO github.com/externpro/wxWidgets TAG v3.1.0.5
   MANIFEST_SHA256 b8ccadd45baafe5af3342e03dff0331440d58b5c6d8df19559fad736ba736deb
