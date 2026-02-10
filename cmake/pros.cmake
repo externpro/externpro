@@ -34,8 +34,8 @@ set(xp_curl REPO github.com/externpro/curl TAG xpv7.80.0.4
 set(xp_eigen REPO github.com/externpro/eigen TAG xpv3.4.0.3
   MANIFEST_SHA256 63af710c14984eab4e99ab7909e9d130735a6e5635316e6b900a1206ab179a32
   )
-set(xp_fecpp REPO github.com/externpro/fecpp TAG v0.9.2
-  MANIFEST_SHA256 c177c19ef10be21fd1dd9bda8a20f21cb397dca7ca1e41f6cc7fbaf77d07ad50
+set(xp_fecpp REPO github.com/externpro/fecpp TAG xpv0.9.3
+  MANIFEST_SHA256 4745ae069ba2cd06db6f1dee80052e21bb297b40ab03ca4f3505c50b17ac53a5
   )
 # pre-release: no windows package
 set(xp_ffmpeg REPO github.com/externpro/FFmpeg TAG xpv4.3.1.4
