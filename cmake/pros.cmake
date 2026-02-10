@@ -107,8 +107,8 @@ set(xp_libzmq REPO github.com/externpro/libzmq TAG xpv4.3.4.4
 set(xp_lua REPO github.com/externpro/lua TAG xpv5.2.3.3
   MANIFEST_SHA256 5fccade658a5ae70b229958fa925b3f0000ed437bd66fcef2797a8f697a27339
   )
-set(xp_luabridge REPO github.com/externpro/LuaBridge TAG v2.10.4
-  MANIFEST_SHA256 1cebecf30afb58c5f4b764fd640638df52a6e11e83f27ae5e3a46ea970296681
+set(xp_luabridge REPO github.com/externpro/LuaBridge TAG xpv2.10.5
+  MANIFEST_SHA256 f4b9bf6b22217d9ab07d121a55b7709e146ccfcbeef421e66112b93c40868195
   )
 set(xp_nasm REPO github.com/externpro/nasm TAG xpv2.14.02.4
   MANIFEST_SHA256 656b4637c1d6e5293cd3302ad05d26c58f081cb6dfab81c3e55a24c39e706c17
