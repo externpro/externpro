@@ -7,8 +7,8 @@ set(xp_apr REPO github.com/externpro/apr TAG xpv1.7.6.3
 set(xp_argon2 REPO github.com/externpro/argon2 TAG v20210625.2
   MANIFEST_SHA256 5a08456a903972f6f22469ccfa5b4bd03adf7b59c166d549884b59eb18022e78
   )
-set(xp_azmq REPO github.com/externpro/azmq TAG v1.0.3.2
-  MANIFEST_SHA256 64c7699cc04af1e663be4f4d80a2a892c023f4aa1a4a92b96c512201fd002a06
+set(xp_azmq REPO github.com/externpro/azmq TAG xpv1.0.3.3
+  MANIFEST_SHA256 7a9f08e987641d6f0763144634c1b2bb031fc3381a2b31bf89cb1d0457628c23
   )
 set(xp_boost REPO github.com/externpro/boost TAG xpv1.76.0.5
   MANIFEST_SHA256 a55d61f2b2e18269f21ee534b8029cae7956cf4824803f232ef33f7a1080f99d
