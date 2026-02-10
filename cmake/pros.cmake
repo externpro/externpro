@@ -184,8 +184,8 @@ set(xp_wxinclude REPO github.com/externpro/wxInclude TAG xpv1.2.3
 set(xp_wxtetris REPO github.com/smanders/wxTetris TAG v1.3.0
   MANIFEST_SHA256 7223c92eba8722709ef70a6c88c0755540216b55301b630f1e434a1c2c92b97c
   )
-set(xp_wxx REPO github.com/externpro/wxx TAG v26.01
-  MANIFEST_SHA256 6fe2736f1cdddf1f1b2df85e1e42ae2bad27c7e551ed083b54ca5ff54ffe4579
+set(xp_wxx REPO github.com/externpro/wxx TAG xpv26.02
+  MANIFEST_SHA256 3294ca1b2560a8bfed34b0f321c33bcaac69124470ac64fb86bf0e82f707fff4
   )
 set(xp_yasm REPO github.com/externpro/yasm TAG xpv1.3.0.3
   MANIFEST_SHA256 e8b3d3b3f43c06c2ae74670594cd734a4b1ddb23d8b11dbd46eb33efde757959
