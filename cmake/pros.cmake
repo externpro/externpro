@@ -92,8 +92,8 @@ set(xp_librttopo REPO github.com/externpro/librttopo TAG v1.1.0.4
 set(xp_libsodium REPO github.com/externpro/libsodium TAG xpv1.0.18.233
   MANIFEST_SHA256 2eb86281465a119a9f499c1268b09a21473de343a21079335b03cda0613dfa46
   )
-set(xp_libspatialite REPO github.com/externpro/libspatialite TAG v5.1.0.7
-  MANIFEST_SHA256 b7b940c861d45a71451ff6551c3fb32085d5d9e38c1ec6780cf640380858088e
+set(xp_libspatialite REPO github.com/externpro/libspatialite TAG xpv5.1.0.8
+  MANIFEST_SHA256 fb1bdb4435c003ec0ae803b8953804485da9dc9798b133bebbababf91b948a90
   )
 set(xp_libssh2 REPO github.com/externpro/libssh2 TAG xpv1.9.0.4
   MANIFEST_SHA256 8c0c0415505276d50e6db6e65a2514d9641d64b093aea5a7d7a416fe5e643a9c
