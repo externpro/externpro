@@ -62,8 +62,8 @@ set(xp_glew REPO github.com/externpro/glew TAG v1.13.0.2
 set(xp_googletest REPO github.com/externpro/googletest TAG v1.16.0.2
   MANIFEST_SHA256 3442fd80e8cb8bb0cdd300ef312d3c4a79b8d067e614f4a66ea7d511e6da96df
   )
-set(xp_hdf5 REPO github.com/externpro/hdf5 TAG v1.14.6.6
-  MANIFEST_SHA256 8b32eb66af6242edce23bafe3e4f283b93434e6434d4a4a9a1144ccfa7dda28c
+set(xp_hdf5 REPO github.com/externpro/hdf5 TAG xpv1.14.6.7
+  MANIFEST_SHA256 5ded50bbc5b3117f05d4e156638590a1b494d732e70563021497e4e459fc1ba0
   )
 set(xp_jasper REPO github.com/externpro/jasper TAG v1.900.1.2
   MANIFEST_SHA256 c7b8b024035b08e3f4b4fe297f6d2f80d191c5986709faf94b7087252496a290
