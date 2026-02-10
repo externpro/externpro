@@ -80,8 +80,8 @@ set(xp_libexpat REPO github.com/externpro/libexpat TAG xpv2.2.5.3
 set(xp_libgeotiff REPO github.com/externpro/libgeotiff TAG v1.2.4.3
   MANIFEST_SHA256 307ffe3d1f98e9c8f04bfaf2361733993ab1f5d9a33b53211578da79ba641c17
   )
-set(xp_libgit2 REPO github.com/externpro/libgit2 TAG v1.3.0.2
-  MANIFEST_SHA256 2b34804488d10631ceb8d6dabaa181e843e697f9e1e35a983787451d64062e20
+set(xp_libgit2 REPO github.com/externpro/libgit2 TAG xpv1.3.0.3
+  MANIFEST_SHA256 bc5e2ceecd29540dbdf492744e1df4c87c2d40d7a2c3cd5be85147dc213b5995
   )
 set(xp_libiconv REPO github.com/externpro/libiconv TAG v1.18.7
   MANIFEST_SHA256 aa52d10023ad64f4afb691aa7a518cb6dff4d88fadcb8bea77e3eb8e822f5012
