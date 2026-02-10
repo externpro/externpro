@@ -151,8 +151,8 @@ set(xp_openssl REPO github.com/externpro/openssl TAG xpv1.1.1l.4
 set(xp_patch REPO github.com/externpro/patch TAG v2.7.6.5
   MANIFEST_SHA256 5484efbcc8e5f7dc8e11f2d2141b0693141a045f7029b80e0453bbb1479c39b6
   )
-set(xp_protobuf REPO github.com/externpro/protobuf TAG v3.14.0.2
-  MANIFEST_SHA256 28fca57139e1367e2823560211846d28f0f487e43fb0abfe60710c29a7f26854
+set(xp_protobuf REPO github.com/externpro/protobuf TAG xpv3.14.0.5
+  MANIFEST_SHA256 bf04752cad38209ea758399b08de9d91f5c180c85ed3505fbbf2655365c30c94
   )
 set(xp_rapidjson REPO github.com/externpro/rapidjson TAG v1.1.0-763.2
   MANIFEST_SHA256 3ba7cb2d9d83c73c4bf2edf40dd78a34ab52cb4cb6b2bf3c42690fe4f512337c
