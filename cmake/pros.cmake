@@ -77,8 +77,8 @@ set(xp_jxrlib REPO github.com/externpro/jxrlib TAG v2019.10.9.2
 set(xp_libexpat REPO github.com/externpro/libexpat TAG xpv2.2.5.3
   MANIFEST_SHA256 8aaed012e038c0e800a580f647b1ca9605950f912ce2518d8bff97bb2559c26a
   )
-set(xp_libgeotiff REPO github.com/externpro/libgeotiff TAG v1.2.4.3
-  MANIFEST_SHA256 307ffe3d1f98e9c8f04bfaf2361733993ab1f5d9a33b53211578da79ba641c17
+set(xp_libgeotiff REPO github.com/externpro/libgeotiff TAG xpv1.2.4.4
+  MANIFEST_SHA256 3caaee2286b16f981ace33a8dac62438a4bc64d4ebe616a0dd3bf6546c7dbf7b
   )
 set(xp_libgit2 REPO github.com/externpro/libgit2 TAG xpv1.3.0.3
   MANIFEST_SHA256 bc5e2ceecd29540dbdf492744e1df4c87c2d40d7a2c3cd5be85147dc213b5995
