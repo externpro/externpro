@@ -86,8 +86,8 @@ set(xp_libgit2 REPO github.com/externpro/libgit2 TAG xpv1.3.0.3
 set(xp_libiconv REPO github.com/externpro/libiconv TAG xpv1.18.8
   MANIFEST_SHA256 c2a0736df8be511da5c4ac507e8fa2acf1d01cba7b5cb3074b94f7cfaeeb5cf0
   )
-set(xp_librttopo REPO github.com/externpro/librttopo TAG v1.1.0.4
-  MANIFEST_SHA256 aa863a204754bf3a1d0fda77085df4864f3d5598fea681e74ea6e754ca6f8943
+set(xp_librttopo REPO github.com/externpro/librttopo TAG xpv1.1.0.5
+  MANIFEST_SHA256 62b7b806bcc513f434672235970543b1d2463fd5111c9492fb2102c110013718
   )
 set(xp_libsodium REPO github.com/externpro/libsodium TAG xpv1.0.18.233
   MANIFEST_SHA256 2eb86281465a119a9f499c1268b09a21473de343a21079335b03cda0613dfa46
