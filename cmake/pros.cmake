@@ -31,8 +31,8 @@ set(xp_cppzmq REPO github.com/externpro/cppzmq TAG v4.7.1.2
 set(xp_curl REPO github.com/externpro/curl TAG xpv7.80.0.3
   MANIFEST_SHA256 b568656b6e1d22d56d57bcbe6c12fa5d5901dde671923c38af3b133406c06856
   )
-set(xp_eigen REPO github.com/externpro/eigen TAG v3.4.0.2
-  MANIFEST_SHA256 e65fe3caf08c90d9e176c665c81c7ba548a8492a785e65c3468591e99faa5ccb
+set(xp_eigen REPO github.com/externpro/eigen TAG xpv3.4.0.3
+  MANIFEST_SHA256 63af710c14984eab4e99ab7909e9d130735a6e5635316e6b900a1206ab179a32
   )
 set(xp_fecpp REPO github.com/externpro/fecpp TAG v0.9.2
   MANIFEST_SHA256 c177c19ef10be21fd1dd9bda8a20f21cb397dca7ca1e41f6cc7fbaf77d07ad50
