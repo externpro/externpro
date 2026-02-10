@@ -1386,20 +1386,23 @@ function(xpCopyFilesToSrc readme graph)
     execute_process(COMMAND ${CMAKE_COMMAND} -E copy_if_different ${xpdepsFile} ${readme})
     execute_process(COMMAND ${CMAKE_COMMAND} -E copy_if_different ${xpdepsGraph} ${graph})
   elseif(isRdmeDiff OR isGraphDiff)
-    message(STATUS "NOTE: files in binary and source directory differ, "
-      "but should be copied from binary to source directory in ${build_container} "
-      "build container, where graphviz is installed and version controlled. "
-      "(graphviz version is recorded in .svg file and different versions generate other diffs too)."
-      )
-    if(isRdmeDiff)
-      cmake_path(RELATIVE_PATH xpdepsFile BASE_DIRECTORY ${CMAKE_SOURCE_DIR} OUTPUT_VARIABLE relXpdepsFile)
-      cmake_path(RELATIVE_PATH readme BASE_DIRECTORY ${CMAKE_SOURCE_DIR} OUTPUT_VARIABLE relSrcRdme)
-      message(STATUS "  * ${relXpdepsFile} -> ${relSrcRdme}")
-    endif()
-    if(isGraphDiff)
-      cmake_path(RELATIVE_PATH xpdepsGraph BASE_DIRECTORY ${CMAKE_SOURCE_DIR} OUTPUT_VARIABLE relXpdepsGraph)
-      cmake_path(RELATIVE_PATH graph BASE_DIRECTORY ${CMAKE_SOURCE_DIR} OUTPUT_VARIABLE relSrcGraph)
-      message(STATUS "  * ${relXpdepsGraph} -> ${relSrcGraph}")
+    option(XP_COPY_FILES_TO_SRC_NOTE "Emit NOTE when README.md/deps.svg differ but can only be copied to source in the build container" ON)
+    if(XP_COPY_FILES_TO_SRC_NOTE)
+      message(STATUS "NOTE: files in binary and source directory differ, "
+        "but should be copied from binary to source directory in ${build_container} "
+        "build container, where graphviz is installed and version controlled. "
+        "(graphviz version is recorded in .svg file and different versions generate other diffs too)."
+        )
+      if(isRdmeDiff)
+        cmake_path(RELATIVE_PATH xpdepsFile BASE_DIRECTORY ${CMAKE_SOURCE_DIR} OUTPUT_VARIABLE relXpdepsFile)
+        cmake_path(RELATIVE_PATH readme BASE_DIRECTORY ${CMAKE_SOURCE_DIR} OUTPUT_VARIABLE relSrcRdme)
+        message(STATUS "  * ${relXpdepsFile} -> ${relSrcRdme}")
+      endif()
+      if(isGraphDiff)
+        cmake_path(RELATIVE_PATH xpdepsGraph BASE_DIRECTORY ${CMAKE_SOURCE_DIR} OUTPUT_VARIABLE relXpdepsGraph)
+        cmake_path(RELATIVE_PATH graph BASE_DIRECTORY ${CMAKE_SOURCE_DIR} OUTPUT_VARIABLE relSrcGraph)
+        message(STATUS "  * ${relXpdepsGraph} -> ${relSrcGraph}")
+      endif()
     endif()
   endif()
 endfunction()
