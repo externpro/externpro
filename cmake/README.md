@@ -69,60 +69,60 @@ this README.md and the [deps.svg](deps.svg) files are generated
 ![deps](deps.svg 'dependencies')
 
 Dependency version mismatches (pinned vs parent manifest):
-- azmq -> boost
-  pinned:   TAG=xpv1.76.0.5  SHA=a55d61f2  REPO=github.com/externpro/boost
-  manifest: TAG=v1.76.0.4  SHA=9d6e0958  REPO=github.com/externpro/boost
-- azmq -> libzmq
-  pinned:   TAG=xpv4.3.4.4  SHA=580d6af0  REPO=github.com/externpro/libzmq
-  manifest: TAG=v4.3.4.3  SHA=3d928aff  REPO=github.com/externpro/libzmq
-- cppzmq -> libzmq
-  pinned:   TAG=xpv4.3.4.4  SHA=580d6af0  REPO=github.com/externpro/libzmq
-  manifest: TAG=v4.3.4.3  SHA=3d928aff  REPO=github.com/externpro/libzmq
-- curl -> c-ares
-  pinned:   TAG=xpv1.18.1.3  SHA=17ad0a47  REPO=github.com/externpro/c-ares
-  manifest: TAG=v1.18.1.2  SHA=81430973  REPO=github.com/externpro/c-ares
-- curl -> libssh2
-  pinned:   TAG=xpv1.9.0.4  SHA=8c0c0415  REPO=github.com/externpro/libssh2
-  manifest: TAG=v1.9.0.3  SHA=44231b54  REPO=github.com/externpro/libssh2
-- fecpp -> boost
-  pinned:   TAG=xpv1.76.0.5  SHA=a55d61f2  REPO=github.com/externpro/boost
-  manifest: TAG=v1.76.0.4  SHA=9d6e0958  REPO=github.com/externpro/boost
-- libgeotiff -> wxwidgets
-  pinned:   TAG=xpv3.1.0.6  SHA=029276ba  REPO=github.com/externpro/wxWidgets
-  manifest: TAG=v3.1.0.5  SHA=b8ccadd4  REPO=github.com/externpro/wxWidgets
-- librttopo -> geos
-  pinned:   TAG=xpv3.13.0.6  SHA=2860cdf7  REPO=github.com/externpro/geos
-  manifest: TAG=v3.13.0.5  SHA=d12a0ac3  REPO=github.com/externpro/geos
-- libspatialite -> geos
-  pinned:   TAG=xpv3.13.0.6  SHA=2860cdf7  REPO=github.com/externpro/geos
-  manifest: TAG=v3.13.0.5  SHA=d12a0ac3  REPO=github.com/externpro/geos
-- libspatialite -> libiconv
-  pinned:   TAG=xpv1.18.8  SHA=c2a0736d  REPO=github.com/externpro/libiconv
-  manifest: TAG=v1.18.7  SHA=aa52d100  REPO=github.com/externpro/libiconv
-- libspatialite -> sqlite3
-  pinned:   TAG=xpv3.38.2.3  SHA=a4185746  REPO=github.com/externpro/SQLite3
-  manifest: TAG=v3.38.2.2  SHA=7abab418  REPO=github.com/externpro/SQLite3
-- libspatialite -> zlib
-  pinned:   TAG=xpv1.3.1.4  SHA=dea8d8a2  REPO=github.com/externpro/zlib
-  manifest: TAG=v1.3.1.3  SHA=89521545  REPO=github.com/externpro/zlib
-- luabridge -> lua
-  pinned:   TAG=xpv5.2.3.3  SHA=5fccade6  REPO=github.com/externpro/lua
-  manifest: TAG=v5.2.3.2  SHA=0841d990  REPO=github.com/externpro/lua
-- protobuf -> zlib
-  pinned:   TAG=xpv1.3.1.4  SHA=dea8d8a2  REPO=github.com/externpro/zlib
-  manifest: TAG=v1.3.1.3  SHA=89521545  REPO=github.com/externpro/zlib
-- wxinclude -> boost
-  pinned:   TAG=xpv1.76.0.5  SHA=a55d61f2  REPO=github.com/externpro/boost
-  manifest: TAG=v1.76.0.4  SHA=9d6e0958  REPO=github.com/externpro/boost
-- wxtetris -> wxwidgets
-  pinned:   TAG=xpv3.1.0.6  SHA=029276ba  REPO=github.com/externpro/wxWidgets
-  manifest: TAG=v3.1.0.5  SHA=b8ccadd4  REPO=github.com/externpro/wxWidgets
-- wxx -> wxwidgets
-  pinned:   TAG=xpv3.1.0.6  SHA=029276ba  REPO=github.com/externpro/wxWidgets
-  manifest: TAG=v3.1.0.5  SHA=b8ccadd4  REPO=github.com/externpro/wxWidgets
-- zmqpp -> libzmq
-  pinned:   TAG=xpv4.3.4.4  SHA=580d6af0  REPO=github.com/externpro/libzmq
-  manifest: TAG=v4.3.4.3  SHA=3d928aff  REPO=github.com/externpro/libzmq
+- azmq -> boost<br>
+  pinned:   TAG=xpv1.76.0.5  SHA=a55d61f2  REPO=github.com/externpro/boost<br>
+  manifest: TAG=v1.76.0.4  SHA=9d6e0958  REPO=github.com/externpro/boost<br>
+- azmq -> libzmq<br>
+  pinned:   TAG=xpv4.3.4.4  SHA=580d6af0  REPO=github.com/externpro/libzmq<br>
+  manifest: TAG=v4.3.4.3  SHA=3d928aff  REPO=github.com/externpro/libzmq<br>
+- cppzmq -> libzmq<br>
+  pinned:   TAG=xpv4.3.4.4  SHA=580d6af0  REPO=github.com/externpro/libzmq<br>
+  manifest: TAG=v4.3.4.3  SHA=3d928aff  REPO=github.com/externpro/libzmq<br>
+- curl -> c-ares<br>
+  pinned:   TAG=xpv1.18.1.3  SHA=17ad0a47  REPO=github.com/externpro/c-ares<br>
+  manifest: TAG=v1.18.1.2  SHA=81430973  REPO=github.com/externpro/c-ares<br>
+- curl -> libssh2<br>
+  pinned:   TAG=xpv1.9.0.4  SHA=8c0c0415  REPO=github.com/externpro/libssh2<br>
+  manifest: TAG=v1.9.0.3  SHA=44231b54  REPO=github.com/externpro/libssh2<br>
+- fecpp -> boost<br>
+  pinned:   TAG=xpv1.76.0.5  SHA=a55d61f2  REPO=github.com/externpro/boost<br>
+  manifest: TAG=v1.76.0.4  SHA=9d6e0958  REPO=github.com/externpro/boost<br>
+- libgeotiff -> wxwidgets<br>
+  pinned:   TAG=xpv3.1.0.6  SHA=029276ba  REPO=github.com/externpro/wxWidgets<br>
+  manifest: TAG=v3.1.0.5  SHA=b8ccadd4  REPO=github.com/externpro/wxWidgets<br>
+- librttopo -> geos<br>
+  pinned:   TAG=xpv3.13.0.6  SHA=2860cdf7  REPO=github.com/externpro/geos<br>
+  manifest: TAG=v3.13.0.5  SHA=d12a0ac3  REPO=github.com/externpro/geos<br>
+- libspatialite -> geos<br>
+  pinned:   TAG=xpv3.13.0.6  SHA=2860cdf7  REPO=github.com/externpro/geos<br>
+  manifest: TAG=v3.13.0.5  SHA=d12a0ac3  REPO=github.com/externpro/geos<br>
+- libspatialite -> libiconv<br>
+  pinned:   TAG=xpv1.18.8  SHA=c2a0736d  REPO=github.com/externpro/libiconv<br>
+  manifest: TAG=v1.18.7  SHA=aa52d100  REPO=github.com/externpro/libiconv<br>
+- libspatialite -> sqlite3<br>
+  pinned:   TAG=xpv3.38.2.3  SHA=a4185746  REPO=github.com/externpro/SQLite3<br>
+  manifest: TAG=v3.38.2.2  SHA=7abab418  REPO=github.com/externpro/SQLite3<br>
+- libspatialite -> zlib<br>
+  pinned:   TAG=xpv1.3.1.4  SHA=dea8d8a2  REPO=github.com/externpro/zlib<br>
+  manifest: TAG=v1.3.1.3  SHA=89521545  REPO=github.com/externpro/zlib<br>
+- luabridge -> lua<br>
+  pinned:   TAG=xpv5.2.3.3  SHA=5fccade6  REPO=github.com/externpro/lua<br>
+  manifest: TAG=v5.2.3.2  SHA=0841d990  REPO=github.com/externpro/lua<br>
+- protobuf -> zlib<br>
+  pinned:   TAG=xpv1.3.1.4  SHA=dea8d8a2  REPO=github.com/externpro/zlib<br>
+  manifest: TAG=v1.3.1.3  SHA=89521545  REPO=github.com/externpro/zlib<br>
+- wxinclude -> boost<br>
+  pinned:   TAG=xpv1.76.0.5  SHA=a55d61f2  REPO=github.com/externpro/boost<br>
+  manifest: TAG=v1.76.0.4  SHA=9d6e0958  REPO=github.com/externpro/boost<br>
+- wxtetris -> wxwidgets<br>
+  pinned:   TAG=xpv3.1.0.6  SHA=029276ba  REPO=github.com/externpro/wxWidgets<br>
+  manifest: TAG=v3.1.0.5  SHA=b8ccadd4  REPO=github.com/externpro/wxWidgets<br>
+- wxx -> wxwidgets<br>
+  pinned:   TAG=xpv3.1.0.6  SHA=029276ba  REPO=github.com/externpro/wxWidgets<br>
+  manifest: TAG=v3.1.0.5  SHA=b8ccadd4  REPO=github.com/externpro/wxWidgets<br>
+- zmqpp -> libzmq<br>
+  pinned:   TAG=xpv4.3.4.4  SHA=580d6af0  REPO=github.com/externpro/libzmq<br>
+  manifest: TAG=v4.3.4.3  SHA=3d928aff  REPO=github.com/externpro/libzmq<br>
 
 
 |diff  |description|
