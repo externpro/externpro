@@ -59,7 +59,7 @@ jobs:
           fetch-depth: 0   # fetches all history
           fetch-tags: true # explicitly fetches tags
           submodules: true
-          token: ${{ secrets.workflow_write_token || github.token }}
+          token: ${{ github.token }}
       -
         name: Validate externpro submodule
         id: validate
@@ -526,6 +526,11 @@ jobs:
         name: Commit and push workflow updates
         if: inputs.create_pr && steps.pr_needed.outputs.pr_needed == 'true'
         run: |
+          TOKEN="${{ secrets.workflow_write_token }}"
+          if [ -z "${TOKEN}" ]; then
+            TOKEN="${{ github.token }}"
+          fi
+          git remote set-url origin "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
           if ! git diff --cached --quiet; then
             COMMIT_MSG="externpro ${{ steps.final_version.outputs.describe }} workflow updates"
             git commit -m "$COMMIT_MSG"
@@ -535,11 +540,14 @@ jobs:
       -
         name: Create Pull Request
         if: inputs.create_pr && steps.pr_needed.outputs.pr_needed == 'true'
-        env:
-          GH_TOKEN: ${{ secrets.workflow_write_token || github.token }}
-          WORKFLOW_REPORT: ${{ steps.update_workflows.outputs.workflow_report }}
         run: |
           set -euo pipefail
+          GH_TOKEN="${{ secrets.workflow_write_token }}"
+          if [ -z "${GH_TOKEN}" ]; then
+            GH_TOKEN="${{ github.token }}"
+          fi
+          export GH_TOKEN
+          WORKFLOW_REPORT="${{ steps.update_workflows.outputs.workflow_report }}"
           gh_retry() {
             local max_attempts=6
             local attempt=1
