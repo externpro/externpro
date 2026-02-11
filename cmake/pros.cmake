@@ -135,8 +135,8 @@ set(xp_nodeng REPO github.com/externpro/nodeng TAG v24.13.0.1
   MANIFEST_SHA256 56951d397ed17096618efa3fc3a0916663f388a1a47e9a1dc7ac9d1373ff761d
   )
 # TRICKY: nodexp, openssl versions coordinated
-set(xp_nodexp REPO github.com/externpro/nodexp TAG v22.19.0.2
-  MANIFEST_SHA256 e6cacde21135da5d876cb794b67a41f4cafdf6539b6a6f509f9ac20ccb4f3e5d
+set(xp_nodexp REPO github.com/externpro/nodexp TAG xpv22.19.0.3
+  MANIFEST_SHA256 06eb63c6fe8d156ae5c0cb1ca53143e432c1b59b888139d16f28c3cd2711d0ef
   )
 set(xp_nvjpeg2000 REPO github.com/externpro/nvJPEG2000 TAG v0.8.1.4
   MANIFEST_SHA256 12218f85ef658b03f28574df9a733f537e90f0280c44ae1485d62b5e33cb8a5c
