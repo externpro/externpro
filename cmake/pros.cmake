@@ -113,8 +113,8 @@ set(xp_luabridge REPO github.com/externpro/LuaBridge TAG xpv2.10.5
 set(xp_nasm REPO github.com/externpro/nasm TAG xpv2.14.02.4
   MANIFEST_SHA256 656b4637c1d6e5293cd3302ad05d26c58f081cb6dfab81c3e55a24c39e706c17
   )
-set(xp_nlohmann_json REPO github.com/externpro/nlohmann_json TAG v3.12.0.2
-  MANIFEST_SHA256 83447ac24840cb6b0f0ad12a6fcd7069bfddf0d72baeadf785797275146f8879
+set(xp_nlohmann_json REPO github.com/externpro/nlohmann_json TAG xpv3.12.0.3
+  MANIFEST_SHA256 abf8bb84da606090a69e62c93aee1ffa89ff466ecbdaa8bf2346e9291ee59228
   )
 set(xp_node-addon-api REPO github.com/externpro/node-addon-api TAG v8.5.0.2
   MANIFEST_SHA256 fcf59bb2da499109ba9f96d3d029f8c71aec0b199411c43ed4af2fe9ce87b39b
