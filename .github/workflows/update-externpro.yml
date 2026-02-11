@@ -533,7 +533,17 @@ jobs:
         name: Commit and push workflow updates
         if: inputs.create_pr && steps.pr_needed.outputs.pr_needed == 'true'
         run: |
+          NEEDS_WORKFLOW_TOKEN=false
+          if ! git diff --cached --name-only | grep -q '^\.github/workflows/'; then
+            NEEDS_WORKFLOW_TOKEN=false
+          else
+            NEEDS_WORKFLOW_TOKEN=true
+          fi
           TOKEN="${{ secrets.workflow_write_token }}"
+          if [ "${NEEDS_WORKFLOW_TOKEN}" = true ] && [ -z "${TOKEN}" ]; then
+            echo "Error: workflow updates include .github/workflows/*; provide workflow_write_token (PAT with workflow permission)." >&2
+            exit 1
+          fi
           if [ -z "${TOKEN}" ]; then
             TOKEN="${{ github.token }}"
           fi
