@@ -1410,7 +1410,8 @@ function(xpCopyFilesToSrc readme graph)
       message(STATUS "NOTE: files in binary and source directory differ, "
         "but should be copied from binary to source directory in ${build_container} "
         "build container, where graphviz is installed and version controlled. "
-        "(graphviz version is recorded in .svg file and different versions generate other diffs too)."
+        "(graphviz version is recorded in .svg file and different versions generate other diffs too). "
+        "Silence with -DXP_COPY_FILES_TO_SRC_NOTE=OFF."
         )
       if(isRdmeDiff)
         cmake_path(RELATIVE_PATH xpdepsFile BASE_DIRECTORY ${CMAKE_SOURCE_DIR} OUTPUT_VARIABLE relXpdepsFile)
