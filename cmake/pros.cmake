@@ -56,8 +56,8 @@ set(xp_geos REPO github.com/externpro/geos TAG xpv3.13.0.6
 set(xp_geotranz REPO github.com/externpro/geotranz TAG xpv2.4.2.3
   MANIFEST_SHA256 34e54a480f67bed7490b807cb4f60a945a8f854bb8523e5d861379bf0ae202aa
   )
-set(xp_glew REPO github.com/externpro/glew TAG v1.13.0.2
-  MANIFEST_SHA256 29808e42bf989521f1bc0666e010af21f0b674b62de2ae18ebe9176082a7cc06
+set(xp_glew REPO github.com/externpro/glew TAG xpv1.13.0.4
+  MANIFEST_SHA256 4abc8659f1371face3ca6c77db20f309fe95ac7ab5b8963a1c1175e308abdc80
   )
 set(xp_googletest REPO github.com/externpro/googletest TAG xpv1.16.0.3
   MANIFEST_SHA256 7d46c0146ca52067fb2c7a19cc8783889e6dea78c2cc1d571b51aa4bdbca189c
