@@ -416,9 +416,10 @@ jobs:
           echo "submodule_dependency_commit=true" >> "$GITHUB_OUTPUT"
           echo "✓ committed dependency artifacts in submodule"
           PUSH_TARGET="${{ inputs.submodule_dependency_push_target }}"
-          SUBMODULE_PUSH_TOKEN="${{ secrets.workflow_write_token || github.token }}"
+          SUBMODULE_PUSH_TOKEN="${{ secrets.workflow_write_token }}"
           if [ -z "${SUBMODULE_PUSH_TOKEN}" ]; then
-            echo "Error: missing token for pushing submodule commit (workflow_write_token/github.token empty)" >&2
+            echo "Error: missing workflow_write_token for pushing submodule commit to externpro/externpro" >&2
+            echo "Provide a PAT/fine-grained token with access to externpro/externpro via the caller secret mapped to workflow_write_token (e.g., secrets.XPUPDATE_TOKEN)." >&2
             exit 1
           fi
           git -C "$SUBMODULE_PATH" remote set-url origin "https://x-access-token:${SUBMODULE_PUSH_TOKEN}@github.com/externpro/externpro.git"
