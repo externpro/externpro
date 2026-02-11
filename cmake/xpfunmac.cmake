@@ -336,6 +336,7 @@ macro(xpSourceListAppend)
     ${_dir}/*.json
     ${_dir}/.*rc
     ${_dir}/*.md
+    ${_dir}/*.svg
     )
   if(miscFiles)
     list(APPEND masterSrcList ${miscFiles})
