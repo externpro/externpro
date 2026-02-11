@@ -231,7 +231,7 @@ jobs:
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
-          password: ${{ secrets.workflow_write_token || github.token }}
+          password: ${{ github.token }}
       -
         name: Snapshot submodule dependency artifacts (pre-configure)
         id: submodule_deps_pre
