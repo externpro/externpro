@@ -163,8 +163,8 @@ set(xp_rapidxml REPO github.com/externpro/rapidxml TAG v1.13.2
 set(xp_shapelib REPO github.com/externpro/shapelib TAG v1.2.10.2
   MANIFEST_SHA256 5ecf7769180dedd09950d48ab92136fff338641d273a4fa2e71d33c5a32cd48b
   )
-set(xp_spatialite-tools REPO github.com/externpro/spatialite-tools TAG v5.1.0.6
-  MANIFEST_SHA256 d654decf8e84be8e3cb2ff7c99a3a48cc9d872209d4808660703a78d355088a0
+set(xp_spatialite-tools REPO github.com/externpro/spatialite-tools TAG xpv5.1.0.7
+  MANIFEST_SHA256 6883507fec73f8ac37b02007f6489aca709617c6bafe3487f7f1ac92fa6cc9f5
   )
 set(xp_spdlog REPO github.com/externpro/spdlog TAG xpv1.15.3.4
   MANIFEST_SHA256 db02687c560007882d0a97cee1ea2afe3b1e1507494ca9c79efea218f2a004b7
