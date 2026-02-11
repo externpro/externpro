@@ -68,8 +68,8 @@ set(xp_hdf5 REPO github.com/externpro/hdf5 TAG xpv1.14.6.7
 set(xp_jasper REPO github.com/externpro/jasper TAG xpv1.900.1.3
   MANIFEST_SHA256 685d1dd0c5aebcec57fa354764061b951a851ffddfed70a1b93d95da3bf73847
   )
-set(xp_jpegxp REPO github.com/externpro/jpegxp TAG v6.25.2
-  MANIFEST_SHA256 9983274826385e9adc1f8ca2e6ba78a7af84055e89b4bb36c4e9df010a59925c
+set(xp_jpegxp REPO github.com/externpro/jpegxp TAG xpv6.25.3
+  MANIFEST_SHA256 db9b9d5093fa321ae52722132448545ae8811f86885741f958fdc93a405b6283
   )
 set(xp_jxrlib REPO github.com/externpro/jxrlib TAG v2019.10.9.2
   MANIFEST_SHA256 109b50a26f140ec454fedd91cdd7d56ad0de18146ad027b3d1e7aa65cc88fad2
