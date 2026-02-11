@@ -546,14 +546,22 @@ jobs:
           fi
           if [ -z "${TOKEN}" ]; then
             TOKEN="${{ github.token }}"
+            echo "Using github.token for push"
+          else
+            TOKEN=$(printf '%s' "${TOKEN}" | tr -d '\r\n' | xargs)
+            echo "Using workflow_write_token for push (length=${#TOKEN})"
           fi
+          # actions/checkout injects an http extraheader for github.com using the checkout token.
+          # When checkout uses github.token, that header can override PAT-in-URL auth for later pushes.
+          # Clear it and force an empty extraheader for the push so the URL credential is used.
+          git config --unset-all http.https://github.com/.extraheader || true
           git remote set-url origin "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
           if ! git diff --cached --quiet; then
             COMMIT_MSG="externpro ${{ steps.final_version.outputs.describe }} workflow updates"
             git commit -m "$COMMIT_MSG"
             echo "Commit created: $COMMIT_MSG"
           fi
-          git push --set-upstream origin "${{ steps.branch.outputs.branch_name }}"
+          git -c http.extraheader= push --set-upstream origin "${{ steps.branch.outputs.branch_name }}"
       -
         name: Create Pull Request
         if: inputs.create_pr && steps.pr_needed.outputs.pr_needed == 'true'
