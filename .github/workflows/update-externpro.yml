@@ -422,6 +422,11 @@ jobs:
             echo "Provide a PAT/fine-grained token with access to externpro/externpro via the caller secret mapped to workflow_write_token (e.g., secrets.XPUPDATE_TOKEN)." >&2
             exit 1
           fi
+          echo "workflow_write_token is set (length=${#SUBMODULE_PUSH_TOKEN})"
+          # actions/checkout injects an http extraheader for github.com using GITHUB_TOKEN.
+          # That can override the remote URL auth and make the push authenticate as github-actions[bot].
+          # Clear it inside the submodule before pushing and also force an empty extraheader for the push.
+          git -C "$SUBMODULE_PATH" config --unset-all http.https://github.com/.extraheader || true
           git -C "$SUBMODULE_PATH" remote set-url origin "https://x-access-token:${SUBMODULE_PUSH_TOKEN}@github.com/externpro/externpro.git"
           case "$PUSH_TARGET" in
             main)
@@ -430,14 +435,14 @@ jobs:
                 exit 1
               fi
               echo "Pushing submodule commit to origin/main"
-              git -C "$SUBMODULE_PATH" push origin HEAD:refs/heads/main
+              git -C "$SUBMODULE_PATH" -c http.extraheader= push origin HEAD:refs/heads/main
               echo "submodule_dependency_push_ref=main" >> "$GITHUB_OUTPUT"
               ;;
             automation|*)
               SUB_BRANCH="xpupdate-deps-${{ github.run_id }}-${{ github.run_attempt }}"
               echo "submodule_dependency_branch=$SUB_BRANCH" >> "$GITHUB_OUTPUT"
               echo "Pushing submodule commit to origin as branch '$SUB_BRANCH'"
-              git -C "$SUBMODULE_PATH" push origin HEAD:refs/heads/"$SUB_BRANCH"
+              git -C "$SUBMODULE_PATH" -c http.extraheader= push origin HEAD:refs/heads/"$SUB_BRANCH"
               echo "submodule_dependency_push_ref=$SUB_BRANCH" >> "$GITHUB_OUTPUT"
               ;;
           esac
