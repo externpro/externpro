@@ -157,8 +157,8 @@ set(xp_protobuf REPO github.com/externpro/protobuf TAG xpv3.14.0.5
 set(xp_rapidjson REPO github.com/externpro/rapidjson TAG xpv1.1.0-763.3
   MANIFEST_SHA256 31f6aaa00f93098ef06f3a6d08a68e971f6f034bd1f3dc855d3f815619b84125
   )
-set(xp_rapidxml REPO github.com/externpro/rapidxml TAG v1.13.2
-  MANIFEST_SHA256 57b27180d35d9f6e75f8fce86c802228fd0a8e16ada580307646b71eb969f4de
+set(xp_rapidxml REPO github.com/externpro/rapidxml TAG xpv1.13.3
+  MANIFEST_SHA256 f3e1ff5a9746c181331a5ad50af9c1bfed4b4212dc25c5907c912aa039d7bbbf
   )
 set(xp_shapelib REPO github.com/externpro/shapelib TAG v1.2.10.2
   MANIFEST_SHA256 5ecf7769180dedd09950d48ab92136fff338641d273a4fa2e71d33c5a32cd48b
