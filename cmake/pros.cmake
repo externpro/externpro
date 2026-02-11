@@ -148,8 +148,8 @@ set(xp_openh264 REPO github.com/externpro/openh264 TAG xpv1.4.0.3
 set(xp_openssl REPO github.com/externpro/openssl TAG xpv1.1.1l.4
   MANIFEST_SHA256 7c65fa87cd7692947e31933ac18799ca29b10831fcefc2d31af2d22e9183886a
   )
-set(xp_patch REPO github.com/externpro/patch TAG v2.7.6.5
-  MANIFEST_SHA256 5484efbcc8e5f7dc8e11f2d2141b0693141a045f7029b80e0453bbb1479c39b6
+set(xp_patch REPO github.com/externpro/patch TAG xpv2.7.6.6
+  MANIFEST_SHA256 2e1093831a6c8d8f11e74ae5f30e44612f2d4003afca302cc7d7d8cc29fdbf36
   )
 set(xp_protobuf REPO github.com/externpro/protobuf TAG xpv3.14.0.5
   MANIFEST_SHA256 bf04752cad38209ea758399b08de9d91f5c180c85ed3505fbbf2655365c30c94
