@@ -23,7 +23,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0   # fetches all history
-          fetch-tags: true # explicitly fetch tags
+          fetch-tags: true # explicitly fetches tags
           submodules: true
           token: ${{ github.token }}
       -
