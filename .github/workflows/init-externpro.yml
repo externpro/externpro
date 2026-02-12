@@ -1,0 +1,92 @@
+name: Init externpro
+on:
+  workflow_call:
+    inputs:
+      submodule_path:
+        description: 'Path to externpro submodule'
+        required: false
+        type: string
+        default: '.devcontainer'
+    secrets:
+      workflow_write_token:
+        description: 'Token with permission to update .github/workflows (PAT or fine-grained token).'
+        required: true
+jobs:
+  init:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: read
+    steps:
+      -
+        name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # fetches all history
+          fetch-tags: true # explicitly fetch tags
+          submodules: true
+          token: ${{ github.token }}
+      -
+        name: Validate externpro submodule
+        id: validate
+        uses: ./.devcontainer/.github/actions/externpro-validate
+        with:
+          submodule_path: ${{ inputs.submodule_path }}
+      -
+        name: Configure Git
+        uses: ./.devcontainer/.github/actions/git-configure-bot
+        with:
+          submodule_path: ${{ steps.validate.outputs.submodule_path }}
+      -
+        name: Update docker-compose links
+        shell: bash
+        run: |
+          set -euo pipefail
+          ln -sf .devcontainer/compose.pro.sh docker-compose.sh
+          ln -sf .devcontainer/compose.bld.yml docker-compose.yml
+          git add docker-compose.sh docker-compose.yml
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          git commit -m "add docker-compose links" -- docker-compose.sh docker-compose.yml
+      -
+        name: Add CMakePresets
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp -f .devcontainer/cmake/presets/CMakePresets* .
+          git add CMakePresets*
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          git commit -m "add CMakePresets" -- CMakePresets*
+      -
+        name: Add GitHub Actions workflows
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p .github/workflows
+          cp -f .devcontainer/.github/wf-templates/xp*.yml .github/workflows/
+          git add .github/workflows
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          git commit -m "add GitHub Actions workflows" -- .github/workflows
+      -
+        name: Push changes
+        shell: bash
+        env:
+          TOKEN: ${{ secrets.workflow_write_token }}
+        run: |
+          set -euo pipefail
+          TOKEN=$(printf '%s' "${TOKEN}" | tr -d '\r\n' | xargs)
+          if [ -z "${TOKEN}" ]; then
+            echo "Error: workflow_write_token is required" >&2
+            exit 1
+          fi
+          git config --unset-all http.https://github.com/.extraheader || true
+          git remote set-url origin "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          git -c http.extraheader= push origin HEAD
