@@ -1,0 +1,19 @@
+name: Configure Git (github-actions bot)
+description: Configure git identity for commits.
+inputs:
+  submodule_path:
+    description: Path to externpro submodule
+    required: false
+    default: .devcontainer
+runs:
+  using: composite
+  steps:
+    -
+      name: Configure Git
+      shell: bash
+      run: |
+        set -euo pipefail
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+        git -C "${{ inputs.submodule_path }}" config user.name "github-actions[bot]"
+        git -C "${{ inputs.submodule_path }}" config user.email "github-actions[bot]@users.noreply.github.com"
