@@ -63,40 +63,9 @@ jobs:
       -
         name: Validate externpro submodule
         id: validate
-        run: |
-          SUBMODULE_PATH="${{ inputs.submodule_path }}"
-          # Check if .gitmodules exists
-          if [ ! -f ".gitmodules" ]; then
-            echo "Error: .gitmodules file not found"
-            exit 1
-          fi
-          # Check if submodule exists in .gitmodules
-          if ! grep -q "path = $SUBMODULE_PATH" .gitmodules; then
-            echo "Error: Submodule path $SUBMODULE_PATH not found in .gitmodules"
-            exit 1
-          fi
-          # Check if submodule directory exists
-          if [ ! -d "$SUBMODULE_PATH" ]; then
-            echo "Error: Submodule directory $SUBMODULE_PATH does not exist"
-            exit 1
-          fi
-          # Check if it's actually a git repository (submodule)
-          if [ ! -e "$SUBMODULE_PATH/.git" ]; then
-            echo "Error: $SUBMODULE_PATH is not a git submodule"
-            exit 1
-          fi
-          if ! git -C "$SUBMODULE_PATH" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
-            echo "Error: $SUBMODULE_PATH is not a valid git work tree"
-            exit 1
-          fi
-          # Get submodule URL to verify it's externpro
-          SUBMODULE_URL=$(git config -f .gitmodules --get submodule.$SUBMODULE_PATH.url)
-          if [[ "$SUBMODULE_URL" != *"externpro/externpro"* ]]; then
-            echo "Error: Submodule URL does not point to externpro/externpro: $SUBMODULE_URL"
-            exit 1
-          fi
-          echo "✓ externpro submodule validation passed"
-          echo "submodule_path=$SUBMODULE_PATH" >> $GITHUB_OUTPUT
+        uses: externpro/externpro/.github/actions/externpro-validate@main
+        with:
+          submodule_path: ${{ inputs.submodule_path }}
       -
         name: Get current externpro HEAD
         id: current_head
