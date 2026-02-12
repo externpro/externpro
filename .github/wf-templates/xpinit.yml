@@ -1,0 +1,12 @@
+name: xpInit externpro
+permissions:
+  contents: write
+  pull-requests: write
+  packages: read
+on:
+  workflow_dispatch:
+jobs:
+  init:
+    uses: externpro/externpro/.github/workflows/init-externpro.yml@main
+    secrets:
+      workflow_write_token: ${{ secrets.XPUPDATE_TOKEN }}
