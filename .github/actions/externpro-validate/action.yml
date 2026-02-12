@@ -1,0 +1,48 @@
+name: Validate externpro Submodule
+description: Validate that the externpro git submodule exists and points to externpro/externpro.
+inputs:
+  submodule_path:
+    description: Path to externpro submodule
+    required: false
+    default: .devcontainer
+outputs:
+  submodule_path:
+    description: Validated submodule path
+    value: ${{ steps.validate.outputs.submodule_path }}
+runs:
+  using: composite
+  steps:
+    -
+      name: Validate externpro submodule
+      id: validate
+      shell: bash
+      run: |
+        set -euo pipefail
+        SUBMODULE_PATH="${{ inputs.submodule_path }}"
+        if [ ! -f ".gitmodules" ]; then
+          echo "Error: .gitmodules file not found" >&2
+          exit 1
+        fi
+        if ! grep -q "path = $SUBMODULE_PATH" .gitmodules; then
+          echo "Error: Submodule path $SUBMODULE_PATH not found in .gitmodules" >&2
+          exit 1
+        fi
+        if [ ! -d "$SUBMODULE_PATH" ]; then
+          echo "Error: Submodule directory $SUBMODULE_PATH does not exist" >&2
+          exit 1
+        fi
+        if [ ! -e "$SUBMODULE_PATH/.git" ]; then
+          echo "Error: $SUBMODULE_PATH is not a git submodule" >&2
+          exit 1
+        fi
+        if ! git -C "$SUBMODULE_PATH" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+          echo "Error: $SUBMODULE_PATH is not a valid git work tree" >&2
+          exit 1
+        fi
+        SUBMODULE_URL=$(git config -f .gitmodules --get submodule.$SUBMODULE_PATH.url)
+        if [[ "$SUBMODULE_URL" != *"externpro/externpro"* ]]; then
+          echo "Error: Submodule URL does not point to externpro/externpro: $SUBMODULE_URL" >&2
+          exit 1
+        fi
+        echo "✓ externpro submodule validation passed"
+        echo "submodule_path=$SUBMODULE_PATH" >> "$GITHUB_OUTPUT"
