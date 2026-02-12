@@ -38,7 +38,7 @@ jobs:
         with:
           submodule_path: ${{ steps.validate.outputs.submodule_path }}
       -
-        name: Update docker-compose links
+        name: Add docker-compose links
         shell: bash
         run: |
           set -euo pipefail
