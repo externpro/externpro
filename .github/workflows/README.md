@@ -2,6 +2,8 @@
 
 This directory contains reusable GitHub Actions for building and releasing the project. These actions are designed to be used by other repositories.
 
+For externpro integration guidance (including `xpinit` preconditions and how to vendor/copy the caller workflow templates), see `../README.md`.
+
 ## Actions
 
 ### 1. `build-linux.yml` - Reusable Linux Build Action
