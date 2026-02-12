@@ -63,47 +63,14 @@ jobs:
       -
         name: Validate externpro submodule
         id: validate
-        run: |
-          SUBMODULE_PATH="${{ inputs.submodule_path }}"
-          # Check if .gitmodules exists
-          if [ ! -f ".gitmodules" ]; then
-            echo "Error: .gitmodules file not found"
-            exit 1
-          fi
-          # Check if submodule exists in .gitmodules
-          if ! grep -q "path = $SUBMODULE_PATH" .gitmodules; then
-            echo "Error: Submodule path $SUBMODULE_PATH not found in .gitmodules"
-            exit 1
-          fi
-          # Check if submodule directory exists
-          if [ ! -d "$SUBMODULE_PATH" ]; then
-            echo "Error: Submodule directory $SUBMODULE_PATH does not exist"
-            exit 1
-          fi
-          # Check if it's actually a git repository (submodule)
-          if [ ! -e "$SUBMODULE_PATH/.git" ]; then
-            echo "Error: $SUBMODULE_PATH is not a git submodule"
-            exit 1
-          fi
-          if ! git -C "$SUBMODULE_PATH" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
-            echo "Error: $SUBMODULE_PATH is not a valid git work tree"
-            exit 1
-          fi
-          # Get submodule URL to verify it's externpro
-          SUBMODULE_URL=$(git config -f .gitmodules --get submodule.$SUBMODULE_PATH.url)
-          if [[ "$SUBMODULE_URL" != *"externpro/externpro"* ]]; then
-            echo "Error: Submodule URL does not point to externpro/externpro: $SUBMODULE_URL"
-            exit 1
-          fi
-          echo "✓ externpro submodule validation passed"
-          echo "submodule_path=$SUBMODULE_PATH" >> $GITHUB_OUTPUT
+        uses: ./.devcontainer/.github/actions/externpro-validate
+        with:
+          submodule_path: ${{ inputs.submodule_path }}
       -
         name: Configure Git
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git -C "${{ steps.validate.outputs.submodule_path }}" config user.name "github-actions[bot]"
-          git -C "${{ steps.validate.outputs.submodule_path }}" config user.email "github-actions[bot]@users.noreply.github.com"
+        uses: ./.devcontainer/.github/actions/git-configure-bot
+        with:
+          submodule_path: ${{ steps.validate.outputs.submodule_path }}
       -
         name: Get current externpro HEAD
         id: current_head
@@ -573,35 +540,7 @@ jobs:
           fi
           export GH_TOKEN
           WORKFLOW_REPORT="${{ steps.update_workflows.outputs.workflow_report }}"
-          gh_retry() {
-            local max_attempts=6
-            local attempt=1
-            local delay=5
-            local out
-            while true; do
-              set +e
-              out=$("$@" 2>&1)
-              local rc=$?
-              set -e
-              if [ $rc -eq 0 ]; then
-                printf '%s' "$out"
-                return 0
-              fi
-              if echo "$out" | grep -q "HTTP 429"; then
-                if [ $attempt -ge $max_attempts ]; then
-                  printf '%s\n' "$out" >&2
-                  return $rc
-                fi
-                printf '%s\n' "$out" >&2
-                sleep "$delay"
-                attempt=$((attempt + 1))
-                delay=$((delay * 2))
-                continue
-              fi
-              printf '%s\n' "$out" >&2
-              return $rc
-            done
-          }
+          GH_RETRY=(bash .devcontainer/.github/actions/gh-retry/gh-retry.sh)
           BASE_BRANCH="${{ github.event.repository.default_branch }}"
           HEAD_BRANCH="${{ steps.branch.outputs.branch_name }}"
           export HEAD_BRANCH
@@ -661,28 +600,28 @@ jobs:
           echo "---" >> "$BODY_FILE"
           echo >> "$BODY_FILE"
           echo "*This PR was created automatically by GitHub Actions*" >> "$BODY_FILE"
-          if gh_retry gh pr view "$HEAD_BRANCH" --json url --jq .url >/dev/null 2>&1; then
-            PR_URL=$(gh_retry gh pr view "$HEAD_BRANCH" --json url --jq .url)
+          if "${GH_RETRY[@]}" gh pr view "$HEAD_BRANCH" --json url --jq .url >/dev/null 2>&1; then
+            PR_URL=$("${GH_RETRY[@]}" gh pr view "$HEAD_BRANCH" --json url --jq .url)
             echo "PR already exists for $HEAD_BRANCH: $PR_URL"
           else
-            PR_URL=$(gh_retry gh pr create \
+            PR_URL=$("${GH_RETRY[@]}" gh pr create \
             --base "$BASE_BRANCH" \
             --head "$HEAD_BRANCH" \
             --title "$TITLE" \
             --body-file "$BODY_FILE")
             echo "Created PR: $PR_URL"
           fi
-          gh_retry gh label create "dependencies" --color "0B3D2E" --description "dependency updates" >/dev/null 2>&1 || true
-          gh_retry gh label create "externpro" --color "0B3D2E" --description "externpro updates" >/dev/null 2>&1 || true
-          gh_retry gh label create "release:tag" --color "FF6A00" --description "Tag release on merge" >/dev/null 2>&1 || true
-          gh_retry gh pr edit "$PR_URL" --add-label "dependencies" >/dev/null 2>&1 || echo "Label 'dependencies' not found; skipping"
-          gh_retry gh pr edit "$PR_URL" --add-label "externpro" >/dev/null 2>&1 || echo "Label 'externpro' not found; skipping"
+          "${GH_RETRY[@]}" gh label create "dependencies" --color "0B3D2E" --description "dependency updates" >/dev/null 2>&1 || true
+          "${GH_RETRY[@]}" gh label create "externpro" --color "0B3D2E" --description "externpro updates" >/dev/null 2>&1 || true
+          "${GH_RETRY[@]}" gh label create "release:tag" --color "FF6A00" --description "Tag release on merge" >/dev/null 2>&1 || true
+          "${GH_RETRY[@]}" gh pr edit "$PR_URL" --add-label "dependencies" >/dev/null 2>&1 || echo "Label 'dependencies' not found; skipping"
+          "${GH_RETRY[@]}" gh pr edit "$PR_URL" --add-label "externpro" >/dev/null 2>&1 || echo "Label 'externpro' not found; skipping"
           # Close superseded PRs from previous runs.
           # Criteria:
           # - head branch name starts with externpro-update-
           # - label includes externpro (if labels are available)
           # - head branch is not the current HEAD_BRANCH
-          SUPERSEDED_PRS=$(gh_retry gh pr list --state open --json number,headRefName,labels --jq '.[] | select(.headRefName | startswith("externpro-update-")) | select(.headRefName != env.HEAD_BRANCH) | select(((.labels // []) | map(.name) | index("externpro")) != null) | "\(.number) \(.headRefName)"')
+          SUPERSEDED_PRS=$("${GH_RETRY[@]}" gh pr list --state open --json number,headRefName,labels --jq '.[] | select(.headRefName | startswith("externpro-update-")) | select(.headRefName != env.HEAD_BRANCH) | select(((.labels // []) | map(.name) | index("externpro")) != null) | "\(.number) \(.headRefName)"')
           if [ -n "$SUPERSEDED_PRS" ]; then
             while IFS= read -r pr; do
               [ -z "$pr" ] && continue
@@ -691,14 +630,14 @@ jobs:
               if [ -z "$PR_NUMBER" ] || [ -z "$SUPERSEDED_HEAD_REF" ]; then
                 continue
               fi
-              gh_retry gh pr close "$PR_NUMBER" --comment "Superseded by $PR_URL" >/dev/null 2>&1 || echo "Failed to close PR #$PR_NUMBER"
+              "${GH_RETRY[@]}" gh pr close "$PR_NUMBER" --comment "Superseded by $PR_URL" >/dev/null 2>&1 || echo "Failed to close PR #$PR_NUMBER"
               if [ "$SUPERSEDED_HEAD_REF" = "$HEAD_BRANCH" ]; then
                 continue
               fi
               case "$SUPERSEDED_HEAD_REF" in
                 externpro-update-*)
                   REF_ENC=$(printf '%s' "$SUPERSEDED_HEAD_REF" | sed 's|/|%2F|g')
-                  if gh_retry gh api -X DELETE "repos/${{ github.repository }}/git/refs/heads/${REF_ENC}" >/dev/null 2>&1; then
+                  if "${GH_RETRY[@]}" gh api -X DELETE "repos/${{ github.repository }}/git/refs/heads/${REF_ENC}" >/dev/null 2>&1; then
                     echo "Deleted superseded branch: $SUPERSEDED_HEAD_REF"
                   else
                     echo "Could not delete branch '$SUPERSEDED_HEAD_REF' (missing/protected/insufficient permissions); skipping"
