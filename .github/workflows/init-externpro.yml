@@ -16,6 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      pull-requests: write
       packages: read
     steps:
       -
@@ -38,7 +39,17 @@ jobs:
         with:
           submodule_path: ${{ steps.validate.outputs.submodule_path }}
       -
+        name: Create branch
+        id: branch
+        run: |
+          set -euo pipefail
+          UNIQUE_SUFFIX="${{ github.run_id }}-${{ github.run_attempt }}"
+          BRANCH_NAME="xpinit-${UNIQUE_SUFFIX}"
+          git checkout -b "$BRANCH_NAME"
+          echo "branch_name=$BRANCH_NAME" >> $GITHUB_OUTPUT
+      -
         name: Add docker-compose links
+        id: docker_compose
         shell: bash
         run: |
           set -euo pipefail
@@ -47,11 +58,14 @@ jobs:
           git add docker-compose.sh docker-compose.yml
           if git diff --cached --quiet; then
             echo "No changes to commit"
+            echo "committed=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
           git commit -m "add docker-compose links" -- docker-compose.sh docker-compose.yml
+          echo "committed=true" >> "$GITHUB_OUTPUT"
       -
         name: Add CMakePresets
+        id: cmake_presets
         shell: bash
         run: |
           set -euo pipefail
@@ -59,11 +73,14 @@ jobs:
           git add CMakePresets*
           if git diff --cached --quiet; then
             echo "No changes to commit"
+            echo "committed=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
           git commit -m "add CMakePresets" -- CMakePresets*
+          echo "committed=true" >> "$GITHUB_OUTPUT"
       -
         name: Add GitHub Actions workflows
+        id: gha_workflows
         shell: bash
         run: |
           set -euo pipefail
@@ -72,11 +89,13 @@ jobs:
           git add .github/workflows
           if git diff --cached --quiet; then
             echo "No changes to commit"
+            echo "committed=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
           git commit -m "add GitHub Actions workflows" -- .github/workflows
       -
         name: Add externpro .gitignore
+        id: gitignore
         shell: bash
         run: |
           set -euo pipefail
@@ -98,12 +117,30 @@ jobs:
           git add .gitignore
           if git diff --cached --quiet; then
             echo "No changes to commit"
+            echo "committed=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
           git commit -m "gitignore: add externpro ignores" -- .gitignore
+          echo "committed=true" >> "$GITHUB_OUTPUT"
       -
-        name: Push changes
+        name: Determine if PR is needed
+        id: pr_needed
+        run: |
+          set -euo pipefail
+          BASE_BRANCH="${{ github.event.repository.default_branch }}"
+          git fetch origin "$BASE_BRANCH"
+          COMMITS_AHEAD=$(git rev-list --count "origin/${BASE_BRANCH}..HEAD")
+          if [ "$COMMITS_AHEAD" -eq 0 ]; then
+            echo "No commits ahead of $BASE_BRANCH; skipping PR"
+            echo "pr_needed=false" >> $GITHUB_OUTPUT
+          else
+            echo "Commits ahead of $BASE_BRANCH: $COMMITS_AHEAD"
+            echo "pr_needed=true" >> $GITHUB_OUTPUT
+          fi
+      -
+        name: Push branch
         shell: bash
+        if: steps.pr_needed.outputs.pr_needed == 'true'
         env:
           TOKEN: ${{ secrets.workflow_write_token }}
         run: |
@@ -115,4 +152,82 @@ jobs:
           fi
           git config --unset-all http.https://github.com/.extraheader || true
           git remote set-url origin "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
-          git -c http.extraheader= push origin HEAD
+          git -c http.extraheader= push --set-upstream origin "${{ steps.branch.outputs.branch_name }}"
+      -
+        name: Ensure labels exist
+        if: steps.pr_needed.outputs.pr_needed == 'true'
+        uses: ./.devcontainer/.github/actions/labels-mgmt
+        env:
+          GH_TOKEN: ${{ secrets.workflow_write_token || github.token }}
+        with:
+          cleanup_legacy_labels: ""
+      -
+        name: Create Pull Request
+        id: create_pr
+        if: steps.pr_needed.outputs.pr_needed == 'true'
+        run: |
+          set -euo pipefail
+          GH_TOKEN="${{ secrets.workflow_write_token }}"
+          if [ -z "${GH_TOKEN}" ]; then
+            GH_TOKEN="${{ github.token }}"
+          fi
+          export GH_TOKEN
+          GH_RETRY=(bash .devcontainer/.github/actions/gh-retry/gh-retry.sh)
+          BASE_BRANCH="${{ github.event.repository.default_branch }}"
+          HEAD_BRANCH="${{ steps.branch.outputs.branch_name }}"
+          export HEAD_BRANCH
+          TITLE="Init externpro"
+          BODY_FILE="/tmp/pr-body.md"
+          : > "$BODY_FILE"
+          echo "## Summary" >> "$BODY_FILE"
+          echo >> "$BODY_FILE"
+          echo "Initialize externpro integration" >> "$BODY_FILE"
+          echo >> "$BODY_FILE"
+          echo "## Changes" >> "$BODY_FILE"
+          echo >> "$BODY_FILE"
+          DOCKER_COMPOSE_COMMITTED="${{ steps.docker_compose.outputs.committed }}"
+          CMAKE_PRESETS_COMMITTED="${{ steps.cmake_presets.outputs.committed }}"
+          GHA_WORKFLOWS_COMMITTED="${{ steps.gha_workflows.outputs.committed }}"
+          GITIGNORE_COMMITTED="${{ steps.gitignore.outputs.committed }}"
+          if [ "$DOCKER_COMPOSE_COMMITTED" = "true" ]; then
+            echo "- Add docker-compose links" >> "$BODY_FILE"
+          fi
+          if [ "$CMAKE_PRESETS_COMMITTED" = "true" ]; then
+            echo "- Add CMakePresets" >> "$BODY_FILE"
+          fi
+          if [ "$GHA_WORKFLOWS_COMMITTED" = "true" ]; then
+            echo "- Add GitHub Actions workflows" >> "$BODY_FILE"
+          fi
+          if [ "$GITIGNORE_COMMITTED" = "true" ]; then
+            echo "- Add externpro ignores to .gitignore" >> "$BODY_FILE"
+          fi
+          echo >> "$BODY_FILE"
+          echo "---" >> "$BODY_FILE"
+          echo >> "$BODY_FILE"
+          echo "*This PR was created automatically by GitHub Actions*" >> "$BODY_FILE"
+          if "${GH_RETRY[@]}" gh pr view "$HEAD_BRANCH" --json url --jq .url >/dev/null 2>&1; then
+            PR_URL=$("${GH_RETRY[@]}" gh pr view "$HEAD_BRANCH" --json url --jq .url)
+            echo "PR already exists for $HEAD_BRANCH: $PR_URL"
+          else
+            PR_URL=$("${GH_RETRY[@]}" gh pr create \
+            --base "$BASE_BRANCH" \
+            --head "$HEAD_BRANCH" \
+            --title "$TITLE" \
+            --body-file "$BODY_FILE")
+            echo "Created PR: $PR_URL"
+          fi
+          echo "pr_url=$PR_URL" >> "$GITHUB_OUTPUT"
+          "${GH_RETRY[@]}" gh pr edit "$PR_URL" --add-label "dependencies" >/dev/null 2>&1 || echo "Label 'dependencies' not found; skipping"
+          "${GH_RETRY[@]}" gh pr edit "$PR_URL" --add-label "xpinit" >/dev/null 2>&1 || echo "Label 'xpinit' not found; skipping"
+      -
+        name: Close superseded PRs
+        if: steps.pr_needed.outputs.pr_needed == 'true'
+        uses: ./.devcontainer/.github/actions/pr-close-superseded
+        env:
+          GH_TOKEN: ${{ secrets.workflow_write_token || github.token }}
+        with:
+          head_branch_prefix: xpinit-
+          keep_head_branch: ${{ steps.branch.outputs.branch_name }}
+          label_name: xpinit
+          pr_url: ${{ steps.create_pr.outputs.pr_url }}
+          delete_branches: "true"
