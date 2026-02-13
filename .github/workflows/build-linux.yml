@@ -140,6 +140,42 @@ jobs:
         buildpro_image: ${{ fromJson(inputs.buildpro-images) }}
     steps:
       -
+        name: Install skopeo (for tag listing)
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y skopeo
+      -
+        name: Determine package SHAs to keep
+        id: keep_shas
+        shell: bash
+        run: |
+          set -euo pipefail
+          OWNER_REPO='${{ needs.lc-repo-names.outputs.owner_repo }}'
+          IMAGE_NAME='${{ format('bldimg-{0}-{1}', matrix.arch, matrix.buildpro_image) }}'
+          REPO_PATH="${OWNER_REPO}/${IMAGE_NAME}"
+          FULL_IMAGE="ghcr.io/${REPO_PATH}"
+          echo "Inspecting tags for ${FULL_IMAGE}"
+          tags=$(skopeo list-tags "docker://${FULL_IMAGE}" | jq -r '.Tags[]' | paste -s -d ' ' -)
+          echo "Found tags: ${tags}"
+          declare -a digests_array=()
+          IFS=' ' read -r -a tag_array <<< "${tags}"
+          for tag in "${tag_array[@]}"; do
+            [ -z "${tag}" ] && continue
+            echo "Inspecting manifest for tag: ${tag}"
+            digests_tag=$(docker manifest inspect "${FULL_IMAGE}:${tag}" 2>/dev/null | jq -r '.manifests[].digest' | paste -s -d ' ' - || true)
+            if [ -n "${digests_tag}" ]; then
+              echo "Digests for ${tag}: ${digests_tag}"
+              digests_array+=("${digests_tag}")
+            else
+              echo "Warning: Could not get digests for tag ${tag}"
+            fi
+          done
+          all_digests=$(printf '%s\n' "${digests_array[@]}" | tr ' ' '\n' | sed '/^$/d' | sort -u | paste -s -d ' ' -)
+          echo "All digests: ${all_digests}"
+          echo "digests=${all_digests}" >> "$GITHUB_OUTPUT"
+      -
         name: Delete untagged images from ghcr
         uses: snok/container-retention-policy@v3.0.0
         with:
@@ -147,5 +183,6 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           image-names: ${{ format('{0}/bldimg-{1}-{2}', needs.lc-repo-names.outputs.repo, matrix.arch, matrix.buildpro_image) }}
           tag-selection: untagged
-          cut-off: 30d
+          skip-shas: ${{ steps.keep_shas.outputs.digests }}
+          cut-off: 1m
           dry-run: false
