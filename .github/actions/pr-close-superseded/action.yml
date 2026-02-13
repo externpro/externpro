@@ -1,0 +1,91 @@
+name: Close Superseded PRs
+description: Close superseded PRs created by automation (by head branch prefix) and optionally delete their branches.
+inputs:
+  head_branch_prefix:
+    description: Prefix of automation head branch names to consider (e.g. xpinit-)
+    required: true
+  keep_head_branch:
+    description: Head branch name to keep (do not close/delete PRs for this branch)
+    required: true
+  label_name:
+    description: If set, only close PRs that have this label
+    required: false
+    default: ""
+  pr_url:
+    description: PR URL to reference in the superseded comment
+    required: false
+    default: ""
+  delete_branches:
+    description: Whether to delete superseded automation branches
+    required: false
+    default: "true"
+runs:
+  using: composite
+  steps:
+    -
+      name: Close superseded PRs
+      shell: bash
+      run: |
+        set -euo pipefail
+        if [ -z "${GH_TOKEN:-}" ]; then
+          echo "Error: GH_TOKEN must be set" >&2
+          exit 1
+        fi
+        GH_RETRY=(bash "${{ github.action_path }}/../gh-retry/gh-retry.sh")
+        HEAD_BRANCH_PREFIX="${{ inputs.head_branch_prefix }}"
+        KEEP_HEAD_BRANCH="${{ inputs.keep_head_branch }}"
+        LABEL_NAME="${{ inputs.label_name }}"
+        PR_URL="${{ inputs.pr_url }}"
+        DELETE_BRANCHES="${{ inputs.delete_branches }}"
+        export KEEP_HEAD_BRANCH
+        if [ -z "$HEAD_BRANCH_PREFIX" ]; then
+          echo "Error: head_branch_prefix is required" >&2
+          exit 1
+        fi
+        if [ -z "$KEEP_HEAD_BRANCH" ]; then
+          echo "Error: keep_head_branch is required" >&2
+          exit 1
+        fi
+        if [ -z "$PR_URL" ]; then
+          PR_URL="(newer automation PR)"
+        fi
+        if [ -n "$LABEL_NAME" ]; then
+          export LABEL_NAME
+          FILTER_JQ='.[] | select(.headRefName | startswith(env.HEAD_BRANCH_PREFIX)) | select(.headRefName != env.KEEP_HEAD_BRANCH) | select(((.labels // []) | map(.name) | index(env.LABEL_NAME)) != null) | "\(.number) \(.headRefName)"'
+        else
+          FILTER_JQ='.[] | select(.headRefName | startswith(env.HEAD_BRANCH_PREFIX)) | select(.headRefName != env.KEEP_HEAD_BRANCH) | "\(.number) \(.headRefName)"'
+        fi
+        export HEAD_BRANCH_PREFIX
+        SUPERSEDED_PRS=$(${GH_RETRY[@]} gh pr list --state open --json number,headRefName,labels --jq "$FILTER_JQ")
+        if [ -z "$SUPERSEDED_PRS" ]; then
+          echo "No superseded PRs found for prefix '$HEAD_BRANCH_PREFIX'"
+          exit 0
+        fi
+        while IFS= read -r pr; do
+          [ -z "$pr" ] && continue
+          PR_NUMBER=$(printf '%s' "$pr" | awk '{print $1}')
+          SUPERSEDED_HEAD_REF=$(printf '%s' "$pr" | awk '{print $2}')
+          if [ -z "$PR_NUMBER" ] || [ -z "$SUPERSEDED_HEAD_REF" ]; then
+            continue
+          fi
+          ${GH_RETRY[@]} gh pr close "$PR_NUMBER" --comment "Superseded by $PR_URL" >/dev/null 2>&1 || echo "Failed to close PR #$PR_NUMBER"
+          if [ "$DELETE_BRANCHES" != "true" ]; then
+            continue
+          fi
+          if [ "$SUPERSEDED_HEAD_REF" = "$KEEP_HEAD_BRANCH" ]; then
+            continue
+          fi
+          case "$SUPERSEDED_HEAD_REF" in
+            ${HEAD_BRANCH_PREFIX}*)
+              REF_ENC=$(printf '%s' "$SUPERSEDED_HEAD_REF" | sed 's|/|%2F|g')
+              if ${GH_RETRY[@]} gh api -X DELETE "repos/${{ github.repository }}/git/refs/heads/${REF_ENC}" >/dev/null 2>&1; then
+                echo "Deleted superseded branch: $SUPERSEDED_HEAD_REF"
+              else
+                echo "Could not delete branch '$SUPERSEDED_HEAD_REF' (missing/protected/insufficient permissions); skipping"
+              fi
+              ;;
+            *)
+              echo "Refusing to delete non-automation branch '$SUPERSEDED_HEAD_REF' from superseded PR #$PR_NUMBER"
+              ;;
+          esac
+        done <<< "$SUPERSEDED_PRS"
