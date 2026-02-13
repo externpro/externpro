@@ -510,7 +510,7 @@ jobs:
           CLEAN_DESCRIBE="$(echo "$DESCRIBE" | sed 's/[^a-zA-Z0-9.-]/-/g')"
           # Include a unique suffix so reruns don't collide on the same describe.
           UNIQUE_SUFFIX="${{ github.run_id }}-${{ github.run_attempt }}"
-          BRANCH_NAME="externpro-update-${CLEAN_DESCRIBE}-${UNIQUE_SUFFIX}"
+          BRANCH_NAME="xpupdate-${CLEAN_DESCRIBE}-${UNIQUE_SUFFIX}"
           git checkout -b "$BRANCH_NAME"
           echo "branch_name=$BRANCH_NAME" >> $GITHUB_OUTPUT
       -
@@ -578,7 +578,16 @@ jobs:
           fi
           git -c http.extraheader= push --set-upstream origin "${{ steps.branch.outputs.branch_name }}"
       -
+        name: Ensure labels exist
+        if: inputs.create_pr && steps.pr_needed.outputs.pr_needed == 'true'
+        uses: ./.devcontainer/.github/actions/labels-mgmt
+        env:
+          GH_TOKEN: ${{ secrets.workflow_write_token || github.token }}
+        with:
+          cleanup_legacy_labels: ""
+      -
         name: Create Pull Request
+        id: create_pr
         if: inputs.create_pr && steps.pr_needed.outputs.pr_needed == 'true'
         run: |
           set -euo pipefail
@@ -659,41 +668,18 @@ jobs:
             --body-file "$BODY_FILE")
             echo "Created PR: $PR_URL"
           fi
-          "${GH_RETRY[@]}" gh label create "dependencies" --color "0B3D2E" --description "dependency updates" >/dev/null 2>&1 || true
-          "${GH_RETRY[@]}" gh label create "externpro" --color "0B3D2E" --description "externpro updates" >/dev/null 2>&1 || true
-          "${GH_RETRY[@]}" gh label create "release:tag" --color "FF6A00" --description "Tag release on merge" >/dev/null 2>&1 || true
+          echo "pr_url=$PR_URL" >> "$GITHUB_OUTPUT"
           "${GH_RETRY[@]}" gh pr edit "$PR_URL" --add-label "dependencies" >/dev/null 2>&1 || echo "Label 'dependencies' not found; skipping"
-          "${GH_RETRY[@]}" gh pr edit "$PR_URL" --add-label "externpro" >/dev/null 2>&1 || echo "Label 'externpro' not found; skipping"
-          # Close superseded PRs from previous runs.
-          # Criteria:
-          # - head branch name starts with externpro-update-
-          # - label includes externpro (if labels are available)
-          # - head branch is not the current HEAD_BRANCH
-          SUPERSEDED_PRS=$("${GH_RETRY[@]}" gh pr list --state open --json number,headRefName,labels --jq '.[] | select(.headRefName | startswith("externpro-update-")) | select(.headRefName != env.HEAD_BRANCH) | select(((.labels // []) | map(.name) | index("externpro")) != null) | "\(.number) \(.headRefName)"')
-          if [ -n "$SUPERSEDED_PRS" ]; then
-            while IFS= read -r pr; do
-              [ -z "$pr" ] && continue
-              PR_NUMBER=$(printf '%s' "$pr" | awk '{print $1}')
-              SUPERSEDED_HEAD_REF=$(printf '%s' "$pr" | awk '{print $2}')
-              if [ -z "$PR_NUMBER" ] || [ -z "$SUPERSEDED_HEAD_REF" ]; then
-                continue
-              fi
-              "${GH_RETRY[@]}" gh pr close "$PR_NUMBER" --comment "Superseded by $PR_URL" >/dev/null 2>&1 || echo "Failed to close PR #$PR_NUMBER"
-              if [ "$SUPERSEDED_HEAD_REF" = "$HEAD_BRANCH" ]; then
-                continue
-              fi
-              case "$SUPERSEDED_HEAD_REF" in
-                externpro-update-*)
-                  REF_ENC=$(printf '%s' "$SUPERSEDED_HEAD_REF" | sed 's|/|%2F|g')
-                  if "${GH_RETRY[@]}" gh api -X DELETE "repos/${{ github.repository }}/git/refs/heads/${REF_ENC}" >/dev/null 2>&1; then
-                    echo "Deleted superseded branch: $SUPERSEDED_HEAD_REF"
-                  else
-                    echo "Could not delete branch '$SUPERSEDED_HEAD_REF' (missing/protected/insufficient permissions); skipping"
-                  fi
-                  ;;
-                *)
-                  echo "Refusing to delete non-automation branch '$SUPERSEDED_HEAD_REF' from superseded PR #$PR_NUMBER"
-                  ;;
-              esac
-            done <<< "$SUPERSEDED_PRS"
-          fi
+          "${GH_RETRY[@]}" gh pr edit "$PR_URL" --add-label "xpupdate" >/dev/null 2>&1 || echo "Label 'xpupdate' not found; skipping"
+      -
+        name: Close superseded PRs
+        if: inputs.create_pr && steps.pr_needed.outputs.pr_needed == 'true'
+        uses: ./.devcontainer/.github/actions/pr-close-superseded
+        env:
+          GH_TOKEN: ${{ secrets.workflow_write_token || github.token }}
+        with:
+          head_branch_prefix: xpupdate-
+          keep_head_branch: ${{ steps.branch.outputs.branch_name }}
+          label_name: xpupdate
+          pr_url: ${{ steps.create_pr.outputs.pr_url }}
+          delete_branches: "true"
