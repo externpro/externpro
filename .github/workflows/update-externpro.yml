@@ -193,12 +193,54 @@ jobs:
           OWN_REPO_NAME=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')
           echo "owner_repo=${OWN_REPO_NAME}" >> "$GITHUB_OUTPUT"
       -
-        name: Log in to GitHub Container Registry (for CMake configure)
+        name: GHCR diagnostics (context)
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "--- github context"
+          echo "github.repository=${{ github.repository }}"
+          echo "github.repository_owner=${{ github.repository_owner }}"
+          echo "github.actor=${{ github.actor }}"
+          echo "runner.os=${{ runner.os }}"
+          echo "runner.arch=${{ runner.arch }}"
+          echo "--- docker"
+          docker version || true
+          docker info 2>/dev/null | sed -n '1,80p' || true
+      -
+        name: Probe GHCR access (anonymous first)
+        id: ghcr_probe
+        shell: bash
+        run: |
+          set -euo pipefail
+          case "${{ runner.arch }}" in
+            X64) ARCH=amd64 ;;
+            ARM64) ARCH=arm64 ;;
+            *) echo "Unsupported runner.arch '${{ runner.arch }}'" >&2; exit 1 ;;
+          esac
+          IMAGE="ghcr.io/${{ steps.names.outputs.owner_repo }}/bldimg-${ARCH}-${{ inputs.build_container }}:latest"
+          echo "image=${IMAGE}" >> "$GITHUB_OUTPUT"
+          echo "Probing image anonymously (public images should work without auth): ${IMAGE}"
+          docker logout ghcr.io >/dev/null 2>&1 || true
+          set +e
+          docker manifest inspect "${IMAGE}" >/tmp/manifest.inspect.out 2>/tmp/manifest.inspect.err
+          RC=$?
+          set -e
+          if [ $RC -eq 0 ]; then
+            echo "needs_auth=false" >> "$GITHUB_OUTPUT"
+            echo "✓ Anonymous manifest inspect succeeded"
+          else
+            echo "needs_auth=true" >> "$GITHUB_OUTPUT"
+            echo "Anonymous manifest inspect failed (rc=$RC). stderr:" >&2
+            sed -n '1,120p' /tmp/manifest.inspect.err >&2 || true
+          fi
+      -
+        name: Log in to GitHub Container Registry (conditional)
+        if: ${{ steps.ghcr_probe.outputs.needs_auth == 'true' }}
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
-          password: ${{ github.token }}
+          password: ${{ secrets.workflow_write_token != '' && secrets.workflow_write_token || github.token }}
       -
         name: Snapshot submodule dependency artifacts (pre-configure)
         id: submodule_deps_pre
@@ -259,8 +301,14 @@ jobs:
           esac
           IMAGE="ghcr.io/${{ steps.names.outputs.owner_repo }}/bldimg-${ARCH}-${{ inputs.build_container }}:latest"
           echo "Running CMake configure in container: ${IMAGE}"
-          if ! docker manifest inspect "${IMAGE}" >/dev/null 2>&1; then
-            echo "Container image not found or not accessible: ${IMAGE}" >&2
+          echo "--- docker manifest inspect (verbose)"
+          set +e
+          docker manifest inspect "${IMAGE}" 2>&1 | sed -n '1,140p'
+          MI_RC=${PIPESTATUS[0]}
+          set -e
+          if [ "${MI_RC}" -ne 0 ]; then
+            echo "Container image not found or not accessible: ${IMAGE} (manifest inspect rc=${MI_RC})" >&2
+            echo "If this image is public, anonymous access should work; otherwise ensure the token used for ghcr login has read access." >&2
             exit 1
           fi
           echo "--- dependency files before"
