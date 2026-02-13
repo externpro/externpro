@@ -147,5 +147,5 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           image-names: ${{ format('{0}/bldimg-{1}-{2}', needs.lc-repo-names.outputs.repo, matrix.arch, matrix.buildpro_image) }}
           tag-selection: untagged
-          cut-off: 1m
+          cut-off: 30d
           dry-run: false
