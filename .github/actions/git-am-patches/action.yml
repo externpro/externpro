@@ -1,0 +1,44 @@
+name: Apply Patch Series (git am)
+description: Optionally generate a patch series (git format-patch) and apply it onto the current checkout using git am -3.
+inputs:
+  patch_dir:
+    description: Directory containing *.patch files to apply; if range is set, patches are generated into this directory.
+    required: true
+  range:
+    description: Optional git revision range to export using git format-patch (e.g. v1.2.3..v1.2.4).
+    required: false
+    default: ""
+runs:
+  using: composite
+  steps:
+    -
+      name: Apply patches
+      shell: bash
+      run: |
+        set -euo pipefail
+        PATCH_DIR="${{ inputs.patch_dir }}"
+        RANGE="${{ inputs.range }}"
+        if [ -n "$(git status --porcelain=v1)" ]; then
+          echo "Error: working tree is not clean; refusing to run git am" >&2
+          git status --porcelain=v1 >&2 || true
+          exit 1
+        fi
+        if [ -n "$RANGE" ]; then
+          mkdir -p "$PATCH_DIR"
+          rm -f "$PATCH_DIR"/*.patch >/dev/null 2>&1 || true
+          git format-patch -o "$PATCH_DIR" "$RANGE" >/dev/null
+        fi
+        shopt -s nullglob
+        mapfile -t PATCHES < <(ls -1 "$PATCH_DIR"/*.patch 2>/dev/null | sort)
+        if [ "${#PATCHES[@]}" -eq 0 ]; then
+          echo "Error: no .patch files found in $PATCH_DIR" >&2
+          exit 1
+        fi
+        on_fail() {
+          echo "git am failed; status:" >&2
+          git status --porcelain=v1 >&2 || true
+          git am --show-current-patch=diff >&2 || true
+        }
+        trap on_fail ERR
+        git am -3 "${PATCHES[@]}"
+        trap - ERR
