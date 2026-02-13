@@ -164,7 +164,7 @@ jobs:
             BASE_VERSION="${BASE_VERSION#v}"
             {
               echo "tag: ${BASE_TAG}"
-              echo "message: \"externpro version ${BASE_VERSION} tag\""
+              echo "message: \"xpro version ${BASE_VERSION} tag\""
             } > "${INTENT_FILE}"
             git add "${INTENT_FILE}"
             echo "intent_created=true" >> "$GITHUB_OUTPUT"
