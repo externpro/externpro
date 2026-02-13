@@ -123,6 +123,27 @@ jobs:
           git commit -m "gitignore: add externpro ignores" -- .gitignore
           echo "committed=true" >> "$GITHUB_OUTPUT"
       -
+        name: Detect patch series
+        id: patches
+        shell: bash
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          patches=(patches/*.patch)
+          if [ -d patches ] && [ "${#patches[@]}" -gt 0 ]; then
+            echo "Found ${#patches[@]} patch(es) under patches/"
+            echo "present=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "No patches/*.patch found"
+            echo "present=false" >> "$GITHUB_OUTPUT"
+          fi
+      -
+        name: Apply patches
+        if: steps.patches.outputs.present == 'true'
+        uses: ./.devcontainer/.github/actions/git-am-patches
+        with:
+          patch_dir: patches
+      -
         name: Determine if PR is needed
         id: pr_needed
         run: |
