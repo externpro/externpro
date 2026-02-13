@@ -1,6 +1,6 @@
 # How-to: modify a project to build with externpro
 
-... and utilize externpro cmake, docker build images, and github actions shared workflows to create devel packages
+... and utilize externpro cmake, docker build images, and github actions shared workflows to create xpro packages
 
 1. attempt to find project on github, then fork or start a new project on github
    * there is no requirement to use the externpro organization, projects can be hosted anywhere
@@ -27,7 +27,7 @@
    _bld*/
    docker-compose.override.yml
    ```
-1. consider updating the default branch name to `dev` if it is not already
+1. consider updating the default branch name to `xpro` if it is not already
 1. GitHub Actions workflows
    * add GitHub Actions workflows from externpro
       ```bash
@@ -43,7 +43,7 @@
         [spdlog](https://github.com/externpro/externpro/blob/main/cmake/README.md#spdlog)
 1. possibly modify CMakePresetsBase.json
    * add a `cacheVariables` section to set variables
-     * `XP_NAMESPACE` or `XP_INSTALL_CMAKEDIR` are common variables I add to CMakePresetsBase.json... and then modify CMakeLists.txt to use one of them in determining whether the project is being built via externpro cmake or not
+     * `XP_NAMESPACE` is a common variable I add to CMakePresetsBase.json... and then modify CMakeLists.txt to use it in determining whether the project is being built via externpro cmake or not
    ```diff
    diff --git a/CMakePresetsBase.json b/CMakePresetsBase.json
    index 085cdc3..4489d79 100644
@@ -74,30 +74,12 @@
        * appends `.devcontainer/cmake/` directory to `CMAKE_MODULE_PATH`, if it's not already in `CMAKE_MODULE_PATH`
        * includes [pros](https://github.com/externpro/externpro/blob/main/cmake/pros.cmake), which defines the default dependencies/projects provided by externpro
        * calls `cmake_language(SET_DEPENDENCY_PROVIDER` to set externpro as the dependency provider so all `find_package()` calls are routed through the `externpro_provide_dependency()` macro also defined in `xproinc`
-   * there really is no reason to modify the `project()` call... if the cmake `project()` call has a `VERSION` argument just keep it as-is -- `xpPackageDevel()` (more specifically `xpGetVersionString()`) uses `git describe --tags` to get the version string (and possibly a 'dirtyrepo' marker if the repository is 'dirty'), so the `VERSION` doesn't have to be specified in `project()` if it's not already specified there in existing cmake
-   * set preprocessor, compiler, linker flags by including `xpflags.cmake` so all externpro-built projects are built with a common set of flags https://github.com/externpro/externpro/blob/main/cmake/xpflags.cmake
-     ```cmake
-     include(xpflags)
-     ```
-   * setup for and call `xpPackageDevel()`...
-     * the extraction of a devel package happens by calling `xpFindPkg()`, which calls `ipGetPrefixPath()`, which assumes the `PKG_NAME` is the same as the repository name (https://github.com/externpro/externpro/blob/25.05/cmake/xpfunmac.cmake#L1356)
-     * so in the creation of the devel package, if the `project()` name (which becomes `CMAKE_PROJECT_NAME`) doesn't match the repository name, then
-       ```cmake
-       set(CMAKE_PROJECT_NAME "<repository-name>") # before calling `xpPackageDevel()`
-       ```
-   * conditionally set `install()` arguments `COMPONENT` and `NAMESPACE` if project is externpro-built, for example:
-     ```cmake
-     if(DEFINED XP_INSTALL_CMAKEDIR) # externpro-built
-       set(XP_COMPONENT "devel") # why they are referred to as `devel` packages
-       set(XP_NAMESPACE "xpro::") # helps distinguish an externpro-built package from a non-externpro-built package
-     else() # whatever these values are in pre-existing cmake
-       set(XP_COMPONENT "bar")
-       set(XP_NAMESPACE "foo::")
-     endif()
-     ```
-     or perhaps instead of `XP_[COMPONENT|NAMESPACE]`... use variable names to match the existing project variable naming
-   * consider some way of disabling the `install()` of `pkgconfig` related files, as there is no need for them in externpro devel packages
-1. a great way to learn what should be modified or created is to examine project diffs links in the [README.md](README.md#DIFF_TABLE)
+   * there really is no reason to modify the `project()` call... if the cmake `project()` call has a `VERSION` argument just keep it as-is -- `xpExternPackage()` (more specifically `xpGetVersionString()`) uses `git describe --tags` to get the version string (and possibly a 'dirtyrepo' marker if the repository is 'dirty'), so the `VERSION` doesn't have to be specified in `project()` if it's not already specified there in existing cmake
+   * setup for and call `xpExternPackage()`...
+     * the extraction of an xpro package happens by calling `xpFindPkg()`, which calls `ipGetProPath()`, which assumes the `PKG_NAME` is the same as the repository name (https://github.com/externpro/externpro/blob/25.07.7/cmake/xpfunmac.cmake#L661)
+     * so in the creation of the xpro package, if the `project()` name (which becomes `CMAKE_PROJECT_NAME`) doesn't match the repository name, then specify the repository name using the `REPO_NAME` parameter of `xpExternPackage()`
+   * consider some way of disabling the `install()` of `pkgconfig` related files, as there is no need for them in externpro xpro packages
+1. a great way to learn what should be modified or created is to examine project diffs links in the [README.md](README.md)
    * `[patch]` diff modifies/patches existing cmake (example: [fmt](https://github.com/externpro/externpro/blob/main/cmake/README.md#fmt))
    * `[intro]` diff introduces cmake (example: [argon2](https://github.com/externpro/externpro/blob/main/cmake/README.md#argon2))
    * `[auto]` diff adds cmake to replace autotools/configure/make (example: [libspatialite](https://github.com/externpro/externpro/blob/main/cmake/README.md#libspatialite))
