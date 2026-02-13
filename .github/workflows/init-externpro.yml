@@ -12,7 +12,7 @@ on:
         description: 'Token with permission to update .github/workflows (PAT or fine-grained token).'
         required: true
 jobs:
-  init:
+  externpro:
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -75,6 +75,32 @@ jobs:
             exit 0
           fi
           git commit -m "add GitHub Actions workflows" -- .github/workflows
+      -
+        name: Add externpro .gitignore
+        shell: bash
+        run: |
+          set -euo pipefail
+          touch .gitignore
+          required_lines=(
+            "# externpro"
+            ".env"
+            "_bld*/"
+            "docker-compose.override.yml"
+          )
+          for line in "${required_lines[@]}"; do
+            if grep -Fxq -- "$line" .gitignore; then
+              echo "gitignore already contains: $line"
+            else
+              echo "adding to gitignore: $line"
+              printf '%s\n' "$line" >> .gitignore
+            fi
+          done
+          git add .gitignore
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          git commit -m "gitignore: add externpro ignores" -- .gitignore
       -
         name: Push changes
         shell: bash
