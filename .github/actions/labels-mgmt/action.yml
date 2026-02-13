@@ -1,0 +1,42 @@
+name: Labels Management
+description: Ensure common workflow labels exist (and optionally delete legacy labels).
+inputs:
+  cleanup_legacy_labels:
+    description: Newline-separated list of legacy labels to delete if present (destructive; opt-in).
+    # Example:
+    #   with:
+    #     cleanup_legacy_labels: |
+    #       externpro
+    #       old-label-2
+    required: false
+    default: ""
+runs:
+  using: composite
+  steps:
+    -
+      name: Ensure labels exist
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        if [ -z "${GH_TOKEN:-}" ]; then
+          echo "Error: GH_TOKEN must be set" >&2
+          exit 1
+        fi
+
+        GH_RETRY=(bash "${{ github.action_path }}/../gh-retry/gh-retry.sh")
+
+        # Create/update labels (create is idempotent; ignore if it already exists).
+        "${GH_RETRY[@]}" gh label create "dependencies" --color "0B3D2E" --description "dependency updates" >/dev/null 2>&1 || true
+        "${GH_RETRY[@]}" gh label create "xpinit" --color "0B3D2E" --description "externpro initialization" >/dev/null 2>&1 || true
+        "${GH_RETRY[@]}" gh label create "xpupdate" --color "0B3D2E" --description "externpro update automation" >/dev/null 2>&1 || true
+        "${GH_RETRY[@]}" gh label create "release:tag" --color "FF6A00" --description "Tag release on merge" >/dev/null 2>&1 || true
+
+        CLEANUP_LIST='${{ inputs.cleanup_legacy_labels }}'
+        if [ -n "$CLEANUP_LIST" ]; then
+          while IFS= read -r label; do
+            label=$(printf '%s' "$label" | tr -d '\r' | xargs)
+            [ -z "$label" ] && continue
+            "${GH_RETRY[@]}" gh label delete "$label" --yes >/dev/null 2>&1 || true
+          done <<< "$CLEANUP_LIST"
+        fi
