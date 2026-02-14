@@ -9,8 +9,8 @@ on:
         required: true
         type: number
     secrets:
-      workflow_write_token:
-        description: 'Optional token to push tags and trigger downstream workflows. If not set, uses GITHUB_TOKEN (note: GITHUB_TOKEN pushes do not trigger other workflows).'
+      automation_token:
+        description: 'Optional token used for automation (tag push). If not set, uses GITHUB_TOKEN (note: GITHUB_TOKEN pushes do not trigger other workflows).'
         required: false
 jobs:
   release:
@@ -25,7 +25,7 @@ jobs:
           ref: ${{ inputs.merge_sha }}
           fetch-depth: 0
           fetch-tags: true
-          token: ${{ secrets.workflow_write_token || github.token }}
+          token: ${{ secrets.automation_token || github.token }}
       -
         name: Install yq
         shell: bash

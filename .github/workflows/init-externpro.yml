@@ -8,8 +8,8 @@ on:
         type: string
         default: '.devcontainer'
     secrets:
-      workflow_write_token:
-        description: 'Token with permission to update .github/workflows (PAT or fine-grained token).'
+      automation_token:
+        description: 'Token used for automation (push/PR/labels; may need workflow permission when updating workflows).'
         required: true
 jobs:
   externpro:
@@ -163,12 +163,12 @@ jobs:
         shell: bash
         if: steps.pr_needed.outputs.pr_needed == 'true'
         env:
-          TOKEN: ${{ secrets.workflow_write_token }}
+          TOKEN: ${{ secrets.automation_token }}
         run: |
           set -euo pipefail
           TOKEN=$(printf '%s' "${TOKEN}" | tr -d '\r\n' | xargs)
           if [ -z "${TOKEN}" ]; then
-            echo "Error: workflow_write_token is required" >&2
+            echo "Error: automation_token is required" >&2
             exit 1
           fi
           git config --unset-all http.https://github.com/.extraheader || true
@@ -179,7 +179,7 @@ jobs:
         if: steps.pr_needed.outputs.pr_needed == 'true'
         uses: ./.devcontainer/.github/actions/labels-mgmt
         env:
-          GH_TOKEN: ${{ secrets.workflow_write_token || github.token }}
+          GH_TOKEN: ${{ secrets.automation_token || github.token }}
         with:
           cleanup_legacy_labels: ""
       -
@@ -188,7 +188,7 @@ jobs:
         if: steps.pr_needed.outputs.pr_needed == 'true'
         run: |
           set -euo pipefail
-          GH_TOKEN="${{ secrets.workflow_write_token }}"
+          GH_TOKEN="${{ secrets.automation_token }}"
           if [ -z "${GH_TOKEN}" ]; then
             GH_TOKEN="${{ github.token }}"
           fi
@@ -245,7 +245,7 @@ jobs:
         if: steps.pr_needed.outputs.pr_needed == 'true'
         uses: ./.devcontainer/.github/actions/pr-close-superseded
         env:
-          GH_TOKEN: ${{ secrets.workflow_write_token || github.token }}
+          GH_TOKEN: ${{ secrets.automation_token || github.token }}
         with:
           head_branch_prefix: xpinit-
           keep_head_branch: ${{ steps.branch.outputs.branch_name }}

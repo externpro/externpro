@@ -38,8 +38,8 @@ on:
         type: string
         default: 'main'
     secrets:
-      workflow_write_token:
-        description: 'Optional token with permission to update .github/workflows (PAT or fine-grained token). If not set, uses GITHUB_TOKEN.'
+      automation_token:
+        description: 'Optional token used for automation (push/PR/labels; may need workflow permission when updating workflows). If not set, uses GITHUB_TOKEN.'
         required: false
 jobs:
   externpro:
@@ -240,7 +240,7 @@ jobs:
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
-          password: ${{ secrets.workflow_write_token != '' && secrets.workflow_write_token || github.token }}
+          password: ${{ secrets.automation_token != '' && secrets.automation_token || github.token }}
       -
         name: Snapshot submodule dependency artifacts (pre-configure)
         id: submodule_deps_pre
@@ -431,14 +431,14 @@ jobs:
           echo "submodule_dependency_commit=true" >> "$GITHUB_OUTPUT"
           echo "✓ committed dependency artifacts in submodule"
           PUSH_TARGET="${{ inputs.submodule_dependency_push_target }}"
-          SUBMODULE_PUSH_TOKEN="${{ secrets.workflow_write_token }}"
+          SUBMODULE_PUSH_TOKEN="${{ secrets.automation_token }}"
           if [ -z "${SUBMODULE_PUSH_TOKEN}" ]; then
-            echo "Error: missing workflow_write_token for pushing submodule commit to externpro/externpro" >&2
-            echo "Provide a PAT/fine-grained token with access to externpro/externpro via the caller secret mapped to workflow_write_token (e.g., secrets.XPUPDATE_TOKEN)." >&2
+            echo "Error: missing automation_token for pushing submodule commit to externpro/externpro" >&2
+            echo "Provide a PAT/fine-grained token with access to externpro/externpro via the caller secret mapped to automation_token (e.g., secrets.XPRO_TOKEN)." >&2
             exit 1
           fi
           SUBMODULE_PUSH_TOKEN=$(printf '%s' "${SUBMODULE_PUSH_TOKEN}" | tr -d '\r\n' | xargs)
-          echo "workflow_write_token is set (length=${#SUBMODULE_PUSH_TOKEN})"
+          echo "automation_token is set (length=${#SUBMODULE_PUSH_TOKEN})"
           # actions/checkout injects an http extraheader for github.com using GITHUB_TOKEN.
           # That can override the remote URL auth and make the push authenticate as github-actions[bot].
           # Clear it inside the submodule before pushing and also force an empty extraheader for the push.
@@ -554,9 +554,9 @@ jobs:
           else
             NEEDS_WORKFLOW_TOKEN=true
           fi
-          TOKEN="${{ secrets.workflow_write_token }}"
+          TOKEN="${{ secrets.automation_token }}"
           if [ "${NEEDS_WORKFLOW_TOKEN}" = true ] && [ -z "${TOKEN}" ]; then
-            echo "Error: workflow updates include .github/workflows/*; provide workflow_write_token (PAT with workflow permission)." >&2
+            echo "Error: workflow updates include .github/workflows/*; provide automation_token (PAT with workflow permission)." >&2
             exit 1
           fi
           if [ -z "${TOKEN}" ]; then
@@ -564,7 +564,7 @@ jobs:
             echo "Using github.token for push"
           else
             TOKEN=$(printf '%s' "${TOKEN}" | tr -d '\r\n' | xargs)
-            echo "Using workflow_write_token for push (length=${#TOKEN})"
+            echo "Using automation_token for push (length=${#TOKEN})"
           fi
           # actions/checkout injects an http extraheader for github.com using the checkout token.
           # When checkout uses github.token, that header can override PAT-in-URL auth for later pushes.
@@ -582,7 +582,7 @@ jobs:
         if: inputs.create_pr && steps.pr_needed.outputs.pr_needed == 'true'
         uses: ./.devcontainer/.github/actions/labels-mgmt
         env:
-          GH_TOKEN: ${{ secrets.workflow_write_token || github.token }}
+          GH_TOKEN: ${{ secrets.automation_token || github.token }}
         with:
           cleanup_legacy_labels: ""
       -
@@ -591,7 +591,7 @@ jobs:
         if: inputs.create_pr && steps.pr_needed.outputs.pr_needed == 'true'
         run: |
           set -euo pipefail
-          GH_TOKEN="${{ secrets.workflow_write_token }}"
+          GH_TOKEN="${{ secrets.automation_token }}"
           if [ -z "${GH_TOKEN}" ]; then
             GH_TOKEN="${{ github.token }}"
           fi
@@ -676,7 +676,7 @@ jobs:
         if: inputs.create_pr && steps.pr_needed.outputs.pr_needed == 'true'
         uses: ./.devcontainer/.github/actions/pr-close-superseded
         env:
-          GH_TOKEN: ${{ secrets.workflow_write_token || github.token }}
+          GH_TOKEN: ${{ secrets.automation_token || github.token }}
         with:
           head_branch_prefix: xpupdate-
           keep_head_branch: ${{ steps.branch.outputs.branch_name }}
