@@ -9,4 +9,4 @@ jobs:
   init:
     uses: externpro/externpro/.github/workflows/init-externpro.yml@main
     secrets:
-      workflow_write_token: ${{ secrets.XPUPDATE_TOKEN }}
+      automation_token: ${{ secrets.XPRO_TOKEN }}
