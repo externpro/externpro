@@ -95,6 +95,25 @@ jobs:
           git commit -m "add GitHub Actions workflows" -- .github/workflows
           echo "committed=true" >> "$GITHUB_OUTPUT"
       -
+        name: Create release-tag intent (if missing)
+        id: release_intent
+        uses: ./.devcontainer/.github/actions/release-tag-intent
+      -
+        name: Commit release-tag intent
+        id: release_intent_commit
+        if: steps.release_intent.outputs.intent_created == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          INTENT_FILE="${{ steps.release_intent.outputs.intent_file }}"
+          if [ -z "${INTENT_FILE}" ] || [ ! -f "${INTENT_FILE}" ]; then
+            echo "release-tag intent file missing; nothing to commit"
+            echo "committed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          git commit -m "add release-tag intent" -- "${INTENT_FILE}"
+          echo "committed=true" >> "$GITHUB_OUTPUT"
+      -
         name: Add externpro .gitignore
         id: gitignore
         shell: bash
@@ -212,6 +231,8 @@ jobs:
           DOCKER_COMPOSE_COMMITTED="${{ steps.docker_compose.outputs.committed }}"
           CMAKE_PRESETS_COMMITTED="${{ steps.cmake_presets.outputs.committed }}"
           GHA_WORKFLOWS_COMMITTED="${{ steps.gha_workflows.outputs.committed }}"
+          RELEASE_INTENT_CREATED="${{ steps.release_intent.outputs.intent_created }}"
+          RELEASE_INTENT_TAG="${{ steps.release_intent.outputs.intent_tag }}"
           GITIGNORE_COMMITTED="${{ steps.gitignore.outputs.committed }}"
           PATCHES_PRESENT="${{ steps.patches.outputs.present }}"
           PATCH_COUNT="${{ steps.patches.outputs.patch_count }}"
@@ -223,6 +244,9 @@ jobs:
           fi
           if [ "$GHA_WORKFLOWS_COMMITTED" = "true" ]; then
             echo "- Add GitHub Actions workflows" >> "$BODY_FILE"
+          fi
+          if [ "$RELEASE_INTENT_CREATED" = "true" ]; then
+            echo "- Created \`.github/release-tag.yml\` (tag: \`${RELEASE_INTENT_TAG}\`)" >> "$BODY_FILE"
           fi
           if [ "$GITIGNORE_COMMITTED" = "true" ]; then
             echo "- Add externpro ignores to .gitignore" >> "$BODY_FILE"
