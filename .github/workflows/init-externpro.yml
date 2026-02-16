@@ -93,6 +93,7 @@ jobs:
             exit 0
           fi
           git commit -m "add GitHub Actions workflows" -- .github/workflows
+          echo "committed=true" >> "$GITHUB_OUTPUT"
       -
         name: Add externpro .gitignore
         id: gitignore
@@ -133,9 +134,11 @@ jobs:
           if [ -d patches ] && [ "${#patches[@]}" -gt 0 ]; then
             echo "Found ${#patches[@]} patch(es) under patches/"
             echo "present=true" >> "$GITHUB_OUTPUT"
+            echo "patch_count=${#patches[@]}" >> "$GITHUB_OUTPUT"
           else
             echo "No patches/*.patch found"
             echo "present=false" >> "$GITHUB_OUTPUT"
+            echo "patch_count=0" >> "$GITHUB_OUTPUT"
           fi
       -
         name: Apply patches
@@ -210,6 +213,8 @@ jobs:
           CMAKE_PRESETS_COMMITTED="${{ steps.cmake_presets.outputs.committed }}"
           GHA_WORKFLOWS_COMMITTED="${{ steps.gha_workflows.outputs.committed }}"
           GITIGNORE_COMMITTED="${{ steps.gitignore.outputs.committed }}"
+          PATCHES_PRESENT="${{ steps.patches.outputs.present }}"
+          PATCH_COUNT="${{ steps.patches.outputs.patch_count }}"
           if [ "$DOCKER_COMPOSE_COMMITTED" = "true" ]; then
             echo "- Add docker-compose links" >> "$BODY_FILE"
           fi
@@ -221,6 +226,11 @@ jobs:
           fi
           if [ "$GITIGNORE_COMMITTED" = "true" ]; then
             echo "- Add externpro ignores to .gitignore" >> "$BODY_FILE"
+          fi
+          if [ "$PATCHES_PRESENT" = "true" ]; then
+            echo "- Patch series detected and applied (${PATCH_COUNT} patch(es))" >> "$BODY_FILE"
+          else
+            echo "- No patch series detected" >> "$BODY_FILE"
           fi
           echo >> "$BODY_FILE"
           echo "---" >> "$BODY_FILE"
