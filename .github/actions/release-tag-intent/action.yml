@@ -4,6 +4,9 @@ outputs:
   intent_created:
     description: Whether the intent file was created in this run.
     value: ${{ steps.intent.outputs.intent_created }}
+  intent_modified:
+    description: Whether the intent file was created or updated in this run.
+    value: ${{ steps.intent.outputs.intent_modified }}
   intent_file:
     description: Path to the intent file.
     value: ${{ steps.intent.outputs.intent_file }}
@@ -23,36 +26,75 @@ runs:
       run: |
         set -euo pipefail
         INTENT_FILE=".github/release-tag.yml"
+        compute_base_tag() {
+          local t
+          t=$(git describe --tags --abbrev=0 2>/dev/null || true)
+          if [ -z "${t}" ]; then
+            t="xpv0.0.0"
+          fi
+          printf '%s' "${t}"
+        }
+        bump_xpv_tag() {
+          local base_tag version prefix digits width next_num padded
+          base_tag="$1"
+          version="${base_tag#xpv}"
+          if [[ ! "${version}" =~ [0-9]+$ ]]; then
+            printf '%s' "${base_tag}"
+            return 0
+          fi
+          prefix="${version%[0-9]*}"
+          digits="${version##*[^0-9]}"
+          width=${#digits}
+          next_num=$((10#${digits} + 1))
+          padded=$(printf "%0${width}d" "${next_num}")
+          printf 'xpv%s%s' "${prefix}" "${padded}"
+        }
+        compute_next_tag() {
+          local base_tag version
+          base_tag="$1"
+          if [[ "${base_tag}" == xpv* ]]; then
+            bump_xpv_tag "${base_tag}"
+            return 0
+          fi
+          version="${base_tag}"
+          if [[ "${version}" == v* ]]; then
+            version="${version#v}"
+          fi
+          printf 'xpv%s.1' "${version}"
+        }
         if [ -f "${INTENT_FILE}" ]; then
-          BASE_TAG=$(grep -E '^tag:' "${INTENT_FILE}" | head -1 | sed -E 's/^tag:[[:space:]]*//')
-          BASE_TAG=$(printf '%s' "${BASE_TAG}" | tr -d '\r' | xargs)
+          FILE_TAG=$(grep -E '^tag:' "${INTENT_FILE}" | head -1 | sed -E 's/^tag:[[:space:]]*//')
+          FILE_TAG=$(printf '%s' "${FILE_TAG}" | tr -d '\r' | xargs)
+          BASE_TAG=$(compute_base_tag)
+          if [ "${FILE_TAG}" = "${BASE_TAG}" ]; then
+            NEXT_TAG=$(compute_next_tag "${BASE_TAG}")
+            BASE_VERSION="${NEXT_TAG#xpv}"
+            {
+              echo "tag: ${NEXT_TAG}"
+              echo "message: \"xpro version ${BASE_VERSION} tag\""
+            } > "${INTENT_FILE}"
+            git add "${INTENT_FILE}"
+            BASE_TAG="${NEXT_TAG}"
+            echo "intent_modified=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "Intent tag does not match git base tag; leaving intent file unchanged. intent_tag=${FILE_TAG} git_base_tag=${BASE_TAG}"
+            BASE_TAG="${FILE_TAG}"
+            echo "intent_modified=false" >> "$GITHUB_OUTPUT"
+          fi
           echo "intent_created=false" >> "$GITHUB_OUTPUT"
         else
           mkdir -p .github
-          set +e
-          BASE_TAG=$(git describe --tags --abbrev=0 --match 'xpv*' 2>/dev/null)
-          RC=$?
-          set -e
-          if [ $RC -ne 0 ] || [ -z "${BASE_TAG}" ]; then
-            set +e
-            BASE_TAG=$(git describe --tags --abbrev=0 --match 'v*' 2>/dev/null)
-            RC=$?
-            set -e
-          fi
-          if [ $RC -ne 0 ] || [ -z "${BASE_TAG}" ]; then
-            BASE_TAG=$(git describe --tags --abbrev=0 2>/dev/null || true)
-          fi
-          if [ -z "${BASE_TAG}" ]; then
-            BASE_TAG="xpv0.0.0"
-          fi
-          BASE_VERSION="${BASE_TAG#xpv}"
-          BASE_VERSION="${BASE_VERSION#v}"
+          BASE_TAG=$(compute_base_tag)
+          NEXT_TAG=$(compute_next_tag "${BASE_TAG}")
+          BASE_VERSION="${NEXT_TAG#xpv}"
           {
-            echo "tag: ${BASE_TAG}"
+            echo "tag: ${NEXT_TAG}"
             echo "message: \"xpro version ${BASE_VERSION} tag\""
           } > "${INTENT_FILE}"
           git add "${INTENT_FILE}"
           echo "intent_created=true" >> "$GITHUB_OUTPUT"
+          echo "intent_modified=true" >> "$GITHUB_OUTPUT"
+          BASE_TAG="${NEXT_TAG}"
         fi
         echo "intent_file=${INTENT_FILE}" >> "$GITHUB_OUTPUT"
         echo "intent_tag=${BASE_TAG}" >> "$GITHUB_OUTPUT"
