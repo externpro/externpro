@@ -1,0 +1,79 @@
+name: GHCR Access
+description: Diagnose and optionally authenticate to GHCR for the build container image.
+inputs:
+  build_container:
+    description: Build container name (suffix in bldimg-<arch>-<build_container>:latest).
+    required: true
+  automation_token:
+    description: Optional token for authenticating to GHCR. If not set, uses github.token.
+    required: false
+    default: ''
+outputs:
+  owner_repo:
+    description: Lowercased owner/repo for ghcr image path.
+    value: ${{ steps.names.outputs.owner_repo }}
+  image:
+    description: Full container image reference.
+    value: ${{ steps.probe.outputs.image }}
+  needs_auth:
+    description: Whether anonymous manifest inspection failed and auth is required.
+    value: ${{ steps.probe.outputs.needs_auth }}
+runs:
+  using: composite
+  steps:
+    -
+      name: Lowercase repository names (for container image)
+      id: names
+      shell: bash
+      run: |
+        OWN_REPO_NAME=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')
+        echo "owner_repo=${OWN_REPO_NAME}" >> "$GITHUB_OUTPUT"
+    -
+      name: GHCR diagnostics (context)
+      shell: bash
+      run: |
+        set -euo pipefail
+        echo "--- github context"
+        echo "github.repository=${{ github.repository }}"
+        echo "github.repository_owner=${{ github.repository_owner }}"
+        echo "github.actor=${{ github.actor }}"
+        echo "runner.os=${{ runner.os }}"
+        echo "runner.arch=${{ runner.arch }}"
+        echo "--- docker"
+        docker version || true
+        docker info 2>/dev/null | sed -n '1,80p' || true
+    -
+      name: Probe GHCR access (anonymous first)
+      id: probe
+      shell: bash
+      run: |
+        set -euo pipefail
+        case "${{ runner.arch }}" in
+          X64) ARCH=amd64 ;;
+          ARM64) ARCH=arm64 ;;
+          *) echo "Unsupported runner.arch '${{ runner.arch }}'" >&2; exit 1 ;;
+        esac
+        IMAGE="ghcr.io/${{ steps.names.outputs.owner_repo }}/bldimg-${ARCH}-${{ inputs.build_container }}:latest"
+        echo "image=${IMAGE}" >> "$GITHUB_OUTPUT"
+        echo "Probing image anonymously (public images should work without auth): ${IMAGE}"
+        docker logout ghcr.io >/dev/null 2>&1 || true
+        set +e
+        docker manifest inspect "${IMAGE}" >/tmp/manifest.inspect.out 2>/tmp/manifest.inspect.err
+        RC=$?
+        set -e
+        if [ $RC -eq 0 ]; then
+          echo "needs_auth=false" >> "$GITHUB_OUTPUT"
+          echo "✓ Anonymous manifest inspect succeeded"
+        else
+          echo "needs_auth=true" >> "$GITHUB_OUTPUT"
+          echo "Anonymous manifest inspect failed (rc=$RC). stderr:" >&2
+          sed -n '1,120p' /tmp/manifest.inspect.err >&2 || true
+        fi
+    -
+      name: Log in to GitHub Container Registry (conditional)
+      if: ${{ steps.probe.outputs.needs_auth == 'true' }}
+      uses: docker/login-action@v3
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ inputs.automation_token != '' && inputs.automation_token || github.token }}
