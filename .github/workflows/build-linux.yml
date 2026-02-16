@@ -30,6 +30,8 @@ on:
 jobs:
   lc-repo-names:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     outputs:
       owner_repo: ${{ steps.names.outputs.owner_repo }}
       repo: ${{ steps.names.outputs.repo }}
@@ -45,6 +47,9 @@ jobs:
   build-docker-image:
     needs: lc-repo-names
     runs-on: ${{ matrix.arch == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
+    permissions:
+      contents: read
+      packages: write
     strategy:
       fail-fast: false
       matrix:
@@ -70,7 +75,7 @@ jobs:
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          password: ${{ github.token }}
       -
         name: Build and push docker image
         run: |
@@ -101,6 +106,9 @@ jobs:
     needs: [lc-repo-names, build-docker-image]
     if: ${{ needs.build-docker-image.result == 'success' }}
     runs-on: ${{ matrix.arch == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
+    permissions:
+      contents: read
+      packages: read
     strategy:
       fail-fast: false
       matrix:
@@ -110,7 +118,7 @@ jobs:
       image: ${{ format('ghcr.io/{0}/bldimg-{1}-{2}:latest', needs.lc-repo-names.outputs.owner_repo, matrix.arch, matrix.buildpro_image) }}
       credentials:
         username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
+        password: ${{ github.token }}
     steps:
       -
         name: Checkout repo
