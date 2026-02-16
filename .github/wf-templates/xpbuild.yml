@@ -14,7 +14,7 @@ jobs:
       contents: read
       pull-requests: write
       packages: write
-    uses: externpro/externpro/.github/workflows/build-linux.yml@25.07.8
+    uses: externpro/externpro/.github/workflows/build-linux.yml@main
     secrets: inherit
   macos:
     uses: externpro/externpro/.github/workflows/build-macos.yml@25.07.8
