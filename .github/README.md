@@ -42,11 +42,13 @@ This directory contains GitHub Actions building blocks (reusable workflows, comp
 
 ### Required secrets
 
-`xpinit` updates files under `.github/workflows/` in the caller repository. GitHub requires a token with workflow-write permission for this.
+The caller workflow templates (`xpinit`, `xpupdate`, and `xptag`) map a repository secret named `XPRO_TOKEN` to the reusable workflows’ `automation_token` secret.
 
-- Add a repository secret named `XPUPDATE_TOKEN` in the caller repo.
-- `XPUPDATE_TOKEN` should be a PAT or fine-grained token with:
-  - read/write to the repository contents
-  - permission to update workflows (`.github/workflows/*`)
+`XPRO_TOKEN` should be a PAT or fine-grained token with:
+- read/write to the repository contents
+- permission to update workflows (`.github/workflows/*`)
 
-The caller workflow maps this to the reusable workflow’s `workflow_write_token` secret.
+For step-by-step instructions (with screenshots) on creating a fine-grained PAT and adding `XPRO_TOKEN` to a repo, see:
+
+- [Creating a fine-grained PAT](docs/secrets-and-tokens.md#creating-a-fine-grained-pat)
+- [Adding `XPRO_TOKEN` to the repository](docs/secrets-and-tokens.md#adding-xpro_token-to-the-repository)
