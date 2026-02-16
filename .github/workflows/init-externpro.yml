@@ -101,7 +101,7 @@ jobs:
       -
         name: Commit release-tag intent
         id: release_intent_commit
-        if: steps.release_intent.outputs.intent_created == 'true'
+        if: steps.release_intent.outputs.intent_modified == 'true'
         shell: bash
         run: |
           set -euo pipefail
@@ -245,8 +245,12 @@ jobs:
           if [ "$GHA_WORKFLOWS_COMMITTED" = "true" ]; then
             echo "- Add GitHub Actions workflows" >> "$BODY_FILE"
           fi
-          if [ "$RELEASE_INTENT_CREATED" = "true" ]; then
-            echo "- Created \`.github/release-tag.yml\` (tag: \`${RELEASE_INTENT_TAG}\`)" >> "$BODY_FILE"
+          if [ "${{ steps.release_intent.outputs.intent_modified }}" = "true" ]; then
+            if [ "${{ steps.release_intent.outputs.intent_created }}" = "true" ]; then
+              echo "- Created \`.github/release-tag.yml\` (tag: \`${RELEASE_INTENT_TAG}\`)" >> "$BODY_FILE"
+            else
+              echo "- Updated \`.github/release-tag.yml\` (tag: \`${RELEASE_INTENT_TAG}\`)" >> "$BODY_FILE"
+            fi
           fi
           if [ "$GITIGNORE_COMMITTED" = "true" ]; then
             echo "- Add externpro ignores to .gitignore" >> "$BODY_FILE"

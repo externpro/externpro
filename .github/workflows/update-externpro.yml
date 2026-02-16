@@ -491,7 +491,7 @@ jobs:
           git commit -m "dependency updates" -- $FILES
       -
         name: Commit release-tag intent
-        if: inputs.create_pr && steps.pr_needed.outputs.pr_needed == 'true' && steps.release_intent.outputs.intent_created == 'true'
+        if: inputs.create_pr && steps.pr_needed.outputs.pr_needed == 'true' && steps.release_intent.outputs.intent_modified == 'true'
         run: |
           INTENT_FILE="${{ steps.release_intent.outputs.intent_file }}"
           if [ -z "${INTENT_FILE}" ] || [ ! -f "${INTENT_FILE}" ]; then
@@ -593,8 +593,12 @@ jobs:
           if [ "${{ steps.commit_submodule_dependencies.outputs.submodule_dependency_commit }}" = "true" ]; then
             echo "- Updated externpro submodule dependency artifacts (pushed to \`${{ steps.commit_submodule_dependencies.outputs.submodule_dependency_push_ref }}\`)" >> "$BODY_FILE"
           fi
-          if [ "${{ steps.release_intent.outputs.intent_created }}" = "true" ]; then
-            echo "- Created \`.github/release-tag.yml\` (tag: \`${{ steps.release_intent.outputs.intent_tag }}\`)" >> "$BODY_FILE"
+          if [ "${{ steps.release_intent.outputs.intent_modified }}" = "true" ]; then
+            if [ "${{ steps.release_intent.outputs.intent_created }}" = "true" ]; then
+              echo "- Created \`.github/release-tag.yml\` (tag: \`${{ steps.release_intent.outputs.intent_tag }}\`)" >> "$BODY_FILE"
+            else
+              echo "- Updated \`.github/release-tag.yml\` (tag: \`${{ steps.release_intent.outputs.intent_tag }}\`)" >> "$BODY_FILE"
+            fi
           fi
           if [ -n "${{ steps.release_intent.outputs.intent_tag }}" ]; then
             echo "- If you add the \\\"release:tag\\\" label, the tag will be \\\`${{ steps.release_intent.outputs.intent_tag }}\\\`" >> "$BODY_FILE"
