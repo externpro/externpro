@@ -27,11 +27,6 @@ on:
         required: false
         type: string
         default: 'rocky9-gcc13'
-      create_pr:
-        description: 'Whether to create a pull request'
-        required: false
-        type: boolean
-        default: true
     secrets:
       automation_token:
         description: 'Optional token used for automation (push/PR/labels; may need workflow permission when updating workflows). If not set, uses GITHUB_TOKEN.'
@@ -125,12 +120,12 @@ jobs:
       -
         name: Create release-tag intent (if missing)
         id: release_intent
-        if: ${{ always() && inputs.create_pr }}
+        if: ${{ always() }}
         uses: ./.devcontainer/.github/actions/release-tag-intent
       -
         name: Update caller workflows
         id: update_workflows
-        if: ${{ always() && inputs.create_pr }}
+        if: ${{ always() }}
         uses: ./.devcontainer/.github/actions/sync-caller-workflows
         with:
           workflow_dir: .github/workflows
@@ -147,7 +142,7 @@ jobs:
       -
         name: Configure and snapshot dependency artifacts
         id: deps
-        if: ${{ inputs.create_pr }}
+        if: ${{ always() }}
         uses: ./.devcontainer/.github/actions/externpro-deps-configure
         with:
           submodule_path: ${{ steps.validate.outputs.submodule_path }}
@@ -170,7 +165,7 @@ jobs:
       -
         name: Stage submodule pointer update
         id: stage_submodule
-        if: ${{ always() && inputs.create_pr }}
+        if: ${{ always() }}
         run: |
           # Stage submodule pointer update after any submodule commits (and/or after switching target ref)
           git add "${{ steps.validate.outputs.submodule_path }}"
@@ -182,7 +177,7 @@ jobs:
       -
         name: Determine if PR is needed
         id: pr_needed
-        if: inputs.create_pr
+        if: ${{ always() }}
         run: |
           if git diff --cached --quiet; then
             echo "pr_needed=false" >> $GITHUB_OUTPUT
@@ -194,7 +189,7 @@ jobs:
       -
         name: Create branch
         id: branch
-        if: inputs.create_pr && steps.pr_needed.outputs.pr_needed == 'true'
+        if: steps.pr_needed.outputs.pr_needed == 'true'
         run: |
           DESCRIBE="${{ steps.final_version.outputs.describe }}"
           # Clean describe for branch name (remove invalid chars)
@@ -206,14 +201,14 @@ jobs:
           echo "branch_name=$BRANCH_NAME" >> $GITHUB_OUTPUT
       -
         name: Commit submodule update
-        if: steps.update.outputs.update_needed == 'true' && inputs.create_pr && steps.pr_needed.outputs.pr_needed == 'true'
+        if: steps.update.outputs.update_needed == 'true' && steps.pr_needed.outputs.pr_needed == 'true'
         run: |
           COMMIT_MSG="externpro ${{ steps.final_version.outputs.describe }}"
           git commit -m "$COMMIT_MSG" -- "${{ steps.validate.outputs.submodule_path }}"
           echo "Commit created: $COMMIT_MSG"
       -
         name: Commit dependency updates
-        if: inputs.create_pr && steps.pr_needed.outputs.pr_needed == 'true'
+        if: steps.pr_needed.outputs.pr_needed == 'true'
         run: |
           FILES="${{ steps.deps.outputs.dependency_files }}"
           FILES=$(printf '%s\n' "$FILES" | sed '/^$/d' | tr '\n' ' ')
@@ -224,7 +219,7 @@ jobs:
           git commit -m "dependency updates" -- $FILES
       -
         name: Commit release-tag intent
-        if: inputs.create_pr && steps.pr_needed.outputs.pr_needed == 'true' && steps.release_intent.outputs.intent_modified == 'true'
+        if: steps.pr_needed.outputs.pr_needed == 'true' && steps.release_intent.outputs.intent_modified == 'true'
         run: |
           INTENT_FILE="${{ steps.release_intent.outputs.intent_file }}"
           if [ -z "${INTENT_FILE}" ] || [ ! -f "${INTENT_FILE}" ]; then
@@ -238,7 +233,7 @@ jobs:
           git commit -m "add release-tag intent" -- "${INTENT_FILE}"
       -
         name: Commit and push workflow updates
-        if: inputs.create_pr && steps.pr_needed.outputs.pr_needed == 'true'
+        if: steps.pr_needed.outputs.pr_needed == 'true'
         run: |
           NEEDS_WORKFLOW_TOKEN=false
           if ! git diff --cached --name-only | grep -q '^\.github/workflows/'; then
@@ -271,7 +266,7 @@ jobs:
           git -c http.extraheader= push --set-upstream origin "${{ steps.branch.outputs.branch_name }}"
       -
         name: Ensure labels exist
-        if: inputs.create_pr && steps.pr_needed.outputs.pr_needed == 'true'
+        if: steps.pr_needed.outputs.pr_needed == 'true'
         uses: ./.devcontainer/.github/actions/labels-mgmt
         env:
           GH_TOKEN: ${{ secrets.automation_token || github.token }}
@@ -280,7 +275,7 @@ jobs:
       -
         name: Create Pull Request
         id: create_pr
-        if: inputs.create_pr && steps.pr_needed.outputs.pr_needed == 'true'
+        if: steps.pr_needed.outputs.pr_needed == 'true'
         run: |
           set -euo pipefail
           GH_TOKEN="${{ secrets.automation_token }}"
@@ -369,11 +364,12 @@ jobs:
           "${GH_RETRY[@]}" gh pr edit "$PR_URL" --add-label "xpupdate" >/dev/null 2>&1 || echo "Label 'xpupdate' not found; skipping"
       -
         name: Close superseded PRs
-        if: inputs.create_pr && steps.pr_needed.outputs.pr_needed == 'true'
+        if: steps.pr_needed.outputs.pr_needed == 'true'
         uses: ./.devcontainer/.github/actions/pr-close-superseded
         env:
           GH_TOKEN: ${{ secrets.automation_token || github.token }}
         with:
+          label: xpupdate
           head_branch_prefix: xpupdate-
           keep_head_branch: ${{ steps.branch.outputs.branch_name }}
           label_name: xpupdate
