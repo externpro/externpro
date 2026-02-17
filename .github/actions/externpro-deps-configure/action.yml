@@ -1,0 +1,242 @@
+name: Externpro dependency artifacts (configure)
+description: Run cmake configure in the build container, stage repo dependency artifacts, and commit/push dependency artifacts in the externpro submodule.
+inputs:
+  submodule_path:
+    description: Path to externpro submodule.
+    required: true
+  build_container:
+    description: Build container name (suffix in bldimg-<arch>-<build_container>:latest).
+    required: true
+  automation_token:
+    description: Token used for pushing submodule dependency commits back to externpro/externpro.
+    required: true
+  dependency_files:
+    description: Repo-level dependency artifact files to stage after configure (space-separated).
+    required: false
+    default: 'xprodeps.md xprodeps.svg'
+  submodule_dependency_files:
+    description: Submodule dependency artifact files to track/commit (space-separated, relative to submodule root).
+    required: false
+    default: 'cmake/README.md cmake/deps.svg'
+outputs:
+  dependency_updated:
+    description: Whether any repo-level dependency_files were staged.
+    value: ${{ steps.configure.outputs.dependency_updated }}
+  dependency_files:
+    description: Newline-separated list of staged repo dependency files.
+    value: ${{ steps.configure.outputs.dependency_files }}
+  submodule_dependency_commit:
+    description: Whether submodule dependency artifacts were committed.
+    value: ${{ steps.submodule_commit.outputs.submodule_dependency_commit }}
+  submodule_dependency_push_ref:
+    description: Branch/ref that the submodule dependency commit was pushed to.
+    value: ${{ steps.submodule_commit.outputs.submodule_dependency_push_ref }}
+runs:
+  using: composite
+  steps:
+    -
+      name: Snapshot submodule dependency artifacts (pre-configure)
+      id: pre
+      shell: bash
+      run: |
+        set -euo pipefail
+        SUBMODULE_PATH="${{ inputs.submodule_path }}"
+        SUBMODULE_DEP_FILES="${{ inputs.submodule_dependency_files }}"
+        hash_files() {
+          local base="$1"
+          shift
+          local files=("$@")
+          local tmp
+          tmp=$(mktemp)
+          : > "$tmp"
+          for rel in "${files[@]}"; do
+            local p="$base/$rel"
+            if [ ! -f "$p" ]; then
+              printf '%s\n' "$rel:MISSING" >> "$tmp"
+              continue
+            fi
+            if command -v sha256sum >/dev/null 2>&1; then
+              printf '%s\n' "$rel:$(sha256sum "$p" | awk '{print $1}')" >> "$tmp"
+            else
+              printf '%s\n' "$rel:$(shasum -a 256 "$p" | awk '{print $1}')" >> "$tmp"
+            fi
+          done
+          if command -v sha256sum >/dev/null 2>&1; then
+            sha256sum "$tmp" | awk '{print $1}'
+          else
+            shasum -a 256 "$tmp" | awk '{print $1}'
+          fi
+          rm -f "$tmp"
+        }
+        read -r -a DEP_ARR <<< "${SUBMODULE_DEP_FILES}"
+        PRE_HASH=$(hash_files "$SUBMODULE_PATH" "${DEP_ARR[@]}")
+        echo "pre_hash_sha256=$PRE_HASH" >> "$GITHUB_OUTPUT"
+        echo "submodule_dep_files=${SUBMODULE_DEP_FILES}" >> "$GITHUB_OUTPUT"
+        echo "pre-configure submodule combined hash: $PRE_HASH"
+    -
+      name: CMake Configure (container)
+      id: configure
+      shell: bash
+      run: |
+        set -euo pipefail
+        SUBMODULE_PATH="${{ inputs.submodule_path }}"
+        DEPENDENCY_FILES="${{ inputs.dependency_files }}"
+        SUBMODULE_DEP_FILES="${{ steps.pre.outputs.submodule_dep_files }}"
+        echo "runner.arch=${{ runner.arch }}"
+        case "${{ runner.arch }}" in
+          X64) ARCH=amd64 ;;
+          ARM64) ARCH=arm64 ;;
+          *) echo "Unsupported runner.arch '${{ runner.arch }}' (expected X64 or ARM64)" >&2; exit 1 ;;
+        esac
+        OWN_REPO_NAME=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')
+        IMAGE="ghcr.io/${OWN_REPO_NAME}/bldimg-${ARCH}-${{ inputs.build_container }}:latest"
+        echo "Running CMake configure in container: ${IMAGE}"
+        echo "--- docker manifest inspect (verbose)"
+        set +e
+        docker manifest inspect "${IMAGE}" 2>&1 | sed -n '1,140p'
+        MI_RC=${PIPESTATUS[0]}
+        set -e
+        if [ "${MI_RC}" -ne 0 ]; then
+          echo "Container image not found or not accessible: ${IMAGE} (manifest inspect rc=${MI_RC})" >&2
+          echo "If this image is public, anonymous access should work; otherwise ensure the token used for ghcr login has read access." >&2
+          exit 1
+        fi
+        echo "--- dependency files before"
+        ls -la $DEPENDENCY_FILES 2>/dev/null || true
+        set +e
+        docker run --rm \
+          --entrypoint bash \
+          --hostname "${{ inputs.build_container }}" \
+          --user "$(id -u):$(id -g)" \
+          --volume "$GITHUB_WORKSPACE:/work" \
+          --workdir /work \
+          "${IMAGE}" \
+          -lc "set -euo pipefail; \
+            echo '=== cmake configure: begin ==='; \
+            echo \"user=$(id -u):$(id -g)\"; \
+            echo \"pwd=$(pwd)\"; \
+            ls -la; \
+            echo '--- cmake diagnostics'; \
+            command -v cmake || { echo 'cmake not found in container' >&2; exit 127; }; \
+            cmake --version; \
+            echo '--- running: cmake --preset=Linux --log-level=VERBOSE'; \
+            cmake --preset=Linux --log-level=VERBOSE; \
+            echo '=== cmake configure: end ==='" 2>&1 | tee /tmp/cmake-configure.log
+        DOCKER_RC=${PIPESTATUS[0]}
+        echo "docker run exit code: ${DOCKER_RC}"
+        set -e
+        if [ "${DOCKER_RC}" -ne 0 ]; then
+          exit "${DOCKER_RC}"
+        fi
+        echo "--- dependency files after"
+        ls -la $DEPENDENCY_FILES 2>/dev/null || true
+        echo "--- submodule dirtiness after configure"
+        git -C "$SUBMODULE_PATH" status --porcelain || true
+        echo "--- submodule diff after configure (name-status)"
+        git -C "$SUBMODULE_PATH" diff --name-status -- $SUBMODULE_DEP_FILES 2>/dev/null || true
+        echo "--- repo dirtiness after configure (before staging)"
+        git status --porcelain || true
+        for file in $DEPENDENCY_FILES; do
+          if [ -e "$file" ]; then
+            git add "$file"
+          fi
+        done
+        echo "--- repo dirtiness after staging dependency files"
+        git status --porcelain || true
+        echo "--- staged changes (name-status)"
+        git diff --cached --name-status -- $DEPENDENCY_FILES || true
+        DEPENDENCY_STAGED_FILES=$(git diff --cached --name-only -- $DEPENDENCY_FILES || true)
+        if [ -n "$DEPENDENCY_STAGED_FILES" ]; then
+          echo "dependency_updated=true" >> "$GITHUB_OUTPUT"
+          echo "dependency_files<<EOF" >> "$GITHUB_OUTPUT"
+          echo "$DEPENDENCY_STAGED_FILES" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+        else
+          echo "dependency_updated=false" >> "$GITHUB_OUTPUT"
+        fi
+    -
+      name: Commit dependency artifacts in submodule
+      id: submodule_commit
+      shell: bash
+      run: |
+        set -euo pipefail
+        SUBMODULE_PATH="${{ inputs.submodule_path }}"
+        SUBMODULE_DEP_FILES="${{ steps.pre.outputs.submodule_dep_files }}"
+        hash_files() {
+          local base="$1"
+          shift
+          local files=("$@")
+          local tmp
+          tmp=$(mktemp)
+          : > "$tmp"
+          for rel in "${files[@]}"; do
+            local p="$base/$rel"
+            if [ ! -f "$p" ]; then
+              printf '%s\n' "$rel:MISSING" >> "$tmp"
+              continue
+            fi
+            if command -v sha256sum >/dev/null 2>&1; then
+              printf '%s\n' "$rel:$(sha256sum "$p" | awk '{print $1}')" >> "$tmp"
+            else
+              printf '%s\n' "$rel:$(shasum -a 256 "$p" | awk '{print $1}')" >> "$tmp"
+            fi
+          done
+          if command -v sha256sum >/dev/null 2>&1; then
+            sha256sum "$tmp" | awk '{print $1}'
+          else
+            shasum -a 256 "$tmp" | awk '{print $1}'
+          fi
+          rm -f "$tmp"
+        }
+        read -r -a DEP_ARR <<< "${SUBMODULE_DEP_FILES}"
+        PRE_HASH="${{ steps.pre.outputs.pre_hash_sha256 }}"
+        POST_HASH=$(hash_files "$SUBMODULE_PATH" "${DEP_ARR[@]}")
+        if [ "$PRE_HASH" = "$POST_HASH" ]; then
+          echo "No submodule dependency artifact changes produced by configure"
+          echo "submodule_dependency_commit=false" >> "$GITHUB_OUTPUT"
+          exit 0
+        fi
+        echo "--- submodule dirtiness at commit time"
+        git -C "$SUBMODULE_PATH" status --porcelain || true
+        echo "--- submodule diff at commit time (name-status)"
+        git -C "$SUBMODULE_PATH" diff --name-status -- $SUBMODULE_DEP_FILES 2>/dev/null || true
+        echo "--- submodule dependency files before"
+        (cd "$SUBMODULE_PATH" && ls -la $SUBMODULE_DEP_FILES 2>/dev/null) || true
+        if git -C "$SUBMODULE_PATH" diff --quiet -- $SUBMODULE_DEP_FILES 2>/dev/null && git -C "$SUBMODULE_PATH" diff --cached --quiet -- $SUBMODULE_DEP_FILES 2>/dev/null; then
+          echo "No submodule dependency artifact changes detected"
+          echo "submodule_dependency_commit=false" >> "$GITHUB_OUTPUT"
+          exit 0
+        fi
+        git -C "$SUBMODULE_PATH" add -- $SUBMODULE_DEP_FILES || true
+        if git -C "$SUBMODULE_PATH" diff --cached --quiet -- $SUBMODULE_DEP_FILES; then
+          echo "No submodule dependency artifact changes staged"
+          echo "submodule_dependency_commit=false" >> "$GITHUB_OUTPUT"
+          exit 0
+        fi
+        git -C "$SUBMODULE_PATH" commit -m "dependency updates" -- $SUBMODULE_DEP_FILES
+        echo "submodule_dependency_commit=true" >> "$GITHUB_OUTPUT"
+        echo "✓ committed dependency artifacts in submodule"
+        PUSH_TARGET=main
+        SUBMODULE_PUSH_TOKEN="${{ inputs.automation_token }}"
+        SUBMODULE_PUSH_TOKEN=$(printf '%s' "${SUBMODULE_PUSH_TOKEN}" | tr -d '\r\n' | xargs)
+        if [ -z "${SUBMODULE_PUSH_TOKEN}" ]; then
+          echo "Error: missing automation_token for pushing submodule commit to externpro/externpro" >&2
+          exit 1
+        fi
+        echo "automation_token is set (length=${#SUBMODULE_PUSH_TOKEN})"
+        git -C "$SUBMODULE_PATH" config --unset-all http.https://github.com/.extraheader || true
+        git -C "$SUBMODULE_PATH" remote set-url origin "https://x-access-token:${SUBMODULE_PUSH_TOKEN}@github.com/externpro/externpro.git"
+        case "$PUSH_TARGET" in
+          main)
+            echo "Pushing submodule commit to origin/main"
+            git -C "$SUBMODULE_PATH" -c http.extraheader= push origin HEAD:refs/heads/main
+            echo "submodule_dependency_push_ref=main" >> "$GITHUB_OUTPUT"
+            ;;
+          automation|*)
+            SUB_BRANCH="xpupdate-deps-${{ github.run_id }}-${{ github.run_attempt }}"
+            echo "submodule_dependency_branch=$SUB_BRANCH" >> "$GITHUB_OUTPUT"
+            echo "Pushing submodule commit to origin as branch '$SUB_BRANCH'"
+            git -C "$SUBMODULE_PATH" -c http.extraheader= push origin HEAD:refs/heads/"$SUB_BRANCH"
+            echo "submodule_dependency_push_ref=$SUB_BRANCH" >> "$GITHUB_OUTPUT"
+            ;;
+        esac
