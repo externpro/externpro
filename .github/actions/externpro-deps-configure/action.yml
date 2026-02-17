@@ -153,6 +153,17 @@ runs:
         echo "Image still not available after auth; treating as missing and will build+push" >&2
         rm -f "$tmp_out"
     -
+      name: Ensure global git identity (for docker-compose build)
+      if: ${{ steps.image_check.outputs.image_exists != 'true' }}
+      shell: bash
+      run: |
+        set -euo pipefail
+        # ./docker-compose.sh -b ... -> buildreq -> gitcfgreq requires ~/.gitconfig to exist
+        if [ ! -f "$HOME/.gitconfig" ]; then
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+        fi
+    -
       name: Build and push docker image (if missing)
       id: image_build
       shell: bash
