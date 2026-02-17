@@ -27,6 +27,10 @@ on:
         type: boolean
         description: 'Start an interactive tmate session if the CMake workflow step fails (useful for debugging CI-only failures)'
         default: false
+    secrets:
+      automation_token:
+        description: 'Optional token for GHCR push retry on permission_denied (e.g., orphaned packages after repo delete/refork). If not set, uses github.token only.'
+        required: false
 jobs:
   lc-repo-names:
     runs-on: ubuntu-latest
@@ -79,6 +83,7 @@ jobs:
       -
         name: Build and push docker image
         run: |
+          set -euo pipefail
           REPO_NAME='${{ needs.lc-repo-names.outputs.repo }}'
           REPO_NAME="${REPO_NAME//./}"
           OWN_REPO_NAME='${{ needs.lc-repo-names.outputs.owner_repo }}'
@@ -87,7 +92,26 @@ jobs:
           echo "Building buildpro image ${REMOTE_IMAGE}"
           ./docker-compose.sh -b -i "${{ matrix.buildpro_image }}"
           docker tag "${LOCAL_IMAGE}" "${REMOTE_IMAGE}"
-          docker push "${REMOTE_IMAGE}"
+          set +e
+          PUSH_OUT=$(docker push "${REMOTE_IMAGE}" 2>&1)
+          PUSH_RC=$?
+          set -e
+          if [ "${PUSH_RC}" -ne 0 ]; then
+            printf '%s\n' "${PUSH_OUT}" >&2
+            if printf '%s\n' "${PUSH_OUT}" | grep -Fq 'permission_denied: write_package'; then
+              if [ -n "${{ secrets.automation_token }}" ]; then
+                echo "Retrying GHCR push with automation_token after permission_denied: write_package" >&2
+                docker logout ghcr.io >/dev/null 2>&1 || true
+                echo "${{ secrets.automation_token }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+                docker push "${REMOTE_IMAGE}"
+              else
+                echo "Error: GHCR push denied (write_package). Provide workflow_call secret 'automation_token' to retry with a PAT, or delete the orphaned package manually." >&2
+                exit "${PUSH_RC}"
+              fi
+            else
+              exit "${PUSH_RC}"
+            fi
+          fi
           docker images
       -
         name: Verify pushed image is usable
