@@ -126,6 +126,12 @@ jobs:
           echo "--- docker pull (native runner platform)"
           docker pull "${IMAGE}"
           echo "✓ image verified"
+      -
+        name: Log out of GitHub Container Registry
+        if: ${{ always() }}
+        shell: bash
+        run: |
+          docker logout ghcr.io >/dev/null 2>&1 || true
   build:
     needs: [lc-repo-names, build-docker-image]
     if: ${{ needs.build-docker-image.result == 'success' }}
