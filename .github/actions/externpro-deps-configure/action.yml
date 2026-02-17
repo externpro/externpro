@@ -31,6 +31,12 @@ outputs:
   submodule_dependency_push_ref:
     description: Branch/ref that the submodule dependency commit was pushed to.
     value: ${{ steps.submodule_commit.outputs.submodule_dependency_push_ref }}
+  image:
+    description: Build container image reference used for configure.
+    value: ${{ steps.image_check.outputs.image }}
+  image_built:
+    description: Whether the build container image was built and pushed in this run.
+    value: ${{ steps.image_build.outputs.image_built }}
 runs:
   using: composite
   steps:
@@ -74,14 +80,11 @@ runs:
         echo "submodule_dep_files=${SUBMODULE_DEP_FILES}" >> "$GITHUB_OUTPUT"
         echo "pre-configure submodule combined hash: $PRE_HASH"
     -
-      name: CMake Configure (container)
-      id: configure
+      name: Check build container image availability
+      id: image_check
       shell: bash
       run: |
         set -euo pipefail
-        SUBMODULE_PATH="${{ inputs.submodule_path }}"
-        DEPENDENCY_FILES="${{ inputs.dependency_files }}"
-        SUBMODULE_DEP_FILES="${{ steps.pre.outputs.submodule_dep_files }}"
         echo "runner.arch=${{ runner.arch }}"
         case "${{ runner.arch }}" in
           X64) ARCH=amd64 ;;
@@ -90,17 +93,102 @@ runs:
         esac
         OWN_REPO_NAME=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')
         IMAGE="ghcr.io/${OWN_REPO_NAME}/bldimg-${ARCH}-${{ inputs.build_container }}:latest"
-        echo "Running CMake configure in container: ${IMAGE}"
+        echo "image=${IMAGE}" >> "$GITHUB_OUTPUT"
+        echo "Checking availability of container image: ${IMAGE}"
         echo "--- docker manifest inspect (verbose)"
+        tmp_out=$(mktemp)
         set +e
-        docker manifest inspect "${IMAGE}" 2>&1 | sed -n '1,140p'
-        MI_RC=${PIPESTATUS[0]}
+        docker manifest inspect "${IMAGE}" >"$tmp_out" 2>&1
+        MI_RC=$?
         set -e
-        if [ "${MI_RC}" -ne 0 ]; then
-          echo "Container image not found or not accessible: ${IMAGE} (manifest inspect rc=${MI_RC})" >&2
-          echo "If this image is public, anonymous access should work; otherwise ensure the token used for ghcr login has read access." >&2
+        sed -n '1,140p' "$tmp_out" || true
+        if [ "${MI_RC}" -eq 0 ]; then
+          echo "image_exists=true" >> "$GITHUB_OUTPUT"
+          echo "needs_auth=false" >> "$GITHUB_OUTPUT"
+          echo "✓ image exists (anonymous)"
+        else
+          echo "image_exists=false" >> "$GITHUB_OUTPUT"
+          echo "needs_auth=true" >> "$GITHUB_OUTPUT"
+          echo "Anonymous manifest inspect failed (rc=${MI_RC}); will retry after login" >&2
+        fi
+        rm -f "$tmp_out"
+    -
+      name: Log in to GitHub Container Registry (for build)
+      if: ${{ steps.image_check.outputs.needs_auth == 'true' }}
+      uses: docker/login-action@v3
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ github.token }}
+    -
+      name: Check build container image availability (authenticated)
+      id: image_check_auth
+      if: ${{ steps.image_check.outputs.needs_auth == 'true' }}
+      shell: bash
+      run: |
+        set -euo pipefail
+        IMAGE="${{ steps.image_check.outputs.image }}"
+        echo "Re-checking availability of container image (authenticated): ${IMAGE}"
+        echo "--- docker manifest inspect (verbose)"
+        tmp_out=$(mktemp)
+        set +e
+        docker manifest inspect "${IMAGE}" >"$tmp_out" 2>&1
+        MI_RC=$?
+        set -e
+        sed -n '1,140p' "$tmp_out" || true
+        if [ "${MI_RC}" -eq 0 ]; then
+          echo "image_exists=true" >> "$GITHUB_OUTPUT"
+          echo "build_needed=false" >> "$GITHUB_OUTPUT"
+          echo "✓ image exists (required auth)"
+          rm -f "$tmp_out"
+          exit 0
+        fi
+        if grep -Eqi '(denied|unauthorized|forbidden|authentication required|insufficient_scope)' "$tmp_out"; then
+          echo "Error: container image exists but is not accessible with current credentials: ${IMAGE}" >&2
+          rm -f "$tmp_out"
           exit 1
         fi
+        echo "image_exists=false" >> "$GITHUB_OUTPUT"
+        echo "build_needed=true" >> "$GITHUB_OUTPUT"
+        echo "Image still not available after auth; treating as missing and will build+push" >&2
+        rm -f "$tmp_out"
+    -
+      name: Build and push docker image (if missing)
+      id: image_build
+      shell: bash
+      run: |
+        set -euo pipefail
+        BUILD_NEEDED=false
+        if [ "${{ steps.image_check.outputs.image_exists }}" = "true" ]; then
+          BUILD_NEEDED=false
+        elif [ "${{ steps.image_check.outputs.needs_auth }}" = "true" ]; then
+          BUILD_NEEDED="${{ steps.image_check_auth.outputs.build_needed }}"
+        fi
+        if [ "${BUILD_NEEDED}" != "true" ]; then
+          echo "image_built=false" >> "$GITHUB_OUTPUT"
+          exit 0
+        fi
+        REPO_NAME=$(echo '${{ github.event.repository.name }}' | tr '[:upper:]' '[:lower:]')
+        REPO_NAME="${REPO_NAME//./}"
+        LOCAL_IMAGE="${REPO_NAME}-bld:latest"
+        REMOTE_IMAGE="${{ steps.image_check.outputs.image }}"
+        echo "Building buildpro image ${REMOTE_IMAGE}"
+        ./docker-compose.sh -b -i "${{ inputs.build_container }}"
+        docker tag "${LOCAL_IMAGE}" "${REMOTE_IMAGE}"
+        docker push "${REMOTE_IMAGE}"
+        docker images
+        echo "image_built=true" >> "$GITHUB_OUTPUT"
+    -
+      name: CMake Configure (container)
+      id: configure
+      shell: bash
+      run: |
+        set -euo pipefail
+        SUBMODULE_PATH="${{ inputs.submodule_path }}"
+        DEPENDENCY_FILES="${{ inputs.dependency_files }}"
+        SUBMODULE_DEP_FILES="${{ steps.pre.outputs.submodule_dep_files }}"
+        IMAGE="${{ steps.image_check.outputs.image }}"
+        echo "Running CMake configure in container: ${IMAGE}"
         echo "--- dependency files before"
         ls -la $DEPENDENCY_FILES 2>/dev/null || true
         set +e
