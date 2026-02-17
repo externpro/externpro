@@ -310,6 +310,11 @@ jobs:
           if [ "$GITIGNORE_COMMITTED" = "true" ]; then
             echo "- Add externpro ignores to .gitignore" >> "$BODY_FILE"
           fi
+          if [ "$PATCHES_PRESENT" = "true" ]; then
+            echo "- Patch series detected and applied (${PATCH_COUNT} patch(es))" >> "$BODY_FILE"
+          else
+            echo "- No patch series detected" >> "$BODY_FILE"
+          fi
           if [ "$DEPENDENCY_UPDATED" = "true" ]; then
             echo "- Updated dependency files" >> "$BODY_FILE"
             if [ -n "$DEPENDENCY_FILES" ]; then
@@ -321,11 +326,6 @@ jobs:
           fi
           if [ "$SUBMODULE_DEP_COMMIT" = "true" ]; then
             echo "- Updated externpro submodule dependency artifacts (pushed to \`${SUBMODULE_DEP_PUSH_REF}\`)" >> "$BODY_FILE"
-          fi
-          if [ "$PATCHES_PRESENT" = "true" ]; then
-            echo "- Patch series detected and applied (${PATCH_COUNT} patch(es))" >> "$BODY_FILE"
-          else
-            echo "- No patch series detected" >> "$BODY_FILE"
           fi
           echo >> "$BODY_FILE"
           echo "---" >> "$BODY_FILE"
