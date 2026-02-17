@@ -7,6 +7,11 @@ on:
         required: false
         type: string
         default: '.devcontainer'
+      build_container:
+        description: 'Build container image ghcr.io/{owner_repo}/bldimg-{arch}-{build_container}:latest'
+        required: false
+        type: string
+        default: 'rocky9-gcc13'
     secrets:
       automation_token:
         description: 'Token used for automation (push/PR/labels; may need workflow permission when updating workflows).'
@@ -143,6 +148,52 @@ jobs:
           git commit -m "gitignore: add externpro ignores" -- .gitignore
           echo "committed=true" >> "$GITHUB_OUTPUT"
       -
+        name: GHCR access
+        id: ghcr
+        uses: ./.devcontainer/.github/actions/ghcr-access
+        with:
+          build_container: ${{ inputs.build_container }}
+          automation_token: ${{ secrets.automation_token }}
+      -
+        name: Configure and snapshot dependency artifacts
+        id: deps
+        uses: ./.devcontainer/.github/actions/externpro-deps-configure
+        with:
+          submodule_path: ${{ steps.validate.outputs.submodule_path }}
+          build_container: ${{ inputs.build_container }}
+          automation_token: ${{ secrets.automation_token }}
+      -
+        name: Commit dependency updates
+        id: dependency_commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          FILES="${{ steps.deps.outputs.dependency_files }}"
+          FILES=$(printf '%s\n' "$FILES" | sed '/^$/d' | tr '\n' ' ')
+          if [ -z "$FILES" ]; then
+            echo "No dependency changes staged"
+            echo "committed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          git commit -m "dependency updates" -- $FILES
+          echo "committed=true" >> "$GITHUB_OUTPUT"
+      -
+        name: Commit externpro submodule pointer update
+        id: submodule_pointer_commit
+        if: ${{ steps.deps.outputs.submodule_dependency_commit == 'true' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          SUBMODULE_PATH="${{ steps.validate.outputs.submodule_path }}"
+          git add "${SUBMODULE_PATH}"
+          if git diff --cached --quiet -- "${SUBMODULE_PATH}"; then
+            echo "No submodule pointer update staged"
+            echo "committed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          git commit -m "externpro dependency updates" -- "${SUBMODULE_PATH}"
+          echo "committed=true" >> "$GITHUB_OUTPUT"
+      -
         name: Detect patch series
         id: patches
         shell: bash
@@ -234,6 +285,10 @@ jobs:
           RELEASE_INTENT_CREATED="${{ steps.release_intent.outputs.intent_created }}"
           RELEASE_INTENT_TAG="${{ steps.release_intent.outputs.intent_tag }}"
           GITIGNORE_COMMITTED="${{ steps.gitignore.outputs.committed }}"
+          DEPENDENCY_UPDATED="${{ steps.deps.outputs.dependency_updated }}"
+          DEPENDENCY_FILES="${{ steps.deps.outputs.dependency_files }}"
+          SUBMODULE_DEP_COMMIT="${{ steps.deps.outputs.submodule_dependency_commit }}"
+          SUBMODULE_DEP_PUSH_REF="${{ steps.deps.outputs.submodule_dependency_push_ref }}"
           PATCHES_PRESENT="${{ steps.patches.outputs.present }}"
           PATCH_COUNT="${{ steps.patches.outputs.patch_count }}"
           if [ "$DOCKER_COMPOSE_COMMITTED" = "true" ]; then
@@ -254,6 +309,18 @@ jobs:
           fi
           if [ "$GITIGNORE_COMMITTED" = "true" ]; then
             echo "- Add externpro ignores to .gitignore" >> "$BODY_FILE"
+          fi
+          if [ "$DEPENDENCY_UPDATED" = "true" ]; then
+            echo "- Updated dependency files" >> "$BODY_FILE"
+            if [ -n "$DEPENDENCY_FILES" ]; then
+              echo "  - Files:" >> "$BODY_FILE"
+              while IFS= read -r f; do
+                [ -n "$f" ] && echo "    - \`$f\`" >> "$BODY_FILE"
+              done < <(printf '%s\n' "$DEPENDENCY_FILES")
+            fi
+          fi
+          if [ "$SUBMODULE_DEP_COMMIT" = "true" ]; then
+            echo "- Updated externpro submodule dependency artifacts (pushed to \`${SUBMODULE_DEP_PUSH_REF}\`)" >> "$BODY_FILE"
           fi
           if [ "$PATCHES_PRESENT" = "true" ]; then
             echo "- Patch series detected and applied (${PATCH_COUNT} patch(es))" >> "$BODY_FILE"
