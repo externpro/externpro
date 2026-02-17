@@ -370,7 +370,6 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.automation_token || github.token }}
         with:
-          label: xpupdate
           head_branch_prefix: xpupdate-
           keep_head_branch: ${{ steps.branch.outputs.branch_name }}
           label_name: xpupdate
