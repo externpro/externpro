@@ -2,7 +2,7 @@ name: xpInit externpro
 permissions:
   contents: write
   pull-requests: write
-  packages: read
+  packages: write
 on:
   workflow_dispatch:
 jobs:
