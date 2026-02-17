@@ -26,11 +26,17 @@ outputs:
     description: Newline-separated list of staged repo dependency files.
     value: ${{ steps.configure.outputs.dependency_files }}
   submodule_dependency_commit:
-    description: Whether submodule dependency artifacts were committed.
+    description: Whether dependency artifacts were committed in the externpro submodule.
     value: ${{ steps.submodule_commit.outputs.submodule_dependency_commit }}
   submodule_dependency_push_ref:
-    description: Branch/ref that the submodule dependency commit was pushed to.
+    description: Branch or ref pushed in externpro/externpro for dependency artifacts.
     value: ${{ steps.submodule_commit.outputs.submodule_dependency_push_ref }}
+  configure_succeeded:
+    description: Whether the containerized CMake configure step succeeded.
+    value: ${{ steps.configure.outputs.configure_succeeded }}
+  configure_exit_code:
+    description: Exit code of the docker run used for containerized CMake configure.
+    value: ${{ steps.configure.outputs.configure_exit_code }}
   image:
     description: Build container image reference used for configure.
     value: ${{ steps.image_check.outputs.image }}
@@ -225,8 +231,17 @@ runs:
         echo "docker run exit code: ${DOCKER_RC}"
         set -e
         if [ "${DOCKER_RC}" -ne 0 ]; then
-          exit "${DOCKER_RC}"
+          echo "CMake configure failed; continuing workflow without dependency updates" >&2
+          echo "configure_succeeded=false" >> "$GITHUB_OUTPUT"
+          echo "configure_exit_code=${DOCKER_RC}" >> "$GITHUB_OUTPUT"
+          echo "dependency_updated=false" >> "$GITHUB_OUTPUT"
+          echo "dependency_files<<EOF" >> "$GITHUB_OUTPUT"
+          echo "" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+          exit 0
         fi
+        echo "configure_succeeded=true" >> "$GITHUB_OUTPUT"
+        echo "configure_exit_code=0" >> "$GITHUB_OUTPUT"
         echo "--- dependency files after"
         ls -la $DEPENDENCY_FILES 2>/dev/null || true
         echo "--- submodule dirtiness after configure"
@@ -259,6 +274,11 @@ runs:
       shell: bash
       run: |
         set -euo pipefail
+        if [ "${{ steps.configure.outputs.configure_succeeded }}" != "true" ]; then
+          echo "Skipping submodule dependency commit because CMake configure did not succeed" >&2
+          echo "submodule_dependency_commit=false" >> "$GITHUB_OUTPUT"
+          exit 0
+        fi
         SUBMODULE_PATH="${{ inputs.submodule_path }}"
         SUBMODULE_DEP_FILES="${{ steps.pre.outputs.submodule_dep_files }}"
         hash_files() {
