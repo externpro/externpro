@@ -327,6 +327,7 @@ jobs:
             else
               echo "- Updated \`.github/release-tag.yml\` (tag: \`${{ steps.release_intent.outputs.intent_tag }}\`)" >> "$BODY_FILE"
             fi
+            echo "  - Optional: add the \"release:tag\" label to trigger tagging, release builds, and draft release notes" >> "$BODY_FILE"
           fi
           if [ -n "${{ steps.release_intent.outputs.intent_tag }}" ]; then
             echo "- If you add the \\\"release:tag\\\" label, the tag will be \\\`${{ steps.release_intent.outputs.intent_tag }}\\\`" >> "$BODY_FILE"

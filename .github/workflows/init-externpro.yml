@@ -306,6 +306,7 @@ jobs:
             else
               echo "- Updated \`.github/release-tag.yml\` (tag: \`${RELEASE_INTENT_TAG}\`)" >> "$BODY_FILE"
             fi
+            echo "  - Optional: add the \"release:tag\" label to trigger tagging, release builds, and draft release notes" >> "$BODY_FILE"
           fi
           if [ "$GITIGNORE_COMMITTED" = "true" ]; then
             echo "- Add externpro ignores to .gitignore" >> "$BODY_FILE"
