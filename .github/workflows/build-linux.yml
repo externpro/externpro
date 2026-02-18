@@ -131,6 +131,7 @@ jobs:
           automation_token: ${{ secrets.automation_token }}
       -
         name: Verify pushed image is usable
+        if: ${{ steps.build_image.outputs.image_built == 'true' }}
         shell: bash
         run: |
           set -euo pipefail
