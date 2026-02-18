@@ -59,7 +59,7 @@ jobs:
         name: Compute build image context tag
         id: image_tag
         uses: ./.devcontainer/.github/actions/build-image-context-tag
-  build-docker-image:
+  docker-image:
     needs: prep
     runs-on: ${{ matrix.arch == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
     permissions:
@@ -151,8 +151,8 @@ jobs:
         run: |
           docker logout ghcr.io >/dev/null 2>&1 || true
   build:
-    needs: [prep, build-docker-image]
-    if: ${{ needs.build-docker-image.result == 'success' }}
+    needs: [prep, docker-image]
+    if: ${{ needs.docker-image.result == 'success' }}
     runs-on: ${{ matrix.arch == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
     permissions:
       contents: read
@@ -186,7 +186,7 @@ jobs:
           name-suffix: -${{ matrix.buildpro_image }}
           enable-tmate: ${{ inputs.enable-tmate }}
   clean-up:
-    needs: [prep, build-docker-image, build]
+    needs: [prep, docker-image, build]
     if: ${{ needs.build.result == 'success' }}
     runs-on: ubuntu-latest
     continue-on-error: true
