@@ -32,14 +32,21 @@ on:
         description: 'Optional token for GHCR push retry on permission_denied (e.g., orphaned packages after repo delete/refork). If not set, uses github.token only.'
         required: false
 jobs:
-  lc-repo-names:
+  prep:
     runs-on: ubuntu-latest
     permissions:
       contents: read
     outputs:
       owner_repo: ${{ steps.names.outputs.owner_repo }}
       repo: ${{ steps.names.outputs.repo }}
+      image_tag: ${{ steps.image_tag.outputs.image_tag }}
     steps:
+      -
+        name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          submodules: true
       -
         name: Lowercase repository names
         id: names
@@ -48,8 +55,12 @@ jobs:
           OWN_REPO_NAME=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')
           echo "owner_repo=${OWN_REPO_NAME}" >> "$GITHUB_OUTPUT"
           echo "repo=${REPO_NAME}" >> "$GITHUB_OUTPUT"
+      -
+        name: Compute build image context tag
+        id: image_tag
+        uses: ./.devcontainer/.github/actions/build-image-context-tag
   build-docker-image:
-    needs: lc-repo-names
+    needs: prep
     runs-on: ${{ matrix.arch == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
     permissions:
       contents: read
@@ -81,45 +92,51 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ github.token }}
       -
-        name: Build and push docker image
+        name: Build and tag docker image (if missing)
+        id: build_image
         run: |
           set -euo pipefail
-          REPO_NAME='${{ needs.lc-repo-names.outputs.repo }}'
+          REPO_NAME='${{ needs.prep.outputs.repo }}'
           REPO_NAME="${REPO_NAME//./}"
-          OWN_REPO_NAME='${{ needs.lc-repo-names.outputs.owner_repo }}'
+          OWN_REPO_NAME='${{ needs.prep.outputs.owner_repo }}'
           LOCAL_IMAGE="${REPO_NAME}-bld:latest"
-          REMOTE_IMAGE="ghcr.io/${OWN_REPO_NAME}/bldimg-${{ matrix.arch }}-${{ matrix.buildpro_image }}:latest"
-          echo "Building buildpro image ${REMOTE_IMAGE}"
-          ./docker-compose.sh -b -i "${{ matrix.buildpro_image }}"
-          docker tag "${LOCAL_IMAGE}" "${REMOTE_IMAGE}"
-          set +e
-          PUSH_OUT=$(docker push "${REMOTE_IMAGE}" 2>&1)
-          PUSH_RC=$?
-          set -e
-          if [ "${PUSH_RC}" -ne 0 ]; then
-            printf '%s\n' "${PUSH_OUT}" >&2
-            if printf '%s\n' "${PUSH_OUT}" | grep -Fq 'permission_denied: write_package'; then
-              if [ -n "${{ secrets.automation_token }}" ]; then
-                echo "Retrying GHCR push with automation_token after permission_denied: write_package" >&2
-                docker logout ghcr.io >/dev/null 2>&1 || true
-                echo "${{ secrets.automation_token }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
-                docker push "${REMOTE_IMAGE}"
-              else
-                echo "Error: GHCR push denied (write_package). Provide workflow_call secret 'automation_token' to retry with a PAT, or delete the orphaned package manually." >&2
-                exit "${PUSH_RC}"
-              fi
-            else
-              exit "${PUSH_RC}"
-            fi
+          IMAGE_TAG='${{ needs.prep.outputs.image_tag }}'
+          REMOTE_IMAGE_HASH="ghcr.io/${OWN_REPO_NAME}/bldimg-${{ matrix.arch }}-${{ matrix.buildpro_image }}:${IMAGE_TAG}"
+          REMOTE_IMAGE_LATEST="ghcr.io/${OWN_REPO_NAME}/bldimg-${{ matrix.arch }}-${{ matrix.buildpro_image }}:latest"
+          echo "Checking availability of buildpro image ${REMOTE_IMAGE_HASH}"
+          if docker manifest inspect "${REMOTE_IMAGE_HASH}" >/dev/null 2>&1; then
+            echo "✓ image exists; skipping build"
+            echo "image_built=false" >> "$GITHUB_OUTPUT"
+            exit 0
           fi
+          echo "Building buildpro image ${REMOTE_IMAGE_HASH}"
+          ./docker-compose.sh -b -i "${{ matrix.buildpro_image }}"
+          docker tag "${LOCAL_IMAGE}" "${REMOTE_IMAGE_HASH}"
+          docker tag "${REMOTE_IMAGE_HASH}" "${REMOTE_IMAGE_LATEST}"
           docker images
+          echo "image_built=true" >> "$GITHUB_OUTPUT"
+      -
+        name: Push hash-tagged image (retry on permission_denied)
+        if: ${{ steps.build_image.outputs.image_built == 'true' }}
+        uses: ./.devcontainer/.github/actions/docker-push-with-retry
+        with:
+          image: ${{ format('ghcr.io/{0}/bldimg-{1}-{2}:{3}', needs.prep.outputs.owner_repo, matrix.arch, matrix.buildpro_image, needs.prep.outputs.image_tag) }}
+          automation_token: ${{ secrets.automation_token }}
+      -
+        name: Push latest image (retry on permission_denied)
+        if: ${{ steps.build_image.outputs.image_built == 'true' }}
+        uses: ./.devcontainer/.github/actions/docker-push-with-retry
+        with:
+          image: ${{ format('ghcr.io/{0}/bldimg-{1}-{2}:latest', needs.prep.outputs.owner_repo, matrix.arch, matrix.buildpro_image) }}
+          automation_token: ${{ secrets.automation_token }}
       -
         name: Verify pushed image is usable
         shell: bash
         run: |
           set -euo pipefail
-          OWN_REPO_NAME='${{ needs.lc-repo-names.outputs.owner_repo }}'
-          IMAGE="ghcr.io/${OWN_REPO_NAME}/bldimg-${{ matrix.arch }}-${{ matrix.buildpro_image }}:latest"
+          OWN_REPO_NAME='${{ needs.prep.outputs.owner_repo }}'
+          IMAGE_TAG='${{ needs.prep.outputs.image_tag }}'
+          IMAGE="ghcr.io/${OWN_REPO_NAME}/bldimg-${{ matrix.arch }}-${{ matrix.buildpro_image }}:${IMAGE_TAG}"
           echo "Verifying pushed image: ${IMAGE}"
           echo "--- docker manifest inspect (verbose)"
           docker manifest inspect "${IMAGE}" 2>&1 | sed -n '1,160p'
@@ -133,7 +150,7 @@ jobs:
         run: |
           docker logout ghcr.io >/dev/null 2>&1 || true
   build:
-    needs: [lc-repo-names, build-docker-image]
+    needs: [prep, build-docker-image]
     if: ${{ needs.build-docker-image.result == 'success' }}
     runs-on: ${{ matrix.arch == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
     permissions:
@@ -145,7 +162,7 @@ jobs:
         arch: ${{ fromJson(inputs.arch-list) }}
         buildpro_image: ${{ fromJson(inputs.buildpro-images) }}
     container:
-      image: ${{ format('ghcr.io/{0}/bldimg-{1}-{2}:latest', needs.lc-repo-names.outputs.owner_repo, matrix.arch, matrix.buildpro_image) }}
+      image: ${{ format('ghcr.io/{0}/bldimg-{1}-{2}:{3}', needs.prep.outputs.owner_repo, matrix.arch, matrix.buildpro_image, needs.prep.outputs.image_tag) }}
       credentials:
         username: ${{ github.actor }}
         password: ${{ github.token }}
@@ -168,7 +185,7 @@ jobs:
           name-suffix: -${{ matrix.buildpro_image }}
           enable-tmate: ${{ inputs.enable-tmate }}
   clean-up:
-    needs: [lc-repo-names, build-docker-image, build]
+    needs: [prep, build-docker-image, build]
     if: ${{ needs.build.result == 'success' }}
     runs-on: ubuntu-latest
     continue-on-error: true
@@ -190,7 +207,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          OWNER_REPO='${{ needs.lc-repo-names.outputs.owner_repo }}'
+          OWNER_REPO='${{ needs.prep.outputs.owner_repo }}'
           IMAGE_NAME='${{ format('bldimg-{0}-{1}', matrix.arch, matrix.buildpro_image) }}'
           REPO_PATH="${OWNER_REPO}/${IMAGE_NAME}"
           FULL_IMAGE="ghcr.io/${REPO_PATH}"
@@ -219,7 +236,7 @@ jobs:
         with:
           account: ${{ github.actor == github.repository_owner && 'user' || github.repository_owner }}
           token: ${{ secrets.GITHUB_TOKEN }}
-          image-names: ${{ format('{0}/bldimg-{1}-{2}', needs.lc-repo-names.outputs.repo, matrix.arch, matrix.buildpro_image) }}
+          image-names: ${{ format('{0}/bldimg-{1}-{2}', needs.prep.outputs.repo, matrix.arch, matrix.buildpro_image) }}
           tag-selection: untagged
           skip-shas: ${{ steps.keep_shas.outputs.digests }}
           cut-off: 1m
