@@ -16,7 +16,7 @@ jobs:
       packages: write
     uses: externpro/externpro/.github/workflows/build-linux.yml@main
     secrets:
-      automation_token: ${{ secrets.XPRO_TOKEN }}
+      automation_token: ${{ secrets.GHCR_TOKEN }}
   macos:
     uses: externpro/externpro/.github/workflows/build-macos.yml@25.07.9
     secrets: inherit
