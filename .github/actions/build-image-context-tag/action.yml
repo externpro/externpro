@@ -1,0 +1,65 @@
+name: Build image context tag
+description: Compute a deterministic image tag from repository files that define the build image context.
+inputs:
+  tag_length:
+    description: Length of the tag prefix to emit from the SHA256 digest.
+    required: false
+    default: '12'
+outputs:
+  image_tag:
+    description: Image tag derived from a SHA256 hash of the build image context.
+    value: ${{ steps.tag.outputs.image_tag }}
+runs:
+  using: composite
+  steps:
+    -
+      name: Compute image context tag
+      id: tag
+      shell: bash
+      run: |
+        set -euo pipefail
+        TAG_LEN='${{ inputs.tag_length }}'
+        if ! [[ "$TAG_LEN" =~ ^[0-9]+$ ]] || [ "$TAG_LEN" -le 0 ]; then
+          echo "Error: tag_length must be a positive integer (got '$TAG_LEN')" >&2
+          exit 1
+        fi
+        files=(
+          ".devcontainer/compose.*.yml"
+          ".devcontainer/compose.*.sh"
+          ".devcontainer/denv.sh"
+          ".devcontainer/funcs.sh"
+          ".devcontainer/tools.sh"
+          ".devcontainer/local.dockerfile"
+        )
+        tmp=$(mktemp)
+        : > "$tmp"
+        for pat in "${files[@]}"; do
+          for p in $pat; do
+            if [ -f "$p" ]; then
+              printf '%s\n' "$p" >> "$tmp"
+            fi
+          done
+        done
+        sort -u "$tmp" -o "$tmp"
+        if [ ! -s "$tmp" ]; then
+          echo "Error: no files found for build image context hash" >&2
+          exit 1
+        fi
+        ctx=$(mktemp)
+        : > "$ctx"
+        hash_file() {
+          local p="$1"
+          if command -v sha256sum >/dev/null 2>&1; then
+            sha256sum "$p" | awk '{print $1}'
+          else
+            shasum -a 256 "$p" | awk '{print $1}'
+          fi
+        }
+        while IFS= read -r p; do
+          printf '%s\n' "$p:$(hash_file "$p")" >> "$ctx"
+        done < "$tmp"
+        hash=$(hash_file "$ctx")
+        tag="${hash:0:${TAG_LEN}}"
+        echo "image_tag=${tag}" >> "$GITHUB_OUTPUT"
+        echo "build image context tag: ${tag}"
+        rm -f "$tmp" "$ctx"
