@@ -1,0 +1,51 @@
+name: Docker push with retry
+description: 'Push a docker image and retry on GHCR permission_denied: write_package using an automation token.'
+inputs:
+  image:
+    description: Full image reference to push (e.g., ghcr.io/org/repo/image:tag).
+    required: true
+  registry:
+    description: Registry host for login/logout.
+    required: false
+    default: ghcr.io
+  username:
+    description: Username for docker login when using automation_token.
+    required: false
+    default: ''
+  automation_token:
+    description: 'Optional token to retry docker push after permission_denied: write_package.'
+    required: false
+runs:
+  using: composite
+  steps:
+    -
+      name: Push image (retry on permission_denied)
+      shell: bash
+      run: |
+        set -euo pipefail
+        IMAGE='${{ inputs.image }}'
+        REGISTRY='${{ inputs.registry }}'
+        USERNAME='${{ inputs.username }}'
+        if [ -z "${USERNAME}" ]; then
+          USERNAME='${{ github.actor }}'
+        fi
+        TOKEN='${{ inputs.automation_token }}'
+        set +e
+        PUSH_OUT=$(docker push "${IMAGE}" 2>&1)
+        PUSH_RC=$?
+        set -e
+        if [ "${PUSH_RC}" -eq 0 ]; then
+          exit 0
+        fi
+        printf '%s\n' "${PUSH_OUT}" >&2
+        if printf '%s\n' "${PUSH_OUT}" | grep -Fq 'permission_denied: write_package'; then
+          if [ -n "${TOKEN}" ]; then
+            echo "Retrying docker push with automation_token after permission_denied: write_package" >&2
+            docker logout "${REGISTRY}" >/dev/null 2>&1 || true
+            printf '%s' "${TOKEN}" | docker login "${REGISTRY}" -u "${USERNAME}" --password-stdin
+            docker push "${IMAGE}"
+            exit 0
+          fi
+          echo "Error: GHCR push denied (write_package). Provide workflow_call secret 'automation_token' to retry with a PAT, or delete the orphaned package manually." >&2
+        fi
+        exit "${PUSH_RC}"
