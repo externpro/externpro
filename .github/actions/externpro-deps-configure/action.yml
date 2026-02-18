@@ -86,6 +86,10 @@ runs:
         echo "submodule_dep_files=${SUBMODULE_DEP_FILES}" >> "$GITHUB_OUTPUT"
         echo "pre-configure submodule combined hash: $PRE_HASH"
     -
+      name: Compute build image context tag
+      id: image_tag
+      uses: ./.devcontainer/.github/actions/build-image-context-tag
+    -
       name: Check build container image availability
       id: image_check
       shell: bash
@@ -98,8 +102,11 @@ runs:
           *) echo "Unsupported runner.arch '${{ runner.arch }}' (expected X64 or ARM64)" >&2; exit 1 ;;
         esac
         OWN_REPO_NAME=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')
-        IMAGE="ghcr.io/${OWN_REPO_NAME}/bldimg-${ARCH}-${{ inputs.build_container }}:latest"
+        IMAGE_TAG='${{ steps.image_tag.outputs.image_tag }}'
+        IMAGE="ghcr.io/${OWN_REPO_NAME}/bldimg-${ARCH}-${{ inputs.build_container }}:${IMAGE_TAG}"
+        IMAGE_LATEST="ghcr.io/${OWN_REPO_NAME}/bldimg-${ARCH}-${{ inputs.build_container }}:latest"
         echo "image=${IMAGE}" >> "$GITHUB_OUTPUT"
+        echo "image_latest=${IMAGE_LATEST}" >> "$GITHUB_OUTPUT"
         echo "Checking availability of container image: ${IMAGE}"
         echo "--- docker manifest inspect (verbose)"
         tmp_out=$(mktemp)
@@ -189,12 +196,29 @@ runs:
         REPO_NAME="${REPO_NAME//./}"
         LOCAL_IMAGE="${REPO_NAME}-bld:latest"
         REMOTE_IMAGE="${{ steps.image_check.outputs.image }}"
+        REMOTE_IMAGE_LATEST="${{ steps.image_check.outputs.image_latest }}"
         echo "Building buildpro image ${REMOTE_IMAGE}"
         ./docker-compose.sh -b -i "${{ inputs.build_container }}"
         docker tag "${LOCAL_IMAGE}" "${REMOTE_IMAGE}"
-        docker push "${REMOTE_IMAGE}"
+        echo "Tagged image: ${REMOTE_IMAGE}"
+        docker tag "${REMOTE_IMAGE}" "${REMOTE_IMAGE_LATEST}"
+        echo "Tagged image: ${REMOTE_IMAGE_LATEST}"
         docker images
         echo "image_built=true" >> "$GITHUB_OUTPUT"
+    -
+      name: Push hash-tagged build image (retry on permission_denied)
+      if: ${{ steps.image_build.outputs.image_built == 'true' }}
+      uses: ./.devcontainer/.github/actions/docker-push-with-retry
+      with:
+        image: ${{ steps.image_check.outputs.image }}
+        automation_token: ${{ inputs.automation_token }}
+    -
+      name: Push latest build image (retry on permission_denied)
+      if: ${{ steps.image_build.outputs.image_built == 'true' }}
+      uses: ./.devcontainer/.github/actions/docker-push-with-retry
+      with:
+        image: ${{ steps.image_check.outputs.image_latest }}
+        automation_token: ${{ inputs.automation_token }}
     -
       name: CMake Configure (container)
       id: configure
