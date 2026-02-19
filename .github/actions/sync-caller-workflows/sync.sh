@@ -82,6 +82,26 @@ restore_preserved_with_keys() {
   done <<< "$jobs"
 }
 
+sync_job_secrets_from_template() {
+  local workflow_file="$1"
+  local template_file="$2"
+  local jobs
+  jobs=$(yq eval '.jobs | keys | .[]' "$template_file" 2>/dev/null | grep -v null || true)
+  if [ -z "$jobs" ]; then
+    return 0
+  fi
+  while IFS= read -r job; do
+    [ -z "$job" ] && continue
+    local tmpl_secrets_json
+    tmpl_secrets_json=$(yq eval -o=json ".jobs.${job}.secrets" "$template_file" 2>/dev/null || true)
+    if [ -z "$tmpl_secrets_json" ] || [ "$tmpl_secrets_json" = "null" ]; then
+      yq eval "del(.jobs.${job}.secrets)" -i "$workflow_file" 2>/dev/null || true
+      continue
+    fi
+    yq eval ".jobs.${job}.secrets = ${tmpl_secrets_json}" -i "$workflow_file"
+  done <<< "$jobs"
+}
+
 sync_workflow_name_from_template() {
   local workflow_file="$1"
   local template_file="$2"
@@ -431,6 +451,7 @@ analyze_diff_and_stage() {
     | grep -v -E '^[\+\-]name:' \
     | grep -v -E 'branches' \
     | grep -v -E 'tags' \
+    | grep -v -E 'secrets' \
     | grep -v -E "$DYNAMIC_EXCLUSION_PATTERN" \
     || true)
   echo "Changes detected:"
@@ -587,6 +608,7 @@ process_template_file() {
   sync_workflow_name_from_template "$workflow_file" "$template_file"
   sync_triggers_from_template "$workflow_file" "$template_file"
   normalize_trigger_formatting "$workflow_file" "$template_file"
+  sync_job_secrets_from_template "$workflow_file" "$template_file"
   restore_preserved_with_keys "$workflow_file" "$workflow_file.backup"
   analyze_diff_and_stage "$template_name" "$workflow_file" "$template_file" "$CURRENT_VERSION" "$TEMPLATE_VERSION"
 }
