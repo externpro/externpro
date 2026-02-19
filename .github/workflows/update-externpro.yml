@@ -276,6 +276,8 @@ jobs:
         name: Create Pull Request
         id: create_pr
         if: steps.pr_needed.outputs.pr_needed == 'true'
+        env:
+          WORKFLOW_REPORT: ${{ steps.update_workflows.outputs.workflow_report }}
         run: |
           set -euo pipefail
           GH_TOKEN="${{ secrets.automation_token }}"
@@ -283,7 +285,6 @@ jobs:
             GH_TOKEN="${{ github.token }}"
           fi
           export GH_TOKEN
-          WORKFLOW_REPORT="${{ steps.update_workflows.outputs.workflow_report }}"
           GH_RETRY=(bash .devcontainer/.github/actions/gh-retry/gh-retry.sh)
           BASE_BRANCH="${{ github.event.repository.default_branch }}"
           HEAD_BRANCH="${{ steps.branch.outputs.branch_name }}"
