@@ -1,5 +1,5 @@
 name: Create release-tag intent
-description: Create .github/release-tag.yml if missing and set outputs describing the chosen tag.
+description: Create .github/release-tag.json if missing and set outputs describing the chosen tag.
 outputs:
   intent_created:
     description: Whether the intent file was created in this run.
@@ -25,7 +25,14 @@ runs:
       shell: bash
       run: |
         set -euo pipefail
-        INTENT_FILE=".github/release-tag.yml"
+        INTENT_FILE_JSON=".github/release-tag.json"
+        INTENT_FILE_YML=".github/release-tag.yml"
+        INTENT_MODIFIED=false
+        INTENT_CREATED=false
+        if [ -f "${INTENT_FILE_YML}" ]; then
+          git rm -f "${INTENT_FILE_YML}"
+          INTENT_MODIFIED=true
+        fi
         compute_base_tag() {
           local t
           t=$(git describe --tags --abbrev=0 2>/dev/null || true)
@@ -62,41 +69,38 @@ runs:
           fi
           printf 'xpv%s.1' "${version}"
         }
-        if [ -f "${INTENT_FILE}" ]; then
-          FILE_TAG=$(grep -E '^tag:' "${INTENT_FILE}" | head -1 | sed -E 's/^tag:[[:space:]]*//')
-          FILE_TAG=$(printf '%s' "${FILE_TAG}" | tr -d '\r' | xargs)
+        read_tag_from_json() {
+          local p="$1"
+          python3 -c 'import json,sys; print((json.load(open(sys.argv[1], "r", encoding="utf-8")).get("tag") or "").strip())' "$p"
+        }
+        if [ -f "${INTENT_FILE_JSON}" ]; then
+          FILE_TAG=$(read_tag_from_json "${INTENT_FILE_JSON}")
           BASE_TAG=$(compute_base_tag)
           if [ "${FILE_TAG}" = "${BASE_TAG}" ]; then
             NEXT_TAG=$(compute_next_tag "${BASE_TAG}")
             BASE_VERSION="${NEXT_TAG#xpv}"
-            {
-              echo "tag: ${NEXT_TAG}"
-              echo "message: \"xpro version ${BASE_VERSION} tag\""
-            } > "${INTENT_FILE}"
-            git add "${INTENT_FILE}"
+            python3 -c 'import json,sys; print(json.dumps({"tag": sys.argv[1], "message": sys.argv[2]}, indent=2, sort_keys=True))' "${NEXT_TAG}" "xpro version ${BASE_VERSION} tag" > "${INTENT_FILE_JSON}"
+            git add "${INTENT_FILE_JSON}"
             BASE_TAG="${NEXT_TAG}"
-            echo "intent_modified=true" >> "$GITHUB_OUTPUT"
+            INTENT_MODIFIED=true
           else
             echo "Intent tag does not match git base tag; leaving intent file unchanged. intent_tag=${FILE_TAG} git_base_tag=${BASE_TAG}"
             BASE_TAG="${FILE_TAG}"
-            echo "intent_modified=false" >> "$GITHUB_OUTPUT"
           fi
-          echo "intent_created=false" >> "$GITHUB_OUTPUT"
         else
           mkdir -p .github
           BASE_TAG=$(compute_base_tag)
           NEXT_TAG=$(compute_next_tag "${BASE_TAG}")
           BASE_VERSION="${NEXT_TAG#xpv}"
-          {
-            echo "tag: ${NEXT_TAG}"
-            echo "message: \"xpro version ${BASE_VERSION} tag\""
-          } > "${INTENT_FILE}"
-          git add "${INTENT_FILE}"
-          echo "intent_created=true" >> "$GITHUB_OUTPUT"
-          echo "intent_modified=true" >> "$GITHUB_OUTPUT"
+          python3 -c 'import json,sys; print(json.dumps({"tag": sys.argv[1], "message": sys.argv[2]}, indent=2, sort_keys=True))' "${NEXT_TAG}" "xpro version ${BASE_VERSION} tag" > "${INTENT_FILE_JSON}"
+          git add "${INTENT_FILE_JSON}"
+          INTENT_CREATED=true
+          INTENT_MODIFIED=true
           BASE_TAG="${NEXT_TAG}"
         fi
-        echo "intent_file=${INTENT_FILE}" >> "$GITHUB_OUTPUT"
+        echo "intent_created=${INTENT_CREATED}" >> "$GITHUB_OUTPUT"
+        echo "intent_modified=${INTENT_MODIFIED}" >> "$GITHUB_OUTPUT"
+        echo "intent_file=${INTENT_FILE_JSON}" >> "$GITHUB_OUTPUT"
         echo "intent_tag=${BASE_TAG}" >> "$GITHUB_OUTPUT"
         if [ -n "${BASE_TAG}" ] && git rev-parse -q --verify "refs/tags/${BASE_TAG}" >/dev/null 2>&1; then
           echo "intent_tag_exists=true" >> "$GITHUB_OUTPUT"

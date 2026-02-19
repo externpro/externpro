@@ -324,17 +324,17 @@ jobs:
           fi
           if [ "${{ steps.release_intent.outputs.intent_modified }}" = "true" ]; then
             if [ "${{ steps.release_intent.outputs.intent_created }}" = "true" ]; then
-              echo "- Created \`.github/release-tag.yml\` (tag: \`${{ steps.release_intent.outputs.intent_tag }}\`)" >> "$BODY_FILE"
+              echo "- Created \`.github/release-tag.json\` (tag: \`${{ steps.release_intent.outputs.intent_tag }}\`)" >> "$BODY_FILE"
             else
-              echo "- Updated \`.github/release-tag.yml\` (tag: \`${{ steps.release_intent.outputs.intent_tag }}\`)" >> "$BODY_FILE"
+              echo "- Updated \`.github/release-tag.json\` (tag: \`${{ steps.release_intent.outputs.intent_tag }}\`)" >> "$BODY_FILE"
             fi
             echo "  - Optional: add the \"release:tag\" label to trigger tagging, release builds, and draft release notes" >> "$BODY_FILE"
           fi
           if [ -n "${{ steps.release_intent.outputs.intent_tag }}" ]; then
             echo "- If you add the \\\"release:tag\\\" label, the tag will be \\\`${{ steps.release_intent.outputs.intent_tag }}\\\`" >> "$BODY_FILE"
             if [ "${{ steps.release_intent.outputs.intent_tag_exists }}" = "true" ]; then
-              echo "  - WARNING: that tag already exists; update \\\".github/release-tag.yml\\\" to the next desired tag value" >> "$BODY_FILE"
-              echo "    - https://github.com/${{ github.repository }}/blob/$HEAD_BRANCH/.github/release-tag.yml" >> "$BODY_FILE"
+              echo "  - WARNING: that tag already exists; update \\\".github/release-tag.json\\\" to the next desired tag value" >> "$BODY_FILE"
+              echo "    - https://github.com/${{ github.repository }}/blob/$HEAD_BRANCH/.github/release-tag.json" >> "$BODY_FILE"
             fi
           fi
           if [ "${{ steps.update_workflows.outputs.workflows_updated }}" = "true" ]; then

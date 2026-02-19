@@ -302,9 +302,9 @@ jobs:
           fi
           if [ "${{ steps.release_intent.outputs.intent_modified }}" = "true" ]; then
             if [ "${{ steps.release_intent.outputs.intent_created }}" = "true" ]; then
-              echo "- Created \`.github/release-tag.yml\` (tag: \`${RELEASE_INTENT_TAG}\`)" >> "$BODY_FILE"
+              echo "- Created \`.github/release-tag.json\` (tag: \`${RELEASE_INTENT_TAG}\`)" >> "$BODY_FILE"
             else
-              echo "- Updated \`.github/release-tag.yml\` (tag: \`${RELEASE_INTENT_TAG}\`)" >> "$BODY_FILE"
+              echo "- Updated \`.github/release-tag.json\` (tag: \`${RELEASE_INTENT_TAG}\`)" >> "$BODY_FILE"
             fi
             echo "  - Optional: add the \"release:tag\" label to trigger tagging, release builds, and draft release notes" >> "$BODY_FILE"
           fi

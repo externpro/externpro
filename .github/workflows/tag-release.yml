@@ -27,16 +27,6 @@ jobs:
           fetch-tags: true
           token: ${{ secrets.automation_token || github.token }}
       -
-        name: Install yq
-        shell: bash
-        run: |
-          if command -v yq >/dev/null 2>&1; then
-            exit 0
-          fi
-          wget -qO /tmp/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
-          chmod +x /tmp/yq
-          echo "/tmp" >> $GITHUB_PATH
-      -
         name: Configure Git
         shell: bash
         run: |
@@ -48,20 +38,18 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          if [ ! -f .github/release-tag.yml ]; then
+          if [ ! -f .github/release-tag.json ]; then
             echo "intent_missing=true" >> $GITHUB_OUTPUT
             exit 0
           fi
-          TAG=$(yq eval '.tag // ""' .github/release-tag.yml)
-          MESSAGE=$(yq eval '.message // ""' .github/release-tag.yml)
-          TAG=$(echo "$TAG" | tr -d '\r' | xargs)
-          MESSAGE=$(echo "$MESSAGE" | tr -d '\r')
+          TAG=$(python3 -c 'import json; print((json.load(open(".github/release-tag.json","r",encoding="utf-8")).get("tag") or "").strip())')
+          MESSAGE=$(python3 -c 'import json; print((json.load(open(".github/release-tag.json","r",encoding="utf-8")).get("message") or "").rstrip("\n"))')
           if [ -z "$TAG" ]; then
-            echo "release-tag.yml missing 'tag'" >&2
+            echo "release-tag.json missing 'tag'" >&2
             exit 1
           fi
           if [ -z "$MESSAGE" ]; then
-            echo "release-tag.yml missing 'message'" >&2
+            echo "release-tag.json missing 'message'" >&2
             exit 1
           fi
           if ! [[ "$TAG" =~ ^(xpv|v)[0-9A-Za-z][0-9A-Za-z._-]*$ ]]; then
@@ -81,13 +69,15 @@ jobs:
         with:
           script: |
             const body = [
-              'Missing `.github/release-tag.yml` in the merge commit.',
+              'Missing `.github/release-tag.json` in the merge commit.',
               '',
               'To enable tagging on merge, add this file to the PR:',
               '',
-              '```yaml',
-              'tag: xpv11.2.0.8',
-              'message: "externpro version 11.2.0.8 tag"',
+              '```json',
+              '{',
+              '  "tag": "xpv11.2.0.8",',
+              '  "message": "xpro version 11.2.0.8 tag"',
+              '}',
               '```',
               '',
               'Then ensure the PR has the `release:tag` label before merging into `xpro`.'
