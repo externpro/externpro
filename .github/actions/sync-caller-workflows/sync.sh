@@ -92,6 +92,13 @@ sync_job_secrets_from_template() {
   fi
   while IFS= read -r job; do
     [ -z "$job" ] && continue
+    # Allow repos to intentionally omit/disable template jobs.
+    # Only sync secrets for jobs that already exist in the repo workflow.
+    local job_exists
+    job_exists=$(yq eval ".jobs.${job} != null" "$workflow_file" 2>/dev/null || echo "false")
+    if [ "$job_exists" != "true" ]; then
+      continue
+    fi
     local tmpl_secrets_json
     tmpl_secrets_json=$(yq eval -o=json ".jobs.${job}.secrets" "$template_file" 2>/dev/null || true)
     if [ -z "$tmpl_secrets_json" ] || [ "$tmpl_secrets_json" = "null" ]; then
@@ -123,6 +130,29 @@ detect_template_drift() {
   # Preserve caller-specific customizations: we intentionally do not force-template jobs.*.with values.
   yq eval -o=json 'del(.jobs.*.with)' "$template_file" > "$tmp_t" 2>/dev/null || echo "{}" > "$tmp_t"
   yq eval -o=json 'del(.jobs.*.with)' "$workflow_file" > "$tmp_w" 2>/dev/null || echo "{}" > "$tmp_w"
+  # Repos may intentionally disable platform jobs (e.g. omit jobs.macos/jobs.windows).
+  # Do not treat missing jobs in the repo workflow as template drift.
+  python3 - "$tmp_t" "$tmp_w" <<'PY'
+import json
+import sys
+tmpl_path = sys.argv[1]
+wf_path = sys.argv[2]
+def load(path):
+  try:
+    with open(path, 'r', encoding='utf-8') as f:
+      return json.load(f)
+  except Exception:
+    return {}
+tmpl = load(tmpl_path)
+wf = load(wf_path)
+wf_jobs = wf.get('jobs')
+tmpl_jobs = tmpl.get('jobs')
+if isinstance(wf_jobs, dict) and isinstance(tmpl_jobs, dict):
+  allowed = set(wf_jobs.keys())
+  tmpl['jobs'] = {k: v for k, v in tmpl_jobs.items() if k in allowed}
+with open(tmpl_path, 'w', encoding='utf-8') as f:
+  json.dump(tmpl, f, sort_keys=True)
+PY
   local drift_diff
   drift_diff=$(diff -u "$tmp_t" "$tmp_w" || true)
   rm -f "$tmp_t" "$tmp_w"
