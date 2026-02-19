@@ -3,6 +3,9 @@ description: Configure and build using CMake presets and upload build artifacts.
 inputs:
   artifact-pattern:
     required: true
+  cmake-version:
+    required: false
+    default: "4.2.3"
   cmake-workflow-preset:
     required: true
   cmake-preset:
@@ -23,11 +26,16 @@ runs:
       uses: ssrobins/install-cmake@v1
       continue-on-error: true
       with:
-        version: 4.2.3
+        version: ${{ inputs.cmake-version }}
     -
       name: CMake Configure
       shell: bash
       run: |
+        shopt -s nullglob
+        files=(cmake-${{ inputs.cmake-version }}-*)
+        if ((${#files[@]})); then
+          rm -f "${files[@]}"
+        fi
         cmake --version
         cmake --preset=${{ inputs.cmake-preset }}
     -
