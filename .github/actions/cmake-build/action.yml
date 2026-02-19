@@ -146,13 +146,32 @@ runs:
       shell: bash
       run: |
         build_dir=_bld-${{ inputs.cmake-preset }}
-        file=$(find "$build_dir" -type f -name "${{ github.event.repository.name }}-*.manifest.cmake" | head -1)
-        file=$(pwd)/$file
-        if [[ ! -f "$file" ]]; then
-          echo "::error::Manifest not found!" >&2
-          ls -la "$build_dir" || true
-          exit 1
+        default_artifact_pattern="${{ github.event.repository.name }}-*-xpro.tar.xz"
+        manifest_required=true
+        if [[ "${{ inputs.artifact-pattern }}" != "$default_artifact_pattern" ]]; then
+          manifest_required=false
         fi
+        rel_file=$(find "$build_dir" -type f -name "${{ github.event.repository.name }}-*.manifest.cmake" | head -1)
+        if [[ -z "$rel_file" ]]; then
+          echo "found=false" >> $GITHUB_OUTPUT
+          if [[ "$manifest_required" == "true" ]]; then
+            echo "::error::Manifest not found!" >&2
+            ls -la "$build_dir" || true
+            exit 1
+          fi
+          exit 0
+        fi
+        file=$(pwd)/$rel_file
+        if [[ ! -f "$file" ]]; then
+          echo "found=false" >> $GITHUB_OUTPUT
+          if [[ "$manifest_required" == "true" ]]; then
+            echo "::error::Manifest not found!" >&2
+            ls -la "$build_dir" || true
+            exit 1
+          fi
+          exit 0
+        fi
+        echo "found=true" >> $GITHUB_OUTPUT
         echo "filepath=$file" >> $GITHUB_OUTPUT
         echo "filename=$(basename $file)" >> $GITHUB_OUTPUT
       working-directory: ${{ github.workspace }}
@@ -175,7 +194,7 @@ runs:
         path: ${{ runner.os == 'Windows' && steps.convert_paths.outputs.package_windows_path || steps.find_package.outputs.filepath }}
     -
       name: Upload manifest artifact
-      if: ${{ inputs.cmake-workflow-preset != inputs.no-install-preset }}
+      if: ${{ inputs.cmake-workflow-preset != inputs.no-install-preset && steps.find_manifest.outputs.found == 'true' }}
       uses: actions/upload-artifact@v4
       with:
         name: ${{ steps.find_manifest.outputs.filename }}-${{ inputs.cmake-preset }}-${{ runner.arch }}${{ inputs.name-suffix }}
