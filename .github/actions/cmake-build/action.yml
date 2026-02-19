@@ -19,9 +19,17 @@ runs:
   using: composite
   steps:
     -
+      name: Install CMake
+      uses: ssrobins/install-cmake@v1
+      continue-on-error: true
+      with:
+        version: 4.2.3
+    -
       name: CMake Configure
       shell: bash
-      run: cmake --preset=${{ inputs.cmake-preset }}
+      run: |
+        cmake --version
+        cmake --preset=${{ inputs.cmake-preset }}
     -
       name: Upload CMake logs
       uses: actions/upload-artifact@v4
