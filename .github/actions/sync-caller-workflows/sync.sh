@@ -152,6 +152,8 @@ if isinstance(wf_jobs, dict) and isinstance(tmpl_jobs, dict):
   tmpl['jobs'] = {k: v for k, v in tmpl_jobs.items() if k in allowed}
 with open(tmpl_path, 'w', encoding='utf-8') as f:
   json.dump(tmpl, f, sort_keys=True)
+with open(wf_path, 'w', encoding='utf-8') as f:
+  json.dump(wf, f, sort_keys=True)
 PY
   local drift_diff
   drift_diff=$(diff -u "$tmp_t" "$tmp_w" || true)
