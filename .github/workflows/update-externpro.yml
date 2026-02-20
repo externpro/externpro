@@ -17,11 +17,6 @@ on:
         required: false
         type: boolean
         default: false
-      create_missing_workflows:
-        description: 'Whether to create new workflow files in the caller repo when templates add them'
-        required: false
-        type: boolean
-        default: true
       build_container:
         description: 'Build container image ghcr.io/{owner_repo}/bldimg-{arch}-{build_container}:latest'
         required: false
@@ -131,7 +126,6 @@ jobs:
           workflow_dir: .github/workflows
           template_dir: ${{ steps.validate.outputs.submodule_path }}/.github/wf-templates
           preserve_existing_branches: ${{ inputs.preserve_existing_branches }}
-          create_missing_workflows: ${{ inputs.create_missing_workflows }}
       -
         name: GHCR access
         id: ghcr
