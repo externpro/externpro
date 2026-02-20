@@ -29,5 +29,5 @@ jobs:
         with:
           artifact_pattern: ${{ inputs.artifact_pattern }}
           cmake_workflow_preset: ${{ inputs.cmake_workflow_preset }}
-          cmake-preset: Windows
-          no-install-preset: WindowsReleaseNoInstall
+          cmake_preset: Windows
+          no_install_preset: WindowsReleaseNoInstall

@@ -29,5 +29,5 @@ jobs:
         with:
           artifact_pattern: ${{ inputs.artifact_pattern }}
           cmake_workflow_preset: ${{ inputs.cmake_workflow_preset }}
-          cmake-preset: Darwin
-          no-install-preset: DarwinReleaseNoInstall
+          cmake_preset: Darwin
+          no_install_preset: DarwinReleaseNoInstall

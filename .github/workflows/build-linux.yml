@@ -181,9 +181,9 @@ jobs:
         with:
           artifact_pattern: ${{ inputs.artifact_pattern }}
           cmake_workflow_preset: ${{ inputs.cmake_workflow_preset }}
-          cmake-preset: Linux
-          no-install-preset: LinuxReleaseNoInstall
-          name-suffix: -${{ matrix.buildpro_image }}
+          cmake_preset: Linux
+          no_install_preset: LinuxReleaseNoInstall
+          name_suffix: -${{ matrix.buildpro_image }}
           enable_tmate: ${{ inputs.enable_tmate }}
   clean-up:
     needs: [prep, docker-image, build]
