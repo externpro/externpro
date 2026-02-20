@@ -5,7 +5,7 @@ inputs:
     required: true
   cmake_version:
     required: false
-    default: "4.2.3"
+    default: "3.31.6"
   cmake_workflow_preset:
     required: true
   cmake_preset:
