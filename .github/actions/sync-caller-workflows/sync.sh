@@ -78,6 +78,32 @@ apply_preservation_rules() {
     [ -z "$job" ] && continue
     local repo_with_keys
     local tmpl_with_keys
+    local tmpl_with_json
+    local repo_with_json
+    tmpl_with_json=$(yq eval -o=json ".jobs.${job}.with // null" "$template_file" 2>/dev/null || true)
+    repo_with_json=$(yq eval -o=json ".jobs.${job}.with // null" "$workflow_backup" 2>/dev/null || true)
+    # If the template has no with block but the repo does, preserve the entire with block verbatim.
+    # This is common for caller workflows like xpbuild where template defines uses/secrets but repo adds inputs.
+    if [ "$tmpl_with_json" = "null" ] && [ -n "$repo_with_json" ] && [ "$repo_with_json" != "null" ]; then
+      local with_block
+      with_block=$(JOB="$job" perl -0777 -ne '
+my $job=$ENV{JOB};
+if (m/^  \Q$job\E:\n(?:(?!^  \S).*(?:\n|\z))*?^(    with:\n(?:(?:^      .*?(?:\n|\z))*))/m) {
+  print $1;
+}
+' "$workflow_backup" 2>/dev/null || true)
+      if [ -n "$with_block" ]; then
+        JOB="$job" WITH_BLOCK="$with_block" perl -0777 -i -pe '
+my $job=$ENV{JOB};
+my $blk=$ENV{WITH_BLOCK};
+my $ins=$blk;
+$ins =~ s/\$/\n/; # ensure trailing newline
+s/(^  \Q$job\E:\n(?:(?!^  \S).*(?:\n|\z))*)(?=^  \S|\z)/$1.$ins/mse;
+' "$workflow_file" 2>/dev/null || true
+        REPORT="${REPORT}🔧 ${template_name}: preserved with block jobs.${job}.with\n"
+      fi
+      continue
+    fi
     repo_with_keys=$(yq eval ".jobs.${job}.with | keys | .[]" "$workflow_backup" 2>/dev/null | grep -v null || true)
     tmpl_with_keys=$(yq eval ".jobs.${job}.with | keys | .[]" "$template_file" 2>/dev/null | grep -v null || true)
     local added_keys
