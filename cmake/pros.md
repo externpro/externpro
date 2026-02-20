@@ -34,7 +34,7 @@
       mkdir -p .github/workflows
       cp .devcontainer/.github/wf-templates/xp*.yml .github/workflows/
       ```
-   * consider modifying `.github/workflows/xpbuild.yml`'s `cmake-workflow-preset` to be `[Linux|Windows]Release` if the project doesn't need to build a `Debug` version of a library (for example, the project only builds an executable or a header-only library)
+   * consider modifying `.github/workflows/xpbuild.yml`'s `cmake_workflow_preset` to be `[Linux|Windows]Release` if the project doesn't need to build a `Debug` version of a library (for example, the project only builds an executable or a header-only library)
    * you may need to disable or modify the trigger of existing "upstream" GitHub Actions workflows
       * examples:
         [fmt](https://github.com/externpro/externpro/blob/main/cmake/README.md#fmt)

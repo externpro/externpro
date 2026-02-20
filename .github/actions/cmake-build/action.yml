@@ -1,21 +1,21 @@
 name: CMake Build
 description: Configure and build using CMake presets and upload build artifacts.
 inputs:
-  artifact-pattern:
+  artifact_pattern:
     required: true
-  cmake-version:
+  cmake_version:
     required: false
     default: "4.2.3"
-  cmake-workflow-preset:
+  cmake_workflow_preset:
     required: true
-  cmake-preset:
+  cmake_preset:
     required: true
-  no-install-preset:
+  no_install_preset:
     required: true
-  name-suffix:
+  name_suffix:
     required: false
     default: ""
-  enable-tmate:
+  enable_tmate:
     required: false
     default: "false"
 runs:
@@ -26,34 +26,34 @@ runs:
       uses: ssrobins/install-cmake@v1
       continue-on-error: true
       with:
-        version: ${{ inputs.cmake-version }}
+        version: ${{ inputs.cmake_version }}
     -
       name: CMake Configure
       shell: bash
       run: |
         shopt -s nullglob
-        files=(cmake-${{ inputs.cmake-version }}-*)
+        files=(cmake-${{ inputs.cmake_version }}-*)
         if ((${#files[@]})); then
           rm -f "${files[@]}"
         fi
         cmake --version
-        cmake --preset=${{ inputs.cmake-preset }}
+        cmake --preset=${{ inputs.cmake_preset }}
     -
       name: Upload CMake logs
       uses: actions/upload-artifact@v4
       with:
-        name: cmake-logs-${{ inputs.cmake-preset }}-${{ runner.arch }}${{ inputs.name-suffix }}
+        name: cmake-logs-${{ inputs.cmake_preset }}-${{ runner.arch }}${{ inputs.name_suffix }}
         path: |
-          _bld-${{ inputs.cmake-preset }}/CMakeFiles/CMakeConfigureLog.yaml
+          _bld-${{ inputs.cmake_preset }}/CMakeFiles/CMakeConfigureLog.yaml
     -
       name: CMake Workflow
       shell: bash
       id: cmake_workflow
       continue-on-error: true
-      run: cmake --workflow --preset=${{ inputs.cmake-workflow-preset }}
+      run: cmake --workflow --preset=${{ inputs.cmake_workflow_preset }}
     -
       name: Install tmate (on failure)
-      if: ${{ inputs.enable-tmate == 'true' && steps.cmake_workflow.outcome == 'failure' }}
+      if: ${{ inputs.enable_tmate == 'true' && steps.cmake_workflow.outcome == 'failure' }}
       shell: bash
       run: |
         if command -v tmate >/dev/null 2>&1; then
@@ -116,7 +116,7 @@ runs:
         fi
     -
       name: Setup tmate session (on failure)
-      if: ${{ inputs.enable-tmate == 'true' && steps.cmake_workflow.outcome == 'failure' }}
+      if: ${{ inputs.enable_tmate == 'true' && steps.cmake_workflow.outcome == 'failure' }}
       uses: mxschmitt/action-tmate@v3
       with:
         install-dependencies: false
@@ -128,10 +128,10 @@ runs:
     -
       name: Find package
       id: find_package
-      if: ${{ inputs.cmake-workflow-preset != inputs.no-install-preset }}
+      if: ${{ inputs.cmake_workflow_preset != inputs.no_install_preset }}
       shell: bash
       run: |
-        file=$(pwd)/$(ls _bld-${{ inputs.cmake-preset }}/${{ inputs.artifact-pattern }})
+        file=$(pwd)/$(ls _bld-${{ inputs.cmake_preset }}/${{ inputs.artifact_pattern }})
         if [[ ! -f "$file" ]]; then
           echo "::error::Package not found!" >&2
           exit 1
@@ -142,13 +142,13 @@ runs:
     -
       name: Find manifest
       id: find_manifest
-      if: ${{ inputs.cmake-workflow-preset != inputs.no-install-preset }}
+      if: ${{ inputs.cmake_workflow_preset != inputs.no_install_preset }}
       shell: bash
       run: |
-        build_dir=_bld-${{ inputs.cmake-preset }}
+        build_dir=_bld-${{ inputs.cmake_preset }}
         default_artifact_pattern="${{ github.event.repository.name }}-*-xpro.tar.xz"
         manifest_required=true
-        if [[ "${{ inputs.artifact-pattern }}" != "$default_artifact_pattern" ]]; then
+        if [[ "${{ inputs.artifact_pattern }}" != "$default_artifact_pattern" ]]; then
           manifest_required=false
         fi
         rel_file=$(find "$build_dir" -type f -name "${{ github.event.repository.name }}-*.manifest.cmake" | head -1)
@@ -178,7 +178,7 @@ runs:
     -
       name: Convert Git Bash paths to Windows paths
       id: convert_paths
-      if: ${{ inputs.cmake-workflow-preset != inputs.no-install-preset && runner.os == 'Windows' }}
+      if: ${{ inputs.cmake_workflow_preset != inputs.no_install_preset && runner.os == 'Windows' }}
       shell: pwsh
       run: |
         $pkgWindowsPath = '${{ steps.find_package.outputs.filepath }}' -replace '^/([a-zA-Z])/', '$1:/' -replace '/', '\\'
@@ -187,17 +187,17 @@ runs:
         echo "manifest_windows_path=$manifestWindowsPath" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
     -
       name: Upload package artifact
-      if: ${{ inputs.cmake-workflow-preset != inputs.no-install-preset }}
+      if: ${{ inputs.cmake_workflow_preset != inputs.no_install_preset }}
       uses: actions/upload-artifact@v4
       with:
         name: ${{ steps.find_package.outputs.filename }}
         path: ${{ runner.os == 'Windows' && steps.convert_paths.outputs.package_windows_path || steps.find_package.outputs.filepath }}
     -
       name: Upload manifest artifact
-      if: ${{ inputs.cmake-workflow-preset != inputs.no-install-preset && steps.find_manifest.outputs.found == 'true' }}
+      if: ${{ inputs.cmake_workflow_preset != inputs.no_install_preset && steps.find_manifest.outputs.found == 'true' }}
       uses: actions/upload-artifact@v4
       with:
-        name: ${{ steps.find_manifest.outputs.filename }}-${{ inputs.cmake-preset }}-${{ runner.arch }}${{ inputs.name-suffix }}
+        name: ${{ steps.find_manifest.outputs.filename }}-${{ inputs.cmake_preset }}-${{ runner.arch }}${{ inputs.name_suffix }}
         path: ${{ runner.os == 'Windows' && steps.convert_paths.outputs.manifest_windows_path || steps.find_manifest.outputs.filepath }}
     -
       name: Check for dirty repo

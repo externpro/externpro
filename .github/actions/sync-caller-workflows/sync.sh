@@ -27,7 +27,26 @@ stage_authoritative_copy() {
   local template_name="$1"
   local workflow_file="$2"
   local template_file="$3"
+  local preserved_release_artifact_pattern
+  preserved_release_artifact_pattern=""
+  if [ "$template_name" = "xprelease.yml" ] && [ -f "$workflow_file.backup" ]; then
+    preserved_release_artifact_pattern=$(yq eval '.jobs.release-from-build.with.artifact_pattern // ""' "$workflow_file.backup" 2>/dev/null || true)
+    if [ -z "$preserved_release_artifact_pattern" ] || [ "$preserved_release_artifact_pattern" = "null" ]; then
+      preserved_release_artifact_pattern=$(yq eval '.jobs.release-from-build.with."artifact-pattern" // ""' "$workflow_file.backup" 2>/dev/null || true)
+    fi
+    if [ -z "$preserved_release_artifact_pattern" ] || [ "$preserved_release_artifact_pattern" = "null" ]; then
+      preserved_release_artifact_pattern=""
+    fi
+  fi
   cp "$template_file" "$workflow_file"
+  if [ "$template_name" = "xprelease.yml" ] && [ -n "$preserved_release_artifact_pattern" ]; then
+    yq eval ".jobs.release-from-build.with.artifact_pattern = \"${preserved_release_artifact_pattern}\"" -i "$workflow_file" 2>/dev/null || true
+  fi
+
+  if [ "$template_name" = "xprelease.yml" ]; then
+    yq eval 'del(.jobs.release-from-build.with."artifact-pattern")' -i "$workflow_file" 2>/dev/null || true
+  fi
+
   local diff_out
   diff_out=$(diff -u "$workflow_file.backup" "$workflow_file" || true)
   if [ -z "$diff_out" ]; then
@@ -63,6 +82,37 @@ restore_preserved_with_keys() {
     if [ -z "$preserved_with_json" ] || [ "$preserved_with_json" = "null" ]; then
       preserved_with_json='{}'
     fi
+
+    # Normalize preserved caller inputs from kebab-case to snake_case.
+    # This allows a caller repo to keep its custom values while we standardize template inputs.
+    preserved_with_json=$(python3 -c 'import json,sys
+raw=(sys.stdin.read() or "").strip() or "{}"
+try:
+  data=json.loads(raw)
+except Exception:
+  data={}
+if not isinstance(data, dict):
+  data={}
+mapping={
+  "artifact-pattern":"artifact_pattern",
+  "cmake-workflow-preset":"cmake_workflow_preset",
+  "arch-list":"arch_list",
+  "buildpro-images":"buildpro_images",
+  "enable-tmate":"enable_tmate",
+  "name-suffix":"name_suffix",
+  "cmake-version":"cmake_version",
+  "cmake-preset":"cmake_preset",
+  "no-install-preset":"no_install_preset",
+  "workflow-run-url":"workflow_run_url",
+}
+for old,new in mapping.items():
+  if new not in data and old in data:
+    data[new]=data[old]
+  if old in data:
+    del data[old]
+sys.stdout.write(json.dumps(data))
+' <<< "$preserved_with_json")
+
     if [ "$current_with_json" = "{}" ] && [ "$preserved_with_json" = "{}" ]; then
       continue
     fi
@@ -70,6 +120,8 @@ restore_preserved_with_keys() {
     # - Template keys remain if caller doesn't specify them.
     # - Caller values override template values when both exist.
     yq eval ".jobs.${job}.with = ((.jobs.${job}.with // {}) *+ ${preserved_with_json})" -i "$workflow_file"
+    # Ensure any legacy kebab-case keys are removed after merge.
+    yq eval "del(.jobs.${job}.with.\"artifact-pattern\") | del(.jobs.${job}.with.\"cmake-workflow-preset\") | del(.jobs.${job}.with.\"arch-list\") | del(.jobs.${job}.with.\"buildpro-images\") | del(.jobs.${job}.with.\"enable-tmate\") | del(.jobs.${job}.with.\"name-suffix\") | del(.jobs.${job}.with.\"cmake-version\") | del(.jobs.${job}.with.\"cmake-preset\") | del(.jobs.${job}.with.\"no-install-preset\") | del(.jobs.${job}.with.\"workflow-run-url\")" -i "$workflow_file" 2>/dev/null || true
     yq eval ".jobs.${job}.with = (.jobs.${job}.with | sort_keys(.))" -i "$workflow_file" 2>/dev/null || true
     local merged_with_json
     merged_with_json=$(yq eval -o=json ".jobs.${job}.with // {}" "$workflow_file" 2>/dev/null || true)

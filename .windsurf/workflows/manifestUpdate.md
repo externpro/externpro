@@ -111,13 +111,13 @@ If the consumer repo uses non-default CMake workflow presets ending in `Release`
 
 Policy:
 - Do copy the templates (the template structure is authoritative; for example linux should typically be a single job).
-- After copying, re-apply only the consumer repo's non-default `cmake-workflow-preset` values that end in `Release`.
+- After copying, re-apply only the consumer repo's non-default `cmake_workflow_preset` values that end in `Release`.
 - Do not add extra linux jobs (e.g. `linux-arm64`) solely to force architecture selection.
-- Do not set `arch-list` unless the consumer repo has a specific reason to deviate; the default should build the intended architectures.
+- Do not set `arch_list` unless the consumer repo has a specific reason to deviate; the default should build the intended architectures.
 
-If the project has a `cmake-workflow-preset` workflow, it MUST be preserved.
+If the project has a `cmake_workflow_preset` workflow, it MUST be preserved.
 
-If `cmake-workflow-preset` exists, ensure it is not overwritten by the template copy step (restore it if needed) before staging `xp*.yml`.
+If `cmake_workflow_preset` exists, ensure it is not overwritten by the template copy step (restore it if needed) before staging `xp*.yml`.
 
 ```sh
 XP_WF_TAG=$(grep -hE "uses: externpro/externpro/.github/workflows/.*@" .github/workflows/xp*.yml | head -1 | sed -E 's/.*@([^ ]+).*/\1/')

@@ -11,10 +11,10 @@ For externpro integration guidance (including `xpinit` preconditions and how to 
 Builds the project in a Docker container on Linux systems.
 
 **Inputs:**
-- `artifact-pattern` (optional): Pattern to search for artifact files (default: `[repository-name]-*-xpro.tar.xz`)
-- `cmake-workflow-preset` (optional): CMake workflow preset (default: `Linux`)
-- `arch-list` (optional): JSON array of target architectures as a string (default: `["amd64","arm64"]`)
-- `buildpro-images` (optional): JSON array of buildpro images as a string (default: `["rocky8-gcc9","rocky9-gcc13","rocky10-gcc15"]`)
+- `artifact_pattern` (optional): Pattern to search for artifact files (default: `[repository-name]-*-xpro.tar.xz`)
+- `cmake_workflow_preset` (optional): CMake workflow preset (default: `Linux`)
+- `arch_list` (optional): JSON array of target architectures as a string (default: `["amd64","arm64"]`)
+- `buildpro_images` (optional): JSON array of buildpro images as a string (default: `["rocky8-gcc9","rocky9-gcc13","rocky10-gcc15"]`)
 
 **Caller permissions:**
 - `contents: read`
@@ -31,9 +31,9 @@ jobs:
       contents: read
       pull-requests: write
       packages: write
-    uses: externpro/externpro/.github/workflows/build-linux.yml@25.06
+    uses: externpro/externpro/.github/workflows/build-linux.yml@main
     with:
-      cmake-workflow-preset: Linux # Release and Debug
+      cmake_workflow_preset: Linux # Release and Debug
     secrets: inherit
 ```
 
@@ -42,8 +42,8 @@ jobs:
 Builds the project on macOS (aka Darwin) systems.
 
 **Inputs:**
-- `artifact-pattern` (optional): Pattern to search for artifact files (default: `[repository-name]-*-xpro.tar.xz`)
-- `cmake-workflow-preset` (optional): CMake workflow preset (default: `Darwin`)
+- `artifact_pattern` (optional): Pattern to search for artifact files (default: `[repository-name]-*-xpro.tar.xz`)
+- `cmake_workflow_preset` (optional): CMake workflow preset (default: `Darwin`)
 
 **Caller permissions:**
 - `contents: read`
@@ -58,9 +58,9 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
-    uses: externpro/externpro/.github/workflows/build-macos.yml@25.06
+    uses: externpro/externpro/.github/workflows/build-macos.yml@main
     with:
-      cmake-workflow-preset: Darwin # Release and Debug
+      cmake_workflow_preset: Darwin # Release and Debug
     secrets: inherit
 ```
 
@@ -69,8 +69,8 @@ jobs:
 Builds the project on Windows systems.
 
 **Inputs:**
-- `artifact-pattern` (optional): Pattern to search for artifact files (default: `[repository-name]-*-xpro.tar.xz`)
-- `cmake-workflow-preset` (optional): CMake workflow preset (default: `Windows`)
+- `artifact_pattern` (optional): Pattern to search for artifact files (default: `[repository-name]-*-xpro.tar.xz`)
+- `cmake_workflow_preset` (optional): CMake workflow preset (default: `Windows`)
 
 **Caller permissions:**
 - `contents: read`
@@ -85,9 +85,9 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
-    uses: externpro/externpro/.github/workflows/build-windows.yml@25.06
+    uses: externpro/externpro/.github/workflows/build-windows.yml@main
     with:
-      cmake-workflow-preset: Windows # Release and Debug
+      cmake_workflow_preset: Windows # Release and Debug
     secrets: inherit
 ```
 
@@ -129,7 +129,7 @@ permissions:
 ```yaml
 jobs:
   release-from-build:
-    uses: externpro/externpro/.github/workflows/release-from-build.yml@25.06
+    uses: externpro/externpro/.github/workflows/release-from-build.yml@main
     with:
       workflow_run_url: https://github.com/owner/repo/actions/runs/123456789
       artifact_pattern: "*.tar.xz"
@@ -157,7 +157,7 @@ on:
         type: string
 jobs:
   release-from-build:
-    uses: externpro/externpro/.github/workflows/release-from-build.yml@25.06
+    uses: externpro/externpro/.github/workflows/release-from-build.yml@main
     with:
       workflow_run_url: ${{ github.event.inputs.workflow_run_url }}
       artifact_pattern: "*.tar.xz"
@@ -198,20 +198,20 @@ jobs:
       contents: read
       pull-requests: write
       packages: write
-    uses: externpro/externpro/.github/workflows/build-linux.yml@25.06
+    uses: externpro/externpro/.github/workflows/build-linux.yml@main
     with:
-      cmake-workflow-preset: LinuxRelease  # Use release preset
-      arch-list: '["arm64"]'
-      buildpro-images: '["rocky9-gcc13"]'
+      cmake_workflow_preset: LinuxRelease  # Use release preset
+      arch_list: '["arm64"]'
+      buildpro_images: '["rocky9-gcc13"]'
     secrets: inherit
 
   windows:
     permissions:
       contents: read
       pull-requests: write
-    uses: externpro/externpro/.github/workflows/build-windows.yml@25.06
+    uses: externpro/externpro/.github/workflows/build-windows.yml@main
     with:
-      cmake-workflow-preset: WindowsRelease  # Use release preset
+      cmake_workflow_preset: WindowsRelease  # Use release preset
     secrets: inherit
 ```
 
@@ -230,10 +230,10 @@ jobs:
       contents: read
       pull-requests: write
       packages: write
-    uses: externpro/externpro/.github/workflows/build-linux.yml@25.06
+    uses: externpro/externpro/.github/workflows/build-linux.yml@main
     with:
-      artifact-pattern: "${{ github.event.repository.name }}-*.zip"
-      cmake-workflow-preset: LinuxRelease
+      artifact_pattern: "${{ github.event.repository.name }}-*.zip"
+      cmake_workflow_preset: LinuxRelease
     secrets: inherit
 ```
 
@@ -241,7 +241,7 @@ release.yml
 ```yaml
 jobs:
   release-from-build:
-    uses: externpro/externpro/.github/workflows/release-from-build.yml@25.06
+    uses: externpro/externpro/.github/workflows/release-from-build.yml@main
     with:
       workflow_run_url: https://github.com/owner/repo/actions/runs/123456789
       artifact_pattern: "*.zip"  # Upload ZIP files instead

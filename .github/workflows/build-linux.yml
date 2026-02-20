@@ -2,27 +2,27 @@ name: Build Linux
 on:
   workflow_call:
     inputs:
-      artifact-pattern:
+      artifact_pattern:
         required: false
         type: string
         description: 'Pattern to search for artifact file'
         default: '${{ github.event.repository.name }}-*-xpro.tar.xz'
-      cmake-workflow-preset:
+      cmake_workflow_preset:
         required: false
         type: string
         description: 'CMake workflow preset to use; e.g. Linux, LinuxRelease, LinuxReleaseNoInstall'
         default: "Linux"
-      arch-list:
+      arch_list:
         required: false
         type: string
         description: 'JSON array of target architectures (e.g. ["amd64","arm64"])'
         default: '["amd64","arm64"]'
-      buildpro-images:
+      buildpro_images:
         required: false
         type: string
         description: 'JSON array of buildpro images to build (e.g. ["rocky8-gcc9","rocky9-gcc13","rocky10-gcc15","ubuntu"])'
         default: '["rocky8-gcc9","rocky9-gcc13","rocky10-gcc15"]'
-      enable-tmate:
+      enable_tmate:
         required: false
         type: boolean
         description: 'Start an interactive tmate session if the CMake workflow step fails (useful for debugging CI-only failures)'
@@ -68,8 +68,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        arch: ${{ fromJson(inputs.arch-list) }}
-        buildpro_image: ${{ fromJson(inputs.buildpro-images) }}
+        arch: ${{ fromJson(inputs.arch_list) }}
+        buildpro_image: ${{ fromJson(inputs.buildpro_images) }}
     steps:
       -
         name: Checkout repo
@@ -160,8 +160,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        arch: ${{ fromJson(inputs.arch-list) }}
-        buildpro_image: ${{ fromJson(inputs.buildpro-images) }}
+        arch: ${{ fromJson(inputs.arch_list) }}
+        buildpro_image: ${{ fromJson(inputs.buildpro_images) }}
     container:
       image: ${{ format('ghcr.io/{0}/bldimg-{1}-{2}:{3}', needs.prep.outputs.owner_repo, matrix.arch, matrix.buildpro_image, needs.prep.outputs.image_tag) }}
       credentials:
@@ -179,12 +179,12 @@ jobs:
         name: CMake Build
         uses: ./.devcontainer/.github/actions/cmake-build
         with:
-          artifact-pattern: ${{ inputs.artifact-pattern }}
-          cmake-workflow-preset: ${{ inputs.cmake-workflow-preset }}
+          artifact_pattern: ${{ inputs.artifact_pattern }}
+          cmake_workflow_preset: ${{ inputs.cmake_workflow_preset }}
           cmake-preset: Linux
           no-install-preset: LinuxReleaseNoInstall
           name-suffix: -${{ matrix.buildpro_image }}
-          enable-tmate: ${{ inputs.enable-tmate }}
+          enable_tmate: ${{ inputs.enable_tmate }}
   clean-up:
     needs: [prep, docker-image, build]
     if: ${{ needs.build.result == 'success' }}
@@ -192,8 +192,8 @@ jobs:
     continue-on-error: true
     strategy:
       matrix:
-        arch: ${{ fromJson(inputs.arch-list) }}
-        buildpro_image: ${{ fromJson(inputs.buildpro-images) }}
+        arch: ${{ fromJson(inputs.arch_list) }}
+        buildpro_image: ${{ fromJson(inputs.buildpro_images) }}
     steps:
       -
         name: Install skopeo (for tag listing)

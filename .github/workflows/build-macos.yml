@@ -2,12 +2,12 @@ name: Build macOS
 on:
   workflow_call:
     inputs:
-      artifact-pattern:
+      artifact_pattern:
         required: false
         type: string
         description: 'Pattern to search for artifact file'
         default: '${{ github.event.repository.name }}-*-xpro.tar.xz'
-      cmake-workflow-preset:
+      cmake_workflow_preset:
         required: false
         type: string
         description: 'CMake workflow preset to use; e.g. Darwin, DarwinRelease, DarwinReleaseNoInstall'
@@ -27,7 +27,7 @@ jobs:
         name: CMake Build
         uses: ./.devcontainer/.github/actions/cmake-build
         with:
-          artifact-pattern: ${{ inputs.artifact-pattern }}
-          cmake-workflow-preset: ${{ inputs.cmake-workflow-preset }}
+          artifact_pattern: ${{ inputs.artifact_pattern }}
+          cmake_workflow_preset: ${{ inputs.cmake_workflow_preset }}
           cmake-preset: Darwin
           no-install-preset: DarwinReleaseNoInstall
