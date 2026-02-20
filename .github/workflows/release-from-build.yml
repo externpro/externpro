@@ -15,7 +15,7 @@ on:
         description: 'Pattern to match artifact files (e.g., "*.tar.xz")'
         required: false
         type: string
-        default: '*.tar.xz'
+        default: '${{ github.event.repository.name }}-*-xpro.tar.xz'
       release_body_template:
         description: 'Template for the release body'
         required: false
@@ -79,6 +79,11 @@ jobs:
         id: find_artifacts
         run: |
           echo "Finding artifacts matching pattern: ${{ inputs.artifact_pattern }}"
+          default_artifact_pattern='${{ github.event.repository.name }}-*-xpro.tar.xz'
+          manifest_required=true
+          if [[ "${{ inputs.artifact_pattern }}" != "$default_artifact_pattern" ]]; then
+            manifest_required=false
+          fi
           artifacts=()
           hashes=()
           # Find all files matching the pattern
@@ -106,9 +111,36 @@ jobs:
           printf '%s\n' "${hashes[@]}" | LC_ALL=C sort -k2,2 > "${sha256sums_file}"
           mapfile -t manifest_files < <(find ./artifacts -name "*.manifest.cmake" -type f | sort)
           if [ ${#manifest_files[@]} -eq 0 ]; then
-            echo "::error::No manifest file found in downloaded artifacts (expected: *.manifest.cmake)"
-            find ./artifacts -type f | sort
-            exit 1
+            if [[ "$manifest_required" == "true" ]]; then
+              echo "::error::No manifest file found in downloaded artifacts (expected: *.manifest.cmake)"
+              find ./artifacts -type f | sort
+              exit 1
+            fi
+            echo "No manifest found; deriving tag from workflow run head_branch"
+            version_tag=$(gh api "/repos/${{ github.repository }}/actions/runs/${{ steps.extract_run_id.outputs.run_id }}" --jq .head_branch)
+            if [ -z "${version_tag}" ]; then
+              echo "::error::Could not derive tag from workflow run head_branch"
+              exit 1
+            fi
+            if [[ "${version_tag}" =~ -[0-9]+-g[a-f0-9]+$ ]]; then
+              is_prerelease="true"
+            else
+              is_prerelease="false"
+            fi
+            sha256sums_hash=$(sha256sum "${sha256sums_file}" | cut -d' ' -f1)
+            # Set outputs (no manifest)
+            {
+              echo "artifacts<<EOF"
+              printf '%s\n' "${artifacts[@]}"
+              echo "EOF"
+              echo "sha256sums_file=$sha256sums_file"
+              echo "sha256sums_hash=$sha256sums_hash"
+              echo "tag=$version_tag"
+              echo "is_prerelease=$is_prerelease"
+              echo "manifest_file="
+              echo "manifest_hash="
+            } >> $GITHUB_OUTPUT
+            exit 0
           fi
           manifest_file="${manifest_files[0]}"
           if [ ${#manifest_files[@]} -gt 1 ]; then
@@ -161,6 +193,8 @@ jobs:
             echo "manifest_file=$manifest_file"
             echo "manifest_hash=$manifest_hash"
           } >> $GITHUB_OUTPUT
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Attest artifacts
         uses: actions/attest-build-provenance@v2
         with:
@@ -212,17 +246,19 @@ jobs:
           # Use the hardcoded repository where this workflow is defined as the signer
           sed -i "s|{workflow_run_url}|${{ inputs.workflow_run_url }}|g" "$RELEASE_NOTES_FILE"
           sed -i "s|{signer_repo}|externpro/externpro|g" "$RELEASE_NOTES_FILE"
-          # Append checksums section to release notes file
-          cat << 'EOF' >> "$RELEASE_NOTES_FILE"
-          ### Manifest
-          ```
-          EOF
-          echo "MANIFEST_SHA256 ${{ steps.find_artifacts.outputs.manifest_hash }}" >> "$RELEASE_NOTES_FILE"
-          # Close the code block
-          echo '```' >> "$RELEASE_NOTES_FILE"
+          if [ -n "${{ steps.find_artifacts.outputs.manifest_hash }}" ]; then
+            # Append checksums section to release notes file
+            cat << 'EOF' >> "$RELEASE_NOTES_FILE"
+            ### Manifest
+            ```
+            EOF
+            echo "MANIFEST_SHA256 ${{ steps.find_artifacts.outputs.manifest_hash }}" >> "$RELEASE_NOTES_FILE"
+            # Close the code block
+            echo '```' >> "$RELEASE_NOTES_FILE"
+          fi
           # Set flags based on release type
           flags=""
-          if [ "$is_prerelease" = "true" ]; then
+          if [[ "$is_prerelease" == "true" ]]; then
             flags="$flags --prerelease"
           fi
           # Always create draft releases
