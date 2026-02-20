@@ -140,7 +140,8 @@ if (m/^  \Q$job\E:\n(?:(?!^  \S).*(?:\n|\z))*?^    with:\n/ms) {
   if (m/^  \Q$job\E:\n(?:(?!^  \S).*(?:\n|\z))*?^    with:\n(?:(?!^    \S).*(?:\n|\z))*?^      \Q$key\E:/ms) {
     # key already present; do nothing
   } else {
-    s/(^  \Q$job\E:\n(?:(?!^  \S).*(?:\n|\z))*?^    with:\n(?:(?:^      .*\n)*)?)/$1.$insert/mes;
+    # Append within the with: block, before the next 4-space key (permissions/secrets/uses/etc.).
+    s/(^  \Q$job\E:\n(?:(?!^  \S).*(?:\n|\z))*?^    with:\n(?:(?:^      .*\n)*))(?=^    \S|^  \S|\z)/$1.$insert/mse;
   }
 } else {
   # 2) No with: block: add one at the end of the job block.
@@ -220,7 +221,6 @@ process_template_file() {
   # Template is always authoritative.
   cp "$template_file" "$workflow_file"
   apply_preservation_rules "$template_name" "$workflow_file" "$workflow_file.backup" "$template_file"
-
   local diff_out
   diff_out=$(diff -u "$workflow_file.backup" "$workflow_file" || true)
   if [ -z "$diff_out" ]; then
