@@ -27,7 +27,7 @@ on:
           {workflow_run_url}
 
           ### Download
-          - Download the appropriate `.tar.xz` file for your platform
+          - Download the appropriate asset for your platform
     outputs:
       release_id:
         description: 'The ID of the release'
