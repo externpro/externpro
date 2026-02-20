@@ -31,7 +31,7 @@ jobs:
       contents: read
       pull-requests: write
       packages: write
-    uses: externpro/externpro/.github/workflows/build-linux.yml@main
+    uses: externpro/externpro/.github/workflows/build-linux.yml@26.01
     with:
       cmake_workflow_preset: Linux # Release and Debug
     secrets: inherit
@@ -58,7 +58,7 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
-    uses: externpro/externpro/.github/workflows/build-macos.yml@main
+    uses: externpro/externpro/.github/workflows/build-macos.yml@26.01
     with:
       cmake_workflow_preset: Darwin # Release and Debug
     secrets: inherit
@@ -85,7 +85,7 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
-    uses: externpro/externpro/.github/workflows/build-windows.yml@main
+    uses: externpro/externpro/.github/workflows/build-windows.yml@26.01
     with:
       cmake_workflow_preset: Windows # Release and Debug
     secrets: inherit
@@ -129,7 +129,7 @@ permissions:
 ```yaml
 jobs:
   release-from-build:
-    uses: externpro/externpro/.github/workflows/release-from-build.yml@main
+    uses: externpro/externpro/.github/workflows/release-from-build.yml@26.01
     with:
       workflow_run_url: https://github.com/owner/repo/actions/runs/123456789
       artifact_pattern: "*.tar.xz"
@@ -157,7 +157,7 @@ on:
         type: string
 jobs:
   release-from-build:
-    uses: externpro/externpro/.github/workflows/release-from-build.yml@main
+    uses: externpro/externpro/.github/workflows/release-from-build.yml@26.01
     with:
       workflow_run_url: ${{ github.event.inputs.workflow_run_url }}
       artifact_pattern: "*.tar.xz"
@@ -198,7 +198,7 @@ jobs:
       contents: read
       pull-requests: write
       packages: write
-    uses: externpro/externpro/.github/workflows/build-linux.yml@main
+    uses: externpro/externpro/.github/workflows/build-linux.yml@26.01
     with:
       cmake_workflow_preset: LinuxRelease  # Use release preset
       arch_list: '["arm64"]'
@@ -209,7 +209,7 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
-    uses: externpro/externpro/.github/workflows/build-windows.yml@main
+    uses: externpro/externpro/.github/workflows/build-windows.yml@26.01
     with:
       cmake_workflow_preset: WindowsRelease  # Use release preset
     secrets: inherit
@@ -230,7 +230,7 @@ jobs:
       contents: read
       pull-requests: write
       packages: write
-    uses: externpro/externpro/.github/workflows/build-linux.yml@main
+    uses: externpro/externpro/.github/workflows/build-linux.yml@26.01
     with:
       artifact_pattern: "${{ github.event.repository.name }}-*.zip"
       cmake_workflow_preset: LinuxRelease
@@ -241,7 +241,7 @@ release.yml
 ```yaml
 jobs:
   release-from-build:
-    uses: externpro/externpro/.github/workflows/release-from-build.yml@main
+    uses: externpro/externpro/.github/workflows/release-from-build.yml@26.01
     with:
       workflow_run_url: https://github.com/owner/repo/actions/runs/123456789
       artifact_pattern: "*.zip"  # Upload ZIP files instead
