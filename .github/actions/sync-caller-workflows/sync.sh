@@ -42,11 +42,9 @@ stage_authoritative_copy() {
   if [ "$template_name" = "xprelease.yml" ] && [ -n "$preserved_release_artifact_pattern" ]; then
     yq eval ".jobs.release-from-build.with.artifact_pattern = \"${preserved_release_artifact_pattern}\"" -i "$workflow_file" 2>/dev/null || true
   fi
-
   if [ "$template_name" = "xprelease.yml" ]; then
     yq eval 'del(.jobs.release-from-build.with."artifact-pattern")' -i "$workflow_file" 2>/dev/null || true
   fi
-
   local diff_out
   diff_out=$(diff -u "$workflow_file.backup" "$workflow_file" || true)
   if [ -z "$diff_out" ]; then
@@ -247,6 +245,33 @@ extract_preserved_customizations() {
   # Also extract template with: keys so new template options don't trip "unexpected diffs"
   TEMPLATE_WITH_KEYS=$(yq eval '.jobs.*.with | keys | .[]' "$template_file" 2>/dev/null | grep -v null || true)
   EXCLUSION_WITH_KEYS=$(printf '%s\n%s\n' "${WITH_KEYS}" "${TEMPLATE_WITH_KEYS}" | sort -u | grep -v '^$' || true)
+  # If caller/template use legacy kebab-case keys but we migrate to snake_case during restore,
+  # ensure the exclusion list includes both forms so the diff filter doesn't treat this as unexpected.
+  EXCLUSION_WITH_KEYS=$(python3 -c 'import sys
+mapping={
+  "artifact-pattern":"artifact_pattern",
+  "cmake-workflow-preset":"cmake_workflow_preset",
+  "arch-list":"arch_list",
+  "buildpro-images":"buildpro_images",
+  "enable-tmate":"enable_tmate",
+  "name-suffix":"name_suffix",
+  "cmake-version":"cmake_version",
+  "cmake-preset":"cmake_preset",
+  "no-install-preset":"no_install_preset",
+  "workflow-run-url":"workflow_run_url",
+}
+keys=[ln.strip() for ln in sys.stdin.read().splitlines() if ln.strip()]
+out=set(keys)
+for k in keys:
+  if k in mapping:
+    out.add(mapping[k])
+  else:
+    for old,new in mapping.items():
+      if k==new:
+        out.add(old)
+        break
+sys.stdout.write("\n".join(sorted(out)))
+' <<< "$EXCLUSION_WITH_KEYS")
   if [ "$template_name" = "xprelease.yml" ]; then
     WITH_KEYS=$(echo "$WITH_KEYS" | grep -v '^workflow_run_url$' || true)
   fi
