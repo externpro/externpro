@@ -72,8 +72,10 @@ apply_preservation_rules() {
     done <<< "$jobs_to_drop"
   fi
   # 3) Preserve repo-added jobs.<job>.with keys (added keys only)
-  local legacy_keys_accum
-  legacy_keys_accum=""
+  local renamed_keys_accum
+  renamed_keys_accum=""
+  local unknown_legacy_keys_accum
+  unknown_legacy_keys_accum=""
   while IFS= read -r job; do
     [ -z "$job" ] && continue
     local repo_with_keys
@@ -98,17 +100,34 @@ if ($b =~ m/^  \Q$job\E:\n(?:(?!^  \S).*(?:\n|\z))*?^(    with:\n(?:(?:^      .*
   $with_blk = $1;
 }
 if (length($with_blk)) {
+  # Rename known legacy kebab-case keys to snake_case in-place.
+  my %map = (
+    "artifact-pattern" => "artifact_pattern",
+    "cmake-workflow-preset" => "cmake_workflow_preset",
+    "arch-list" => "arch_list",
+    "buildpro-images" => "buildpro_images",
+    "enable-tmate" => "enable_tmate",
+    "name-suffix" => "name_suffix",
+    "cmake-version" => "cmake_version",
+    "cmake-preset" => "cmake_preset",
+    "no-install-preset" => "no_install_preset",
+    "workflow-run-url" => "workflow_run_url",
+  );
+  for my $k (keys %map) {
+    my $v = $map{$k};
+    $with_blk =~ s/^(\s{6})\Q$k\E:/$1$v:/mg;
+  }
   $with_blk .= "\n" unless $with_blk =~ /\n\z/;
   s/(^  \Q$job\E:\n(?:(?!^  \S).*(?:\n|\z))*)(?=^  \S|\z)/$1.$with_blk/mse;
 }
 ' "$workflow_file" 2>/dev/null || true
       REPORT="${REPORT}🔧 ${template_name}: preserved with block jobs.${job}.with\n"
-      # Still report legacy kebab-case keys present in the repo's with: block.
+      # Track renamed legacy keys (for report).
       repo_with_keys=$(yq eval ".jobs.${job}.with | keys | .[]" "$workflow_backup" 2>/dev/null | grep -v null || true)
-      local legacy_keys
-      legacy_keys=$(printf '%s\n' "$repo_with_keys" | grep -E '^(artifact-pattern|cmake-workflow-preset|arch-list|buildpro-images|enable-tmate|name-suffix|cmake-version|cmake-preset|no-install-preset|workflow-run-url)$' || true)
-      if [ -n "$legacy_keys" ]; then
-        legacy_keys_accum=$(printf '%s\n%s' "$legacy_keys_accum" "$legacy_keys" | sed '/^$/d' | sort -u)
+      local renamed_keys
+      renamed_keys=$(printf '%s\n' "$repo_with_keys" | grep -E '^(artifact-pattern|cmake-workflow-preset|arch-list|buildpro-images|enable-tmate|name-suffix|cmake-version|cmake-preset|no-install-preset|workflow-run-url)$' || true)
+      if [ -n "$renamed_keys" ]; then
+        renamed_keys_accum=$(printf '%s\n%s' "$renamed_keys_accum" "$renamed_keys" | sed '/^$/d' | sort -u)
       fi
       continue
     fi
@@ -121,17 +140,38 @@ if (length($with_blk)) {
     fi
     while IFS= read -r key; do
       [ -z "$key" ] && continue
+      # Destination key name (auto-rename known legacy kebab-case keys to snake_case).
+      local dest_key
+      dest_key="$key"
+      case "$key" in
+        artifact-pattern) dest_key="artifact_pattern";;
+        cmake-workflow-preset) dest_key="cmake_workflow_preset";;
+        arch-list) dest_key="arch_list";;
+        buildpro-images) dest_key="buildpro_images";;
+        enable-tmate) dest_key="enable_tmate";;
+        name-suffix) dest_key="name_suffix";;
+        cmake-version) dest_key="cmake_version";;
+        cmake-preset) dest_key="cmake_preset";;
+        no-install-preset) dest_key="no_install_preset";;
+        workflow-run-url) dest_key="workflow_run_url";;
+      esac
+      if [ "$dest_key" != "$key" ]; then
+        renamed_keys_accum=$(printf '%s\n%s' "$renamed_keys_accum" "$key" | sed '/^$/d' | sort -u)
+      elif printf '%s' "$key" | grep -q -- '-'; then
+        unknown_legacy_keys_accum=$(printf '%s\n%s' "$unknown_legacy_keys_accum" "$key" | sed '/^$/d' | sort -u)
+      fi
       # Extract and insert in perl to avoid Bash expanding GitHub expressions like "${{ ... }}".
-      JOB="$job" KEY="$key" BACKUP_FILE="$workflow_backup" perl -0777 -i -pe '
+      JOB="$job" SRC_KEY="$key" DEST_KEY="$dest_key" BACKUP_FILE="$workflow_backup" perl -0777 -i -pe '
 my $job=$ENV{JOB};
-my $key=$ENV{KEY};
+my $src_key=$ENV{SRC_KEY};
+my $dest_key=$ENV{DEST_KEY};
 my $backup=$ENV{BACKUP_FILE};
 open(my $fh, "<", $backup) or next;
 local $/;
 my $b = <$fh>;
 close($fh);
 my $value = "";
-if ($b =~ m/^  \Q$job\E:\n(?:(?!^  \S).*(?:\n|\z))*?^    with:\n(?:(?!^    \S).*(?:\n|\z))*?^      \Q$key\E:\s*([^\n]*)$/m) {
+if ($b =~ m/^  \Q$job\E:\n(?:(?!^  \S).*(?:\n|\z))*?^    with:\n(?:(?!^    \S).*(?:\n|\z))*?^      \Q$src_key\E:\s*([^\n]*)$/m) {
   $value = $1;
 }
 next if $value eq "" || $value eq "null";
@@ -141,10 +181,10 @@ if ($value !~ /^".*"\z/ && $value !~ /^\x27.*\x27\z/) {
     $value = "\x27".$value."\x27";
   }
 }
-my $insert = "      ${key}: ${value}\n";
+my $insert = "      ${dest_key}: ${value}\n";
 # 1) If with: exists, append at end of with block (unless key already present).
 if (m/^  \Q$job\E:\n(?:(?!^  \S).*(?:\n|\z))*?^    with:\n/ms) {
-  if (m/^  \Q$job\E:\n(?:(?!^  \S).*(?:\n|\z))*?^    with:\n(?:(?!^    \S).*(?:\n|\z))*?^      \Q$key\E:/ms) {
+  if (m/^  \Q$job\E:\n(?:(?!^  \S).*(?:\n|\z))*?^    with:\n(?:(?!^    \S).*(?:\n|\z))*?^      \Q$dest_key\E:/ms) {
     # key already present; do nothing
   } else {
     # Append within the with: block, before the next 4-space key (permissions/secrets/uses/etc.).
@@ -158,17 +198,14 @@ if (m/^  \Q$job\E:\n(?:(?!^  \S).*(?:\n|\z))*?^    with:\n/ms) {
 ' "$workflow_file" 2>/dev/null || true
       REPORT="${REPORT}🔧 ${template_name}: preserved added with key jobs.${job}.with.${key}\n"
     done <<< "$added_keys"
-    # Also warn on legacy kebab-case keys (no renames)
-    local legacy_keys
-    legacy_keys=$(printf '%s\n' "$repo_with_keys" | grep -E '^(artifact-pattern|cmake-workflow-preset|arch-list|buildpro-images|enable-tmate|name-suffix|cmake-version|cmake-preset|no-install-preset|workflow-run-url)$' || true)
-    if [ -n "$legacy_keys" ]; then
-      legacy_keys_accum=$(printf '%s\n%s' "$legacy_keys_accum" "$legacy_keys" | sed '/^$/d' | sort -u)
-    fi
   done <<< "$repo_jobs"
-  if [ -n "$legacy_keys_accum" ]; then
-    echo "WARNING: Legacy kebab-case 'with:' keys detected; please rename to snake_case:"
-    echo "$legacy_keys_accum" | sed 's/^/  - /'
-    REPORT="${REPORT}⚠️ workflow_call input key rename needed (kebab-case → snake_case):\n$(echo "$legacy_keys_accum" | sed 's/^/  - /')\n"
+  if [ -n "$renamed_keys_accum" ]; then
+    REPORT="${REPORT}🔧 workflow_call input keys renamed (kebab-case → snake_case):\n$(echo "$renamed_keys_accum" | sed 's/^/  - /')\n"
+  fi
+  if [ -n "$unknown_legacy_keys_accum" ]; then
+    echo "WARNING: Unrecognized kebab-case 'with:' keys detected (no auto-rename applied):"
+    echo "$unknown_legacy_keys_accum" | sed 's/^/  - /'
+    REPORT="${REPORT}⚠️ Unrecognized kebab-case 'with:' keys detected (no auto-rename applied):\n$(echo "$unknown_legacy_keys_accum" | sed 's/^/  - /')\n"
   fi
 }
 
