@@ -66,7 +66,8 @@ apply_preservation_rules() {
   if [ -n "$jobs_to_drop" ]; then
     while IFS= read -r job; do
       [ -z "$job" ] && continue
-      JOB="$job" perl -0777 -i -pe 'my $job=$ENV{JOB}; s/(^jobs:\n.*?)(^  \Q$job\E:\n(?:(?!^  \S|^\S).*$\n)*)/$1/ms;' "$workflow_file" 2>/dev/null || true
+      # Delete the entire job block, including a final line that may not end with a newline.
+      JOB="$job" perl -0777 -i -pe 'my $job=$ENV{JOB}; s/(^jobs:\n.*?)(^  \Q$job\E:\n(?:(?!^  \S|^\S).*(?:\n|\z))*)/$1/ms;' "$workflow_file" 2>/dev/null || true
       REPORT="${REPORT}🔧 ${template_name}: preserved dropped job jobs.${job}\n"
     done <<< "$jobs_to_drop"
   fi
@@ -86,22 +87,44 @@ apply_preservation_rules() {
     fi
     while IFS= read -r key; do
       [ -z "$key" ] && continue
-      local value_yaml
-      value_yaml=$(yq eval ".jobs.${job}.with.\"${key}\"" "$workflow_backup" 2>/dev/null | head -n 1 || true)
-      if [ -z "$value_yaml" ] || [ "$value_yaml" = "null" ]; then
+      # Extract the raw value text from the repo workflow backup to preserve quoting/format.
+      # Using yq to render the value can drop quotes (e.g. '*.rpm') and break the workflow.
+      local value_text
+      value_text=$(JOB="$job" KEY="$key" perl -0777 -ne '
+my $job=$ENV{JOB};
+my $key=$ENV{KEY};
+if (m/^  \Q$job\E:\n(?:(?!^  \S).*$\n)*?^    with:\n(?:(?!^    \S).*$\n)*?^      \Q$key\E:\s*([^\n]*)$/m) {
+  print $1;
+}
+' "$workflow_backup" 2>/dev/null || true)
+      if [ -z "$value_text" ] || [ "$value_text" = "null" ]; then
         continue
       fi
+      # Guardrails: GitHub workflow inputs are strings; also unquoted globs (e.g. *.rpm) can be parsed oddly.
+      # If the value looks like a flow collection or glob and isn't already quoted, wrap it in single quotes.
+      if [[ "$value_text" != "\""*"\"" && "$value_text" != "'"*"'" ]]; then
+        if [[ "$value_text" == \[*\] || "$value_text" == \{*\} || "$value_text" == *\** ]]; then
+          value_text="'$value_text'"
+        fi
+      fi
       # Insert without reformatting the rest of the file.
-      # Prefer inserting into an existing "with:" block; otherwise create one under the job.
-      JOB="$job" KEY="$key" VALUE="$value_yaml" perl -0777 -i -pe '
+      # Append to an existing with: block; otherwise create a with: block at the end of the job.
+      JOB="$job" KEY="$key" VALUE="$value_text" perl -0777 -i -pe '
 my $job=$ENV{JOB};
 my $key=$ENV{KEY};
 my $value=$ENV{VALUE};
 my $insert = "      ${key}: ${value}\n";
-if (s/(^  \Q$job\E:\n.*?^    with:\n)/$1$insert/ms) {
-  # inserted into existing with block
-} elsif (s/(^  \Q$job\E:\n)/$1."    with:\n".$insert/mes) {
-  # created with block
+# 1) If with: exists, append at end of with block (unless key already present).
+if (m/^  \Q$job\E:\n(?:(?!^  \S).*$\n)*?^    with:\n/ms) {
+  if (m/^  \Q$job\E:\n(?:(?!^  \S).*$\n)*?^    with:\n(?:(?!^    \S).*$\n)*?^      \Q$key\E:/ms) {
+    # key already present; do nothing
+  } else {
+    s/(^  \Q$job\E:\n(?:(?!^  \S).*$\n)*?^    with:\n(?:(?:^      .*\n)*)?)/$1.$insert/mes;
+  }
+} else {
+  # 2) No with: block: add one at the end of the job block.
+  #    Insert before the next job (two-space indent) or end of file.
+  s/(^  \Q$job\E:\n(?:(?!^  \S).*$\n)*)(?=^  \S|\z)/$1."    with:\n".$insert/ms;
 }
 ' "$workflow_file" 2>/dev/null || true
       REPORT="${REPORT}🔧 ${template_name}: preserved added with key jobs.${job}.with.${key}\n"
