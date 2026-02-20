@@ -182,19 +182,59 @@ if ($value !~ /^".*"\z/ && $value !~ /^\x27.*\x27\z/) {
   }
 }
 my $insert = "      ${dest_key}: ${value}\n";
-# 1) If with: exists, append at end of with block (unless key already present).
-if (m/^  \Q$job\E:\n(?:(?!^  \S).*(?:\n|\z))*?^    with:\n/ms) {
-  if (m/^  \Q$job\E:\n(?:(?!^  \S).*(?:\n|\z))*?^    with:\n(?:(?!^    \S).*(?:\n|\z))*?^      \Q$dest_key\E:/ms) {
-    # key already present; do nothing
-  } else {
-    # Append within the with: block, before the next 4-space key (permissions/secrets/uses/etc.).
-    s/(^  \Q$job\E:\n(?:(?!^  \S).*(?:\n|\z))*?^    with:\n(?:(?:^      .*\n)*))(?=^    \S|^  \S|\z)/$1.$insert/mse;
+# Insert deterministically:
+# - If with: exists, insert at end of with: block (before next 4-space key)
+# - Otherwise create with: immediately after uses:
+my @lines = split(/\n/, $_, -1);
+my @out;
+my $in_job = 0;
+my $in_with = 0;
+my $inserted = 0;
+my $dest_present = 0;
+for (my $i=0; $i<@lines; $i++) {
+  my $line = $lines[$i];
+  if ($line =~ /^  \Q$job\E:$/) {
+    $in_job = 1;
+    $in_with = 0;
+  } elsif ($in_job && $line =~ /^  \S/ && $line !~ /^  \Q$job\E:$/) {
+    # next job
+    if ($in_with && !$inserted && !$dest_present) { push @out, "      ${dest_key}: ${value}"; $inserted=1; }
+    $in_job = 0;
+    $in_with = 0;
   }
-} else {
-  # 2) No with: block: add one at the end of the job block.
-  #    Insert before the next job (two-space indent) or end of file.
-  s/(^  \Q$job\E:\n(?:(?!^  \S).*(?:\n|\z))*)(?=^  \S|\z)/$1."    with:\n".$insert/mse;
+  if ($in_job) {
+    if ($line =~ /^    with:$/) {
+      $in_with = 1;
+    } elsif ($in_with) {
+      if ($line =~ /^      \Q$dest_key\E:/) { $dest_present = 1; }
+      if ($line =~ /^    \S/) {
+        # leaving with: block
+        if (!$inserted && !$dest_present) { push @out, "      ${dest_key}: ${value}"; $inserted=1; }
+        $in_with = 0;
+      }
+    }
+    # If no with block exists, create it right after uses:
+    if (!$inserted && !$dest_present && !$in_with && $line =~ /^    uses: .*$/) {
+      # Look ahead within this job: if a with: block already exists, do not create a new one.
+      my $has_with = 0;
+      for (my $j = $i + 1; $j < @lines; $j++) {
+        my $l2 = $lines[$j];
+        last if $l2 =~ /^  \S/;          # next job / end jobs
+        if ($l2 =~ /^    with:$/) { $has_with = 1; last; }
+      }
+      if (!$has_with) {
+        push @out, $line;
+        push @out, "    with:";
+        push @out, "      ${dest_key}: ${value}";
+        $inserted = 1;
+        next;
+      }
+    }
+  }
+  push @out, $line;
 }
+if ($in_with && !$inserted && !$dest_present) { push @out, "      ${dest_key}: ${value}"; $inserted=1; }
+$_ = join("\n", @out);
 ' "$workflow_file" 2>/dev/null || true
       REPORT="${REPORT}🔧 ${template_name}: preserved added with key jobs.${job}.with.${key}\n"
     done <<< "$added_keys"
