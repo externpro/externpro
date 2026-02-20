@@ -85,23 +85,24 @@ apply_preservation_rules() {
     # If the template has no with block but the repo does, preserve the entire with block verbatim.
     # This is common for caller workflows like xpbuild where template defines uses/secrets but repo adds inputs.
     if [ "$tmpl_with_json" = "null" ] && [ -n "$repo_with_json" ] && [ "$repo_with_json" != "null" ]; then
-      local with_block
-      with_block=$(JOB="$job" perl -0777 -ne '
+      # Do the extraction/insertion entirely in perl to avoid Bash expanding "${{ ... }}".
+      JOB="$job" BACKUP_FILE="$workflow_backup" perl -0777 -i -pe '
 my $job=$ENV{JOB};
-if (m/^  \Q$job\E:\n(?:(?!^  \S).*(?:\n|\z))*?^(    with:\n(?:(?:^      .*?(?:\n|\z))*))/m) {
-  print $1;
+my $backup=$ENV{BACKUP_FILE};
+open(my $fh, "<", $backup) or next;
+local $/;
+my $b = <$fh>;
+close($fh);
+my $with_blk = "";
+if ($b =~ m/^  \Q$job\E:\n(?:(?!^  \S).*(?:\n|\z))*?^(    with:\n(?:(?:^      .*?(?:\n|\z))*))/m) {
+  $with_blk = $1;
 }
-' "$workflow_backup" 2>/dev/null || true)
-      if [ -n "$with_block" ]; then
-        JOB="$job" WITH_BLOCK="$with_block" perl -0777 -i -pe '
-my $job=$ENV{JOB};
-my $blk=$ENV{WITH_BLOCK};
-my $ins=$blk;
-$ins =~ s/\$/\n/; # ensure trailing newline
-s/(^  \Q$job\E:\n(?:(?!^  \S).*(?:\n|\z))*)(?=^  \S|\z)/$1.$ins/mse;
+if (length($with_blk)) {
+  $with_blk .= "\n" unless $with_blk =~ /\n\z/;
+  s/(^  \Q$job\E:\n(?:(?!^  \S).*(?:\n|\z))*)(?=^  \S|\z)/$1.$with_blk/mse;
+}
 ' "$workflow_file" 2>/dev/null || true
-        REPORT="${REPORT}🔧 ${template_name}: preserved with block jobs.${job}.with\n"
-      fi
+      REPORT="${REPORT}🔧 ${template_name}: preserved with block jobs.${job}.with\n"
       continue
     fi
     repo_with_keys=$(yq eval ".jobs.${job}.with | keys | .[]" "$workflow_backup" 2>/dev/null | grep -v null || true)
@@ -113,44 +114,38 @@ s/(^  \Q$job\E:\n(?:(?!^  \S).*(?:\n|\z))*)(?=^  \S|\z)/$1.$ins/mse;
     fi
     while IFS= read -r key; do
       [ -z "$key" ] && continue
-      # Extract the raw value text from the repo workflow backup to preserve quoting/format.
-      # Using yq to render the value can drop quotes (e.g. '*.rpm') and break the workflow.
-      local value_text
-      value_text=$(JOB="$job" KEY="$key" perl -0777 -ne '
+      # Extract and insert in perl to avoid Bash expanding GitHub expressions like "${{ ... }}".
+      JOB="$job" KEY="$key" BACKUP_FILE="$workflow_backup" perl -0777 -i -pe '
 my $job=$ENV{JOB};
 my $key=$ENV{KEY};
-if (m/^  \Q$job\E:\n(?:(?!^  \S).*$\n)*?^    with:\n(?:(?!^    \S).*$\n)*?^      \Q$key\E:\s*([^\n]*)$/m) {
-  print $1;
+my $backup=$ENV{BACKUP_FILE};
+open(my $fh, "<", $backup) or next;
+local $/;
+my $b = <$fh>;
+close($fh);
+my $value = "";
+if ($b =~ m/^  \Q$job\E:\n(?:(?!^  \S).*(?:\n|\z))*?^    with:\n(?:(?!^    \S).*(?:\n|\z))*?^      \Q$key\E:\s*([^\n]*)$/m) {
+  $value = $1;
 }
-' "$workflow_backup" 2>/dev/null || true)
-      if [ -z "$value_text" ] || [ "$value_text" = "null" ]; then
-        continue
-      fi
-      # Guardrails: GitHub workflow inputs are strings; also unquoted globs (e.g. *.rpm) can be parsed oddly.
-      # If the value looks like a flow collection or glob and isn't already quoted, wrap it in single quotes.
-      if [[ "$value_text" != "\""*"\"" && "$value_text" != "'"*"'" ]]; then
-        if [[ "$value_text" == \[*\] || "$value_text" == \{*\} || "$value_text" == *\** ]]; then
-          value_text="'$value_text'"
-        fi
-      fi
-      # Insert without reformatting the rest of the file.
-      # Append to an existing with: block; otherwise create a with: block at the end of the job.
-      JOB="$job" KEY="$key" VALUE="$value_text" perl -0777 -i -pe '
-my $job=$ENV{JOB};
-my $key=$ENV{KEY};
-my $value=$ENV{VALUE};
+next if $value eq "" || $value eq "null";
+# Guardrails: GitHub workflow inputs are strings; also unquoted globs/flow collections can parse oddly.
+if ($value !~ /^".*"\z/ && $value !~ /^\x27.*\x27\z/) {
+  if ($value =~ /^\[.*\]\z/ || $value =~ /^\{.*\}\z/ || $value =~ /\*/) {
+    $value = "\x27".$value."\x27";
+  }
+}
 my $insert = "      ${key}: ${value}\n";
 # 1) If with: exists, append at end of with block (unless key already present).
-if (m/^  \Q$job\E:\n(?:(?!^  \S).*$\n)*?^    with:\n/ms) {
-  if (m/^  \Q$job\E:\n(?:(?!^  \S).*$\n)*?^    with:\n(?:(?!^    \S).*$\n)*?^      \Q$key\E:/ms) {
+if (m/^  \Q$job\E:\n(?:(?!^  \S).*(?:\n|\z))*?^    with:\n/ms) {
+  if (m/^  \Q$job\E:\n(?:(?!^  \S).*(?:\n|\z))*?^    with:\n(?:(?!^    \S).*(?:\n|\z))*?^      \Q$key\E:/ms) {
     # key already present; do nothing
   } else {
-    s/(^  \Q$job\E:\n(?:(?!^  \S).*$\n)*?^    with:\n(?:(?:^      .*\n)*)?)/$1.$insert/mes;
+    s/(^  \Q$job\E:\n(?:(?!^  \S).*(?:\n|\z))*?^    with:\n(?:(?:^      .*\n)*)?)/$1.$insert/mes;
   }
 } else {
   # 2) No with: block: add one at the end of the job block.
   #    Insert before the next job (two-space indent) or end of file.
-  s/(^  \Q$job\E:\n(?:(?!^  \S).*$\n)*)(?=^  \S|\z)/$1."    with:\n".$insert/mse;
+  s/(^  \Q$job\E:\n(?:(?!^  \S).*(?:\n|\z))*)(?=^  \S|\z)/$1."    with:\n".$insert/mse;
 }
 ' "$workflow_file" 2>/dev/null || true
       REPORT="${REPORT}🔧 ${template_name}: preserved added with key jobs.${job}.with.${key}\n"
