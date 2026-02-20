@@ -124,7 +124,7 @@ if (m/^  \Q$job\E:\n(?:(?!^  \S).*$\n)*?^    with:\n/ms) {
 } else {
   # 2) No with: block: add one at the end of the job block.
   #    Insert before the next job (two-space indent) or end of file.
-  s/(^  \Q$job\E:\n(?:(?!^  \S).*$\n)*)(?=^  \S|\z)/$1."    with:\n".$insert/ms;
+  s/(^  \Q$job\E:\n(?:(?!^  \S).*$\n)*)(?=^  \S|\z)/$1."    with:\n".$insert/mse;
 }
 ' "$workflow_file" 2>/dev/null || true
       REPORT="${REPORT}🔧 ${template_name}: preserved added with key jobs.${job}.with.${key}\n"
