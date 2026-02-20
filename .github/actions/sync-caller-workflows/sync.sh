@@ -66,7 +66,8 @@ apply_preservation_rules() {
   if [ -n "$jobs_to_drop" ]; then
     while IFS= read -r job; do
       [ -z "$job" ] && continue
-      yq eval "del(.jobs.${job})" -i "$workflow_file" 2>/dev/null || true
+      JOB="$job" perl -0777 -i -pe 'my $job=$ENV{JOB}; s/(^jobs:\n.*?)(^  \Q$job\E:\n(?:(?!^  \S|^\S).*$\n)*)/$1/ms;' "$workflow_file" 2>/dev/null || true
+      REPORT="${REPORT}🔧 ${template_name}: preserved dropped job jobs.${job}\n"
     done <<< "$jobs_to_drop"
   fi
   # 3) Preserve repo-added jobs.<job>.with keys (added keys only)
@@ -85,12 +86,25 @@ apply_preservation_rules() {
     fi
     while IFS= read -r key; do
       [ -z "$key" ] && continue
-      local value_json
-      value_json=$(yq eval -o=json ".jobs.${job}.with.\"${key}\"" "$workflow_backup" 2>/dev/null || true)
-      if [ -z "$value_json" ] || [ "$value_json" = "null" ]; then
+      local value_yaml
+      value_yaml=$(yq eval ".jobs.${job}.with.\"${key}\"" "$workflow_backup" 2>/dev/null | head -n 1 || true)
+      if [ -z "$value_yaml" ] || [ "$value_yaml" = "null" ]; then
         continue
       fi
-      yq eval ".jobs.${job}.with.\"${key}\" = ${value_json}" -i "$workflow_file" 2>/dev/null || true
+      # Insert without reformatting the rest of the file.
+      # Prefer inserting into an existing "with:" block; otherwise create one under the job.
+      JOB="$job" KEY="$key" VALUE="$value_yaml" perl -0777 -i -pe '
+my $job=$ENV{JOB};
+my $key=$ENV{KEY};
+my $value=$ENV{VALUE};
+my $insert = "      ${key}: ${value}\n";
+if (s/(^  \Q$job\E:\n.*?^    with:\n)/$1$insert/ms) {
+  # inserted into existing with block
+} elsif (s/(^  \Q$job\E:\n)/$1."    with:\n".$insert/mes) {
+  # created with block
+}
+' "$workflow_file" 2>/dev/null || true
+      REPORT="${REPORT}🔧 ${template_name}: preserved added with key jobs.${job}.with.${key}\n"
     done <<< "$added_keys"
     # Also warn on legacy kebab-case keys (no renames)
     local legacy_keys
