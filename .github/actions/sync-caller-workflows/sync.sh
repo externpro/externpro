@@ -103,6 +103,13 @@ if (length($with_blk)) {
 }
 ' "$workflow_file" 2>/dev/null || true
       REPORT="${REPORT}🔧 ${template_name}: preserved with block jobs.${job}.with\n"
+      # Still report legacy kebab-case keys present in the repo's with: block.
+      repo_with_keys=$(yq eval ".jobs.${job}.with | keys | .[]" "$workflow_backup" 2>/dev/null | grep -v null || true)
+      local legacy_keys
+      legacy_keys=$(printf '%s\n' "$repo_with_keys" | grep -E '^(artifact-pattern|cmake-workflow-preset|arch-list|buildpro-images|enable-tmate|name-suffix|cmake-version|cmake-preset|no-install-preset|workflow-run-url)$' || true)
+      if [ -n "$legacy_keys" ]; then
+        legacy_keys_accum=$(printf '%s\n%s' "$legacy_keys_accum" "$legacy_keys" | sed '/^$/d' | sort -u)
+      fi
       continue
     fi
     repo_with_keys=$(yq eval ".jobs.${job}.with | keys | .[]" "$workflow_backup" 2>/dev/null | grep -v null || true)
