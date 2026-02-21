@@ -187,14 +187,14 @@ runs:
         echo "manifest_windows_path=$manifestWindowsPath" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
     -
       name: Upload package artifact
-      if: ${{ inputs.cmake_workflow_preset != inputs.no_install_preset }}
+      if: ${{ inputs.cmake_workflow_preset != inputs.no_install_preset && inputs.name_suffix != '-ubuntu' }}
       uses: actions/upload-artifact@v4
       with:
         name: ${{ steps.find_package.outputs.filename }}
         path: ${{ runner.os == 'Windows' && steps.convert_paths.outputs.package_windows_path || steps.find_package.outputs.filepath }}
     -
       name: Upload manifest artifact
-      if: ${{ inputs.cmake_workflow_preset != inputs.no_install_preset && steps.find_manifest.outputs.found == 'true' }}
+      if: ${{ inputs.cmake_workflow_preset != inputs.no_install_preset && steps.find_manifest.outputs.found == 'true' && inputs.name_suffix != '-ubuntu' }}
       uses: actions/upload-artifact@v4
       with:
         name: ${{ steps.find_manifest.outputs.filename }}-${{ inputs.cmake_preset }}-${{ runner.arch }}${{ inputs.name_suffix }}
