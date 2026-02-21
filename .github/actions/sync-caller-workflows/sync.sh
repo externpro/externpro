@@ -8,6 +8,11 @@ WORKFLOW_DIR="${WORKFLOW_DIR:?}"
 TEMPLATE_DIR="${TEMPLATE_DIR:?}"
 GITHUB_OUTPUT="${GITHUB_OUTPUT:-/dev/null}"
 PRESERVE_EXISTING_BRANCHES="${PRESERVE_EXISTING_BRANCHES:-false}"
+# Preserve dropped jobs (drop template jobs that are not present in the existing repo workflow)
+PRESERVE_DROPPED_JOBS="${PRESERVE_DROPPED_JOBS:-true}"
+# Which workflow files should apply the dropped-jobs rule.
+# Default: only xpbuild.yml needs this (to drop macos/windows for linux-only repos).
+JOB_DROP_WORKFLOWS="${JOB_DROP_WORKFLOWS:-xpbuild.yml}"
 WORKFLOWS_UPDATED=false
 REPORT=""
 
@@ -59,17 +64,20 @@ apply_preservation_rules() {
   # 2) Preserve dropped jobs (if repo removed jobs, keep them removed)
   local tmpl_jobs
   local repo_jobs
-  tmpl_jobs=$(yq eval '.jobs | keys | .[]' "$template_file" 2>/dev/null | grep -v null || true)
+  repo_jobs=""
   repo_jobs=$(yq eval '.jobs | keys | .[]' "$workflow_backup" 2>/dev/null | grep -v null || true)
-  local jobs_to_drop
-  jobs_to_drop=$(comm -23 <(printf '%s\n' "$tmpl_jobs" | sort) <(printf '%s\n' "$repo_jobs" | sort) || true)
-  if [ -n "$jobs_to_drop" ]; then
-    while IFS= read -r job; do
-      [ -z "$job" ] && continue
-      # Delete the entire job block, including a final line that may not end with a newline.
-      JOB="$job" perl -0777 -i -pe 'my $job=$ENV{JOB}; s/(^jobs:\n.*?)(^  \Q$job\E:\n(?:(?!^  \S|^\S).*(?:\n|\z))*)/$1/ms;' "$workflow_file" 2>/dev/null || true
-      REPORT="${REPORT}🔧 ${template_name}: preserved dropped job jobs.${job}\n"
-    done <<< "$jobs_to_drop"
+  if [ "$PRESERVE_DROPPED_JOBS" = "true" ] && printf ' %s ' "$JOB_DROP_WORKFLOWS" | grep -q " ${template_name} "; then
+    tmpl_jobs=$(yq eval '.jobs | keys | .[]' "$template_file" 2>/dev/null | grep -v null || true)
+    local jobs_to_drop
+    jobs_to_drop=$(comm -23 <(printf '%s\n' "$tmpl_jobs" | sort) <(printf '%s\n' "$repo_jobs" | sort) || true)
+    if [ -n "$jobs_to_drop" ]; then
+      while IFS= read -r job; do
+        [ -z "$job" ] && continue
+        # Delete the entire job block, including a final line that may not end with a newline.
+        JOB="$job" perl -0777 -i -pe 'my $job=$ENV{JOB}; s/(^jobs:\n.*?)(^  \Q$job\E:\n(?:(?!^  \S|^\S).*(?:\n|\z))*)/$1/ms;' "$workflow_file" 2>/dev/null || true
+        REPORT="${REPORT}🔧 ${template_name}: preserved dropped job jobs.${job}\n"
+      done <<< "$jobs_to_drop"
+    fi
   fi
   # 3) Preserve repo-added jobs.<job>.with keys (added keys only)
   local renamed_keys_accum
