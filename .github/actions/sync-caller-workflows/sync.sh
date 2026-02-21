@@ -48,7 +48,7 @@ apply_preservation_rules() {
       push_branches_list=$(printf '%s\n' "$push_branches_list" | sed '/^$/d' | sed 's/\\/\\\\/g; s/"/\\"/g' | awk 'BEGIN{first=1}{if(!first){printf ", "}; printf "\"%s\"", $0; first=0}END{print ""}')
       if [ -n "$push_branches_list" ]; then
         perl -0777 -i -pe "s/(\n\s*push:\s*\n(?:(?!\n\S).)*?\n\s*branches:\s*\[)[^\]]*(\])/$1${push_branches_list}$2/s" "$workflow_file" 2>/dev/null || true
-        REPORT="${REPORT}🔧 ${template_name}: preserved on.push.branches\n"
+        REPORT="${REPORT}🔧 ${template_name}: preserved `on.push.branches`\n"
       fi
     fi
     if [ -n "$pr_branches_json" ] && [ "$pr_branches_json" != "null" ]; then
@@ -57,7 +57,7 @@ apply_preservation_rules() {
       pr_branches_list=$(printf '%s\n' "$pr_branches_list" | sed '/^$/d' | sed 's/\\/\\\\/g; s/"/\\"/g' | awk 'BEGIN{first=1}{if(!first){printf ", "}; printf "\"%s\"", $0; first=0}END{print ""}')
       if [ -n "$pr_branches_list" ]; then
         perl -0777 -i -pe "s/(\n\s*pull_request:\s*\n(?:(?!\n\S).)*?\n\s*branches:\s*\[)[^\]]*(\])/$1${pr_branches_list}$2/s" "$workflow_file" 2>/dev/null || true
-        REPORT="${REPORT}🔧 ${template_name}: preserved on.pull_request.branches\n"
+        REPORT="${REPORT}🔧 ${template_name}: preserved `on.pull_request.branches`\n"
       fi
     fi
   fi
@@ -75,7 +75,7 @@ apply_preservation_rules() {
         [ -z "$job" ] && continue
         # Delete the entire job block, including a final line that may not end with a newline.
         JOB="$job" perl -0777 -i -pe 'my $job=$ENV{JOB}; s/(^jobs:\n.*?)(^  \Q$job\E:\n(?:(?!^  \S|^\S).*(?:\n|\z))*)/$1/ms;' "$workflow_file" 2>/dev/null || true
-        REPORT="${REPORT}🔧 ${template_name}: preserved dropped job jobs.${job}\n"
+        REPORT="${REPORT}🔧 ${template_name}: preserved dropped job `jobs.${job}`\n"
       done <<< "$jobs_to_drop"
     fi
   fi
@@ -162,7 +162,7 @@ if (length($with_blk)) {
   $_ = join("\n", @out);
 }
 ' "$workflow_file" 2>/dev/null || true
-      REPORT="${REPORT}🔧 ${template_name}: preserved with block jobs.${job}.with\n"
+      REPORT="${REPORT}🔧 ${template_name}: preserved `with` block `jobs.${job}.with`\n"
       # Track renamed legacy keys (for report).
       repo_with_keys=$(yq eval ".jobs.${job}.with | keys | .[]" "$workflow_backup" 2>/dev/null | grep -v null || true)
       local renamed_keys
@@ -280,7 +280,7 @@ for (my $i=0; $i<@lines; $i++) {
 if ($in_with && !$inserted && !$dest_present) { push @out, "      ${dest_key}: ${value}"; $inserted=1; }
 $_ = join("\n", @out);
 ' "$workflow_file" 2>/dev/null || true
-      REPORT="${REPORT}🔧 ${template_name}: preserved added with key jobs.${job}.with.${key}\n"
+      REPORT="${REPORT}🔧 ${template_name}: preserved added `with` key `jobs.${job}.with.${key}`\n"
     done <<< "$added_keys"
   done <<< "$repo_jobs"
   if [ -n "$renamed_keys_accum" ]; then
