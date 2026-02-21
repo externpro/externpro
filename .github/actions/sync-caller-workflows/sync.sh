@@ -98,13 +98,14 @@ apply_preservation_rules() {
       # Do the extraction/insertion entirely in perl to avoid Bash expanding "${{ ... }}".
       JOB="$job" BACKUP_FILE="$workflow_backup" perl -0777 -i -pe '
 my $job=$ENV{JOB};
+$job =~ s/\r\z//;
 my $backup=$ENV{BACKUP_FILE};
 open(my $fh, "<", $backup) or next;
 local $/;
 my $b = <$fh>;
 close($fh);
 my $with_blk = "";
-if ($b =~ m/^  \Q$job\E:\n(?:(?!^  \S).*(?:\n|\z))*?^(    with:\n(?:(?:^      .*?(?:\n|\z))*))/m) {
+if ($b =~ m/^  \Q$job\E:\s*\r?\n(?:(?!^  \S).*(?:\n|\z))*?^(    with:\n(?:(?:^      .*?(?:\n|\z))*))/m) {
   $with_blk = $1;
 }
 if (length($with_blk)) {
@@ -125,8 +126,40 @@ if (length($with_blk)) {
     my $v = $map{$k};
     $with_blk =~ s/^(\s{6})\Q$k\E:/$1$v:/mg;
   }
-  $with_blk .= "\n" unless $with_blk =~ /\n\z/;
-  s/(^  \Q$job\E:\n(?:(?!^  \S).*(?:\n|\z))*)(?=^  \S|\z)/$1.$with_blk/mse;
+  # Insert the with: block under the correct job by scanning lines.
+  $with_blk =~ s/\n\z//;
+  my @with_lines = split(/\n/, $with_blk, -1);
+  my @lines = split(/\n/, $_, -1);
+  my @out;
+  my $in_job = 0;
+  my $inserted = 0;
+  for (my $i = 0; $i < @lines; $i++) {
+    my $line = $lines[$i];
+    $line =~ s/\r\z//;
+    if ($line =~ /^  \Q$job\E:\s*\r?$/) {
+      $in_job = 1;
+    } elsif ($in_job && $line =~ /^  \S/ && $line !~ /^  \Q$job\E:\s*\r?$/) {
+      $in_job = 0;
+    }
+    if ($in_job && !$inserted && $line =~ /^    uses: .*$/) {
+      # If this job already has a with: block, do not insert another.
+      my $has_with = 0;
+      for (my $j = $i + 1; $j < @lines; $j++) {
+        my $l2 = $lines[$j];
+        $l2 =~ s/\r\z//;
+        last if $l2 =~ /^  \S/;
+        if ($l2 =~ /^    with:$/) { $has_with = 1; last; }
+      }
+      push @out, $line;
+      if (!$has_with) {
+        push @out, @with_lines;
+        $inserted = 1;
+      }
+      next;
+    }
+    push @out, $line;
+  }
+  $_ = join("\n", @out);
 }
 ' "$workflow_file" 2>/dev/null || true
       REPORT="${REPORT}🔧 ${template_name}: preserved with block jobs.${job}.with\n"
@@ -171,6 +204,7 @@ if (length($with_blk)) {
       # Extract and insert in perl to avoid Bash expanding GitHub expressions like "${{ ... }}".
       JOB="$job" SRC_KEY="$key" DEST_KEY="$dest_key" BACKUP_FILE="$workflow_backup" perl -0777 -i -pe '
 my $job=$ENV{JOB};
+$job =~ s/\r\z//;
 my $src_key=$ENV{SRC_KEY};
 my $dest_key=$ENV{DEST_KEY};
 my $backup=$ENV{BACKUP_FILE};
@@ -179,7 +213,7 @@ local $/;
 my $b = <$fh>;
 close($fh);
 my $value = "";
-if ($b =~ m/^  \Q$job\E:\n(?:(?!^  \S).*(?:\n|\z))*?^    with:\n(?:(?!^    \S).*(?:\n|\z))*?^      \Q$src_key\E:\s*([^\n]*)$/m) {
+if ($b =~ m/^  \Q$job\E:\s*\r?\n(?:(?!^  \S).*(?:\n|\z))*?^    with:\n(?:(?!^    \S).*(?:\n|\z))*?^      \Q$src_key\E:\s*([^\n]*)$/m) {
   $value = $1;
 }
 next if $value eq "" || $value eq "null";
@@ -201,10 +235,11 @@ my $inserted = 0;
 my $dest_present = 0;
 for (my $i=0; $i<@lines; $i++) {
   my $line = $lines[$i];
-  if ($line =~ /^  \Q$job\E:$/) {
+  $line =~ s/\r\z//;
+  if ($line =~ /^  \Q$job\E:\s*\r?$/) {
     $in_job = 1;
     $in_with = 0;
-  } elsif ($in_job && $line =~ /^  \S/ && $line !~ /^  \Q$job\E:$/) {
+  } elsif ($in_job && $line =~ /^  \S/ && $line !~ /^  \Q$job\E:\s*\r?$/) {
     # next job
     if ($in_with && !$inserted && !$dest_present) { push @out, "      ${dest_key}: ${value}"; $inserted=1; }
     $in_job = 0;
@@ -227,6 +262,7 @@ for (my $i=0; $i<@lines; $i++) {
       my $has_with = 0;
       for (my $j = $i + 1; $j < @lines; $j++) {
         my $l2 = $lines[$j];
+        $l2 =~ s/\r\z//;
         last if $l2 =~ /^  \S/;          # next job / end jobs
         if ($l2 =~ /^    with:$/) { $has_with = 1; last; }
       }
