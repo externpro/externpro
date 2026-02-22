@@ -42,6 +42,11 @@
       "inherits": ["isWindows"],
       "configurePreset": "Windows",
       "configuration": "Release"
+    },
+    {
+      "name": "WindowsReleaseTargets",
+      "displayName": "build Windows Release Target(s) from CMakePresetsBase",
+      "inherits": ["WindowsReleaseNoInstall", "build-base"]
     }
   ],
   "testPresets": [
@@ -132,6 +137,24 @@
         {
           "type": "build",
           "name": "WindowsRelease"
+        },
+        {
+          "type": "package",
+          "name": "WindowsRelease"
+        }
+      ]
+    },
+    {
+      "name": "WindowsReleaseTargets",
+      "displayName": "workflow Windows Release Targets",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "Windows"
+        },
+        {
+          "type": "build",
+          "name": "WindowsReleaseTargets"
         },
         {
           "type": "package",
