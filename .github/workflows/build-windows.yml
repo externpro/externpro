@@ -7,11 +7,11 @@ on:
         type: string
         description: 'Pattern to search for artifact file'
         default: '${{ github.event.repository.name }}-*-xpro.tar.xz'
-      cmake_workflow_preset:
+      cmake_workflow_preset_suffix:
         required: false
         type: string
-        description: 'CMake workflow preset to use; e.g. Windows, WindowsRelease, WindowsReleaseNoInstall'
-        default: "Windows"
+        description: 'CMake workflow preset suffix to use; e.g. Release, ReleaseNoInstall'
+        default: ""
 jobs:
   build:
     runs-on: windows-2022
@@ -28,6 +28,5 @@ jobs:
         uses: ./.devcontainer/.github/actions/cmake-build
         with:
           artifact_pattern: ${{ inputs.artifact_pattern }}
-          cmake_workflow_preset: ${{ inputs.cmake_workflow_preset }}
-          cmake_preset: Windows
-          no_install_preset: WindowsReleaseNoInstall
+          cmake_preset: MswVs2022
+          cmake_workflow_preset_suffix: ${{ inputs.cmake_workflow_preset_suffix }}

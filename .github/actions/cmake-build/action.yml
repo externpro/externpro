@@ -6,11 +6,9 @@ inputs:
   cmake_version:
     required: false
     default: "4.2.3"
-  cmake_workflow_preset:
-    required: true
   cmake_preset:
     required: true
-  no_install_preset:
+  cmake_workflow_preset_suffix:
     required: true
   name_suffix:
     required: false
@@ -21,6 +19,13 @@ inputs:
 runs:
   using: composite
   steps:
+    -
+      name: Compute preset names
+      id: presets
+      shell: bash
+      run: |
+        echo "workflow_preset=${{ inputs.cmake_preset }}${{ inputs.cmake_workflow_preset_suffix }}" >> $GITHUB_OUTPUT
+        echo "no_install_preset=${{ inputs.cmake_preset }}ReleaseNoInstall" >> $GITHUB_OUTPUT
     -
       name: Install CMake
       uses: ssrobins/install-cmake@v1
@@ -50,7 +55,7 @@ runs:
       shell: bash
       id: cmake_workflow
       continue-on-error: true
-      run: cmake --workflow --preset=${{ inputs.cmake_workflow_preset }}
+      run: cmake --workflow --preset=${{ steps.presets.outputs.workflow_preset }}
     -
       name: Install tmate (on failure)
       if: ${{ inputs.enable_tmate == 'true' && steps.cmake_workflow.outcome == 'failure' }}
@@ -128,7 +133,7 @@ runs:
     -
       name: Find package
       id: find_package
-      if: ${{ inputs.cmake_workflow_preset != inputs.no_install_preset }}
+      if: ${{ steps.presets.outputs.workflow_preset != steps.presets.outputs.no_install_preset }}
       shell: bash
       run: |
         file=$(pwd)/$(ls _bld-${{ inputs.cmake_preset }}/${{ inputs.artifact_pattern }})
@@ -142,7 +147,7 @@ runs:
     -
       name: Find manifest
       id: find_manifest
-      if: ${{ inputs.cmake_workflow_preset != inputs.no_install_preset }}
+      if: ${{ steps.presets.outputs.workflow_preset != steps.presets.outputs.no_install_preset }}
       shell: bash
       run: |
         build_dir=_bld-${{ inputs.cmake_preset }}
@@ -178,7 +183,7 @@ runs:
     -
       name: Convert Git Bash paths to Windows paths
       id: convert_paths
-      if: ${{ inputs.cmake_workflow_preset != inputs.no_install_preset && runner.os == 'Windows' }}
+      if: ${{ steps.presets.outputs.workflow_preset != steps.presets.outputs.no_install_preset && runner.os == 'Windows' }}
       shell: pwsh
       run: |
         $pkgWindowsPath = '${{ steps.find_package.outputs.filepath }}' -replace '^/([a-zA-Z])/', '$1:/' -replace '/', '\\'
@@ -187,14 +192,14 @@ runs:
         echo "manifest_windows_path=$manifestWindowsPath" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
     -
       name: Upload package artifact
-      if: ${{ inputs.cmake_workflow_preset != inputs.no_install_preset && inputs.name_suffix != '-ubuntu' }}
+      if: ${{ steps.presets.outputs.workflow_preset != steps.presets.outputs.no_install_preset && inputs.name_suffix != '-ubuntu' }}
       uses: actions/upload-artifact@v4
       with:
         name: ${{ steps.find_package.outputs.filename }}
         path: ${{ runner.os == 'Windows' && steps.convert_paths.outputs.package_windows_path || steps.find_package.outputs.filepath }}
     -
       name: Upload manifest artifact
-      if: ${{ inputs.cmake_workflow_preset != inputs.no_install_preset && steps.find_manifest.outputs.found == 'true' && inputs.name_suffix != '-ubuntu' }}
+      if: ${{ steps.presets.outputs.workflow_preset != steps.presets.outputs.no_install_preset && steps.find_manifest.outputs.found == 'true' && inputs.name_suffix != '-ubuntu' }}
       uses: actions/upload-artifact@v4
       with:
         name: ${{ steps.find_manifest.outputs.filename }}-${{ inputs.cmake_preset }}-${{ runner.arch }}${{ inputs.name_suffix }}
