@@ -20,7 +20,7 @@ jobs:
     steps:
       -
         name: Checkout merge commit
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           ref: ${{ inputs.merge_sha }}
           fetch-depth: 0
