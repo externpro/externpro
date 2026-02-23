@@ -17,9 +17,12 @@ jobs:
     uses: externpro/externpro/.github/workflows/build-linux.yml@25.07.13
     secrets:
       automation_token: ${{ secrets.GHCR_TOKEN }}
+    with: {}
   macos:
     uses: externpro/externpro/.github/workflows/build-macos.yml@25.07.13
     secrets: inherit
+    with: {}
   windows:
     uses: externpro/externpro/.github/workflows/build-windows.yml@25.07.13
     secrets: inherit
+    with: {}
