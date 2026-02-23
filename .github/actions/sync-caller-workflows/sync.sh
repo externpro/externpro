@@ -92,86 +92,6 @@ apply_preservation_rules() {
     local repo_with_json
     tmpl_with_json=$(yq eval -o=json ".jobs.${job}.with // null" "$template_file" 2>/dev/null || true)
     repo_with_json=$(yq eval -o=json ".jobs.${job}.with // null" "$workflow_backup" 2>/dev/null || true)
-    # If the template has no with block but the repo does, preserve the entire with block verbatim.
-    # This is common for caller workflows like xpbuild where template defines uses/secrets but repo adds inputs.
-    if [ "$tmpl_with_json" = "null" ] && [ -n "$repo_with_json" ] && [ "$repo_with_json" != "null" ]; then
-      # Do the extraction/insertion entirely in perl to avoid Bash expanding "${{ ... }}".
-      JOB="$job" BACKUP_FILE="$workflow_backup" perl -0777 -i -pe '
-my $job=$ENV{JOB};
-$job =~ s/\r\z//;
-my $backup=$ENV{BACKUP_FILE};
-open(my $fh, "<", $backup) or next;
-local $/;
-my $b = <$fh>;
-close($fh);
-my $with_blk = "";
-if ($b =~ m/^  \Q$job\E:\s*\r?\n(?:(?!^  \S).*(?:\n|\z))*?^(    with:\n(?:(?:^      .*?(?:\n|\z))*))/m) {
-  $with_blk = $1;
-}
-if (length($with_blk)) {
-  # Rename known legacy kebab-case keys to snake_case in-place.
-  my %map = (
-    "artifact-pattern" => "artifact_pattern",
-    "cmake-workflow-preset" => "cmake_workflow_preset",
-    "arch-list" => "arch_list",
-    "buildpro-images" => "buildpro_images",
-    "enable-tmate" => "enable_tmate",
-    "name-suffix" => "name_suffix",
-    "cmake-version" => "cmake_version",
-    "cmake-preset" => "cmake_preset",
-    "no-install-preset" => "no_install_preset",
-    "workflow-run-url" => "workflow_run_url",
-  );
-  for my $k (keys %map) {
-    my $v = $map{$k};
-    $with_blk =~ s/^(\s{6})\Q$k\E:/$1$v:/mg;
-  }
-  # Insert the with: block under the correct job by scanning lines.
-  $with_blk =~ s/\n\z//;
-  my @with_lines = split(/\n/, $with_blk, -1);
-  my @lines = split(/\n/, $_, -1);
-  my @out;
-  my $in_job = 0;
-  my $inserted = 0;
-  for (my $i = 0; $i < @lines; $i++) {
-    my $line = $lines[$i];
-    $line =~ s/\r\z//;
-    if ($line =~ /^  \Q$job\E:\s*\r?$/) {
-      $in_job = 1;
-    } elsif ($in_job && $line =~ /^  \S/ && $line !~ /^  \Q$job\E:\s*\r?$/) {
-      $in_job = 0;
-    }
-    if ($in_job && !$inserted && $line =~ /^    uses: .*$/) {
-      # If this job already has a with: block, do not insert another.
-      my $has_with = 0;
-      for (my $j = $i + 1; $j < @lines; $j++) {
-        my $l2 = $lines[$j];
-        $l2 =~ s/\r\z//;
-        last if $l2 =~ /^  \S/;
-        if ($l2 =~ /^    with:$/) { $has_with = 1; last; }
-      }
-      push @out, $line;
-      if (!$has_with) {
-        push @out, @with_lines;
-        $inserted = 1;
-      }
-      next;
-    }
-    push @out, $line;
-  }
-  $_ = join("\n", @out);
-}
-' "$workflow_file" 2>/dev/null || true
-      REPORT="${REPORT}🔧 ${template_name}: preserved \`with\` block \`jobs.${job}.with\`\n"
-      # Track renamed legacy keys (for report).
-      repo_with_keys=$(yq eval ".jobs.${job}.with | keys | .[]" "$workflow_backup" 2>/dev/null | grep -v null || true)
-      local renamed_keys
-      renamed_keys=$(printf '%s\n' "$repo_with_keys" | grep -E '^(artifact-pattern|cmake-workflow-preset|arch-list|buildpro-images|enable-tmate|name-suffix|cmake-version|cmake-preset|no-install-preset|workflow-run-url)$' || true)
-      if [ -n "$renamed_keys" ]; then
-        renamed_keys_accum=$(printf '%s\n%s' "$renamed_keys_accum" "$renamed_keys" | sed '/^$/d' | sort -u)
-      fi
-      continue
-    fi
     repo_with_keys=$(yq eval ".jobs.${job}.with | keys | .[]" "$workflow_backup" 2>/dev/null | grep -v null || true)
     tmpl_with_keys=$(yq eval ".jobs.${job}.with | keys | .[]" "$template_file" 2>/dev/null | grep -v null || true)
     local added_keys
@@ -186,7 +106,8 @@ if (length($with_blk)) {
       dest_key="$key"
       case "$key" in
         artifact-pattern) dest_key="artifact_pattern";;
-        cmake-workflow-preset) dest_key="cmake_workflow_preset";;
+        cmake-workflow-preset) dest_key="cmake_workflow_preset_suffix";;
+        cmake_workflow_preset) dest_key="cmake_workflow_preset_suffix";;
         arch-list) dest_key="arch_list";;
         buildpro-images) dest_key="buildpro_images";;
         enable-tmate) dest_key="enable_tmate";;
@@ -217,6 +138,14 @@ if ($b =~ m/^  \Q$job\E:\s*\r?\n(?:(?!^  \S).*(?:\n|\z))*?^    with:\n(?:(?!^   
   $value = $1;
 }
 next if $value eq "" || $value eq "null";
+# Transform full workflow preset to suffix only when migrating keys.
+if ($dest_key eq "cmake_workflow_preset_suffix") {
+  my $q = "";
+  my $v = $value;
+  if ($value =~ /^("|\x27)(.*)\1\z/) { $q=$1; $v=$2; }
+  if ($v =~ /^(Linux|Darwin|Windows)(.*)\z/) { $v = $2; }
+  $value = $q ? ($q.$v.$q) : $v;
+}
 # Guardrails: GitHub workflow inputs are strings; also unquoted globs/flow collections can parse oddly.
 if ($value !~ /^".*"\z/ && $value !~ /^\x27.*\x27\z/) {
   if ($value =~ /^\[.*\]\z/ || $value =~ /^\{.*\}\z/ || $value =~ /\*/) {
@@ -236,6 +165,11 @@ my $dest_present = 0;
 for (my $i=0; $i<@lines; $i++) {
   my $line = $lines[$i];
   $line =~ s/\r\z//;
+  # Normalize empty inline maps like `with: {}` into a multiline `with:` so we can
+  # deterministically insert preserved keys beneath it.
+  if ($in_job && $line =~ /^    with:\s*\{\s*\}\s*$/) {
+    $line = "    with:";
+  }
   if ($line =~ /^  \Q$job\E:\s*\r?$/) {
     $in_job = 1;
     $in_with = 0;
@@ -246,10 +180,15 @@ for (my $i=0; $i<@lines; $i++) {
     $in_with = 0;
   }
   if ($in_job) {
-    if ($line =~ /^    with:$/) {
+    if ($line =~ /^    with:(?:\s*\{\s*\}\s*)?$/) {
       $in_with = 1;
     } elsif ($in_with) {
-      if ($line =~ /^      \Q$dest_key\E:/) { $dest_present = 1; }
+      if ($line =~ /^      \Q$dest_key\E:/) {
+        # If the destination key already exists in the template, overwrite its value.
+        $line = "      ${dest_key}: ${value}";
+        $dest_present = 1;
+        $inserted = 1;
+      }
       if ($line =~ /^    \S/) {
         # leaving with: block
         if (!$inserted && !$dest_present) { push @out, "      ${dest_key}: ${value}"; $inserted=1; }
@@ -264,7 +203,7 @@ for (my $i=0; $i<@lines; $i++) {
         my $l2 = $lines[$j];
         $l2 =~ s/\r\z//;
         last if $l2 =~ /^  \S/;          # next job / end jobs
-        if ($l2 =~ /^    with:$/) { $has_with = 1; last; }
+        if ($l2 =~ /^    with:(?:\s*\{\s*\}\s*)?$/) { $has_with = 1; last; }
       }
       if (!$has_with) {
         push @out, $line;
@@ -277,8 +216,18 @@ for (my $i=0; $i<@lines; $i++) {
   }
   push @out, $line;
 }
-if ($in_with && !$inserted && !$dest_present) { push @out, "      ${dest_key}: ${value}"; $inserted=1; }
+if ($in_with && !$inserted && !$dest_present) {
+  # If the file ended with a newline, split(..., -1) gives us a trailing empty element.
+  # Insert before it to avoid creating a blank line and to preserve a newline at EOF.
+  if (@out && $out[-1] eq "") {
+    splice(@out, -1, 0, "      ${dest_key}: ${value}");
+  } else {
+    push @out, "      ${dest_key}: ${value}";
+  }
+  $inserted=1;
+}
 $_ = join("\n", @out);
+$_ .= "\n" if $_ !~ /\n\z/;
 ' "$workflow_file" 2>/dev/null || true
       REPORT="${REPORT}🔧 ${template_name}: preserved added \`with\` key \`jobs.${job}.with.${key}\`\n"
     done <<< "$added_keys"
