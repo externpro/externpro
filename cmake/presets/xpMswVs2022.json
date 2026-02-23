@@ -1,0 +1,180 @@
+{
+  "version": 8,
+  "include": ["../../../CMakePresetsBase.json"],
+  "configurePresets": [
+    {
+      "name": "isMswVs2022",
+      "hidden": true,
+      "condition": { "lhs": "${hostSystemName}", "type": "equals", "rhs": "Windows" }
+    },
+    {
+      "name": "MswVs2022",
+      "displayName": "configure Windows VS2022",
+      "inherits": ["config-base", "isMswVs2022"],
+      "generator": "Visual Studio 17 2022",
+      "architecture": "x64"
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "isMswVs2022",
+      "hidden": true,
+      "condition": { "lhs": "${hostSystemName}", "type": "equals", "rhs": "Windows" }
+    },
+    {
+      "name": "MswVs2022Debug",
+      "displayName": "build Windows VS2022 Debug",
+      "inherits": ["isMswVs2022"],
+      "configurePreset": "MswVs2022",
+      "configuration": "Debug"
+    },
+    {
+      "name": "MswVs2022Release",
+      "displayName": "build Windows VS2022 Release",
+      "inherits": ["isMswVs2022"],
+      "targets": ["ALL_BUILD", "INSTALL"],
+      "configurePreset": "MswVs2022",
+      "configuration": "Release"
+    },
+    {
+      "name": "MswVs2022ReleaseNoInstall",
+      "displayName": "build Windows VS2022 Release, no install",
+      "inherits": ["isMswVs2022"],
+      "configurePreset": "MswVs2022",
+      "configuration": "Release"
+    },
+    {
+      "name": "MswVs2022ReleaseTargets",
+      "displayName": "build Windows VS2022 Release Target(s) from CMakePresetsBase",
+      "inherits": ["MswVs2022ReleaseNoInstall", "build-base"]
+    }
+  ],
+  "testPresets": [
+    {
+      "name": "isMswVs2022",
+      "hidden": true,
+      "condition": { "lhs": "${hostSystemName}", "type": "equals", "rhs": "Windows" }
+    },
+    {
+      "name": "MswVs2022Debug",
+      "displayName": "test Windows VS2022 Debug",
+      "inherits": ["isMswVs2022"],
+      "configurePreset": "MswVs2022",
+      "configuration": "Debug",
+      "output": { "outputOnFailure": true },
+      "execution": { "noTestsAction": "ignore", "stopOnFailure": false }
+    },
+    {
+      "name": "MswVs2022Release",
+      "displayName": "test Windows VS2022 Release",
+      "inherits": ["isMswVs2022"],
+      "configurePreset": "MswVs2022",
+      "configuration": "Release",
+      "output": { "outputOnFailure": true },
+      "execution": { "noTestsAction": "ignore", "stopOnFailure": false }
+    }
+  ],
+  "packagePresets": [
+    {
+      "name": "isMswVs2022",
+      "hidden": true,
+      "condition": { "lhs": "${hostSystemName}", "type": "equals", "rhs": "Windows" }
+    },
+    {
+      "name": "MswVs2022",
+      "displayName": "package Windows VS2022",
+      "inherits": ["isMswVs2022"],
+      "configurePreset": "MswVs2022",
+      "configurations": ["Debug", "Release"]
+    },
+    {
+      "name": "MswVs2022Release",
+      "displayName": "package Windows VS2022 Release",
+      "inherits": ["isMswVs2022"],
+      "configurePreset": "MswVs2022",
+      "configurations": ["Release"]
+    }
+  ],
+  "workflowPresets": [
+    {
+      "name": "MswVs2022",
+      "displayName": "workflow Windows VS2022",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "MswVs2022"
+        },
+        {
+          "type": "build",
+          "name": "MswVs2022Debug"
+        },
+        {
+          "type": "build",
+          "name": "MswVs2022Release"
+        },
+        {
+          "type": "test",
+          "name": "MswVs2022Debug"
+        },
+        {
+          "type": "test",
+          "name": "MswVs2022Release"
+        },
+        {
+          "type": "package",
+          "name": "MswVs2022"
+        }
+      ]
+    },
+    {
+      "name": "MswVs2022Release",
+      "displayName": "workflow Windows VS2022 Release",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "MswVs2022"
+        },
+        {
+          "type": "build",
+          "name": "MswVs2022Release"
+        },
+        {
+          "type": "package",
+          "name": "MswVs2022Release"
+        }
+      ]
+    },
+    {
+      "name": "MswVs2022ReleaseTargets",
+      "displayName": "workflow Windows VS2022 Release Targets",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "MswVs2022"
+        },
+        {
+          "type": "build",
+          "name": "MswVs2022ReleaseTargets"
+        },
+        {
+          "type": "package",
+          "name": "MswVs2022Release"
+        }
+      ]
+    },
+    {
+      "name": "MswVs2022ReleaseNoInstall",
+      "displayName": "workflow Windows VS2022 Release, no install",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "MswVs2022"
+        },
+        {
+          "type": "build",
+          "name": "MswVs2022ReleaseNoInstall"
+        }
+      ]
+    }
+  ]
+}

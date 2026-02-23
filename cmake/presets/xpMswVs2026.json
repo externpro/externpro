@@ -1,0 +1,180 @@
+{
+  "version": 8,
+  "include": ["../../../CMakePresetsBase.json"],
+  "configurePresets": [
+    {
+      "name": "isMswVs2026",
+      "hidden": true,
+      "condition": { "lhs": "${hostSystemName}", "type": "equals", "rhs": "Windows" }
+    },
+    {
+      "name": "MswVs2026",
+      "displayName": "configure Windows VS2026",
+      "inherits": ["config-base", "isMswVs2026"],
+      "generator": "Visual Studio 18 2026",
+      "architecture": "x64"
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "isMswVs2026",
+      "hidden": true,
+      "condition": { "lhs": "${hostSystemName}", "type": "equals", "rhs": "Windows" }
+    },
+    {
+      "name": "MswVs2026Debug",
+      "displayName": "build Windows VS2026 Debug",
+      "inherits": ["isMswVs2026"],
+      "configurePreset": "MswVs2026",
+      "configuration": "Debug"
+    },
+    {
+      "name": "MswVs2026Release",
+      "displayName": "build Windows VS2026 Release",
+      "inherits": ["isMswVs2026"],
+      "targets": ["ALL_BUILD", "INSTALL"],
+      "configurePreset": "MswVs2026",
+      "configuration": "Release"
+    },
+    {
+      "name": "MswVs2026ReleaseNoInstall",
+      "displayName": "build Windows VS2026 Release, no install",
+      "inherits": ["isMswVs2026"],
+      "configurePreset": "MswVs2026",
+      "configuration": "Release"
+    },
+    {
+      "name": "MswVs2026ReleaseTargets",
+      "displayName": "build Windows VS2026 Release Target(s) from CMakePresetsBase",
+      "inherits": ["MswVs2026ReleaseNoInstall", "build-base"]
+    }
+  ],
+  "testPresets": [
+    {
+      "name": "isMswVs2026",
+      "hidden": true,
+      "condition": { "lhs": "${hostSystemName}", "type": "equals", "rhs": "Windows" }
+    },
+    {
+      "name": "MswVs2026Debug",
+      "displayName": "test Windows VS2026 Debug",
+      "inherits": ["isMswVs2026"],
+      "configurePreset": "MswVs2026",
+      "configuration": "Debug",
+      "output": { "outputOnFailure": true },
+      "execution": { "noTestsAction": "ignore", "stopOnFailure": false }
+    },
+    {
+      "name": "MswVs2026Release",
+      "displayName": "test Windows VS2026 Release",
+      "inherits": ["isMswVs2026"],
+      "configurePreset": "MswVs2026",
+      "configuration": "Release",
+      "output": { "outputOnFailure": true },
+      "execution": { "noTestsAction": "ignore", "stopOnFailure": false }
+    }
+  ],
+  "packagePresets": [
+    {
+      "name": "isMswVs2026",
+      "hidden": true,
+      "condition": { "lhs": "${hostSystemName}", "type": "equals", "rhs": "Windows" }
+    },
+    {
+      "name": "MswVs2026",
+      "displayName": "package Windows VS2026",
+      "inherits": ["isMswVs2026"],
+      "configurePreset": "MswVs2026",
+      "configurations": ["Debug", "Release"]
+    },
+    {
+      "name": "MswVs2026Release",
+      "displayName": "package Windows VS2026 Release",
+      "inherits": ["isMswVs2026"],
+      "configurePreset": "MswVs2026",
+      "configurations": ["Release"]
+    }
+  ],
+  "workflowPresets": [
+    {
+      "name": "MswVs2026",
+      "displayName": "workflow Windows VS2026",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "MswVs2026"
+        },
+        {
+          "type": "build",
+          "name": "MswVs2026Debug"
+        },
+        {
+          "type": "build",
+          "name": "MswVs2026Release"
+        },
+        {
+          "type": "test",
+          "name": "MswVs2026Debug"
+        },
+        {
+          "type": "test",
+          "name": "MswVs2026Release"
+        },
+        {
+          "type": "package",
+          "name": "MswVs2026"
+        }
+      ]
+    },
+    {
+      "name": "MswVs2026Release",
+      "displayName": "workflow Windows VS2026 Release",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "MswVs2026"
+        },
+        {
+          "type": "build",
+          "name": "MswVs2026Release"
+        },
+        {
+          "type": "package",
+          "name": "MswVs2026Release"
+        }
+      ]
+    },
+    {
+      "name": "MswVs2026ReleaseTargets",
+      "displayName": "workflow Windows VS2026 Release Targets",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "MswVs2026"
+        },
+        {
+          "type": "build",
+          "name": "MswVs2026ReleaseTargets"
+        },
+        {
+          "type": "package",
+          "name": "MswVs2026Release"
+        }
+      ]
+    },
+    {
+      "name": "MswVs2026ReleaseNoInstall",
+      "displayName": "workflow Windows VS2026 Release, no install",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "MswVs2026"
+        },
+        {
+          "type": "build",
+          "name": "MswVs2026ReleaseNoInstall"
+        }
+      ]
+    }
+  ]
+}
