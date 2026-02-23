@@ -12,9 +12,18 @@ on:
         type: string
         description: 'CMake workflow preset suffix to use; e.g. Release, ReleaseNoInstall'
         default: ""
+      vs_compilers:
+        required: false
+        type: string
+        description: 'JSON array of Visual Studio compiler versions to build (e.g. ["Vs2022","Vs2026"])'
+        default: '["Vs2022","Vs2026"]'
 jobs:
   build:
-    runs-on: windows-2022
+    runs-on: ${{ matrix.vs_compiler == 'Vs2026' && 'windows-2025-vs2026' || 'windows-2022' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        vs_compiler: ${{ fromJson(inputs.vs_compilers) }}
     steps:
       -
         name: Checkout repo
@@ -28,5 +37,5 @@ jobs:
         uses: ./.devcontainer/.github/actions/cmake-build
         with:
           artifact_pattern: ${{ inputs.artifact_pattern }}
-          cmake_preset: MswVs2022
+          cmake_preset: Msw${{ matrix.vs_compiler }}
           cmake_workflow_preset_suffix: ${{ inputs.cmake_workflow_preset_suffix }}
