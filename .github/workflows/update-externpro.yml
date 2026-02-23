@@ -1,12 +1,10 @@
 name: Update externpro Submodule
+env:
+  XPRO_SUBMODULE_PATH: .devcontainer
+  XPRO_BUILD_CONTAINER: rocky9-gcc13
 on:
   workflow_call:
     inputs:
-      submodule_path:
-        description: 'Path to externpro submodule'
-        required: false
-        type: string
-        default: '.devcontainer'
       target_ref:
         description: 'Branch or tag to update externpro to (e.g., "main" or "25.07.4")'
         required: false
@@ -17,11 +15,6 @@ on:
         required: false
         type: boolean
         default: false
-      build_container:
-        description: 'Build container image ghcr.io/{owner_repo}/bldimg-{arch}-{build_container}:latest'
-        required: false
-        type: string
-        default: 'rocky9-gcc13'
     secrets:
       automation_token:
         description: 'Optional token used for automation (push/PR/labels; may need workflow permission when updating workflows). If not set, uses GITHUB_TOKEN.'
@@ -47,7 +40,7 @@ jobs:
         id: validate
         uses: externpro/externpro/.github/actions/externpro-validate@main
         with:
-          submodule_path: ${{ inputs.submodule_path }}
+          submodule_path: ${{ env.XPRO_SUBMODULE_PATH }}
       -
         name: Get current externpro HEAD
         id: current_head
@@ -131,7 +124,7 @@ jobs:
         id: ghcr
         uses: ./.devcontainer/.github/actions/ghcr-access
         with:
-          build_container: ${{ inputs.build_container }}
+          build_container: ${{ env.XPRO_BUILD_CONTAINER }}
           automation_token: ${{ secrets.automation_token }}
       -
         name: Configure and snapshot dependency artifacts
@@ -140,7 +133,7 @@ jobs:
         uses: ./.devcontainer/.github/actions/externpro-deps-configure
         with:
           submodule_path: ${{ steps.validate.outputs.submodule_path }}
-          build_container: ${{ inputs.build_container }}
+          build_container: ${{ env.XPRO_BUILD_CONTAINER }}
           automation_token: ${{ secrets.automation_token }}
       -
         name: Get final externpro version/head
