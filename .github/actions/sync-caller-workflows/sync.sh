@@ -118,7 +118,7 @@ apply_preservation_rules() {
         workflow-run-url) dest_key="workflow_run_url";;
       esac
       if [ "$dest_key" != "$key" ]; then
-        renamed_keys_accum=$(printf '%s\n%s' "$renamed_keys_accum" "$key" | sed '/^$/d' | sort -u)
+        renamed_keys_accum=$(printf '%s\n%s -> %s' "$renamed_keys_accum" "$key" "$dest_key" | sed '/^$/d' | sort -u)
       elif printf '%s' "$key" | grep -q -- '-'; then
         unknown_legacy_keys_accum=$(printf '%s\n%s' "$unknown_legacy_keys_accum" "$key" | sed '/^$/d' | sort -u)
       fi
@@ -229,16 +229,21 @@ if ($in_with && !$inserted && !$dest_present) {
 $_ = join("\n", @out);
 $_ .= "\n" if $_ !~ /\n\z/;
 ' "$workflow_file" 2>/dev/null || true
-      REPORT="${REPORT}🔧 ${template_name}: preserved added \`with\` key \`jobs.${job}.with.${key}\`\n"
+
+      if [ "$dest_key" != "$key" ]; then
+        REPORT="${REPORT}- 🔧 ${template_name}: preserved repo key \`jobs.${job}.with.${dest_key}\` (renamed from \`${key}\`)\n"
+      else
+        REPORT="${REPORT}- 🔧 ${template_name}: preserved repo key \`jobs.${job}.with.${key}\`\n"
+      fi
     done <<< "$added_keys"
   done <<< "$repo_jobs"
   if [ -n "$renamed_keys_accum" ]; then
-    REPORT="${REPORT}- 🔧 workflow_call input keys renamed (kebab-case → snake_case):\n$(echo "$renamed_keys_accum" | sed 's/^/  - /')\n"
+    REPORT="${REPORT}\n- 🔧 workflow_call input keys renamed (kebab-case → snake_case):\n$(echo "$renamed_keys_accum" | sed 's/^/  - /')\n"
   fi
   if [ -n "$unknown_legacy_keys_accum" ]; then
     echo "WARNING: Unrecognized kebab-case 'with:' keys detected (no auto-rename applied):"
     echo "$unknown_legacy_keys_accum" | sed 's/^/  - /'
-    REPORT="${REPORT}⚠️ Unrecognized kebab-case 'with:' keys detected (no auto-rename applied):\n$(echo "$unknown_legacy_keys_accum" | sed 's/^/  - /')\n"
+    REPORT="${REPORT}\n- ⚠️ Unrecognized kebab-case 'with:' keys detected (no auto-rename applied):\n$(echo "$unknown_legacy_keys_accum" | sed 's/^/  - /')\n"
   fi
 }
 
@@ -287,8 +292,8 @@ process_template_file() {
   if [ ! -f "$workflow_file" ]; then
     echo "Workflow $template_name not found, copying from template..."
     cp "$template_file" "$workflow_file"
-    echo "✓ Created new workflow $template_name from template"
-    REPORT="${REPORT}✓ $template_name: Created new workflow from template\n"
+    echo "- ✓ Created new workflow $template_name from template"
+    REPORT="${REPORT}- ✓ $template_name: Created new workflow from template\n"
     git add "$workflow_file"
     WORKFLOWS_UPDATED=true
     return 0
@@ -309,7 +314,7 @@ process_template_file() {
   WORKFLOWS_UPDATED=true
   rm "$workflow_file.backup"
   echo "✓ $template_name synced from template"
-  REPORT="${REPORT}✓ $template_name: Synced from template\n"
+  REPORT="${REPORT}- ✓ $template_name: Synced from template\n"
 }
 
 main() {
