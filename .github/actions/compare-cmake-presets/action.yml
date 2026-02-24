@@ -24,7 +24,7 @@ runs:
         REPO_PRESETS="${PRESETS_DIR%/}/CMakePresets.json"
         TEMPLATE_PRESETS="${TEMPLATE_DIR%/}/CMakePresets.json"
         #####
-        REPORT=$(python3 "$GITHUB_ACTION_PATH/compare.py" "$REPO_PRESETS" "$TEMPLATE_PRESETS")
+        REPORT=$(python3 "$GITHUB_ACTION_PATH/compare.py" --fix --stage "$REPO_PRESETS" "$TEMPLATE_PRESETS")
         {
           echo "report<<__XPRO_REPORT__"
           printf '%s\n' "$REPORT"
