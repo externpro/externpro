@@ -233,7 +233,7 @@ $_ .= "\n" if $_ !~ /\n\z/;
     done <<< "$added_keys"
   done <<< "$repo_jobs"
   if [ -n "$renamed_keys_accum" ]; then
-    REPORT="${REPORT}🔧 workflow_call input keys renamed (kebab-case → snake_case):\n$(echo "$renamed_keys_accum" | sed 's/^/  - /')\n"
+    REPORT="${REPORT}- 🔧 workflow_call input keys renamed (kebab-case → snake_case):\n$(echo "$renamed_keys_accum" | sed 's/^/  - /')\n"
   fi
   if [ -n "$unknown_legacy_keys_accum" ]; then
     echo "WARNING: Unrecognized kebab-case 'with:' keys detected (no auto-rename applied):"
