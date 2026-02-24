@@ -50,5 +50,5 @@ The caller workflow templates (`xpinit`, `xpupdate`, and `xptag`) map a reposito
 
 For step-by-step instructions (with screenshots) on creating a fine-grained PAT and adding `XPRO_TOKEN` to a repo, see:
 
-- [Creating a fine-grained PAT](docs/secrets-and-tokens.md#creating-a-fine-grained-pat)
-- [Adding `XPRO_TOKEN` to the repository](docs/secrets-and-tokens.md#adding-xpro_token-to-the-repository)
+- [Creating a fine-grained PAT](secrets-and-tokens.md#creating-a-fine-grained-pat)
+- [Adding `XPRO_TOKEN` to the repository](secrets-and-tokens.md#adding-xpro_token-to-the-repository)
