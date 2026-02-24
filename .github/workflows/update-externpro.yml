@@ -281,6 +281,7 @@ jobs:
         if: steps.pr_needed.outputs.pr_needed == 'true'
         env:
           WORKFLOW_REPORT: ${{ steps.update_workflows.outputs.workflow_report }}
+          CMAKE_PRESETS_REPORT: ${{ steps.cmake_presets.outputs.report }}
         run: |
           set -euo pipefail
           GH_TOKEN="${{ secrets.automation_token }}"
@@ -343,7 +344,7 @@ jobs:
           if [ "${{ steps.update_workflows.outputs.workflows_updated }}" = "true" ]; then
             echo "- Updated caller workflows to match templates" >> "$BODY_FILE"
           fi
-          if [ -n "${{ steps.cmake_presets.outputs.report }}" ]; then
+          if [ -n "${CMAKE_PRESETS_REPORT}" ]; then
             echo "- CMakePresets.json review needed" >> "$BODY_FILE"
             echo "  - See details below" >> "$BODY_FILE"
           fi
@@ -353,11 +354,11 @@ jobs:
             echo >> "$BODY_FILE"
             printf '%s\n' "$WORKFLOW_REPORT" >> "$BODY_FILE"
           fi
-          if [ -n "${{ steps.cmake_presets.outputs.report }}" ]; then
+          if [ -n "${CMAKE_PRESETS_REPORT}" ]; then
             echo >> "$BODY_FILE"
             echo "### CMakePresets.json" >> "$BODY_FILE"
             echo >> "$BODY_FILE"
-            printf '%s\n' "${{ steps.cmake_presets.outputs.report }}" >> "$BODY_FILE"
+            printf '%s\n' "${CMAKE_PRESETS_REPORT}" >> "$BODY_FILE"
           fi
           echo >> "$BODY_FILE"
           echo "---" >> "$BODY_FILE"
