@@ -231,10 +231,10 @@ jobs:
         if: steps.pr_needed.outputs.pr_needed == 'true'
         run: |
           NEEDS_WORKFLOW_TOKEN=false
-          if ! git diff --cached --name-only | grep -q '^\.github/workflows/'; then
-            NEEDS_WORKFLOW_TOKEN=false
-          else
+          if git diff --cached --name-only | grep -q '^\.github/workflows/'; then
             NEEDS_WORKFLOW_TOKEN=true
+          else
+            NEEDS_WORKFLOW_TOKEN=false
           fi
           TOKEN="${{ secrets.automation_token }}"
           if [ "${NEEDS_WORKFLOW_TOKEN}" = true ] && [ -z "${TOKEN}" ]; then
@@ -248,6 +248,13 @@ jobs:
             TOKEN=$(printf '%s' "${TOKEN}" | tr -d '\r\n' | xargs)
             echo "Using automation_token for push (length=${#TOKEN})"
           fi
+          TOKEN_TYPE="unknown"
+          case "${TOKEN}" in
+            ghp_*) TOKEN_TYPE="classic_pat" ;;
+            github_pat_*) TOKEN_TYPE="fine_grained_pat" ;;
+            ghs_*) TOKEN_TYPE="github_actions_token" ;;
+          esac
+          echo "Push token type: ${TOKEN_TYPE}"
           # actions/checkout injects an http extraheader for github.com using the checkout token.
           # When checkout uses github.token, that header can override PAT-in-URL auth for later pushes.
           # Clear it and force an empty extraheader for the push so the URL credential is used.
