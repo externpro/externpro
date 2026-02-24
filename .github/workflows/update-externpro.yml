@@ -31,10 +31,10 @@ jobs:
         name: Checkout repository
         uses: actions/checkout@v6
         with:
+          token: ${{ secrets.automation_token || github.token }}
           fetch-depth: 0   # fetches all history
           fetch-tags: true # explicitly fetches tags
           submodules: true
-          token: ${{ github.token }}
       -
         name: Validate externpro submodule
         id: validate
