@@ -233,6 +233,8 @@ jobs:
       -
         name: Delete untagged images from ghcr
         uses: snok/container-retention-policy@v3.0.0
+        continue-on-error: true
+        timeout-minutes: 10
         with:
           account: ${{ github.actor == github.repository_owner && 'user' || github.repository_owner }}
           token: ${{ secrets.GITHUB_TOKEN }}
