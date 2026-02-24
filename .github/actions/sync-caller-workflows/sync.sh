@@ -239,7 +239,9 @@ $_ .= "\n" if $_ !~ /\n\z/;
   if [ -n "$renamed_keys_accum" ]; then
     while IFS= read -r rename; do
       [ -z "$rename" ] && continue
-      REPORT="${REPORT}- 🔧 workflow_call input renamed (kebab-case → snake_case): ${rename}\n"
+      OLD_KEY="${rename%% -> *}"
+      NEW_KEY="${rename##* -> }"
+      REPORT="${REPORT}- 🔧 workflow_call input renamed (kebab-case → snake_case): \`${OLD_KEY}\` -> \`${NEW_KEY}\`\n"
     done <<< "$renamed_keys_accum"
   fi
   if [ -n "$unknown_legacy_keys_accum" ]; then
