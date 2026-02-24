@@ -131,8 +131,8 @@ set(xp_nodeng REPO github.com/externpro/nodeng TAG v22.19.0.2-2-g3a430c8
   MANIFEST_SHA256 60f9d99fb469a6f013924b938be607f6258b8337711eeb0b93e8d1ff1ee28772
   )
 # last xp_nodeng set is used
-set(xp_nodeng REPO github.com/externpro/nodeng TAG xpv24.13.0.2
-  MANIFEST_SHA256 d69bd8e242d199aee331701c4b5681712b0b9bdcc76f8a83ba5262a98226d9eb
+set(xp_nodeng REPO github.com/externpro/nodeng TAG xpv24.13.0.5
+  MANIFEST_SHA256 c09c34bc2730314605e109968e542aff490c1f95e489be48f5afa4e217bd3872
   )
 # TRICKY: nodexp, openssl versions coordinated
 set(xp_nodexp REPO github.com/externpro/nodexp TAG xpv22.19.0.3
