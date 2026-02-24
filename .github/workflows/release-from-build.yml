@@ -246,11 +246,13 @@ jobs:
           # Use the hardcoded repository where this workflow is defined as the signer
           sed -i "s|{workflow_run_url}|${{ inputs.workflow_run_url }}|g" "$RELEASE_NOTES_FILE"
           sed -i "s|{signer_repo}|externpro/externpro|g" "$RELEASE_NOTES_FILE"
-          if [ -n "${{ steps.find_artifacts.outputs.manifest_hash }}" ]; then
+          manifest_file="${{ steps.find_artifacts.outputs.manifest_file }}"
+          if [ -n "$manifest_file" ] && [ -f "$manifest_file" ]; then
+            manifest_hash=$(sha256sum "$manifest_file" | cut -d' ' -f1)
             echo "### Manifest" >> "$RELEASE_NOTES_FILE"
-            echo "```" >> "$RELEASE_NOTES_FILE"
-            echo "MANIFEST_SHA256 ${{ steps.find_artifacts.outputs.manifest_hash }}" >> "$RELEASE_NOTES_FILE"
-            echo "```" >> "$RELEASE_NOTES_FILE"
+            echo '```' >> "$RELEASE_NOTES_FILE"
+            echo "MANIFEST_SHA256 $manifest_hash" >> "$RELEASE_NOTES_FILE"
+            echo '```' >> "$RELEASE_NOTES_FILE"
           fi
           # Set flags based on release type
           flags=""
