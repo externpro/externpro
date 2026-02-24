@@ -1,0 +1,32 @@
+name: Compare CMake Presets
+description: Compare repository CMake presets files against externpro template presets and emit a report.
+inputs:
+  presets_dir:
+    description: Directory containing the repository CMake presets files (e.g. ".")
+    required: true
+  template_dir:
+    description: Directory containing the template CMake presets files (e.g. ".devcontainer/cmake/presets")
+    required: true
+outputs:
+  report:
+    description: Multi-line report suitable for inclusion in a PR body
+    value: ${{ steps.compare.outputs.report }}
+runs:
+  using: composite
+  steps:
+    - id: compare
+      shell: bash
+      run: |
+        set -euo pipefail
+        PRESETS_DIR="${{ inputs.presets_dir }}"
+        TEMPLATE_DIR="${{ inputs.template_dir }}"
+        #####
+        REPO_PRESETS="${PRESETS_DIR%/}/CMakePresets.json"
+        TEMPLATE_PRESETS="${TEMPLATE_DIR%/}/CMakePresets.json"
+        #####
+        REPORT=$(python3 "$GITHUB_ACTION_PATH/compare.py" "$REPO_PRESETS" "$TEMPLATE_PRESETS")
+        {
+          echo "report<<__XPRO_REPORT__"
+          printf '%s\n' "$REPORT"
+          echo "__XPRO_REPORT__"
+        } >> "$GITHUB_OUTPUT"
