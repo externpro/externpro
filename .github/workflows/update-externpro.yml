@@ -120,6 +120,14 @@ jobs:
           template_dir: ${{ steps.validate.outputs.submodule_path }}/.github/wf-templates
           preserve_existing_branches: ${{ inputs.preserve_existing_branches }}
       -
+        name: Compare CMakePresets
+        id: cmake_presets
+        if: ${{ always() }}
+        uses: ./.devcontainer/.github/actions/compare-cmake-presets
+        with:
+          presets_dir: .
+          template_dir: ${{ steps.validate.outputs.submodule_path }}/cmake/presets
+      -
         name: GHCR access
         id: ghcr
         uses: ./.devcontainer/.github/actions/ghcr-access
@@ -217,9 +225,9 @@ jobs:
             echo "release-tag intent not staged; nothing to commit"
             exit 0
           fi
-          git commit -m "add release-tag intent" -- "${INTENT_FILE}"
+          git commit -m "update .github/release-tag.json" -- "${INTENT_FILE}"
       -
-        name: Commit and push workflow updates
+        name: Commit and push externpro updates
         if: steps.pr_needed.outputs.pr_needed == 'true'
         run: |
           NEEDS_WORKFLOW_TOKEN=false
@@ -246,7 +254,7 @@ jobs:
           git config --unset-all http.https://github.com/.extraheader || true
           git remote set-url origin "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
           if ! git diff --cached --quiet; then
-            COMMIT_MSG="externpro ${{ steps.final_version.outputs.describe }} workflow updates"
+            COMMIT_MSG="externpro ${{ steps.final_version.outputs.describe }} updates"
             git commit -m "$COMMIT_MSG"
             echo "Commit created: $COMMIT_MSG"
           fi
@@ -327,11 +335,21 @@ jobs:
           if [ "${{ steps.update_workflows.outputs.workflows_updated }}" = "true" ]; then
             echo "- Updated caller workflows to match templates" >> "$BODY_FILE"
           fi
+          if [ -n "${{ steps.cmake_presets.outputs.report }}" ]; then
+            echo "- CMakePresets.json review needed" >> "$BODY_FILE"
+            echo "  - See details below" >> "$BODY_FILE"
+          fi
           if [ -n "${WORKFLOW_REPORT}" ]; then
             echo >> "$BODY_FILE"
             echo "### Workflow Update Report" >> "$BODY_FILE"
             echo >> "$BODY_FILE"
             printf '%s\n' "$WORKFLOW_REPORT" >> "$BODY_FILE"
+          fi
+          if [ -n "${{ steps.cmake_presets.outputs.report }}" ]; then
+            echo >> "$BODY_FILE"
+            echo "### CMakePresets.json" >> "$BODY_FILE"
+            echo >> "$BODY_FILE"
+            printf '%s\n' "${{ steps.cmake_presets.outputs.report }}" >> "$BODY_FILE"
           fi
           echo >> "$BODY_FILE"
           echo "---" >> "$BODY_FILE"
