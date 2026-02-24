@@ -229,7 +229,6 @@ if ($in_with && !$inserted && !$dest_present) {
 $_ = join("\n", @out);
 $_ .= "\n" if $_ !~ /\n\z/;
 ' "$workflow_file" 2>/dev/null || true
-
       if [ "$dest_key" != "$key" ]; then
         REPORT="${REPORT}- 🔧 ${template_name}: preserved repo key \`jobs.${job}.with.${dest_key}\` (renamed from \`${key}\`)\n"
       else
@@ -238,12 +237,18 @@ $_ .= "\n" if $_ !~ /\n\z/;
     done <<< "$added_keys"
   done <<< "$repo_jobs"
   if [ -n "$renamed_keys_accum" ]; then
-    REPORT="${REPORT}\n- 🔧 workflow_call input keys renamed (kebab-case → snake_case):\n$(echo "$renamed_keys_accum" | sed 's/^/  - /')\n"
+    while IFS= read -r rename; do
+      [ -z "$rename" ] && continue
+      REPORT="${REPORT}- 🔧 workflow_call input renamed (kebab-case → snake_case): ${rename}\n"
+    done <<< "$renamed_keys_accum"
   fi
   if [ -n "$unknown_legacy_keys_accum" ]; then
     echo "WARNING: Unrecognized kebab-case 'with:' keys detected (no auto-rename applied):"
     echo "$unknown_legacy_keys_accum" | sed 's/^/  - /'
-    REPORT="${REPORT}\n- ⚠️ Unrecognized kebab-case 'with:' keys detected (no auto-rename applied):\n$(echo "$unknown_legacy_keys_accum" | sed 's/^/  - /')\n"
+    while IFS= read -r key; do
+      [ -z "$key" ] && continue
+      REPORT="${REPORT}- ⚠️ Unrecognized kebab-case 'with:' key (no auto-rename): ${key}\n"
+    done <<< "$unknown_legacy_keys_accum"
   fi
 }
 
