@@ -21,9 +21,9 @@ This page documents the default build matrices (where applicable) used by the bu
 Linux builds run inside buildpro-based Docker containers and use a matrix of:
 
 - **Architectures** (`arch_list`)
-  - default: `{"amd64","arm64"}`
+  - default: `["amd64","arm64"]`
 - **Toolchain/container images** (`buildpro_images`)
-  - default: `{"rocky8-gcc9","rocky9-gcc13","rocky10-gcc15"}`
+  - default: `["rocky8-gcc9","rocky9-gcc13","rocky10-gcc15"]`
 
 ### Customizing Linux
 
@@ -67,7 +67,7 @@ The common knob is selecting a different workflow preset suffix via the shared i
 Windows builds run on GitHub-hosted runners and use a matrix of Visual Studio toolchains:
 
 - **Toolchains** (`vs_compilers`)
-  - default: `{"Vs2022","Vs2026"}`
+  - default: `["Vs2022","Vs2026"]`
 
 ### Customizing Windows
 

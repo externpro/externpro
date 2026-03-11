@@ -16,7 +16,8 @@ The `.github/` directory contains GitHub Actions building blocks (reusable workf
 - `XPRO_TOKEN`
   - Used by caller workflow templates as `secrets.XPRO_TOKEN`, passed through to reusable workflows as `automation_token`.
   - Required for `xpinit`.
-  - Commonly needed for `xpupdate` and `xptag` (push/PR/label operations; and tag pushes that should trigger downstream workflows).
+  - Commonly needed for `xpupdate` (push/PR/label operations).
+  - Recommended for `xptag` when tag pushes must trigger downstream workflows.
   - Setup details: see [Secrets and tokens](secrets-and-tokens.md).
 
 ## Documentation index
