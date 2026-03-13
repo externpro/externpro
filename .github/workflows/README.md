@@ -4,7 +4,7 @@ This directory contains reusable workflows intended to be called from project re
 
 Canonical documentation for externpro GitHub Actions lives under:
 
-- [`../doc/README.md`](../doc/README.md)
+- [`../docs/README.md`](../docs/README.md)
 
 Start there for:
 
