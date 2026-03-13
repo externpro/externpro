@@ -1111,9 +1111,11 @@ function(ipProDepsInit)
   elseif(DEFINED xpdepsFile)
     string(JOIN "\n" hdr
       "# projects"
-      "this README.md and the [deps.svg](deps.svg) files are generated"
+      "This README.md and the [deps.svg](deps.svg) files are generated"
       " from the contents of [pros.cmake](pros.cmake), any independently set"
-      " or overridden `xp_` variables, and downloaded project manifest files"
+      " or overridden `xp_` variables, and downloaded project manifest files."
+      ""
+      "For CMake toolkit docs, see [cmake/doc/README.md](doc/README.md)."
       ""
       )
     file(WRITE ${xpdepsFile} "${hdr}")
@@ -1443,7 +1445,6 @@ function(xpProDeps)
     ipProDepsRow(PKG ${pkg} ${${pro}})
   endforeach()
   ipProDepsEnd()
-  file(APPEND ${xpdepsFile} "\n[How-to: modify a project to build with externpro](pros.md)\n")
   xpCopyFilesToSrc(${xpThisDir}/README.md ${xpThisDir}/deps.svg)
 endfunction()
 
