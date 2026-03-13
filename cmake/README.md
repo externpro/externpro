@@ -3,7 +3,7 @@ This README.md and the [deps.svg](deps.svg) files are generated
  from the contents of [pros.cmake](pros.cmake), any independently set
  or overridden `xp_` variables, and downloaded project manifest files.
 
-For CMake toolkit docs, see [cmake/doc/README.md](doc/README.md).
+For CMake toolkit docs, see [cmake/docs/README.md](docs/README.md).
 
 |project|license [^_l]|description [dependencies]|version|source|diff [^_d]|
 |-------|-------------|--------------------------|-------|------|----------|

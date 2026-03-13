@@ -1115,7 +1115,7 @@ function(ipProDepsInit)
       " from the contents of [pros.cmake](pros.cmake), any independently set"
       " or overridden `xp_` variables, and downloaded project manifest files."
       ""
-      "For CMake toolkit docs, see [cmake/doc/README.md](doc/README.md)."
+      "For CMake toolkit docs, see [cmake/docs/README.md](docs/README.md)."
       ""
       )
     file(WRITE ${xpdepsFile} "${hdr}")

@@ -36,7 +36,7 @@ _bld*/
 docker-compose.override.yml
 ```
 
-Note: steps 3-5 can also be handled by running the `xpInit` caller workflow (`.github/workflows/xpinit.yml`, copied from [`xpinit.yml`](../../.github/wf-templates/xpinit.yml)). See the `xpInit` docs in [Caller workflows](../../.github/doc/caller-workflows.md#xpinit-xpinityml).
+Note: steps 3-5 can also be handled by running the `xpInit` caller workflow (`.github/workflows/xpinit.yml`, copied from [`xpinit.yml`](../../.github/wf-templates/xpinit.yml)). See the `xpInit` docs in [Caller workflows](../../.github/docs/caller-workflows.md#xpinit-xpinityml).
 
 ## GitHub Actions workflows
 
