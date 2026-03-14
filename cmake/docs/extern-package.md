@@ -28,12 +28,6 @@ In repos that integrate externpro via `CMAKE_PROJECT_TOP_LEVEL_INCLUDES`, the de
   - Use when `CMAKE_PROJECT_NAME` does not match the repository name.
   - This affects naming of generated files and the package identity used in the consumer config.
 
-- `NAMESPACE`
-  - Prepends a CMake namespace to library/executable targets in the consumer config.
-
-- `ALIAS_NAMESPACE`
-  - If set along with `NAMESPACE`, generates ALIAS targets so consumers can use an alternate namespace.
-
 - `TARGETS_FILE`
   - A targets file name (without `.cmake`) to include from the consumer config.
 
