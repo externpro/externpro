@@ -43,6 +43,7 @@ The default `xpbuild.yml` template triggers on tag pushes matching `xpv*`.
     - generates build provenance attestations
     - creates a **draft** GitHub Release (fails if it already exists)
     - uploads artifacts (and a manifest if present) as release assets
+    - release assets are tracked and kept as part of the GitHub Release (not just as ephemeral workflow artifacts)
 
 ## Notes
 
