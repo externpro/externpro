@@ -68,7 +68,7 @@ The goal is simple: make "develop -> build -> test -> release" fast and consiste
     - Windows: MSVC (Visual Studio 2022/2026)
 - Architected to be easily extensible
 - CI pipelines run on [GitHub-hosted runners](#github-hosted-runners), which provide the macOS/Windows toolchains (Linux uses buildpro containers for the toolchain)
-- CMake toolkit (functions/macros) for dependency provisioning, packaging (CPack), dependency reporting, and optional classified/offline source integration; see [`cmake/docs/`](./cmake/docs/)
+- CMake toolkit (functions/macros) for dependency provisioning, packaging (CPack, including installers like msi/rpm/deb when applicable), dependency reporting, and optional classified/offline source integration; see [`cmake/docs/`](./cmake/docs/)
 
 #### Leverage Docker buildpro images (Linux)
 - **Pre-built toolchains**
@@ -101,7 +101,7 @@ The goal is simple: make "develop -> build -> test -> release" fast and consiste
   project(foo)
   ```
 
-- See [cmake/README.md](./cmake/README.md) for externpro projects — each one is an example of vendoring externpro/externpro as a submodule and using it as the CMake build platform and dependency provider, with reusable CI pipelines, to create an xpro package that can be consumed by other "downstream" projects.
+- See [cmake/README.md](./cmake/README.md) for externpro projects — each one is an example of vendoring externpro/externpro as a submodule and using it as the CMake build platform and dependency provider, with reusable CI pipelines, to create an xpro package (a release artifact plus its manifest metadata and generated CMake "use" config) that can be consumed by other "downstream" projects.
 
 #### Provide your project as a dependency for others
 - Quickly and easily make your project consumable by other downstream projects by calling externpro-provided cmake functions to create an xpro package
@@ -140,12 +140,10 @@ git submodule add https://github.com/externpro/externpro .devcontainer
 
 It is possible to add externpro as a submodule at a different path, but the workflows, templates, and documentation assume `.devcontainer` in many places, so using a different path requires updating those references.
 
-## Notes
+## History
 
-### legacy externpro and history
+There is a legacy externpro project at [smanders/externpro](https://github.com/smanders/externpro) that was continued at [externpro/exdlpro](https://github.com/externpro/exdlpro) (to avoid the naming conflict with this repo) that created a bundled tar.xz package of several third-party [projects](https://github.com/externpro/exdlpro/blob/dev/projects/README.md) -- see [releases](https://github.com/externpro/exdlpro/releases) -- this "legacy" externpro/exdlpro has now been phased out and archived as all projects now build standalone and host their packages as github release assets
+  - The first commits of externpro (in a private repo) were made on 2012.02.22: "Initial commit, boost and patch" and "Make things more modular"
+  - The initial commits of a public repo externpro were made on 2015.11.19
 
-there is a legacy externpro project at [smanders/externpro](https://github.com/smanders/externpro) that was continued at [externpro/exdlpro](https://github.com/externpro/exdlpro) (to avoid the naming conflict with this repo) that created a bundled tar.xz package of several third-party [projects](https://github.com/externpro/exdlpro/blob/dev/projects/README.md) -- see [releases](https://github.com/externpro/exdlpro/releases) -- this "legacy" externpro/exdlpro has now been phased out and archived as all projects now build standalone and host their packages as github release assets
-  - the first commits of externpro (in a private repo) were made on 2012.02.22: "Initial commit, boost and patch" and "Make things more modular"
-  - the initial commits of a public repo externpro were made on 2015.11.19
-
-the legacy externpro made heavy use of cmake's [ExternalProject](https://cmake.org/cmake/help/latest/module/ExternalProject.html) module -- see [Building External Projects with CMake 2.8](https://www.kitware.com/main/wp-content/uploads/2016/01/kitware_quarterly1009.pdf) for a good overview of the module when it was first introduced -- and was the origin of the "externpro" name
+The legacy externpro made heavy use of cmake's [ExternalProject](https://cmake.org/cmake/help/latest/module/ExternalProject.html) module -- see [Building External Projects with CMake 2.8](https://www.kitware.com/main/wp-content/uploads/2016/01/kitware_quarterly1009.pdf) for a good overview of the module when it was first introduced -- and was the origin of the "externpro" name

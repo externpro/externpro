@@ -40,11 +40,14 @@ Note: steps 3-5 can also be handled by running the `xpInit` caller workflow (`.g
 
 ## GitHub Actions workflows
 
-- Copy caller workflows into your repo:
+For the recommended first-time workflow setup (including copying `xpinit.yml` and prerequisites before running it), see [xpInit preconditions](../../.github/docs/caller-workflows.md#preconditions-before-running-xpinit).
+
+- If you are doing this manually (or want to understand what the workflows are doing), the core step is simply to copy the caller workflow templates from `.devcontainer/.github/wf-templates/` into your repo’s `.github/workflows/`.
 
 ```bash
 mkdir -p .github/workflows
 cp .devcontainer/.github/wf-templates/xp*.yml .github/workflows/
+git add .github/workflows
 ```
 
 - Consider adjusting `.github/workflows/xpbuild.yml` input `cmake_workflow_preset_suffix` to match your project requirements (e.g. `Release`, `ReleaseNoInstall`).

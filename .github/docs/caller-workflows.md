@@ -40,6 +40,8 @@ git submodule add https://github.com/externpro/externpro .devcontainer
 5. Copy `.devcontainer/.github/wf-templates/xpinit.yml` into the repo’s `.github/workflows/` and commit.
 6. Push `xpro` to GitHub.
 
+For the repo wiring and CMake integration checklist, see [How-to: adopt externpro](../../cmake/docs/how-to-adopt-externpro.md).
+
 ### What `init-externpro` does (high level)
 
 - Validates the externpro submodule path (`.devcontainer`).
