@@ -72,7 +72,7 @@ runs:
     -
       name: Log in to GitHub Container Registry (conditional)
       if: ${{ steps.probe.outputs.needs_auth == 'true' }}
-      uses: docker/login-action@v3
+      uses: docker/login-action@v4
       with:
         registry: ghcr.io
         username: ${{ github.actor }}
