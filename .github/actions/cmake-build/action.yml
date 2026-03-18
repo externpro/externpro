@@ -45,7 +45,7 @@ runs:
         cmake --preset=${{ inputs.cmake_preset }}
     -
       name: Upload CMake logs
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: cmake-logs-${{ inputs.cmake_preset }}-${{ runner.arch }}${{ inputs.name_suffix }}
         path: |
@@ -193,14 +193,14 @@ runs:
     -
       name: Upload package artifact
       if: ${{ steps.presets.outputs.workflow_preset != steps.presets.outputs.no_install_preset && inputs.name_suffix != '-ubuntu' }}
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: ${{ steps.find_package.outputs.filename }}
         path: ${{ runner.os == 'Windows' && steps.convert_paths.outputs.package_windows_path || steps.find_package.outputs.filepath }}
     -
       name: Upload manifest artifact
       if: ${{ steps.presets.outputs.workflow_preset != steps.presets.outputs.no_install_preset && steps.find_manifest.outputs.found == 'true' && inputs.name_suffix != '-ubuntu' }}
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: ${{ steps.find_manifest.outputs.filename }}-${{ inputs.cmake_preset }}-${{ runner.arch }}${{ inputs.name_suffix }}
         path: ${{ runner.os == 'Windows' && steps.convert_paths.outputs.manifest_windows_path || steps.find_manifest.outputs.filepath }}
