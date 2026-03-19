@@ -42,6 +42,8 @@ safe-outputs:
       steps:
         - name: Create draft release
           shell: bash
+          env:
+            GH_TOKEN: ${{ github.token }}
           run: |
             set -euo pipefail
             if [ ! -f "$GH_AW_AGENT_OUTPUT" ]; then

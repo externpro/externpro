@@ -21,7 +21,7 @@
 # For more information: https://github.github.com/gh-aw/introduction/overview/
 #
 #
-# gh-aw-metadata: {"schema_version":"v2","frontmatter_hash":"dcb0ed31b3227183688692eb5c45e8953e70a2473c89070ab7290a350e6dce6d","compiler_version":"v0.62.2","strict":true}
+# gh-aw-metadata: {"schema_version":"v2","frontmatter_hash":"55cd15b147f4eb99a28a67526699e67f754bc5a463d4639ff8c4f509b01d97c1","compiler_version":"v0.62.2","strict":true}
 
 name: "Create Draft Release on Tag"
 "on":
@@ -1027,6 +1027,8 @@ jobs:
             args+=(--notes-file "$notes_file")
           fi
           gh release create "${args[@]}"
+        env:
+          GH_TOKEN: ${{ github.token }}
         shell: bash
 
   pre_activation:
