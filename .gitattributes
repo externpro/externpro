@@ -1,6 +1,7 @@
 CMakeLists.txt text eol=lf
 Dockerfile text eol=lf
 .gitattributes text eol=lf
+.github/workflows/*.lock.yml linguist-generated=true merge=ours
 *.c text eol=lf
 *.cfg text eol=lf
 *.cls text eol=lf
