@@ -24,6 +24,10 @@ In general, you should provide `XPRO_TOKEN` if the automation needs to:
 
 Create a fine-grained personal access token (PAT). Repository-scoped access is recommended (least privilege), but org-wide access can be appropriate when using a shared org secret across many repositories.
 
+If you prefer, you can use this pre-filled template link (you will still need to choose a resource owner and repository access):
+
+https://github.com/settings/personal-access-tokens/new?name=EXTERNPRO_GITHUB_TOKEN&description=Used%20by%20externpro%20GitHub%20Actions%20for%20automation%20when%20pushing%20commits%2Ftags%20or%20creating%2Fupdating%20PRs%20(may%20include%20workflow%20file%20updates).&contents=write&pull_requests=write&workflows=write
+
 1. Go to GitHub settings:
 
    - `Settings` -> `Developer settings` -> `Personal access tokens` -> `Fine-grained tokens`
