@@ -44,6 +44,7 @@ safe-outputs:
           shell: bash
           env:
             GH_TOKEN: ${{ github.token }}
+            GH_REPO: ${{ github.repository }}
           run: |
             set -euo pipefail
             if [ ! -f "$GH_AW_AGENT_OUTPUT" ]; then
@@ -79,7 +80,7 @@ safe-outputs:
             if [ "$NOTES" = "null" ]; then
               NOTES=""
             fi
-            if gh release view "$TAG" >/dev/null 2>&1; then
+            if gh release view "$TAG" --repo "$GH_REPO" >/dev/null 2>&1; then
               echo "Release already exists for tag: $TAG" >&2
               exit 1
             fi
@@ -108,7 +109,7 @@ safe-outputs:
               fi
               args+=(--notes-file "$notes_file")
             fi
-            gh release create "${args[@]}"
+            gh release create "${args[@]}" --repo "$GH_REPO"
 ---
 # Create draft release on tag creation
 When a new git tag is created in this repository:

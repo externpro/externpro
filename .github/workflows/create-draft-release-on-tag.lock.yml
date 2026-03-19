@@ -21,7 +21,7 @@
 # For more information: https://github.github.com/gh-aw/introduction/overview/
 #
 #
-# gh-aw-metadata: {"schema_version":"v2","frontmatter_hash":"55cd15b147f4eb99a28a67526699e67f754bc5a463d4639ff8c4f509b01d97c1","compiler_version":"v0.62.2","strict":true}
+# gh-aw-metadata: {"schema_version":"v2","frontmatter_hash":"f152338f8cdda4507270ac148a1e9fec28ee99b5eb3351cebf91a26c6db0b222","compiler_version":"v0.62.2","strict":true}
 
 name: "Create Draft Release on Tag"
 "on":
@@ -997,7 +997,7 @@ jobs:
           if [ "$NOTES" = "null" ]; then
             NOTES=""
           fi
-          if gh release view "$TAG" >/dev/null 2>&1; then
+          if gh release view "$TAG" --repo "$GH_REPO" >/dev/null 2>&1; then
             echo "Release already exists for tag: $TAG" >&2
             exit 1
           fi
@@ -1026,8 +1026,9 @@ jobs:
             fi
             args+=(--notes-file "$notes_file")
           fi
-          gh release create "${args[@]}"
+          gh release create "${args[@]}" --repo "$GH_REPO"
         env:
+          GH_REPO: ${{ github.repository }}
           GH_TOKEN: ${{ github.token }}
         shell: bash
 
