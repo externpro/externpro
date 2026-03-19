@@ -4,7 +4,6 @@ on:
   create: null
 permissions:
   contents: read
-  metadata: read
 engine: copilot
 safe-outputs:
   jobs:
