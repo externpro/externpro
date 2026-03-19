@@ -2,6 +2,14 @@
 
 A CMake build platform and dependency provider with reusable CI (continuous integration) pipelines.
 
+**Contents**
+- [Why externpro?](#why-externpro)
+- [Who is externpro for?](#who-is-externpro-for)
+- [What externpro provides](#what-externpro-provides)
+- [Documentation](#documentation)
+- [Getting Started](#getting-started)
+- [History](#history)
+
 ## Why externpro?
 
 externpro exists to make builds reproducible and reusable across projects: same toolchain, same dependencies, same CI - across developers, machines, and projects - so teams can move faster with fewer "works on my machine" surprises.
@@ -126,6 +134,11 @@ The goal is simple: make "develop -> build -> test -> release" fast and consiste
 
 #### GitHub-hosted Runners
 The CI pipelines are designed to run on GitHub-hosted runners, providing a consistent and reliable build environment. https://docs.github.com/en/actions/concepts/runners/github-hosted-runners and https://github.com/actions/runner-images
+
+## Documentation
+- GitHub Actions docs index: [.github/docs/README.md](.github/docs/README.md)
+- CMake dependency/projects table (generated): [cmake/README.md](./cmake/README.md)
+- CMake toolkit docs index: [cmake/docs/README.md](./cmake/docs/README.md)
 
 ## Getting Started
 
