@@ -218,6 +218,12 @@ If this workflow is triggered for a branch create event (not a tag), do nothing 
 When generating release notes (`notes`) as the agent:
 - Determine the created tag name from the create event.
 - Use the bash tool to compute changes locally with `git` and generate release notes from that data.
+- Before writing `notes`, you MUST run `git log` and `git diff --name-status` for the computed range so the notes are grounded in concrete repository changes.
+- After running those commands, create a short internal checklist for yourself (do not include it in `notes`) with:
+  - The `TAG` and computed `PREV_TAG`
+  - The top commit subjects in the range (at least 5 if available)
+  - The list of changed files / statuses (at least 10 if available)
+- Only mention changes in `notes` that are supported by the `git log` subjects and/or `git diff --name-status` file list. If you are not sure a change happened, omit it.
 - Fetch tags locally and compute the previous tag using the repo's tag scheme:
   - Tags are `YY.REV` for releases and `YY.REV.PATCH` for prereleases.
   - `YY` is the year, `REV` is the revision, `PATCH` is the prerelease patch.
