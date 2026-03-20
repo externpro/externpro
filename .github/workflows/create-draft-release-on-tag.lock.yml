@@ -21,7 +21,7 @@
 # For more information: https://github.github.com/gh-aw/introduction/overview/
 #
 #
-# gh-aw-metadata: {"schema_version":"v2","frontmatter_hash":"5aaa175470d5b731896e9b09f372ab318310be6f5366b658f424edc0fa65b48d","compiler_version":"v0.62.2","strict":true}
+# gh-aw-metadata: {"schema_version":"v2","frontmatter_hash":"84e8b4eaf3374b75706ab8e507fec74047af1e8e7ea7d295bb10ec1e55e67917","compiler_version":"v0.62.2","strict":true}
 
 name: "Create Draft Release on Tag"
 "on":
@@ -984,12 +984,19 @@ jobs:
             echo "Missing GH_AW_AGENT_OUTPUT" >&2
             exit 1
           fi
-          TAG=$(jq -r '.items[] | select(.type == "create_draft_release") | .tag' "$GH_AW_AGENT_OUTPUT" | head -n1)
-          TITLE=$(jq -r '.items[] | select(.type == "create_draft_release") | .title' "$GH_AW_AGENT_OUTPUT" | head -n1)
-          NOTES=$(jq -r '.items[] | select(.type == "create_draft_release") | .notes' "$GH_AW_AGENT_OUTPUT" | head -n1)
-          PRERELEASE=$(jq -r '.items[] | select(.type == "create_draft_release") | .prerelease' "$GH_AW_AGENT_OUTPUT" | head -n1)
-          DRAFT=$(jq -r '.items[] | select(.type == "create_draft_release") | .draft' "$GH_AW_AGENT_OUTPUT" | head -n1)
-          GEN=$(jq -r '.items[] | select(.type == "create_draft_release") | .generate_notes' "$GH_AW_AGENT_OUTPUT" | head -n1)
+
+          item_json=$(jq -c '.items[] | select(.type == "create_draft_release")' "$GH_AW_AGENT_OUTPUT" | head -n1)
+          if [ -z "$item_json" ]; then
+            echo "Missing required agent output item: type=create_draft_release" >&2
+            exit 1
+          fi
+
+          TAG=$(printf '%s' "$item_json" | jq -r '.tag')
+          TITLE=$(printf '%s' "$item_json" | jq -r '.title')
+          NOTES=$(printf '%s' "$item_json" | jq -r '.notes')
+          PRERELEASE=$(printf '%s' "$item_json" | jq -r '.prerelease')
+          DRAFT=$(printf '%s' "$item_json" | jq -r '.draft')
+          GEN=$(printf '%s' "$item_json" | jq -r '.generate_notes')
           if [ -z "$TAG" ] || [ "$TAG" = "null" ]; then
             echo "Missing required output field: tag" >&2
             exit 1

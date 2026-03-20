@@ -54,12 +54,19 @@ safe-outputs:
               echo "Missing GH_AW_AGENT_OUTPUT" >&2
               exit 1
             fi
-            TAG=$(jq -r '.items[] | select(.type == "create_draft_release") | .tag' "$GH_AW_AGENT_OUTPUT" | head -n1)
-            TITLE=$(jq -r '.items[] | select(.type == "create_draft_release") | .title' "$GH_AW_AGENT_OUTPUT" | head -n1)
-            NOTES=$(jq -r '.items[] | select(.type == "create_draft_release") | .notes' "$GH_AW_AGENT_OUTPUT" | head -n1)
-            PRERELEASE=$(jq -r '.items[] | select(.type == "create_draft_release") | .prerelease' "$GH_AW_AGENT_OUTPUT" | head -n1)
-            DRAFT=$(jq -r '.items[] | select(.type == "create_draft_release") | .draft' "$GH_AW_AGENT_OUTPUT" | head -n1)
-            GEN=$(jq -r '.items[] | select(.type == "create_draft_release") | .generate_notes' "$GH_AW_AGENT_OUTPUT" | head -n1)
+
+            item_json=$(jq -c '.items[] | select(.type == "create_draft_release")' "$GH_AW_AGENT_OUTPUT" | head -n1)
+            if [ -z "$item_json" ]; then
+              echo "Missing required agent output item: type=create_draft_release" >&2
+              exit 1
+            fi
+
+            TAG=$(printf '%s' "$item_json" | jq -r '.tag')
+            TITLE=$(printf '%s' "$item_json" | jq -r '.title')
+            NOTES=$(printf '%s' "$item_json" | jq -r '.notes')
+            PRERELEASE=$(printf '%s' "$item_json" | jq -r '.prerelease')
+            DRAFT=$(printf '%s' "$item_json" | jq -r '.draft')
+            GEN=$(printf '%s' "$item_json" | jq -r '.generate_notes')
             if [ -z "$TAG" ] || [ "$TAG" = "null" ]; then
               echo "Missing required output field: tag" >&2
               exit 1
