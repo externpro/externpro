@@ -219,10 +219,22 @@ When generating release notes (`notes`) as the agent:
 - Determine the created tag name from the create event.
 - Use the bash tool to compute changes locally with `git` and generate release notes from that data.
 - Before writing `notes`, you MUST run `git log` and `git diff --name-status` for the computed range so the notes are grounded in concrete repository changes.
-- After running those commands, create a short internal checklist for yourself (do not include it in `notes`) with:
-  - The `TAG` and computed `PREV_TAG`
-  - The top commit subjects in the range (at least 5 if available)
-  - The list of changed files / statuses (at least 10 if available)
+- After running those commands, do the following (do not include these notes in `notes`):
+  - Create a short evidence summary for yourself:
+    - `TAG` and computed `PREV_TAG`
+    - Top commit subjects in the range (at least 5 if available)
+    - Changed files / statuses from the diff (at least 10 if available)
+  - Cluster the evidence into areas (use whichever apply):
+    - Agentic release workflow changes (`.github/workflows/create-draft-release-on-tag.*`)
+    - CI/workflow templates (`.github/wf-templates/*`, `.github/workflows/*`)
+    - GitHub Actions (`.github/actions/*`)
+    - Docs (`.github/docs/*`, `README.md`)
+    - CMake build/tooling (`cmake/*`)
+    - Scripts (`scripts/*`)
+  - Draft bullets from the evidence and prefer including concrete anchors:
+    - file paths from `git diff --name-status`
+    - commit subjects from `git log`
+  - Avoid generic claims like “improves stability” or “refactors” unless you can support it with a cited commit subject and/or file path.
 - Only mention changes in `notes` that are supported by the `git log` subjects and/or `git diff --name-status` file list. If you are not sure a change happened, omit it.
 - Fetch tags locally and compute the previous tag using the repo's tag scheme:
   - Tags are `YY.REV` for releases and `YY.REV.PATCH` for prereleases.
