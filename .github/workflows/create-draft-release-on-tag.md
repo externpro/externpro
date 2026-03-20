@@ -5,6 +5,9 @@ on:
 permissions:
   contents: read
 engine: copilot
+tools:
+  bash:
+    - git:*
 safe-outputs:
   jobs:
     create-draft-release:
@@ -80,9 +83,82 @@ safe-outputs:
             if [ "$NOTES" = "null" ]; then
               NOTES=""
             fi
-            if gh release view "$TAG" --repo "$GH_REPO" >/dev/null 2>&1; then
-              echo "Release already exists for tag: $TAG" >&2
-              exit 1
+
+            tags_json=$(gh api --paginate "repos/${GITHUB_REPOSITORY}/tags?per_page=100" 2>/dev/null || true)
+            PREV_TAG=$(printf '%s' "$tags_json" | jq -r --arg current "$TAG" '
+              [.[].name
+                | select(test("^v?[0-9]+\\.[0-9]+(\\.[0-9]+)?$"))
+                | select(. != $current)
+              ]
+              | map({
+                  tag: .,
+                  norm: (sub("^v"; "")),
+                  parts: ((sub("^v"; "") | split(".")) | map(tonumber))
+                })
+              | map(. + {
+                  y: .parts[0],
+                  r: .parts[1],
+                  p: (if (.parts | length) > 2 then .parts[2] else 0 end),
+                  v: (.parts[0]*1000000 + .parts[1]*1000 + (if (.parts | length) > 2 then .parts[2] else 0 end))
+                })
+              | ( ($current | sub("^v"; "") | split(".") | map(tonumber)) as $cparts
+                  | ($cparts[0]*1000000 + $cparts[1]*1000 + (if ($cparts|length) > 2 then $cparts[2] else 0 end)) as $cv
+                  | map(select(.v < $cv))
+                  | sort_by(.v)
+                  | last
+                  | .tag
+                )
+            ' 2>/dev/null || true)
+            if [ -z "$PREV_TAG" ] || [ "$PREV_TAG" = "null" ]; then
+              PREV_TAG=""
+            fi
+
+            compare_urls=()
+            if [ -n "$PREV_TAG" ]; then
+              compare_urls+=("https://github.com/${GITHUB_REPOSITORY}/compare/${PREV_TAG}...${TAG}")
+
+              if [ "$PRERELEASE" != "true" ]; then
+                prev_is_prerelease=false
+                if [[ "$PREV_TAG" == v* ]]; then
+                  prev_t="${PREV_TAG#v}"
+                else
+                  prev_t="$PREV_TAG"
+                fi
+                if [[ "$prev_t" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+                  prev_is_prerelease=true
+                fi
+
+                if [ "$prev_is_prerelease" = true ]; then
+                  prev_release_tag="${PREV_TAG%.*}"
+                  compare_urls+=("https://github.com/${GITHUB_REPOSITORY}/compare/${prev_release_tag}...${TAG}")
+                fi
+              fi
+            fi
+
+            COMPARE_JSON=""
+            if [ -n "$PREV_TAG" ]; then
+              COMPARE_JSON=$(gh api "repos/${GITHUB_REPOSITORY}/compare/${PREV_TAG}...${TAG}" 2>/dev/null || true)
+            fi
+
+            if [ -z "$NOTES" ] && [ -n "$COMPARE_JSON" ]; then
+              commits_md=$(printf '%s' "$COMPARE_JSON" | jq -r '.commits[]? | "- " + (.commit.message | split("\n")[0]) + " (" + (.sha[0:7]) + ")"' | head -n 100)
+              files_md=$(printf '%s' "$COMPARE_JSON" | jq -r '.files[]? | "- " + .filename + " (" + .status + ")"' | head -n 100)
+              printf -v NOTES '## Summary\n\n- Changes since `%s`.\n\n## Changes\n\n%s\n\n## Files changed\n\n%s\n' "$PREV_TAG" "$commits_md" "$files_md"
+            fi
+
+            if [ -n "$NOTES" ] && [ "${#compare_urls[@]}" -gt 0 ]; then
+              NOTES+=$'\n\n## Compare\n\n'
+              for u in "${compare_urls[@]}"; do
+                NOTES+="- ${u}"$'\n'
+              done
+            fi
+
+            release_exists=false
+            release_is_draft=false
+            release_info_json=$(gh release view "$TAG" --repo "$GH_REPO" --json isDraft 2>/dev/null || true)
+            if [ -n "$release_info_json" ]; then
+              release_exists=true
+              release_is_draft=$(printf '%s' "$release_info_json" | jq -r '.isDraft')
             fi
             args=("$TAG" --title "$TITLE")
             if [ "$DRAFT" = "true" ]; then
@@ -95,9 +171,16 @@ safe-outputs:
             if [ "$GEN" = "true" ]; then
               GEN_BODY=$(gh api -X POST "repos/${GITHUB_REPOSITORY}/releases/generate-notes" -f tag_name="$TAG" --jq .body)
             fi
+
+            if [ -n "$GEN_BODY" ]; then
+              trimmed=$(printf '%s' "$GEN_BODY" | sed '/^[[:space:]]*$/d')
+              if [ "$(printf '%s\n' "$trimmed" | wc -l | tr -d ' ')" = "1" ] && printf '%s' "$trimmed" | grep -Eq '^\*\*Full Changelog\*\*:'; then
+                GEN_BODY=""
+              fi
+            fi
             if [ -n "$NOTES" ] || [ -n "$GEN_BODY" ]; then
               notes_file="${RUNNER_TEMP:-/tmp}/gh-aw-release-notes.md"
-              : >"$notes_file"
+              printf '' >"$notes_file"
               if [ -n "$NOTES" ]; then
                 printf "%s\n" "$NOTES" >>"$notes_file"
               fi
@@ -109,7 +192,27 @@ safe-outputs:
               fi
               args+=(--notes-file "$notes_file")
             fi
-            gh release create "${args[@]}" --repo "$GH_REPO"
+
+            if [ "$release_exists" = true ]; then
+              if [ "$release_is_draft" != "true" ]; then
+                echo "Release already exists and is not a draft for tag: $TAG" >&2
+                exit 1
+              fi
+
+              edit_args=(--title "$TITLE")
+              if [ "$DRAFT" = "true" ]; then
+                edit_args+=(--draft)
+              fi
+              if [ "$PRERELEASE" = "true" ]; then
+                edit_args+=(--prerelease)
+              fi
+              if [ -n "$NOTES" ] || [ -n "$GEN_BODY" ]; then
+                edit_args+=(--notes-file "$notes_file")
+              fi
+              gh release edit "$TAG" "${edit_args[@]}" --repo "$GH_REPO"
+            else
+              gh release create "${args[@]}" --repo "$GH_REPO"
+            fi
 ---
 # Create draft release on tag creation
 When a new git tag is created in this repository:
@@ -136,6 +239,29 @@ Release notes style:
 - Prefer concise bullets under headings.
 
 If this workflow is triggered for a branch create event (not a tag), do nothing and finish with a noop safe output.
+
+When generating release notes (`notes`) as the agent:
+- Determine the created tag name from the create event.
+- Use the bash tool to compute changes locally with `git` and generate release notes from that data.
+- Fetch tags locally and compute the previous tag using the repo's tag scheme:
+  - Tags are `YY.REV` for releases and `YY.REV.PATCH` for prereleases.
+  - `YY` is the year, `REV` is the revision, `PATCH` is the prerelease patch.
+  - The "previous tag" is the greatest semver-ish tag less than the current tag.
+  - Examples:
+    - previous of `25.07.16` is `25.07.15`
+    - previous of `25.07.1` is `25.07`
+    - previous of `26.01` is the latest `25.*` tag
+- Recommended commands:
+  - `git fetch --tags --force`
+  - `git tag --list | grep -E '^v?[0-9]+\.[0-9]+(\.[0-9]+)?$'` (list candidate tags)
+  - Determine `PREV_TAG` as the greatest tag less than `TAG` in `YY.REV[.PATCH]` numeric order.
+  - `git log --no-decorate --pretty=format:'%h %s' "${PREV_TAG}..${TAG}"`
+  - `git diff --name-status "${PREV_TAG}..${TAG}"`
+- Use `git log` and `git diff` between `PREV_TAG..TAG` to gather the concrete changes and write curated release notes in the style below.
+- The `notes` field must be non-empty.
+- Include compare URL(s) in a `## Compare` section:
+  - Always include `https://github.com/externpro/externpro/compare/<PREV_TAG>...<TAG>` when `PREV_TAG` is known.
+  - If `TAG` is a release (`YY.REV`) and `PREV_TAG` is a prerelease (`YY.REV.PATCH`), include a second compare URL: `https://github.com/externpro/externpro/compare/<PREV_RELEASE_TAG>...<TAG>` where `<PREV_RELEASE_TAG>` is `YY.REV`.
 
 Use the safe output job `create-draft-release` exactly once.
 
