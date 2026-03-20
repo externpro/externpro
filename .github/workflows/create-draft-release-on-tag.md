@@ -199,6 +199,13 @@ Minimum content requirements for `notes`:
 - Do not output headings-only notes. If there are no meaningful changes, explicitly say so in bullets.
 - Always include a `## Compare` section containing the compare URL(s) described below.
 
+Before you emit the safe output:
+- Verify `notes` contains at least one bullet under `## Summary`.
+- Verify there is at least one additional section besides `## Summary` and `## Compare`.
+- Verify there are at least 3 bullets total across the additional section(s).
+- Verify `## Compare` exists and contains at least one URL matching `https://github.com/externpro/externpro/compare/`.
+- If any of these checks fail, do not emit the safe output. Instead, re-run `git` commands and rewrite `notes` until the checks pass.
+
 If this workflow is triggered for a branch create event (not a tag), do nothing and finish with a noop safe output.
 
 When generating release notes (`notes`) as the agent:
@@ -234,3 +241,16 @@ Output JSON schema for the safe output job:
 - draft: true
 - generate_notes: true
 - prerelease: boolean, derived from tag format (major.minor => false, major.minor.patch => true)
+
+Example safe output JSON (shape and minimum content; values must match the actual tag and computed previous tag):
+```json
+{
+  "type": "create_draft_release",
+  "tag": "25.07.16",
+  "title": "25.07.16",
+  "prerelease": true,
+  "draft": true,
+  "generate_notes": true,
+  "notes": "## Summary\n- Add agent output validation excerpt to improve debugging when notes are rejected\n- Improve notes validation to count common bullet markers and require substantive content\n\n## Changes\n- Update release note validation to treat '*', '+', and '-' bullets consistently\n- Print a truncated excerpt of agent-provided notes when validation fails\n- Recompile the agentic workflow lockfile\n\n## Compare\n- https://github.com/externpro/externpro/compare/25.07.15...25.07.16"
+}
+```
