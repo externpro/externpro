@@ -21,7 +21,7 @@
 # For more information: https://github.github.com/gh-aw/introduction/overview/
 #
 #
-# gh-aw-metadata: {"schema_version":"v2","frontmatter_hash":"6f1a5c2761fef340d8be6f1e0756558d6dd9722466aac654ba763dda6ac07491","compiler_version":"v0.62.2","strict":true}
+# gh-aw-metadata: {"schema_version":"v2","frontmatter_hash":"0479fbf2fd0ef9c61f2c7a4027685a9305840a631b5ea2f3aec11ec5d8fcff7b","compiler_version":"v0.62.2","strict":true}
 
 name: "Create Draft Release on Tag"
 "on":
@@ -1014,73 +1014,22 @@ jobs:
             NOTES=""
           fi
 
-          tags_json=$(gh api --paginate "repos/${GITHUB_REPOSITORY}/tags?per_page=100" 2>/dev/null || true)
-          PREV_TAG=$(printf '%s' "$tags_json" | jq -r --arg current "$TAG" '
-            [.[].name
-              | select(test("^v?[0-9]+\\.[0-9]+(\\.[0-9]+)?$"))
-              | select(. != $current)
-            ]
-            | map({
-                tag: .,
-                norm: (sub("^v"; "")),
-                parts: ((sub("^v"; "") | split(".")) | map(tonumber))
-              })
-            | map(. + {
-                y: .parts[0],
-                r: .parts[1],
-                p: (if (.parts | length) > 2 then .parts[2] else 0 end),
-                v: (.parts[0]*1000000 + .parts[1]*1000 + (if (.parts | length) > 2 then .parts[2] else 0 end))
-              })
-            | ( ($current | sub("^v"; "") | split(".") | map(tonumber)) as $cparts
-                | ($cparts[0]*1000000 + $cparts[1]*1000 + (if ($cparts|length) > 2 then $cparts[2] else 0 end)) as $cv
-                | map(select(.v < $cv))
-                | sort_by(.v)
-                | last
-                | .tag
-              )
-          ' 2>/dev/null || true)
-          if [ -z "$PREV_TAG" ] || [ "$PREV_TAG" = "null" ]; then
-            PREV_TAG=""
+          if [ -z "$NOTES" ]; then
+            echo "Agent did not provide release notes (notes is empty)." >&2
+            exit 1
           fi
 
-          compare_urls=()
-          if [ -n "$PREV_TAG" ]; then
-            compare_urls+=("https://github.com/${GITHUB_REPOSITORY}/compare/${PREV_TAG}...${TAG}")
-
-            if [ "$PRERELEASE" != "true" ]; then
-              prev_is_prerelease=false
-              if [[ "$PREV_TAG" == v* ]]; then
-                prev_t="${PREV_TAG#v}"
-              else
-                prev_t="$PREV_TAG"
-              fi
-              if [[ "$prev_t" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-                prev_is_prerelease=true
-              fi
-
-              if [ "$prev_is_prerelease" = true ]; then
-                prev_release_tag="${PREV_TAG%.*}"
-                compare_urls+=("https://github.com/${GITHUB_REPOSITORY}/compare/${prev_release_tag}...${TAG}")
-              fi
-            fi
+          notes_trim=$(printf '%s' "$NOTES" | sed '/^[[:space:]]*$/d')
+          notes_non_heading=$(printf '%s\n' "$notes_trim" | grep -vE '^[[:space:]]*#' || true)
+          notes_non_url_bullets=$(printf '%s\n' "$notes_non_heading" | grep -E '^[[:space:]]*-' | grep -vE '^[[:space:]]*- https?://' || true)
+          if [ -z "$(printf '%s' "$notes_non_url_bullets" | tr -d '[:space:]')" ]; then
+            echo "Agent-provided release notes are too low-content (headings and/or URL-only bullets)." >&2
+            exit 1
           fi
 
-          COMPARE_JSON=""
-          if [ -n "$PREV_TAG" ]; then
-            COMPARE_JSON=$(gh api "repos/${GITHUB_REPOSITORY}/compare/${PREV_TAG}...${TAG}" 2>/dev/null || true)
-          fi
-
-          if [ -z "$NOTES" ] && [ -n "$COMPARE_JSON" ]; then
-            commits_md=$(printf '%s' "$COMPARE_JSON" | jq -r '.commits[]? | "- " + (.commit.message | split("\n")[0]) + " (" + (.sha[0:7]) + ")"' | head -n 100)
-            files_md=$(printf '%s' "$COMPARE_JSON" | jq -r '.files[]? | "- " + .filename + " (" + .status + ")"' | head -n 100)
-            printf -v NOTES '## Summary\n\n- Changes since `%s`.\n\n## Changes\n\n%s\n\n## Files changed\n\n%s\n' "$PREV_TAG" "$commits_md" "$files_md"
-          fi
-
-          if [ -n "$NOTES" ] && [ "${#compare_urls[@]}" -gt 0 ]; then
-            NOTES+=$'\n\n## Compare\n\n'
-            for u in "${compare_urls[@]}"; do
-              NOTES+="- ${u}"$'\n'
-            done
+          if ! printf '%s\n' "$NOTES" | grep -Eq 'https://github\.com/[^/]+/[^/]+/compare/'; then
+            echo "Agent-provided release notes are missing required compare URL(s)." >&2
+            exit 1
           fi
 
           release_exists=false
