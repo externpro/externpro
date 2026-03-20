@@ -21,7 +21,7 @@
 # For more information: https://github.github.com/gh-aw/introduction/overview/
 #
 #
-# gh-aw-metadata: {"schema_version":"v2","frontmatter_hash":"0479fbf2fd0ef9c61f2c7a4027685a9305840a631b5ea2f3aec11ec5d8fcff7b","compiler_version":"v0.62.2","strict":true}
+# gh-aw-metadata: {"schema_version":"v2","frontmatter_hash":"5aaa175470d5b731896e9b09f372ab318310be6f5366b658f424edc0fa65b48d","compiler_version":"v0.62.2","strict":true}
 
 name: "Create Draft Release on Tag"
 "on":
@@ -1021,14 +1021,20 @@ jobs:
 
           notes_trim=$(printf '%s' "$NOTES" | sed '/^[[:space:]]*$/d')
           notes_non_heading=$(printf '%s\n' "$notes_trim" | grep -vE '^[[:space:]]*#' || true)
-          notes_non_url_bullets=$(printf '%s\n' "$notes_non_heading" | grep -E '^[[:space:]]*-' | grep -vE '^[[:space:]]*- https?://' || true)
+          notes_non_url_bullets=$(printf '%s\n' "$notes_non_heading" | grep -E '^[[:space:]]*[-*+]' | grep -vE '^[[:space:]]*[-*+] https?://' || true)
           if [ -z "$(printf '%s' "$notes_non_url_bullets" | tr -d '[:space:]')" ]; then
             echo "Agent-provided release notes are too low-content (headings and/or URL-only bullets)." >&2
+            echo "--- Agent notes excerpt (first 60 lines, truncated) ---" >&2
+            printf '%s\n' "$notes_trim" | head -n 60 >&2
+            echo "--- end excerpt ---" >&2
             exit 1
           fi
 
           if ! printf '%s\n' "$NOTES" | grep -Eq 'https://github\.com/[^/]+/[^/]+/compare/'; then
             echo "Agent-provided release notes are missing required compare URL(s)." >&2
+            echo "--- Agent notes excerpt (first 60 lines, truncated) ---" >&2
+            printf '%s\n' "$notes_trim" | head -n 60 >&2
+            echo "--- end excerpt ---" >&2
             exit 1
           fi
 

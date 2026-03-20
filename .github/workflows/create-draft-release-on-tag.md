@@ -91,14 +91,20 @@ safe-outputs:
 
             notes_trim=$(printf '%s' "$NOTES" | sed '/^[[:space:]]*$/d')
             notes_non_heading=$(printf '%s\n' "$notes_trim" | grep -vE '^[[:space:]]*#' || true)
-            notes_non_url_bullets=$(printf '%s\n' "$notes_non_heading" | grep -E '^[[:space:]]*-' | grep -vE '^[[:space:]]*- https?://' || true)
+            notes_non_url_bullets=$(printf '%s\n' "$notes_non_heading" | grep -E '^[[:space:]]*[-*+]' | grep -vE '^[[:space:]]*[-*+] https?://' || true)
             if [ -z "$(printf '%s' "$notes_non_url_bullets" | tr -d '[:space:]')" ]; then
               echo "Agent-provided release notes are too low-content (headings and/or URL-only bullets)." >&2
+              echo "--- Agent notes excerpt (first 60 lines, truncated) ---" >&2
+              printf '%s\n' "$notes_trim" | head -n 60 >&2
+              echo "--- end excerpt ---" >&2
               exit 1
             fi
 
             if ! printf '%s\n' "$NOTES" | grep -Eq 'https://github\.com/[^/]+/[^/]+/compare/'; then
               echo "Agent-provided release notes are missing required compare URL(s)." >&2
+              echo "--- Agent notes excerpt (first 60 lines, truncated) ---" >&2
+              printf '%s\n' "$notes_trim" | head -n 60 >&2
+              echo "--- end excerpt ---" >&2
               exit 1
             fi
 
