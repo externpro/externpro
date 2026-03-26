@@ -1464,20 +1464,22 @@ endfunction()
 function(xpExternPackage)
   # NOTE: if CMAKE_INSTALL_CMAKEDIR is not defined, it will be set here
   #   and available in PARENT_SCOPE
-  set(opts FIND_THREADS)
+  set(opts CREATE_ALIASES FIND_THREADS)
+  # CREATE_ALIASES is an optional parameter to indicate ALIAS targets should be
+  #   created with hard-coded 'xpro' namespace for EXE and LIBRARIES
   # FIND_THREADS is an optional parameter to indicate the use script
   #   should find the Threads::Threads target (from Threads package)
   set(oneValueArgs ALIAS_NAMESPACE COMPONENT EXE EXE_PATH NAMESPACE REPO_NAME TARGETS_FILE)
-  # ALIAS_NAMESPACE is to specify an alternative (often well-known) CMake namespace
-  #   add_[executable|library] ALIAS[es] will be included in the use script for
-  #   EXE and LIBRARIES
+  # ALIAS_NAMESPACE is deprecated; now hard-coded internally to 'xpro' as an alternative
+  #   CMake namespace. add_[executable|library] ALIAS[es] will be included in the use script
+  #   for EXE and LIBRARIES when CREATE_ALIASES option is specified
   # COMPONENT is for CPack/install component name (optional, used if project has COMPONENTs)
   # EXE is for a CMake executable target name; included in the use script
   # EXE_PATH is for executable path (relative to package root, alternative to EXE)
   #   useful when the executable is not a CMake target, e.g. a binary built
   #   elsewhere; included in the use script
-  # NAMESPACE is for CMake namespace and will be prependended to CMake target names
-  #   EXE and LIBRARIES in the use script
+  # NAMESPACE is deprecated; CMAKE_PROJECT_NAME (or REPO_NAME if specified) is now
+  #   prepended to CMake target names EXE and LIBRARIES in the use script
   # REPO_NAME is for repository name; if repository name doesn't match
   #   CMAKE_PROJECT_NAME (case sensitive), use REPO_NAME parameter to specify it
   # TARGETS_FILE is for targets file name (see EXPORT parameter of install() command)
@@ -1510,6 +1512,12 @@ function(xpExternPackage)
   #   may have private dependencies that don't need to be found by projects
   #   that use the project that has private dependencies)
   cmake_parse_arguments(P "${opts}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+  if(DEFINED P_ALIAS_NAMESPACE)
+    message(AUTHOR_WARNING "xpExternPackage: ALIAS_NAMESPACE parameter is deprecated and ignored. Use CREATE_ALIASES option to create 'xpro' aliases instead.")
+  endif()
+  if(DEFINED P_NAMESPACE)
+    message(AUTHOR_WARNING "xpExternPackage: NAMESPACE parameter is deprecated and ignored. Using package name as namespace instead.")
+  endif()
   if(DEFINED P_COMPONENT)
     set(XP_COMPONENT COMPONENT ${P_COMPONENT})
     set(CPACK_ARCHIVE_COMPONENT_INSTALL ON)
@@ -1519,6 +1527,8 @@ function(xpExternPackage)
   if(NOT DEFINED P_REPO_NAME)
     set(P_REPO_NAME ${CMAKE_PROJECT_NAME})
   endif()
+  set(P_NAMESPACE ${P_REPO_NAME})
+  set(P_ALIAS_NAMESPACE xpro) # hard-coded alias namespace
   xpGetVersionString(VER)
   ###############
   # use script
@@ -1539,7 +1549,7 @@ function(xpExternPackage)
     set(TARGETS_FILE "include(\${CMAKE_CURRENT_LIST_DIR}/${P_TARGETS_FILE}.cmake)\n")
   endif()
   if(DEFINED P_LIBRARIES)
-    if(DEFINED P_ALIAS_NAMESPACE AND DEFINED P_NAMESPACE)
+    if(P_CREATE_ALIASES)
       foreach(lib ${P_LIBRARIES})
         string(JOIN "\n" alias
           "if(NOT TARGET ${P_ALIAS_NAMESPACE}::${lib})"
@@ -1550,9 +1560,7 @@ function(xpExternPackage)
         set(ALIASES ${ALIASES}${alias})
       endforeach()
     endif()
-    if(DEFINED P_NAMESPACE)
-      list(TRANSFORM P_LIBRARIES PREPEND "${P_NAMESPACE}::")
-    endif()
+    list(TRANSFORM P_LIBRARIES PREPEND "${P_NAMESPACE}::")
     list(JOIN P_LIBRARIES " " libs) # list to string with spaces
     string(JOIN "\n" LIBS
       "set(${ucRepoName}_LIBRARIES ${libs})"
@@ -1564,7 +1572,7 @@ function(xpExternPackage)
     if(DEFINED P_EXE_PATH)
       message(FATAL_ERROR "xpExternPackage: can only define EXE or EXE_PATH, not both")
     endif()
-    if(DEFINED P_ALIAS_NAMESPACE AND DEFINED P_NAMESPACE)
+    if(P_CREATE_ALIASES)
       string(JOIN "\n" alias
         "if(NOT TARGET ${P_ALIAS_NAMESPACE}::${P_EXE})"
         "  add_executable(${P_ALIAS_NAMESPACE}::${P_EXE} ALIAS ${P_NAMESPACE}::${P_EXE})"
@@ -1573,9 +1581,7 @@ function(xpExternPackage)
         )
       set(ALIASES ${ALIASES}${alias})
     endif()
-    if(DEFINED P_NAMESPACE)
-      string(PREPEND P_EXE "${P_NAMESPACE}::")
-    endif()
+    string(PREPEND P_EXE "${P_NAMESPACE}::")
     string(JOIN "\n" EXE
       "set(${ucRepoName}_EXE ${P_EXE})"
       "list(APPEND reqVars ${ucRepoName}_EXE)"
