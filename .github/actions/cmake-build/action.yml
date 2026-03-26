@@ -36,11 +36,6 @@ runs:
       name: CMake Configure
       shell: bash
       run: |
-        shopt -s nullglob
-        files=(cmake-${{ inputs.cmake_version }}-*)
-        if ((${#files[@]})); then
-          rm -f "${files[@]}"
-        fi
         cmake --version
         cmake --preset=${{ inputs.cmake_preset }}
     -
