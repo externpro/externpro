@@ -49,8 +49,15 @@ runs:
             printf '%s' "${base_tag}"
             return 0
           fi
-          prefix="${version%[0-9]*}"
-          digits="${version##*[^0-9]}"
+          # Use regex to properly separate prefix from trailing digits
+          if [[ "${version}" =~ ^(.*[^0-9])([0-9]+)$ ]]; then
+            prefix="${BASH_REMATCH[1]}"
+            digits="${BASH_REMATCH[2]}"
+          else
+            # Fallback if regex doesn't match (shouldn't happen with the check above)
+            prefix="${version%[0-9]*}"
+            digits="${version##*[^0-9]}"
+          fi
           width=${#digits}
           next_num=$((10#${digits} + 1))
           padded=$(printf "%0${width}d" "${next_num}")
