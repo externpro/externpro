@@ -12,7 +12,10 @@
       "displayName": "configure Windows VS2026",
       "inherits": ["config-base", "isMswVs2026"],
       "generator": "Visual Studio 18 2026",
-      "architecture": "x64"
+      "architecture": "x64",
+      "cacheVariables": {
+        "CMAKE_PROJECT_TOP_LEVEL_INCLUDES": ".devcontainer/cmake/xproinc.cmake"
+      }
     }
   ],
   "buildPresets": [

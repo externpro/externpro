@@ -16,7 +16,10 @@
       "name": "Linux",
       "displayName": "configure Linux Ninja",
       "inherits": ["config-base", "isLinux"],
-      "generator": "Ninja"
+      "generator": "Ninja",
+      "cacheVariables": {
+        "CMAKE_PROJECT_TOP_LEVEL_INCLUDES": ".devcontainer/cmake/xproinc.cmake"
+      }
     }
   ],
   "buildPresets": [

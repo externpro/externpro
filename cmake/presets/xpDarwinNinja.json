@@ -16,7 +16,10 @@
       "name": "Darwin",
       "displayName": "configure Darwin Ninja",
       "inherits": ["config-base", "isDarwin"],
-      "generator": "Ninja Multi-Config"
+      "generator": "Ninja Multi-Config",
+      "cacheVariables": {
+        "CMAKE_PROJECT_TOP_LEVEL_INCLUDES": ".devcontainer/cmake/xproinc.cmake"
+      }
     }
   ],
   "buildPresets": [

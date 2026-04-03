@@ -12,7 +12,10 @@
       "displayName": "configure Windows VS2022",
       "inherits": ["config-base", "isMswVs2022"],
       "generator": "Visual Studio 17 2022",
-      "architecture": "x64"
+      "architecture": "x64",
+      "cacheVariables": {
+        "CMAKE_PROJECT_TOP_LEVEL_INCLUDES": ".devcontainer/cmake/xproinc.cmake"
+      }
     }
   ],
   "buildPresets": [
