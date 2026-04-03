@@ -4,7 +4,7 @@ externpro integrates with CMake's dependency provider mechanism so that `find_pa
 
 ## How it works
 
-- [`cmake/xproinc.cmake`](../xproinc.cmake) is intended to be injected via `CMAKE_PROJECT_TOP_LEVEL_INCLUDES` so it runs before your top-level `project()` call.
+- [`cmake/xproinc.cmake`](../xproinc.cmake) is injected via `CMAKE_PROJECT_TOP_LEVEL_INCLUDES` through CMakePresets so it runs before your top-level `project()` call.
 - It sets a few key variables early (notably `CMAKE_INSTALL_PREFIX` and `XPRO_DIR`).
 - It adds externpro's `cmake/` directory to `CMAKE_MODULE_PATH`.
 - It includes [`cmake/pros.cmake`](../pros.cmake), which defines the default externpro dependency variables (`xp_<project>`).
@@ -40,11 +40,13 @@ It is used by internals (e.g., `ipGetProPath()` / download+extract) to store:
 
 ## Common usage
 
-In a consuming repo, set:
+In a consuming repo, the provided CMakePresets automatically set:
 
 - `CMAKE_PROJECT_TOP_LEVEL_INCLUDES` to point to externpro's [`cmake/xproinc.cmake`](../xproinc.cmake)
 
 Then in your CMakeLists you can keep using normal `find_package()` calls; externpro will intercept them when it can.
+
+The CMakePresets handle this injection automatically, so no manual `set()` call is needed in your `CMakeLists.txt`.
 
 ## Related
 

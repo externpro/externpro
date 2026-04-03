@@ -60,13 +60,9 @@ If your repo default branch is not `xpro`, you will likely need to adjust the ca
 
 ## CMake integration
 
-1. Before `project()` set the externpro top-level include
-   ```cmake
-   set(CMAKE_PROJECT_TOP_LEVEL_INCLUDES .devcontainer/cmake/xproinc.cmake)
-   project(foo)
-   ```
+1. The CMakePresets automatically inject `CMAKE_PROJECT_TOP_LEVEL_INCLUDES` to point to `.devcontainer/cmake/xproinc.cmake`, so no manual setup is needed in your `CMakeLists.txt`.
 
-1. `xproinc.cmake` currently:
+1. `xproinc.cmake` (automatically included via CMakePresets) currently:
     - defines `CMAKE_INSTALL_PREFIX` if not already defined
     - appends `.devcontainer/cmake/` to `CMAKE_MODULE_PATH`
     - includes `pros.cmake` (default externpro dependency variables)

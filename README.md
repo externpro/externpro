@@ -28,7 +28,7 @@ What you get instead:
 - Contributors can validate changes across supported platforms without reproducing every environment locally.
 
 What makes externpro different?
-- A CMake-native dependency provider model (via `CMAKE_PROJECT_TOP_LEVEL_INCLUDES`) that standardizes how dependencies are introduced to builds.
+- A CMake-native dependency provider model (via `CMAKE_PROJECT_TOP_LEVEL_INCLUDES` injected through CMakePresets) that standardizes how dependencies are introduced to builds.
 - Prebuilt toolchain environments for Linux ([buildpro images](https://github.com/externpro/buildpro/tree/xpro/public)) that keep compilers, build tools, and system dependencies consistent.
 - Reusable CI pipelines that standardize build/test/release across repos.
 - Dependency reports produced (graph, table including versions and licenses) -- for example, curl at https://github.com/externpro/curl/blob/xpro/xprodeps.md
@@ -103,12 +103,7 @@ The goal is simple: make "develop -> build -> test -> release" fast and consiste
 ### Dependency Provider
 - Instead of CMake (or your "consuming" project) fetching/building a dependency itself, externpro "provides" that dependency to the build as an already-available package/target — so the consuming project can just link to it. See the CMake documentation overview on [dependency providers](https://cmake.org/cmake/help/latest/guide/using-dependencies/index.html#dependency-providers-overview).
 - For details on how externpro wires this into CMake, see [Dependency provider (xproinc)](./cmake/docs/dependency-provider.md).
-- Leverage externpro as a dependency provider by adding a single line before the `project()` call in your root `CMakeLists.txt`:
-  ```cmake
-  set(CMAKE_PROJECT_TOP_LEVEL_INCLUDES .devcontainer/cmake/xproinc.cmake)
-  project(foo)
-  ```
-
+- Leverage externpro as a dependency provider by using the provided CMakePresets, which automatically inject `CMAKE_PROJECT_TOP_LEVEL_INCLUDES` to point to [`.devcontainer/cmake/xproinc.cmake`](./cmake/xproinc.cmake). The CMakePresets handle the injection automatically, so no manual `set()` call is needed in your `CMakeLists.txt`.
 - See [cmake/README.md](./cmake/README.md) for externpro projects — each one is an example of vendoring externpro/externpro as a submodule and using it as the CMake build platform and dependency provider, with reusable CI pipelines, to create an xpro package (a release artifact plus its manifest metadata and generated CMake "use" config) that can be consumed by other "downstream" projects.
 
 #### Provide your project as a dependency for others
