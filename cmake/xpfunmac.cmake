@@ -1697,7 +1697,7 @@ function(xpExternPackage)
     DESTINATION ${CMAKE_INSTALL_CMAKEDIR} ${XP_COMPONENT}
     )
   ###############
-  # CPS: package metadata
+  # CPS/SBOM: package metadata
   set(xpInfoProject)
   if(NOT "${P_REPO_NAME}" STREQUAL "${CMAKE_PROJECT_NAME}")
     # By default, if the specified <package-name> matches the current CMake PROJECT_NAME,
@@ -1758,6 +1758,19 @@ function(xpExternPackage)
       ${xpInfoProject} ${xpInfoVersion} ${xpInfoLicense} ${xpInfoDesc} ${xpInfoHome}
       DESTINATION ${CMAKE_INSTALL_CPSDIR} ${XP_COMPONENT}
       )
+  endif()
+  ###############
+  # SBOM: software bill of materials
+  if(CMAKE_VERSION VERSION_GREATER_EQUAL 4.3 AND DEFINED P_TARGETS_FILE)
+    if(CMAKE_EXPERIMENTAL_GENERATE_SBOM STREQUAL "ca494ed3-b261-4205-a01f-603c95e4cae0")
+      if(NOT DEFINED CMAKE_INSTALL_SBOMDIR)
+        set(CMAKE_INSTALL_SBOMDIR ${CMAKE_INSTALL_DATADIR}/sbom)
+      endif()
+      install(SBOM ${P_REPO_NAME} EXPORT ${P_TARGETS_FILE}
+        ${xpInfoProject} ${xpInfoVersion} ${xpInfoLicense} ${xpInfoDesc} ${xpInfoHome}
+        DESTINATION ${CMAKE_INSTALL_SBOMDIR} ${XP_COMPONENT}
+        )
+    endif()
   endif()
   ###############
   # packaging
