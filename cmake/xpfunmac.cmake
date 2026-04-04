@@ -1647,15 +1647,15 @@ function(xpExternPackage)
   ###############
   # sysinfo.txt file
   # NOTE: metadata in sysinfo file is different depending on platform
-  set(xpinfoFile ${CMAKE_CURRENT_BINARY_DIR}/sysinfo.txt)
-  file(WRITE ${xpinfoFile} "${VER}\n")
+  set(xpSysinfoFile ${CMAKE_CURRENT_BINARY_DIR}/sysinfo.txt)
+  file(WRITE ${xpSysinfoFile} "${VER}\n")
   execute_process(COMMAND uname -a
     OUTPUT_VARIABLE uname
     OUTPUT_STRIP_TRAILING_WHITESPACE
     ERROR_VARIABLE unameErr
     )
   if(NOT unameErr)
-    file(APPEND ${xpinfoFile} "${uname}\n")
+    file(APPEND ${xpSysinfoFile} "${uname}\n")
   endif()
   execute_process(COMMAND lsb_release --description
     OUTPUT_VARIABLE lsbDesc # LSB (Linux Standard Base)
@@ -1663,13 +1663,13 @@ function(xpExternPackage)
     ERROR_QUIET
     )
   if(NOT lsbDesc STREQUAL "")
-    file(APPEND ${xpinfoFile} "lsb_release ${lsbDesc}\n")
+    file(APPEND ${xpSysinfoFile} "lsb_release ${lsbDesc}\n")
   endif()
   if(DEFINED MSVC_VERSION)
-    file(APPEND ${xpinfoFile} "MSVC_VERSION ${MSVC_VERSION}\n")
+    file(APPEND ${xpSysinfoFile} "MSVC_VERSION ${MSVC_VERSION}\n")
   endif()
   xpGetCompilerPrefix(compilerPrefix)
-  file(APPEND ${xpinfoFile} "COMPILER_PREFIX: ${compilerPrefix}\n")
+  file(APPEND ${xpSysinfoFile} "COMPILER_PREFIX: ${compilerPrefix}\n")
   ###############
   # xpdeps files
   if(DEFINED P_DEPS OR DEFINED P_PVT_DEPS)
@@ -1682,6 +1682,7 @@ function(xpExternPackage)
   endif()
   ###############
   # install sysinfo.txt, xpuse-${lcRepoName}-config.cmake, and manifest.cmake
+  install(FILES ${xpSysinfoFile} DESTINATION ${CMAKE_INSTALL_DATADIR} ${XP_COMPONENT})
   if(NOT DEFINED CMAKE_INSTALL_DATADIR)
     include(GNUInstallDirs)
   endif()
@@ -1692,7 +1693,7 @@ function(xpExternPackage)
     set(CMAKE_INSTALL_CMAKEDIR ${CMAKE_INSTALL_DATADIR}/cmake)
     set(CMAKE_INSTALL_CMAKEDIR ${CMAKE_INSTALL_CMAKEDIR} PARENT_SCOPE)
   endif()
-  install(FILES ${xpinfoFile} ${xpuseFile} ${xpmanifestFile}
+  install(FILES ${xpuseFile} ${xpmanifestFile}
     DESTINATION ${CMAKE_INSTALL_CMAKEDIR} ${XP_COMPONENT}
     )
   ###############
