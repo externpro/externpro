@@ -1697,6 +1697,69 @@ function(xpExternPackage)
     DESTINATION ${CMAKE_INSTALL_CMAKEDIR} ${XP_COMPONENT}
     )
   ###############
+  # CPS: package metadata
+  set(xpInfoProject)
+  if(NOT "${P_REPO_NAME}" STREQUAL "${CMAKE_PROJECT_NAME}")
+    # By default, if the specified <package-name> matches the current CMake PROJECT_NAME,
+    # package metadata will be inherited from the project. The PROJECT <project-name>
+    # option may be used to specify a different project from which to inherit metadata.
+    # In any case, any metadata values specified in the install command will take precedence.
+    set(xpInfoProject PROJECT ${CMAKE_PROJECT_NAME})
+  endif()
+  set(xpInfoVersion)
+  if(DEFINED PROJECT_VERSION AND PROJECT_VERSION MATCHES "^[0-9]+(\\.[0-9]+)*$")
+    set(xpInfoVersion VERSION ${PROJECT_VERSION})
+  elseif(DEFINED P_BASE)
+    set(xpInfoVersionCandidate ${P_BASE})
+    string(REGEX REPLACE "^${lcRepoName}[-_]" "" xpInfoVersionCandidate "${xpInfoVersionCandidate}")
+    string(REGEX REPLACE "^[vn]([0-9])" "\\1" xpInfoVersionCandidate "${xpInfoVersionCandidate}")
+    if(xpInfoVersionCandidate MATCHES "^[0-9]+(\\.[0-9]+)*$" AND
+        NOT xpInfoVersionCandidate MATCHES "^0(\\.0+)*$")
+      set(xpInfoVersion VERSION ${xpInfoVersionCandidate})
+    endif()
+  endif()
+  if(NOT xpInfoVersion)
+    set(xpInfoVerCandidate "${VER}")
+    string(REGEX REPLACE "^xpv" "" xpInfoVerCandidate "${xpInfoVerCandidate}")
+    string(REGEX REPLACE "-.*$" "" xpInfoVerCandidate "${xpInfoVerCandidate}")
+    string(REGEX REPLACE "[^0-9.]" "" xpInfoVerCandidate "${xpInfoVerCandidate}")
+    if(xpInfoVerCandidate MATCHES "^[0-9]+(\\.[0-9]+)*$")
+      string(REPLACE "." ";" xpInfoVerList "${xpInfoVerCandidate}")
+      list(LENGTH xpInfoVerList xpInfoVerLen)
+      if(xpInfoVerLen GREATER 3)
+        list(SUBLIST xpInfoVerList 0 3 xpInfoVerList)
+      endif()
+      list(JOIN xpInfoVerList "." xpInfoVerCandidate)
+      set(xpInfoVersion VERSION ${xpInfoVerCandidate})
+    endif()
+  endif()
+  if(DEFINED P_DESC)
+    set(xpInfoDesc DESCRIPTION "${P_DESC}")
+  endif()
+  if(DEFINED P_WEB)
+    set(xpInfoHome HOMEPAGE_URL "${P_WEB}")
+  endif()
+  if(DEFINED P_LICENSE)
+    if(P_LICENSE MATCHES "^\\[[^]]+\\]\\([^)]+\\)$")
+      set(xpInfoLicenseCandidate "${P_LICENSE}")
+      string(REGEX REPLACE "^\\[([^]]+)\\]\\([^)]+\\)$" "\\1" xpInfoLicenseCandidate "${xpInfoLicenseCandidate}")
+      if(NOT xpInfoLicenseCandidate STREQUAL "")
+        set(xpInfoLicense LICENSE "${xpInfoLicenseCandidate}")
+      endif()
+    endif()
+  endif()
+  ###############
+  # CPS: common package specification
+  if(CMAKE_VERSION VERSION_GREATER_EQUAL 4.3 AND DEFINED P_TARGETS_FILE)
+    if(NOT DEFINED CMAKE_INSTALL_CPSDIR)
+      set(CMAKE_INSTALL_CPSDIR ${CMAKE_INSTALL_DATADIR}/cps)
+    endif()
+    install(PACKAGE_INFO ${P_REPO_NAME} EXPORT ${P_TARGETS_FILE}
+      ${xpInfoProject} ${xpInfoVersion} ${xpInfoLicense} ${xpInfoDesc} ${xpInfoHome}
+      DESTINATION ${CMAKE_INSTALL_CPSDIR} ${XP_COMPONENT}
+      )
+  endif()
+  ###############
   # packaging
   unset(CPACK_PACKAGING_INSTALL_PREFIX)
   set(CPACK_GENERATOR TXZ)
