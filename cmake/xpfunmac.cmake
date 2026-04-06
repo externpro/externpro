@@ -1685,6 +1685,17 @@ function(ipManifestDepsFromVars _out deps)
   set(${_out} "${out}" PARENT_SCOPE)
 endfunction()
 
+function(ipJsonOptionalString _out _var)
+  if(DEFINED ${_var})
+    set(_t "${${_var}}")
+    string(REPLACE "\\" "\\\\" _t "${_t}")
+    string(REPLACE "\"" "\\\"" _t "${_t}")
+    set(${_out} "\"${_t}\"" PARENT_SCOPE)
+  else()
+    set(${_out} "null" PARENT_SCOPE)
+  endif()
+endfunction()
+
 function(xpExternPackage)
   # NOTE: if CMAKE_INSTALL_CMAKEDIR is not defined, it will be set here
   #   and available in PARENT_SCOPE
@@ -1820,8 +1831,8 @@ function(xpExternPackage)
       ""
       )
   endif()
-  set(xpuseFile ${CMAKE_CURRENT_BINARY_DIR}/xpuse-${lcRepoName}-config.cmake)
-  configure_file(${xpThisDir}/xpuse.cmake.in ${xpuseFile} @ONLY NEWLINE_STYLE LF)
+  set(xpUseCMakeFile ${CMAKE_CURRENT_BINARY_DIR}/xpuse-${lcRepoName}-config.cmake)
+  configure_file(${xpThisDir}/xpuse.cmake.in ${xpUseCMakeFile} @ONLY NEWLINE_STYLE LF)
   ###############
   # manifest.cmake file
   # NOTE: metadata in manifest file is consistent across all platforms
@@ -1859,14 +1870,56 @@ function(xpExternPackage)
     list(JOIN P_PVT_DEPS " " pvtdeps) # list to string with spaces
     set(MANIFEST_VARS "${MANIFEST_VARS}\nset(XP_MANIFEST_PVT_DEPS ${pvtdeps})")
   endif()
-  set(xpmanifestFile ${CMAKE_CURRENT_BINARY_DIR}/${P_REPO_NAME}-${VER}.manifest.cmake)
-  file(WRITE ${xpmanifestFile}
+  set(xpManifestCMakeFile ${CMAKE_CURRENT_BINARY_DIR}/${P_REPO_NAME}-${VER}.manifest.cmake)
+  file(WRITE ${xpManifestCMakeFile}
     "set(XP_MANIFEST_VERSION 1)\n"
     "set(XP_MANIFEST_REPO \"${P_REPO_NAME}\")\n"
     "set(XP_MANIFEST_TAG \"${VER}\")\n"
     "${MANIFEST_VARS}\n"
     "${MANIFEST_DEPS}\n"
     "set(XP_MANIFEST_ARTIFACTS)\n"
+    )
+  ###############
+  # manifest.json file
+  # NOTE: metadata in manifest file is consistent across all platforms
+  set(xpManifestJsonFile ${CMAKE_CURRENT_BINARY_DIR}/${P_REPO_NAME}-${VER}.manifest.json)
+  ipJsonOptionalString(_mj_attr P_ATTRIBUTION)
+  ipJsonOptionalString(_mj_base P_BASE)
+  ipJsonOptionalString(_mj_desc P_DESC)
+  ipJsonOptionalString(_mj_lic P_LICENSE)
+  ipJsonOptionalString(_mj_up P_UPSTREAM)
+  ipJsonOptionalString(_mj_web P_WEB)
+  ipJsonOptionalString(_mj_xpd P_XPDIFF)
+  set(_mj_deps "[]")
+  if(DEFINED P_DEPS)
+    list(TRANSFORM P_DEPS TOLOWER)
+    foreach(d ${P_DEPS})
+      string(JSON _mj_deps SET "${_mj_deps}" -1 "${d}")
+    endforeach()
+  endif()
+  set(_mj_pvt_deps "[]")
+  if(DEFINED P_PVT_DEPS)
+    list(TRANSFORM P_PVT_DEPS TOLOWER)
+    foreach(d ${P_PVT_DEPS})
+      string(JSON _mj_pvt_deps SET "${_mj_pvt_deps}" -1 "${d}")
+    endforeach()
+  endif()
+  file(WRITE ${xpManifestJsonFile}
+    "{\n"
+    "  \"manifest_version\": 1,\n"
+    "  \"repo\": \"${P_REPO_NAME}\",\n"
+    "  \"tag\": \"${VER}\",\n"
+    "  \"base\": ${_mj_base},\n"
+    "  \"web\": ${_mj_web},\n"
+    "  \"upstream\": ${_mj_up},\n"
+    "  \"desc\": ${_mj_desc},\n"
+    "  \"license\": ${_mj_lic},\n"
+    "  \"xpdiff\": ${_mj_xpd},\n"
+    "  \"attribution\": ${_mj_attr},\n"
+    "  \"deps\": ${_mj_deps},\n"
+    "  \"pvt_deps\": ${_mj_pvt_deps},\n"
+    "  \"artifacts\": []\n"
+    "}\n"
     )
   ###############
   # sysinfo.txt file
@@ -1900,7 +1953,7 @@ function(xpExternPackage)
     set(xpdepsFile ${CMAKE_CURRENT_BINARY_DIR}/xprodeps.md)
     set(xpdepsGraph ${CMAKE_CURRENT_BINARY_DIR}/xprodeps.svg)
     ipProDepsInit()
-    ipProDepsWalk(PKG ${lcRepoName} MANIFEST_FILE ${xpmanifestFile})
+    ipProDepsWalk(PKG ${lcRepoName} MANIFEST_FILE ${xpManifestCMakeFile})
     ipProDepsEnd()
     xpCopyFilesToSrc(${CMAKE_SOURCE_DIR}/xprodeps.md ${CMAKE_SOURCE_DIR}/xprodeps.svg)
   endif()
@@ -1917,7 +1970,7 @@ function(xpExternPackage)
     set(CMAKE_INSTALL_CMAKEDIR ${CMAKE_INSTALL_DATADIR}/cmake)
     set(CMAKE_INSTALL_CMAKEDIR ${CMAKE_INSTALL_CMAKEDIR} PARENT_SCOPE)
   endif()
-  install(FILES ${xpuseFile} ${xpmanifestFile}
+  install(FILES ${xpUseCMakeFile} ${xpManifestCMakeFile}
     DESTINATION ${CMAKE_INSTALL_CMAKEDIR} ${XP_COMPONENT}
     )
   ###############
@@ -1974,10 +2027,13 @@ function(xpExternPackage)
   endif()
   ###############
   # CPS: common package specification
+  if(NOT DEFINED CMAKE_INSTALL_CPSDIR)
+    set(CMAKE_INSTALL_CPSDIR ${CMAKE_INSTALL_DATADIR}/cps)
+  endif()
+  install(FILES ${xpManifestJsonFile}
+    DESTINATION ${CMAKE_INSTALL_CPSDIR} ${XP_COMPONENT}
+    )
   if(CMAKE_VERSION VERSION_GREATER_EQUAL 4.3 AND DEFINED P_TARGETS_FILE)
-    if(NOT DEFINED CMAKE_INSTALL_CPSDIR)
-      set(CMAKE_INSTALL_CPSDIR ${CMAKE_INSTALL_DATADIR}/cps)
-    endif()
     install(PACKAGE_INFO ${P_REPO_NAME} EXPORT ${P_TARGETS_FILE}
       ${xpInfoProject} ${xpInfoVersion} ${xpInfoLicense} ${xpInfoDesc} ${xpInfoHome}
       DESTINATION ${CMAKE_INSTALL_CPSDIR} ${XP_COMPONENT}
