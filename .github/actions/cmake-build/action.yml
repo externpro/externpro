@@ -151,7 +151,11 @@ runs:
         if [[ "${{ inputs.artifact_pattern }}" != "$default_artifact_pattern" ]]; then
           manifest_required=false
         fi
-        rel_file=$(find "$build_dir" -type f -name "${{ github.event.repository.name }}-*.manifest.cmake" | head -1)
+        # Prefer CPS JSON manifests, but allow legacy manifest.cmake during transition.
+        rel_file=$(find "$build_dir" -type f -name "${{ github.event.repository.name }}-*.manifest.json" | head -1)
+        if [[ -z "$rel_file" ]]; then
+          rel_file=$(find "$build_dir" -type f -name "${{ github.event.repository.name }}-*.manifest.cmake" | head -1)
+        fi
         if [[ -z "$rel_file" ]]; then
           echo "found=false" >> $GITHUB_OUTPUT
           if [[ "$manifest_required" == "true" ]]; then
