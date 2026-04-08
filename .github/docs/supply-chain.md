@@ -31,9 +31,11 @@ gh attestation verify --repo <owner>/<repo> --signer-repo externpro/externpro <a
 
 ## SBOM
 
-SBOM generation is currently implemented for public buildpro Docker image builds.
+SBOM generation is currently implemented for:
+- Public buildpro Docker image builds
+- Projects using `xpExternPackage()` with CMake's SBOM generation feature
 
-SBOM generation is planned for externpro’s reusable CI pipelines so that projects using the `xp*` workflows can produce SBOMs as part of their build/release runs.
+When projects call `xpExternPackage()` in their CMakeLists.txt, the function uses CMake's `install(SBOM)` command to generate Software Bill of Materials files as part of the package creation process. This requires CMake 4.3+.
 
 ## Notes
 

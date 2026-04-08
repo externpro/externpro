@@ -13,7 +13,7 @@ The core flow is:
 
 All of this is implemented in [`cmake/xpfunmac.cmake`](../xpfunmac.cmake).
 
-## Working directories (`XPRO_DIR`)
+## Working directory layout (`XPRO_DIR`)
 
 `XPRO_DIR` is set (and cached) by [`cmake/xproinc.cmake`](../xproinc.cmake) and defaults to:
 
@@ -49,82 +49,44 @@ ipGetProPath(pth PKG <dep> ${xp_<dep>})
   - Use a local `.tar.xz` archive file (typically a locally built package artifact).
   - This is most useful for local development/testing: you can build/package a dependency and validate the consumer flow without publishing a release.
   - It computes the archive SHA and treats it like a download URL (`file://...`).
-- `REPO` + `TAG` + `MANIFEST_SHA256` (the common case)
+- `REPO` + `TAG` + manifest hash (the common case)
   - Downloads the release manifest first.
 
-In the common case, it does:
+For the common case (REPO + TAG + manifest hash), `ipGetProPath()`:
+1. Calls `ipDownloadManifestFromRepo()` to download the manifest file
+2. Calls `ipGetPkgFromManifest()` to select the correct artifact
+3. Calls `ipDownloadExtract()` to download and extract the package
 
-1. Compute a manifest destination path:
+## Step 3: ipDownloadManifestFromRepo() downloads the manifest
 
-- `${XPRO_DIR}/xpd/manifests/<repoName>-<tag>.manifest.cmake`
+`ipDownloadManifestFromRepo()` handles both `.manifest.cmake` and `.manifest.json` formats:
 
-2. Download the manifest with integrity checking:
+- Determines the manifest format based on whether `MANIFEST_SHA256` or `MANIFEST_HASH` is provided
+- Downloads to `${XPRO_DIR}/xpd/manifests/<repo>-<tag>.manifest.<ext>`
+- Performs integrity checking with the provided SHA256
 
-- `ipDownload(https://<REPO>/releases/download/<TAG>/<repoName>-<TAG>.manifest.cmake <MANIFEST_SHA256> <dst>)`
+## Step 4: ipGetPkgFromManifest() selects the right artifact
 
-3. Select the correct artifact filename + its SHA from the manifest:
+`ipGetPkgFromManifest()` reads the manifest and selects the appropriate artifact:
 
-- `ipGetPkgFromManifest(<dst> pkg sha)`
+- Matches artifacts based on compiler prefix and platform
+- First tries `<prefix>-<platform>...tar.xz`, falls back to `<platform>...tar.xz`
+- Returns the artifact filename and its SHA256
+- Works with both CMake and JSON manifest formats
 
-4. Build the final artifact URL:
-
-- `https://<REPO>/releases/download/<TAG>/<pkg>`
-
-5. Download+extract:
-
-- `ipDownloadExtract(<url> <sha> pth)`
-
-## Step 3: ipGetPkgFromManifest() selects the right artifact for your platform
-
-A manifest defines `XP_MANIFEST_ARTIFACTS` and per-artifact SHA256 variables.
-
-`ipGetPkgFromManifest()` matches an artifact name based on:
-
-- compiler prefix (from `xpGetCompilerPrefix(pfx VER_ONE)`)
-- platform string derived from:
-  - `CMAKE_SYSTEM_NAME` and
-  - `CMAKE_SYSTEM_PROCESSOR` (arm64 vs amd64)
-
-It first tries to find an artifact matching:
-
-- `<pfx>-<platform>...tar.xz`
-
-and falls back to:
-
-- `<platform>...tar.xz`
-
-It then normalizes the artifact filename into a manifest variable name and reads:
-
-- `XP_ARTIFACT_SHA256__<normalized-filename>`
-
-If no matching artifact exists, or the SHA variable is missing/invalid, it fails with a clear `FATAL_ERROR`.
-
-## Step 4: ipDownloadExtract() downloads and extracts
+## Step 5: ipDownloadExtract() downloads and extracts
 
 `ipDownloadExtract(url, sha, outPathVar)`:
+- downloads the `.tar.xz` into `${XPRO_DIR}/xpd/pkgs/<filename>.tar.xz`
+- extracts into `${XPRO_DIR}/xpx/`
+- uses a timestamp file to determine whether to re-extract when a newer archive is downloaded
+- determines the CMake entry point path by probing for `${XPRO_DIR}/xpx/<pkgbase>-xpro/share/cmake` or `${XPRO_DIR}/xpx/<pkgbase>/share/cmake`
 
-- downloads the `.tar.xz` into:
-  - `${XPRO_DIR}/xpd/pkgs/<filename>.tar.xz`
-- extracts into:
-  - `${XPRO_DIR}/xpx/`
+## Step 6: find_package(xpuse-<dep>) loads the consumer config
 
-It uses a timestamp file (`${XPRO_DIR}/xpx`) to determine whether to re-extract when a newer archive is downloaded.
-
-Then it determines the "CMake entry point" path to return by probing for:
-
-- `${XPRO_DIR}/xpx/<pkgbase>-xpro/share/cmake`
-- `${XPRO_DIR}/xpx/<pkgbase>/share/cmake` (fallback)
-
-That returned path is what `xpFindPkg()` passes to `find_package(... PATHS ... NO_DEFAULT_PATH)`.
-
-## Step 5: find_package(xpuse-<dep>) loads the consumer config
-
-The extracted package contains a generated use config named:
-
-- `xpuse-<dep>-config.cmake`
+The extracted package contains a generated use config named `xpuse-<dep>-config.cmake`.
 
 `xpFindPkg()` calls:
-
 ```cmake
 find_package(xpuse-<dep> BYPASS_PROVIDER REQUIRED PATHS <pth> NO_DEFAULT_PATH)
 ```

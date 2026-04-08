@@ -7,8 +7,9 @@ It is implemented in [`cmake/xpfunmac.cmake`](../xpfunmac.cmake).
 At a high level it:
 
 - generates a consumer "use" config (`xpuse-<pkg>-config.cmake`)
-- generates a per-release manifest (`<repo>-<tag>.manifest.cmake`)
+- generates a per-release manifest (`<repo>-<tag>.manifest.cmake` or `<repo>-<tag>.manifest.json`)
 - writes build metadata (`sysinfo.txt`)
+- generates SBOM (Software Bill Of Materials) and CPS (Common Package Specification) files
 - optionally generates dependency reports (`xprodeps.md` and `xprodeps.svg`) when dependency metadata is provided
 - configures basic archive packaging (TXZ) for the produced artifacts
 
@@ -50,7 +51,7 @@ In repos using externpro, the provided CMakePresets automatically set up the dep
 
 ### Manifest metadata parameters
 
-These fields are written into the generated `*.manifest.cmake` file:
+These fields are written into the generated manifest file (`.manifest.cmake` or `.manifest.json`):
 
 - `WEB`
   - Project homepage URL.
@@ -72,7 +73,7 @@ These fields are written into the generated `*.manifest.cmake` file:
 - `xpuse-<repo>-config.cmake`
   - Consumer entry point used by `xpFindPkg()` / `find_package(xpuse-<repo>)`.
 
-- `<REPO_NAME>-<VER>.manifest.cmake`
+- `<REPO_NAME>-<VER>.manifest.cmake` or `<REPO_NAME>-<VER>.manifest.json`
   - Machine-readable metadata for the release.
 
 - `sysinfo.txt`
