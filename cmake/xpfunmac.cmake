@@ -1799,7 +1799,7 @@ function(xpExternPackage)
   #   created with hard-coded 'xpro' namespace for EXE and LIBRARIES
   # FIND_THREADS is an optional parameter to indicate the use script
   #   should find the Threads::Threads target (from Threads package)
-  set(oneValueArgs ALIAS_NAMESPACE COMPONENT EXE EXE_PATH NAMESPACE REPO_NAME TARGETS_FILE)
+  set(oneValueArgs ALIAS_NAMESPACE COMPONENT EXE EXE_PATH EXPORT NAMESPACE REPO_NAME TARGETS_FILE)
   # ALIAS_NAMESPACE is deprecated; now hard-coded internally to 'xpro' as an alternative
   #   CMake namespace. add_[executable|library] ALIAS[es] will be included in the use script
   #   for EXE and LIBRARIES when CREATE_ALIASES option is specified
@@ -1808,6 +1808,8 @@ function(xpExternPackage)
   # EXE_PATH is for executable path (relative to package root, alternative to EXE)
   #   useful when the executable is not a CMake target, e.g. a binary built
   #   elsewhere; included in the use script
+  # EXPORT is for export name used in install(PACKAGE_INFO) and install(SBOM) commands
+  #   if not specified, defaults to TARGETS_FILE value
   # NAMESPACE is deprecated; CMAKE_PROJECT_NAME (or REPO_NAME if specified) is now
   #   prepended to CMake target names EXE and LIBRARIES in the use script
   # REPO_NAME is for repository name; if repository name doesn't match
@@ -1847,6 +1849,12 @@ function(xpExternPackage)
   endif()
   if(DEFINED P_NAMESPACE)
     message(AUTHOR_WARNING "xpExternPackage: NAMESPACE parameter is deprecated and ignored. Using package name as namespace instead.")
+  endif()
+  # Set P_EXPORT to P_TARGETS_FILE if P_EXPORT is not defined
+  if(NOT DEFINED P_EXPORT)
+    if(DEFINED P_TARGETS_FILE)
+      set(P_EXPORT ${P_TARGETS_FILE})
+    endif()
   endif()
   if(DEFINED P_COMPONENT)
     set(XP_COMPONENT COMPONENT ${P_COMPONENT})
@@ -2116,20 +2124,20 @@ function(xpExternPackage)
   install(FILES ${xpManifestJsonFile}
     DESTINATION ${CMAKE_INSTALL_CPSDIR} ${XP_COMPONENT}
     )
-  if(CMAKE_VERSION VERSION_GREATER_EQUAL 4.3 AND DEFINED P_TARGETS_FILE)
-    install(PACKAGE_INFO ${P_REPO_NAME} EXPORT ${P_TARGETS_FILE}
+  if(CMAKE_VERSION VERSION_GREATER_EQUAL 4.3 AND DEFINED P_EXPORT)
+    install(PACKAGE_INFO ${P_REPO_NAME} EXPORT ${P_EXPORT}
       ${xpInfoProject} ${xpInfoVersion} ${xpInfoLicense} ${xpInfoDesc} ${xpInfoHome}
       DESTINATION ${CMAKE_INSTALL_CPSDIR} ${XP_COMPONENT}
       )
   endif()
   ###############
   # SBOM: software bill of materials
-  if(CMAKE_VERSION VERSION_GREATER_EQUAL 4.3 AND DEFINED P_TARGETS_FILE)
+  if(CMAKE_VERSION VERSION_GREATER_EQUAL 4.3 AND DEFINED P_EXPORT)
     if(CMAKE_EXPERIMENTAL_GENERATE_SBOM STREQUAL "ca494ed3-b261-4205-a01f-603c95e4cae0")
       if(NOT DEFINED CMAKE_INSTALL_SBOMDIR)
         set(CMAKE_INSTALL_SBOMDIR ${CMAKE_INSTALL_DATADIR}/sbom)
       endif()
-      install(SBOM ${P_REPO_NAME} EXPORT ${P_TARGETS_FILE}
+      install(SBOM ${P_REPO_NAME} EXPORT ${P_EXPORT}
         ${xpInfoProject} ${xpInfoVersion} ${xpInfoLicense} ${xpInfoDesc} ${xpInfoHome}
         DESTINATION ${CMAKE_INSTALL_SBOMDIR} ${XP_COMPONENT}
         )

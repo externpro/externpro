@@ -32,6 +32,11 @@ In repos using externpro, the provided CMakePresets automatically set up the dep
 - `TARGETS_FILE`
   - A targets file name (without `.cmake`) to include from the consumer config.
 
+- `EXPORT`
+  - Export name used in `install(PACKAGE_INFO)` and `install(SBOM)` commands.
+  - If not specified, defaults to `TARGETS_FILE` value.
+  - Useful when the export name needs to be different from the targets file name.
+
 - `LIBRARIES`
   - List of library target names that the consumer could link against.
 
