@@ -40,6 +40,9 @@ In repos using externpro, the provided CMakePresets automatically set up the dep
 - `LIBRARIES`
   - List of library target names that the consumer could link against.
 
+- `DEFAULT_TARGETS`
+  - List of default CMake targets passed to `install(PACKAGE_INFO)` for CPS generation.
+
 - `EXE` / `EXE_PATH`
   - `EXE`: a CMake executable target name.
   - `EXE_PATH`: a relative executable path inside the package when the executable is not a CMake target.

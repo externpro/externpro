@@ -1842,7 +1842,8 @@ function(xpExternPackage)
   #   native: diff adds cmake but uses existing build system
   #      bin: diff adds cmake to repackage binaries built elsewhere
   #    fetch: diff adds cmake and utilizes FetchContent
-  set(multiValueArgs DEPS LIBRARIES PVT_DEPS)
+  set(multiValueArgs DEFAULT_TARGETS DEPS LIBRARIES PVT_DEPS)
+  # DEFAULT_TARGETS are for default CMake targets; passed to install(PACKAGE_INFO)
   # DEPS are for library dependencies; leveraged by use script and manifest
   # LIBRARIES are for CMake library targets; included in the use script
   # PVT_DEPS are for private dependencies (often an executable or internal
@@ -2109,9 +2110,13 @@ function(xpExternPackage)
   install(FILES ${xpManifestJsonFile}
     DESTINATION ${CMAKE_INSTALL_CPSDIR} ${XP_COMPONENT}
     )
+  if(DEFINED P_DEFAULT_TARGETS)
+    set(xpInfoDefaultTargets DEFAULT_TARGETS ${P_DEFAULT_TARGETS})
+  endif()
   if(CMAKE_VERSION VERSION_GREATER_EQUAL 4.3 AND DEFINED P_EXPORT)
     install(PACKAGE_INFO ${P_REPO_NAME} EXPORT ${P_EXPORT}
-      ${xpInfoProject} ${xpInfoVersion} ${xpInfoLicense} ${xpInfoDesc} ${xpInfoHome}
+      ${xpInfoProject} ${xpInfoVersion} ${xpInfoDefaultTargets}
+      ${xpInfoLicense} ${xpInfoDesc} ${xpInfoHome}
       DESTINATION ${CMAKE_INSTALL_CPSDIR} ${XP_COMPONENT}
       )
   endif()
