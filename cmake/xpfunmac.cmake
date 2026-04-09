@@ -1868,6 +1868,8 @@ function(xpExternPackage)
   set(P_NAMESPACE ${P_REPO_NAME})
   set(P_ALIAS_NAMESPACE xpro) # hard-coded alias namespace
   xpGetVersionString(VER)
+  set(xproBinDir "${CMAKE_CURRENT_BINARY_DIR}/xpro")
+  file(MAKE_DIRECTORY "${xproBinDir}")
   ###############
   # use script
   string(TOUPPER ${P_REPO_NAME} ucRepoName)
@@ -1934,7 +1936,7 @@ function(xpExternPackage)
       ""
       )
   endif()
-  set(xpUseCMakeFile ${CMAKE_CURRENT_BINARY_DIR}/xpuse-${lcRepoName}-config.cmake)
+  set(xpUseCMakeFile ${xproBinDir}/${lcRepoName}-config.cmake)
   configure_file(${xpThisDir}/xpuse.cmake.in ${xpUseCMakeFile} @ONLY NEWLINE_STYLE LF)
   ###############
   # manifest.cmake file
@@ -1973,7 +1975,7 @@ function(xpExternPackage)
     list(JOIN P_PVT_DEPS " " pvtdeps) # list to string with spaces
     set(MANIFEST_VARS "${MANIFEST_VARS}\nset(XP_MANIFEST_PVT_DEPS ${pvtdeps})")
   endif()
-  set(xpManifestCMakeFile ${CMAKE_CURRENT_BINARY_DIR}/${P_REPO_NAME}-${VER}.manifest.cmake)
+  set(xpManifestCMakeFile ${xproBinDir}/${P_REPO_NAME}-${VER}.manifest.cmake)
   file(WRITE ${xpManifestCMakeFile}
     "set(XP_MANIFEST_VERSION 1)\n"
     "set(XP_MANIFEST_REPO \"${P_REPO_NAME}\")\n"
@@ -1985,7 +1987,6 @@ function(xpExternPackage)
   ###############
   # manifest.json file
   # NOTE: metadata in manifest file is consistent across all platforms
-  set(xpManifestJsonFile ${CMAKE_CURRENT_BINARY_DIR}/${P_REPO_NAME}-${VER}.manifest.json)
   ipJsonOptionalString(_mj_attr P_ATTRIBUTION)
   ipJsonOptionalString(_mj_base P_BASE)
   ipJsonOptionalString(_mj_desc P_DESC)
@@ -1995,6 +1996,7 @@ function(xpExternPackage)
   ipJsonOptionalString(_mj_xpd P_XPDIFF)
   ipManifestDepsFromVarsJson(_mj_deps "${P_DEPS}")
   ipManifestDepsFromVarsJson(_mj_pvt_deps "${P_PVT_DEPS}")
+  set(xpManifestJsonFile ${xproBinDir}/${P_REPO_NAME}-${VER}.manifest.json)
   file(WRITE ${xpManifestJsonFile}
     "{\n"
     "  \"manifest_version\": 1,\n"
@@ -2015,7 +2017,7 @@ function(xpExternPackage)
   ###############
   # sysinfo.txt file
   # NOTE: metadata in sysinfo file is different depending on platform
-  set(xpSysinfoFile ${CMAKE_CURRENT_BINARY_DIR}/sysinfo.txt)
+  set(xpSysinfoFile ${xproBinDir}/sysinfo.txt)
   file(WRITE ${xpSysinfoFile} "${VER}\n")
   execute_process(COMMAND uname -a
     OUTPUT_VARIABLE uname
@@ -2041,8 +2043,8 @@ function(xpExternPackage)
   ###############
   # xpdeps files
   if(DEFINED P_DEPS OR DEFINED P_PVT_DEPS)
-    set(xpdepsFile ${CMAKE_CURRENT_BINARY_DIR}/xprodeps.md)
-    set(xpdepsGraph ${CMAKE_CURRENT_BINARY_DIR}/xprodeps.svg)
+    set(xpdepsFile ${xproBinDir}/xprodeps.md)
+    set(xpdepsGraph ${xproBinDir}/xprodeps.svg)
     ipProDepsInit()
     ipProDepsWalk(PKG ${lcRepoName} MANIFEST_FILE ${xpManifestJsonFile})
     ipProDepsEnd()
