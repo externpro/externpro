@@ -826,8 +826,10 @@ function(xpFindPkg)
     if(DEFINED xp_${pkg})
       ipGetProPath(pth PKG ${pkg} ${xp_${pkg}})
       unset(${pkg}_DIR CACHE)
-      find_package(${pkg} NAMES ${pkg} xpuse-${pkg}
-        REQUIRED CONFIG BYPASS_PROVIDER
+      if(EXISTS ${pth}/share/cmake/xpuse-${pkg}-config.cmake)
+        set(PKG_NAMES NAMES xpuse-${pkg})
+      endif()
+      find_package(${pkg} ${PKG_NAMES} REQUIRED CONFIG BYPASS_PROVIDER
         PATHS ${pth} ${pth}/share/cmake NO_DEFAULT_PATH
         )
       mark_as_advanced(${pkg}_DIR)
@@ -837,6 +839,8 @@ function(xpFindPkg)
       if(DEFINED ${PKG}_FOUND)
         set(${package}_FOUND ${${PKG}_FOUND})
         list(APPEND reqVars ${PKG}_FOUND ${package}_FOUND)
+      elseif(DEFINED ${package}_FOUND)
+        list(APPEND reqVars ${package}_FOUND)
       endif()
       foreach(var ${reqVars})
         set(${var} ${${var}} PARENT_SCOPE)
