@@ -172,6 +172,9 @@ set(xp_spdlog REPO github.com/externpro/spdlog TAG xpv1.17.0.1
 set(xp_sqlite3 REPO github.com/externpro/SQLite3 TAG xpv3.38.2.3
   MANIFEST_SHA256 a41857465c8b760e7f500f0115bdd83d1151da6f4cefabe9c0baf2ae52cb13a6
   )
+set(xp_threads REPO github.com/externpro/Threads TAG xpv1.0.0
+  MANIFEST_HASH SHA256=99112c83332fbe560f6b375e310388a56ac014d0ff3ebacdf691a7b724bc000d
+  )
 set(xp_wirehair REPO github.com/externpro/wirehair TAG xpv23.12.02.3
   MANIFEST_SHA256 8d0617549ee6e5d07df73d2336d78e46ee34ddc0d3f6660fdfccfee3b5238266
   )
