@@ -1647,13 +1647,11 @@ function(xpCopyFilesToSrc readme graph)
     execute_process(COMMAND ${CMAKE_COMMAND} -E copy_if_different ${xpdepsFile} ${readme})
     execute_process(COMMAND ${CMAKE_COMMAND} -E copy_if_different ${xpdepsGraph} ${graph})
   elseif(isRdmeDiff OR isGraphDiff)
-    option(XP_COPY_FILES_TO_SRC_NOTE "Emit NOTE when README.md/deps.svg differ but can only be copied to source in the build container" ON)
-    if(XP_COPY_FILES_TO_SRC_NOTE)
+    if(NOT DEFINED __xp_copy_files_to_src_note_shown)
       message(STATUS "NOTE: files in binary and source directory differ, "
         "but should be copied from binary to source directory in ${build_container} "
         "build container, where graphviz is installed and version controlled. "
-        "(graphviz version is recorded in .svg file and different versions generate other diffs too). "
-        "Silence with -DXP_COPY_FILES_TO_SRC_NOTE=OFF."
+        "(graphviz version is recorded in .svg file and different versions generate other diffs too)."
         )
       if(isRdmeDiff)
         cmake_path(RELATIVE_PATH xpdepsFile BASE_DIRECTORY ${CMAKE_SOURCE_DIR} OUTPUT_VARIABLE relXpdepsFile)
@@ -1665,6 +1663,7 @@ function(xpCopyFilesToSrc readme graph)
         cmake_path(RELATIVE_PATH graph BASE_DIRECTORY ${CMAKE_SOURCE_DIR} OUTPUT_VARIABLE relSrcGraph)
         message(STATUS "  * ${relXpdepsGraph} -> ${relSrcGraph}")
       endif()
+      set(__xp_copy_files_to_src_note_shown TRUE CACHE INTERNAL "Flag to track if XP_COPY_FILES_TO_SRC_NOTE message was shown")
     endif()
   endif()
 endfunction()
