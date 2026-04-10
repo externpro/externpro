@@ -836,8 +836,11 @@ function(xpFindPkg)
         PATHS ${pth} ${pth}/share/cmake NO_DEFAULT_PATH
         )
       mark_as_advanced(${package}_DIR)
-      if(DEFINED ${package}_CONFIG AND ${package}_CONFIG MATCHES "\\.cps$")
+      if(NOT DEFINED __xp_${package}_cps_message_shown
+         AND DEFINED ${package}_CONFIG
+         AND ${package}_CONFIG MATCHES "\\.cps$")
         message(STATUS "Found ${package}.cps: ${${package}_VERSION}")
+        set(__xp_${package}_cps_message_shown TRUE CACHE INTERNAL "Flag to track if ${package}.cps message was shown")
       endif()
       if(DEFINED ${PKG}_FOUND)
         set(${package}_FOUND ${${PKG}_FOUND})
