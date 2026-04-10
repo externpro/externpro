@@ -47,8 +47,8 @@ set(xp_ffmpeg REPO github.com/externpro/FFmpeg TAG xpv2.6.2.4
 set(xp_flatbuffers REPO github.com/externpro/flatbuffers TAG xpv25.2.10.3
   MANIFEST_SHA256 ec5f7b4a7f0b575ff4491ac91c3b51fe79e4023ae98c91b38747bb6e6507a8a0
   )
-set(xp_fmt REPO github.com/externpro/fmt TAG xpv12.1.0.3
-  MANIFEST_HASH SHA256=44d8b30d88023549230191a53b430e98b48bccdd560a657bf09ba2a1f4367805
+set(xp_fmt REPO github.com/externpro/fmt TAG xpv12.1.0.4
+  MANIFEST_HASH SHA256=f1d15624040ee023a5963d0f82e6f1836da35458e580b23c85bb553e035d3141
   )
 set(xp_geos REPO github.com/externpro/geos TAG xpv3.13.0.6
   MANIFEST_SHA256 2860cdf7324ad83682b1add3351046b5aa6d35a45a39600a3242bd529d873b44
