@@ -38,10 +38,10 @@ set(xp_fecpp REPO github.com/externpro/fecpp TAG xpv0.9.3
   MANIFEST_SHA256 4745ae069ba2cd06db6f1dee80052e21bb297b40ab03ca4f3505c50b17ac53a5
   )
 # pre-release: no windows package
-set(xp_ffmpeg REPO github.com/externpro/FFmpeg TAG xpv4.3.1.4
+set(xp_FFmpeg REPO github.com/externpro/FFmpeg TAG xpv4.3.1.4
   MANIFEST_SHA256 ac239ba1ec1d33f56ddfb7dd819dfa3f77436b5def4ebf593cf9aaa9f647e8d2
   )
-set(xp_ffmpeg REPO github.com/externpro/FFmpeg TAG xpv2.6.2.4
+set(xp_FFmpeg REPO github.com/externpro/FFmpeg TAG xpv2.6.2.4
   MANIFEST_SHA256 fa72af4a7b04799d441c41fb500273e0fe3ff8e74b16eab3767e4d78526a93e2
   )
 set(xp_flatbuffers REPO github.com/externpro/flatbuffers TAG xpv25.2.10.3
@@ -107,7 +107,7 @@ set(xp_libzmq REPO github.com/externpro/libzmq TAG xpv4.3.4.4
 set(xp_lua REPO github.com/externpro/lua TAG xpv5.2.3.3
   MANIFEST_SHA256 5fccade658a5ae70b229958fa925b3f0000ed437bd66fcef2797a8f697a27339
   )
-set(xp_luabridge REPO github.com/externpro/LuaBridge TAG xpv2.10.5
+set(xp_LuaBridge REPO github.com/externpro/LuaBridge TAG xpv2.10.5
   MANIFEST_SHA256 f4b9bf6b22217d9ab07d121a55b7709e146ccfcbeef421e66112b93c40868195
   )
 set(xp_nasm REPO github.com/externpro/nasm TAG xpv2.14.02.4
@@ -138,7 +138,7 @@ set(xp_nodeng REPO github.com/externpro/nodeng TAG xpv24.13.0.5
 set(xp_nodexp REPO github.com/externpro/nodexp TAG xpv22.19.0.3
   MANIFEST_SHA256 06eb63c6fe8d156ae5c0cb1ca53143e432c1b59b888139d16f28c3cd2711d0ef
   )
-set(xp_nvjpeg2000 REPO github.com/externpro/nvJPEG2000 TAG xpv0.8.1.5
+set(xp_nvJPEG2000 REPO github.com/externpro/nvJPEG2000 TAG xpv0.8.1.5
   MANIFEST_SHA256 85fe46cb76e1bde9e7ddf87480ae1b0d7c56ea05563d2ae786abf0cb45be94b5
   )
 set(xp_openh264 REPO github.com/externpro/openh264 TAG xpv1.4.0.3
@@ -169,7 +169,7 @@ set(xp_spatialite-tools REPO github.com/externpro/spatialite-tools TAG xpv5.1.0.
 set(xp_spdlog REPO github.com/externpro/spdlog TAG xpv1.17.0.1
   MANIFEST_SHA256 8b7e31b324d6dd7101033cd63dda21be3b44941c2e7d543a07dff4892f99690a
   )
-set(xp_sqlite3 REPO github.com/externpro/SQLite3 TAG xpv3.38.2.3
+set(xp_SQLite3 REPO github.com/externpro/SQLite3 TAG xpv3.38.2.3
   MANIFEST_SHA256 a41857465c8b760e7f500f0115bdd83d1151da6f4cefabe9c0baf2ae52cb13a6
   )
 set(xp_threads REPO github.com/externpro/Threads TAG xpv1.0.0
@@ -178,13 +178,13 @@ set(xp_threads REPO github.com/externpro/Threads TAG xpv1.0.0
 set(xp_wirehair REPO github.com/externpro/wirehair TAG xpv23.12.02.3
   MANIFEST_SHA256 8d0617549ee6e5d07df73d2336d78e46ee34ddc0d3f6660fdfccfee3b5238266
   )
-set(xp_wxwidgets REPO github.com/externpro/wxWidgets TAG xpv3.1.0.6
+set(xp_wxWidgets REPO github.com/externpro/wxWidgets TAG xpv3.1.0.6
   MANIFEST_SHA256 029276ba7e00f383616d6044c4a03baeb99fa909e20ecfc5af76c453d3f5ccab
   )
-set(xp_wxinclude REPO github.com/externpro/wxInclude TAG xpv1.2.3
+set(xp_wxInclude REPO github.com/externpro/wxInclude TAG xpv1.2.3
   MANIFEST_SHA256 48e7bfa35b929d8c43839a1806b466a39c2e500ba529fd8b22c19a60d6b63e63
   )
-set(xp_wxtetris REPO github.com/smanders/wxTetris TAG xpv1.3.1
+set(xp_wxTetris REPO github.com/smanders/wxTetris TAG xpv1.3.1
   MANIFEST_SHA256 93e1c05c1baa829ce407b8cc3e29acd85d7e98c0a0d15e1b029458904474201f
   )
 set(xp_wxx REPO github.com/externpro/wxx TAG xpv26.02
