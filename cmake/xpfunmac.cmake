@@ -832,7 +832,7 @@ function(xpFindPkg)
       if(EXISTS ${pth}/share/cmake/xpuse-${pkg}-config.cmake)
         set(PKG_NAMES NAMES xpuse-${pkg})
       endif()
-      find_package(${package} ${PKG_NAMES} REQUIRED CONFIG BYPASS_PROVIDER
+      find_package(${package} ${PKG_NAMES} REQUIRED CONFIG BYPASS_PROVIDER GLOBAL
         PATHS ${pth} ${pth}/share/cmake NO_DEFAULT_PATH
         )
       mark_as_advanced(${package}_DIR)
