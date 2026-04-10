@@ -1,5 +1,5 @@
 set(@ucRepoName@_VER "@VER@")
 set(reqVars @ucRepoName@_VER)
 @FIND_DEPS@@FIND_THREADS@@EXT1@@TARGETS_FILE@@EXT2@@LIBS@@EXE@@ALIASES@@EXT3@@EXT4@include(FindPackageHandleStandardArgs)
-find_package_handle_standard_args(@lcRepoName@ REQUIRED_VARS ${reqVars})
+find_package_handle_standard_args(@P_REPO_NAME@ REQUIRED_VARS ${reqVars})
 mark_as_advanced(${reqVars})
