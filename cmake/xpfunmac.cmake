@@ -1815,8 +1815,8 @@ function(xpExternPackage)
   set(opts CREATE_ALIASES FIND_THREADS)
   # CREATE_ALIASES is an optional parameter to indicate ALIAS targets should be
   #   created with hard-coded 'xpro' namespace for EXE and LIBRARIES
-  # FIND_THREADS is an optional parameter to indicate the use script
-  #   should find the Threads::Threads target (from Threads package)
+  # FIND_THREADS is deprecated; add 'Threads' to DEPS parameter instead
+  #   Previously indicated the use script should find the Threads::Threads target
   set(oneValueArgs ALIAS_NAMESPACE COMPONENT EXE EXE_PATH EXPORT NAMESPACE REPO_NAME TARGETS_FILE)
   # ALIAS_NAMESPACE is deprecated; now hard-coded internally to 'xpro' as an alternative
   #   CMake namespace. add_[executable|library] ALIAS[es] will be included in the use script
@@ -1869,6 +1869,9 @@ function(xpExternPackage)
   if(DEFINED P_NAMESPACE)
     message(AUTHOR_WARNING "xpExternPackage: NAMESPACE parameter is deprecated and ignored. Using package name as namespace instead.")
   endif()
+  if(P_FIND_THREADS)
+    message(AUTHOR_WARNING "xpExternPackage: FIND_THREADS option is deprecated and ignored. Add 'Threads' to DEPS parameter instead.")
+  endif()
   # Set P_EXPORT to P_TARGETS_FILE if P_EXPORT is not defined
   if(NOT DEFINED P_EXPORT)
     if(DEFINED P_TARGETS_FILE)
@@ -1896,13 +1899,6 @@ function(xpExternPackage)
   if(DEFINED P_DEPS)
     list(JOIN P_DEPS " " deps) # list to string with spaces
     set(FIND_DEPS "xpFindPkg(PKGS ${deps}) # dependencies\n")
-  endif()
-  if(P_FIND_THREADS)
-    string(JOIN "\n" FIND_THREADS
-      "set(THREAD_PREFER_PTHREAD_FLAG ON)"
-      "find_package(Threads REQUIRED) # depends on Threads::Threads"
-      ""
-      )
   endif()
   if(DEFINED P_TARGETS_FILE)
     set(TARGETS_FILE "include(\${CMAKE_CURRENT_LIST_DIR}/${P_TARGETS_FILE}.cmake)\n")

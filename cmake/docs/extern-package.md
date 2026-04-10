@@ -54,8 +54,9 @@ In repos using externpro, the provided CMakePresets automatically set up the dep
 - `PVT_DEPS`
   - Private dependencies written to the manifest but not included in the consumer config.
 
-- `FIND_THREADS`
-  - Emits `find_package(Threads REQUIRED)` into the consumer config.
+- `FIND_THREADS` (deprecated)
+  - Previously emitted `find_package(Threads REQUIRED)` into the consumer config.
+  - Add 'Threads' to `DEPS` parameter instead.
 
 ### Manifest metadata parameters
 
