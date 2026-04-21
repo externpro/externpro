@@ -50,9 +50,13 @@ In repos using externpro, the provided CMakePresets automatically set up the dep
 
 - `DEPS`
   - List of externpro dependency names. Used to generate `xpFindPkg(PKGS ...)` in the consumer config.
+  - If not specified, dependencies will be automatically inferred from `LIBRARIES` and `EXE` targets.
+  - Set to empty string `""` to disable automatic dependency inference.
+  - When specified, inferred dependencies are audited against provided ones and differences are reported if the `XP_EXTERNPACKAGE_AUDIT_DEPS` option is enabled.
 
 - `PVT_DEPS`
   - Private dependencies written to the manifest but not included in the consumer config.
+  - If not specified, private dependencies will be automatically inferred from `LIBRARIES` and `EXE` targets.
 
 - `FIND_THREADS` (deprecated)
   - Previously emitted `find_package(Threads REQUIRED)` into the consumer config.
