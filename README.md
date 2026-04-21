@@ -109,12 +109,13 @@ The goal is simple: make "develop -> build -> test -> release" fast and consiste
 #### Provide your project as a dependency for others
 - Quickly and easily make your project consumable by other downstream projects by calling externpro-provided cmake functions to create an xpro package
 - For details on generating the xpro package, manifest metadata, and the generated use script, see [Extern package](./cmake/docs/extern-package.md).
-- For example, this is what "creating an xpro package" looks like in practice: spdlog (which depends on fmt) calls `xpExternPackage()` in its `CMakeLists.txt` to create an xpro package, which includes metadata about the project
+- For example, this is what "creating an xpro package" looks like in practice: spdlog calls `xpExternPackage()` in its `CMakeLists.txt` to create an xpro package, which includes metadata about the project (its dependency on fmt is determined automatically by externpro)
    ```cmake
-   xpExternPackage(TARGETS_FILE ${targetsFile}
+   xpExternPackage(EXPORT spdlog
+     TARGETS_FILE spdlogConfigTargets
      LIBRARIES spdlog spdlog_header_only
+     DEFAULT_TARGETS spdlog
      BASE v${SPDLOG_VERSION} XPDIFF "patch"
-     FIND_THREADS DEPS fmt
      WEB "https://github.com/gabime/spdlog/wiki"
      UPSTREAM "github.com/gabime/spdlog"
      DESC "Fast C++ logging library"
