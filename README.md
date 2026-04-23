@@ -109,17 +109,15 @@ The goal is simple: make "develop -> build -> test -> release" fast and consiste
 #### Provide your project as a dependency for others
 - Quickly and easily make your project consumable by other downstream projects by calling externpro-provided cmake functions to create an xpro package
 - For details on generating the xpro package, manifest metadata, and the generated use script, see [Extern package](./cmake/docs/extern-package.md).
-- For example, this is what "creating an xpro package" looks like in practice: spdlog calls `xpExternPackage()` in its `CMakeLists.txt` to create an xpro package, which includes metadata about the project (its dependency on fmt is determined automatically by externpro)
+- For example, this is what "creating an xpro package" looks like in practice: libexpat calls `xpExternPackage()` in its `CMakeLists.txt` to create an xpro package, which includes metadata about the project
    ```cmake
-   xpExternPackage(EXPORT spdlog
-     TARGETS_FILE spdlogConfigTargets
-     LIBRARIES spdlog spdlog_header_only
-     DEFAULT_TARGETS spdlog
-     BASE v${SPDLOG_VERSION} XPDIFF "patch"
-     WEB "https://github.com/gabime/spdlog/wiki"
-     UPSTREAM "github.com/gabime/spdlog"
-     DESC "Fast C++ logging library"
-     LICENSE "[MIT](https://github.com/gabime/spdlog?tab=License-1-ov-file 'MIT License')"
+   xpExternPackage(TARGETS_FILE ${targetsFile}
+     LIBRARIES expat
+     BASE R_2_2_5 XPDIFF "patch"
+     WEB "https://libexpat.github.io"
+     UPSTREAM "github.com/libexpat/libexpat"
+     DESC "a stream-oriented XML parser library written in C"
+     LICENSE "[MIT](https://github.com/libexpat/libexpat/blob/R_2_2_5/expat/COPYING 'MIT License')"
      )
    ```
 
