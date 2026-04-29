@@ -37,6 +37,16 @@ jobs:
           fetch-tags: true # explicitly fetches tags
           submodules: true
       -
+        name: Checkout xpupdate branch if exists
+        run: |
+          # Check if xpupdate branch exists and checkout if it does
+          if git rev-parse --verify origin/xpupdate >/dev/null 2>&1; then
+            echo "xpupdate branch exists, checking it out"
+            git checkout -B xpupdate origin/xpupdate
+          else
+            echo "xpupdate branch does not exist, staying on default branch"
+          fi
+      -
         name: Validate externpro submodule
         id: validate
         uses: externpro/externpro/.github/actions/externpro-validate@main
@@ -138,7 +148,6 @@ jobs:
       -
         name: Configure and snapshot dependency artifacts
         id: deps
-        if: ${{ always() }}
         uses: ./.devcontainer/.github/actions/externpro-deps-configure
         with:
           submodule_path: ${{ steps.validate.outputs.submodule_path }}
