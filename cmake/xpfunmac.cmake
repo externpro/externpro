@@ -1872,8 +1872,23 @@ function(ipExternPackageInferDeps _out_deps _out_pvt_deps)
   if(_pvt_deps AND _pub_deps)
     list(REMOVE_ITEM _pvt_deps ${_pub_deps})
   endif()
-  set(${_out_deps} "${_pub_deps}" PARENT_SCOPE)
-  set(${_out_pvt_deps} "${_pvt_deps}" PARENT_SCOPE)
+  if(_pub_deps)
+    list(REMOVE_DUPLICATES _pub_deps)
+  endif()
+  if(_pvt_deps)
+    list(REMOVE_DUPLICATES _pvt_deps)
+  endif()
+  # Set variables, but unset them if empty to avoid downstream DEFINED checks
+  if(_pub_deps)
+    set(${_out_deps} "${_pub_deps}" PARENT_SCOPE)
+  else()
+    unset(${_out_deps} PARENT_SCOPE)
+  endif()
+  if(_pvt_deps)
+    set(${_out_pvt_deps} "${_pvt_deps}" PARENT_SCOPE)
+  else()
+    unset(${_out_pvt_deps} PARENT_SCOPE)
+  endif()
 endfunction()
 
 # Helper function to compute missing/extra dependencies
@@ -1892,65 +1907,61 @@ function(ipExternPackageComputeDiffs missing_var extra_var infer_list provided_l
 endfunction()
 
 # Helper function to report dependency differences
-function(ipExternPackageReportDiffs repo_name missing_deps extra_deps missing_pvt extra_pvt)
+function(ipExternPackageReportDiffs missing_deps extra_deps missing_pvt extra_pvt)
   if(missing_deps OR extra_deps OR missing_pvt OR extra_pvt)
     if(missing_deps)
-      message(STATUS "xpExternPackage[${repo_name}] missing DEPS: '${missing_deps}'")
+      message(STATUS "missing DEPS: '${missing_deps}'")
     endif()
     if(extra_deps)
-      message(STATUS "xpExternPackage[${repo_name}] extra DEPS: '${extra_deps}'")
+      message(STATUS "extra DEPS: '${extra_deps}'")
     endif()
     if(missing_pvt)
-      message(STATUS "xpExternPackage[${repo_name}] missing PVT_DEPS: '${missing_pvt}'")
+      message(STATUS "missing PVT_DEPS: '${missing_pvt_deps}'")
     endif()
     if(extra_pvt)
-      message(STATUS "xpExternPackage[${repo_name}] extra PVT_DEPS: '${extra_pvt}'")
+      message(STATUS "extra PVT_DEPS: '${extra_pvt_deps}'")
     endif()
   else()
-    message(STATUS "xpExternPackage[${repo_name}] inferred and provided dependencies match")
+    message(STATUS "inferred and provided dependencies match")
   endif()
 endfunction()
 
-function(ipExternPackageAuditDeps repo_name targets provided_deps provided_pvt_deps)
-  # Infer dependencies from targets
+function(ipExternPackageAuditDeps provided_deps provided_pvt_deps targets)
+  # Infer dependencies for comparison
   ipExternPackageInferDeps(_infer_deps _infer_pvt_deps TARGETS ${targets})
-  set(_provided_deps "${provided_deps}")
-  set(_provided_pvt_deps "${provided_pvt_deps}")
-  # Sort lists for order-insensitive comparison before computing differences
+  # Sort lists for comparison
   if(_infer_deps)
     list(SORT _infer_deps)
-  endif()
-  if(_provided_deps)
-    list(SORT _provided_deps)
   endif()
   if(_infer_pvt_deps)
     list(SORT _infer_pvt_deps)
   endif()
-  if(_provided_pvt_deps)
-    list(SORT _provided_pvt_deps)
+  if(provided_deps)
+    list(SORT provided_deps)
   endif()
-  # Compute differences using sorted lists
-  ipExternPackageComputeDiffs(_missing_deps _extra_deps "${_infer_deps}" "${_provided_deps}")
-  ipExternPackageComputeDiffs(_missing_pvt _extra_pvt "${_infer_pvt_deps}" "${_provided_pvt_deps}")
-  # Always show inferred vs provided comparison when dependencies exist
-  if(_infer_deps OR _infer_pvt_deps OR _provided_deps OR _provided_pvt_deps)
-    message(STATUS "xpExternPackage[${repo_name}] inferred DEPS='${_infer_deps}' PVT_DEPS='${_infer_pvt_deps}'")
-    message(STATUS "xpExternPackage[${repo_name}] provided DEPS='${_provided_deps}' PVT_DEPS='${_provided_pvt_deps}'")
-    ipExternPackageReportDiffs("${repo_name}" "${_missing_deps}" "${_extra_deps}" "${_missing_pvt}" "${_extra_pvt}")
+  if(provided_pvt_deps)
+    list(SORT provided_pvt_deps)
   endif()
-  # Return inferred dependencies for potential use
-  set("${repo_name}_INFERRED_DEPS" "${_infer_deps}" PARENT_SCOPE)
-  set("${repo_name}_INFERRED_PVT_DEPS" "${_infer_pvt_deps}" PARENT_SCOPE)
+  # Compute differences
+  ipExternPackageComputeDiffs(_missing_deps _extra_deps "${_infer_deps}" "${provided_deps}")
+  ipExternPackageComputeDiffs(_missing_pvt _extra_pvt "${_infer_pvt_deps}" "${provided_pvt_deps}")
+  # Show comparison
+  if(_infer_deps OR _infer_pvt_deps OR provided_deps OR provided_pvt_deps)
+    message(STATUS "inferred DEPS='${_infer_deps}' PVT_DEPS='${_infer_pvt_deps}'")
+    message(STATUS "provided DEPS='${provided_deps}' PVT_DEPS='${provided_pvt_deps}'")
+    ipExternPackageReportDiffs("${_missing_deps}" "${_extra_deps}" "${_missing_pvt}" "${_extra_pvt}")
+  endif()
 endfunction()
 
 function(xpExternPackage)
   # NOTE: if CMAKE_INSTALL_CMAKEDIR is not defined, it will be set here
   #   and available in PARENT_SCOPE
-  set(opts CREATE_ALIASES FIND_THREADS)
+  set(opts CREATE_ALIASES FIND_THREADS NO_INFER_DEPS)
   # CREATE_ALIASES is an optional parameter to indicate ALIAS targets should be
   #   created with hard-coded 'xpro' namespace for EXE and LIBRARIES
   # FIND_THREADS is deprecated; add 'Threads' to DEPS parameter instead
   #   Previously indicated the use script should find the Threads::Threads target
+  # NO_INFER_DEPS disables automatic dependency inference when DEPS/PVT_DEPS not specified
   set(oneValueArgs ALIAS_NAMESPACE COMPONENT EXE EXE_PATH EXPORT NAMESPACE REPO_NAME TARGETS_FILE)
   # ALIAS_NAMESPACE is deprecated; now hard-coded internally to 'xpro' as an alternative
   #   CMake namespace. add_[executable|library] ALIAS[es] will be included in the use script
@@ -1992,13 +2003,14 @@ function(xpExternPackage)
   # DEFAULT_TARGETS are for default CMake targets; passed to install(PACKAGE_INFO)
   # DEPS are for library dependencies; leveraged by use script and manifest
   #   If not specified, dependencies will be automatically inferred from LIBRARIES and EXE targets
-  #   Set to empty string "" to disable automatic dependency inference
+  #   Use NO_INFER_DEPS option to disable automatic dependency inference
   # LIBRARIES are for CMake library targets; included in the use script
   # PVT_DEPS are for private dependencies (often an executable or internal
   #   dependency); part of manifest and NOT part of use script (a project
   #   may have private dependencies that don't need to be found by projects
   #   that use the project that has private dependencies)
   #   If not specified, private dependencies will be automatically inferred from LIBRARIES and EXE targets
+  #   Use NO_INFER_DEPS option to disable automatic dependency inference
   cmake_parse_arguments(P "${opts}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
   if(DEFINED P_ALIAS_NAMESPACE)
     message(AUTHOR_WARNING "xpExternPackage: ALIAS_NAMESPACE parameter is deprecated and ignored. Use CREATE_ALIASES option to create 'xpro' aliases instead.")
@@ -2032,41 +2044,15 @@ function(xpExternPackage)
   ###############
   # dependency processing
   if(DEFINED P_LIBRARIES OR DEFINED P_EXE)
-    set(_targets ${P_LIBRARIES} ${P_EXE}) # collect targets for dependency analysis
+    set(_targets ${P_LIBRARIES} ${P_EXE})
+  endif()
+  # Infer dependencies if DEPS/PVT_DEPS not specified and NO_INFER_DEPS not set
+  if(_targets AND NOT P_NO_INFER_DEPS AND NOT DEFINED P_DEPS AND NOT DEFINED P_PVT_DEPS)
+    ipExternPackageInferDeps(P_DEPS P_PVT_DEPS TARGETS ${_targets})
   endif()
   option(XP_EXTERNPACKAGE_AUDIT_DEPS "Audit inferred vs provided DEPS/PVT_DEPS in xpExternPackage" OFF)
-  if(XP_EXTERNPACKAGE_AUDIT_DEPS)
-    # Show audit report if DEPS and/or PVT_DEPS is defined (even if empty string)
-    if(DEFINED P_DEPS OR DEFINED P_PVT_DEPS)
-      if(_targets)
-        ipExternPackageAuditDeps("${P_REPO_NAME}" "${_targets}" "${P_DEPS}" "${P_PVT_DEPS}")
-        message(STATUS "xpExternPackage[${P_REPO_NAME}] using provided DEPS/PVT_DEPS")
-      endif()
-    elseif(_targets)
-      # Neither DEPS nor PVT_DEPS specified, use inferred dependencies
-      ipExternPackageAuditDeps("${P_REPO_NAME}" "${_targets}" "${P_DEPS}" "${P_PVT_DEPS}")
-      if(DEFINED ${P_REPO_NAME}_INFERRED_DEPS)
-        set(P_DEPS "${${P_REPO_NAME}_INFERRED_DEPS}")
-        message(STATUS "xpExternPackage[${P_REPO_NAME}] using inferred DEPS: '${P_DEPS}'")
-      endif()
-      if(DEFINED ${P_REPO_NAME}_INFERRED_PVT_DEPS)
-        set(P_PVT_DEPS "${${P_REPO_NAME}_INFERRED_PVT_DEPS}")
-        if(P_PVT_DEPS)
-          message(STATUS "xpExternPackage[${P_REPO_NAME}] using inferred PVT_DEPS: '${P_PVT_DEPS}'")
-        endif()
-      endif()
-    endif()
-  else()
-    # audit option is OFF - silently infer dependencies if neither DEPS nor PVT_DEPS specified
-    if((NOT "${ARGN}" MATCHES "DEPS;") AND (NOT "${ARGN}" MATCHES "PVT_DEPS;") AND _targets)
-      ipExternPackageInferDeps(_inferred_deps _inferred_pvt_deps TARGETS ${_targets})
-      if(_inferred_deps)
-        set(P_DEPS "${_inferred_deps}")
-      endif()
-      if(_inferred_pvt_deps)
-        set(P_PVT_DEPS "${_inferred_pvt_deps}")
-      endif()
-    endif()
+  if(XP_EXTERNPACKAGE_AUDIT_DEPS AND _targets)
+    ipExternPackageAuditDeps("${P_DEPS}" "${P_PVT_DEPS}" "${_targets}")
   endif()
   ###############
   # use script
