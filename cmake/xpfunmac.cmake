@@ -2046,13 +2046,14 @@ function(xpExternPackage)
   if(DEFINED P_LIBRARIES OR DEFINED P_EXE)
     set(_targets ${P_LIBRARIES} ${P_EXE})
   endif()
+  option(XP_EXTERNPACKAGE_AUDIT_DEPS "Audit inferred vs provided DEPS/PVT_DEPS in xpExternPackage" OFF)
+  # Audit dependencies first to see what's missing before inference
+  if(XP_EXTERNPACKAGE_AUDIT_DEPS AND _targets)
+    ipExternPackageAuditDeps("${P_DEPS}" "${P_PVT_DEPS}" "${_targets}")
+  endif()
   # Infer dependencies if DEPS/PVT_DEPS not specified and NO_INFER_DEPS not set
   if(_targets AND NOT P_NO_INFER_DEPS AND NOT DEFINED P_DEPS AND NOT DEFINED P_PVT_DEPS)
     ipExternPackageInferDeps(P_DEPS P_PVT_DEPS TARGETS ${_targets})
-  endif()
-  option(XP_EXTERNPACKAGE_AUDIT_DEPS "Audit inferred vs provided DEPS/PVT_DEPS in xpExternPackage" OFF)
-  if(XP_EXTERNPACKAGE_AUDIT_DEPS AND _targets)
-    ipExternPackageAuditDeps("${P_DEPS}" "${P_PVT_DEPS}" "${_targets}")
   endif()
   ###############
   # use script
