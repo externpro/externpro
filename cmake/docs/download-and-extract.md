@@ -2,6 +2,8 @@
 
 This page describes the "other half" of the dependency-provider story: what happens after externpro decides it can satisfy a `find_package(<dep>)` call.
 
+This includes downloading and extracting packages, with support for both Common Package Specification (CPS) files and traditional CMake script configurations.
+
 The core flow is:
 
 - `find_package(<dep>)`
@@ -9,7 +11,7 @@ The core flow is:
 - `xpFindPkg()` calls `ipGetProPath()` to obtain a `PATHS` entry
 - `ipGetProPath()` downloads a release manifest (or uses a local artifact)
 - `ipDownloadExtract()` downloads the `.tar.xz` package and extracts it under `XPRO_DIR`
-- `find_package(xpuse-<dep> ... PATHS <share/cmake> NO_DEFAULT_PATH)` loads the generated use config from the extracted package
+- `find_package(<dep> ... PATHS <search_paths> NO_DEFAULT_PATH)` loads either CPS files or the generated cmake script config from the extracted package
 
 All of this is implemented in [`cmake/xpfunmac.cmake`](../xpfunmac.cmake).
 
@@ -82,14 +84,26 @@ For the common case (REPO + TAG + manifest hash), `ipGetProPath()`:
 - uses a timestamp file to determine whether to re-extract when a newer archive is downloaded
 - determines the CMake entry point path by probing for `${XPRO_DIR}/xpx/<pkgbase>-xpro/share/cmake` or `${XPRO_DIR}/xpx/<pkgbase>/share/cmake`
 
-## Step 6: find_package(xpuse-<dep>) loads the consumer config
+## Step 6: find_package(<dep>) loads the package config
 
-The extracted package contains a generated use config named `xpuse-<dep>-config.cmake`.
+The extracted package contains a generated use config named `<dep>-config.cmake` (cmake script). Many packages also include CPS files.
 
 `xpFindPkg()` calls:
 ```cmake
-find_package(xpuse-<dep> BYPASS_PROVIDER REQUIRED PATHS <pth> NO_DEFAULT_PATH)
+find_package(<dep> [NAMES xpuse-<dep>] REQUIRED CONFIG GLOBAL
+  BYPASS_PROVIDER PATHS <search_paths> NO_DEFAULT_PATH)
 ```
+
+The optional `NAMES xpuse-<dep>` is for backward compatibility with xpro packages created before CPS support was added.
+
+Where `<search_paths>` depends on the mode:
+- **CPS mode**: `${pth} ${pth}/share/cmake` (searches both CPS and cmake script files)
+- **CMake script mode**: `${pth}/share/cmake` (searches only cmake script files)
+
+The mode is determined by:
+1. Global `FIND_PACKAGE_CMAKE_SCRIPT` option
+2. Per-package `findxpro.cmake` marker file
+3. Default CPS behavior
 
 This is how the package's imported targets/variables become available to the consuming project.
 

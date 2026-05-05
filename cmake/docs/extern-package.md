@@ -6,10 +6,11 @@ It is implemented in [`cmake/xpfunmac.cmake`](../xpfunmac.cmake).
 
 At a high level it:
 
-- generates a consumer "use" config (`xpuse-<pkg>-config.cmake`)
+- generates a consumer "use" config (cmake script: `<repo>-config.cmake`)
 - generates a per-release manifest (`<repo>-<tag>.manifest.cmake` or `<repo>-<tag>.manifest.json`)
 - writes build metadata (`sysinfo.txt`)
-- generates SBOM (Software Bill Of Materials) and CPS (Common Package Specification) files
+- generates SBOM (Software Bill Of Materials) files
+- generates CPS (Common Package Specification) files
 - optionally generates dependency reports (`xprodeps.md` and `xprodeps.svg`) when dependency metadata is provided
 - configures basic archive packaging (TXZ) for the produced artifacts
 
@@ -58,6 +59,12 @@ In repos using externpro, the provided CMakePresets automatically set up the dep
   - Private dependencies written to the manifest but not included in the consumer config.
   - If not specified, private dependencies will be automatically inferred from `LIBRARIES` and `EXE` targets.
 
+- `FIND_XPRO_CMAKE`
+  - Creates a `findxpro.cmake` marker file that forces `find_package()` to use cmake script files instead of CPS files for this package.
+  - Useful for packages that have CPS compatibility issues on specific platforms.
+  - Can be used conditionally per platform (e.g., only on Windows).
+  - Global `FIND_PACKAGE_CMAKE_SCRIPT` option can override this behavior for testing.
+
 - `FIND_THREADS` (deprecated)
   - Previously emitted `find_package(Threads REQUIRED)` into the consumer config.
   - Add 'Threads' to `DEPS` parameter instead.
@@ -83,14 +90,18 @@ These fields are written into the generated manifest file (`.manifest.cmake` or 
 
 ## Generated files (in the build directory)
 
-- `xpuse-<repo>-config.cmake`
-  - Consumer entry point used by `xpFindPkg()` / `find_package(xpuse-<repo>)`.
+- `<repo>-config.cmake`
+  - Consumer entry point used by `xpFindPkg()` / `find_package(<repo>)`.
 
 - `<REPO_NAME>-<VER>.manifest.cmake` or `<REPO_NAME>-<VER>.manifest.json`
   - Machine-readable metadata for the release.
 
 - `sysinfo.txt`
   - Build machine details plus compiler prefix.
+
+- `findxpro.cmake` (optional)
+  - Marker file created when `FIND_XPRO_CMAKE` option is used.
+  - Forces `find_package()` to use cmake script files instead of CPS files for this package.
 
 - `xprodeps.md` and `xprodeps.svg` (optional)
   - Generated when `DEPS` or `PVT_DEPS` is provided.
