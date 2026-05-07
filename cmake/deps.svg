@@ -5,7 +5,7 @@
  -->
 <!-- Title: GG Pages: 1 -->
 <svg width="1728pt" height="260pt"
- viewBox="0.00 0.00 1727.93 260.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+ viewBox="0.00 0.00 1727.97 260.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
 <g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 256)">
 <title>GG</title>
 <!-- FFmpeg -->
@@ -431,32 +431,32 @@
 <!-- spdlog -->
 <g id="node38" class="node">
 <title>spdlog</title>
-<ellipse fill="none" stroke="#64748b" cx="1660.97" cy="-234" rx="28.69" ry="18"/>
-<text text-anchor="middle" x="1660.97" y="-231.5" font-family="Times-Roman" font-size="10.00" fill="#64748b">spdlog</text>
-</g>
-<!-- fmt -->
-<g id="node39" class="node">
-<title>fmt</title>
-<ellipse fill="none" stroke="#64748b" cx="1608.97" cy="-162" rx="27" ry="18"/>
-<text text-anchor="middle" x="1608.97" y="-159.5" font-family="Times-Roman" font-size="10.00" fill="#64748b">fmt</text>
-</g>
-<!-- spdlog&#45;&gt;fmt -->
-<g id="edge34" class="edge">
-<title>spdlog&#45;&gt;fmt</title>
-<path fill="none" stroke="#64748b" d="M1649.42,-217.46C1642.69,-208.4 1634.06,-196.79 1626.51,-186.61"/>
-<polygon fill="#64748b" stroke="#64748b" points="1629.25,-184.43 1620.47,-178.49 1623.63,-188.61 1629.25,-184.43"/>
+<ellipse fill="none" stroke="#64748b" cx="1663.97" cy="-234" rx="28.69" ry="18"/>
+<text text-anchor="middle" x="1663.97" y="-231.5" font-family="Times-Roman" font-size="10.00" fill="#64748b">spdlog</text>
 </g>
 <!-- Threads -->
-<g id="node40" class="node">
+<g id="node39" class="node">
 <title>Threads</title>
-<ellipse fill="none" stroke="#64748b" cx="1686.97" cy="-162" rx="32.93" ry="18"/>
-<text text-anchor="middle" x="1686.97" y="-159.5" font-family="Times-Roman" font-size="10.00" fill="#64748b">Threads</text>
+<ellipse fill="none" stroke="#64748b" cx="1614.97" cy="-162" rx="32.93" ry="18"/>
+<text text-anchor="middle" x="1614.97" y="-159.5" font-family="Times-Roman" font-size="10.00" fill="#64748b">Threads</text>
 </g>
 <!-- spdlog&#45;&gt;Threads -->
-<g id="edge35" class="edge">
+<g id="edge34" class="edge">
 <title>spdlog&#45;&gt;Threads</title>
-<path fill="none" stroke="#64748b" d="M1667.13,-216.41C1670.13,-208.34 1673.8,-198.43 1677.18,-189.35"/>
-<polygon fill="#64748b" stroke="#64748b" points="1680.47,-190.55 1680.67,-179.96 1673.9,-188.11 1680.47,-190.55"/>
+<path fill="none" stroke="#64748b" d="M1652.85,-217.12C1646.73,-208.38 1639.01,-197.35 1632.14,-187.54"/>
+<polygon fill="#64748b" stroke="#64748b" points="1634.98,-185.49 1626.38,-179.31 1629.25,-189.51 1634.98,-185.49"/>
+</g>
+<!-- fmt -->
+<g id="node40" class="node">
+<title>fmt</title>
+<ellipse fill="none" stroke="#64748b" cx="1692.97" cy="-162" rx="27" ry="18"/>
+<text text-anchor="middle" x="1692.97" y="-159.5" font-family="Times-Roman" font-size="10.00" fill="#64748b">fmt</text>
+</g>
+<!-- spdlog&#45;&gt;fmt -->
+<g id="edge35" class="edge">
+<title>spdlog&#45;&gt;fmt</title>
+<path fill="none" stroke="#64748b" d="M1670.84,-216.41C1674.23,-208.22 1678.41,-198.14 1682.21,-188.95"/>
+<polygon fill="#64748b" stroke="#64748b" points="1685.55,-190.05 1686.14,-179.47 1679.08,-187.37 1685.55,-190.05"/>
 </g>
 <!-- wxInclude -->
 <g id="node41" class="node">
