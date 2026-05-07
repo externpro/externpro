@@ -17,6 +17,11 @@ on:
         type: string
         description: 'JSON array of Visual Studio compiler versions to build (e.g. ["Vs2022","Vs2026"])'
         default: '["Vs2022","Vs2026"]'
+      enable_tmate:
+        required: false
+        type: boolean
+        description: 'Start an interactive tmate session if the CMake workflow step fails (useful for debugging CI-only failures)'
+        default: false
 jobs:
   build:
     runs-on: ${{ matrix.vs_compiler == 'Vs2026' && 'windows-2025-vs2026' || 'windows-2022' }}
@@ -39,3 +44,4 @@ jobs:
           artifact_pattern: ${{ inputs.artifact_pattern }}
           cmake_preset: Msw${{ matrix.vs_compiler }}
           cmake_workflow_preset_suffix: ${{ inputs.cmake_workflow_preset_suffix }}
+          enable_tmate: ${{ inputs.enable_tmate }}

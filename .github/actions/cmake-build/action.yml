@@ -119,7 +119,7 @@ runs:
       if: ${{ inputs.enable_tmate == 'true' && steps.cmake_workflow.outcome == 'failure' }}
       uses: mxschmitt/action-tmate@v3
       with:
-        install-dependencies: false
+        install-dependencies: ${{ runner.os == 'Windows' }}
     -
       name: Fail if CMake Workflow failed
       if: ${{ steps.cmake_workflow.outcome == 'failure' }}
