@@ -49,7 +49,6 @@ runs:
       name: CMake Workflow
       shell: bash
       id: cmake_workflow
-      timeout-minutes: 15
       continue-on-error: true
       run: cmake --workflow --preset=${{ steps.presets.outputs.workflow_preset }}
     -
