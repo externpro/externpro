@@ -56,7 +56,7 @@ function(xpGetCompilerPrefix _ret)
     else()
       message(SEND_ERROR "xpfunmac.cmake: unknown CMAKE_<LANG>_COMPILER_VERSION")
     endif()
-    string(REGEX REPLACE "([0-9]+)\\.([0-9]+)\\.([0-9]+)\\.([0-9]+)?"
+    string(REGEX REPLACE "([0-9]+)\\.([0-9]+)\\.([0-9]+)(\\.[0-9]+)?"
       "${clangName}${digits}"
       prefix ${compilerVersion}
       )
