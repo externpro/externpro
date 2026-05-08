@@ -25,7 +25,6 @@ on:
 jobs:
   build:
     runs-on: ${{ matrix.vs_compiler == 'Vs2026' && 'windows-2025-vs2026' || 'windows-2022' }}
-    timeout-minutes: 20
     strategy:
       fail-fast: false
       matrix:
