@@ -46,6 +46,12 @@ runs:
         path: |
           _bld-${{ inputs.cmake_preset }}/CMakeFiles/CMakeConfigureLog.yaml
     -
+      name: Setup tmate session (for hanging tests)
+      if: ${{ inputs.enable_tmate == 'true' && runner.os == 'Windows' }}
+      uses: mxschmitt/action-tmate@v3
+      with:
+        install-dependencies: true
+    -
       name: CMake Workflow
       shell: bash
       id: cmake_workflow
