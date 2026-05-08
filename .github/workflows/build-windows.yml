@@ -20,7 +20,7 @@ on:
       enable_tmate:
         required: false
         type: boolean
-        description: 'Start an interactive tmate session if the CMake workflow step fails (useful for debugging CI-only failures)'
+        description: 'Start an interactive tmate session before CMake workflow (useful for debugging hanging tests)'
         default: false
 jobs:
   build:
