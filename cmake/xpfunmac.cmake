@@ -1873,8 +1873,20 @@ function(ipExternPackageInferDeps _out_deps _out_pvt_deps)
       list(APPEND _all_link ${_link})
     endif()
   endforeach()
-  ipExternPackageExtractDepNames(_pub_deps "${_all_iface}" "${P_TARGETS}")
-  ipExternPackageExtractDepNames(_pvt_deps "${_all_link}" "${P_TARGETS}")
+  # Separate INTERFACE_LINK_LIBRARIES into regular interface and LINK_ONLY deps
+  foreach(_it IN LISTS _all_iface)
+    if(_it MATCHES "^\\\$<LINK_ONLY:")
+      list(APPEND _link_only_iface "${_it}")
+    else()
+      list(APPEND _regular_iface "${_it}")
+    endif()
+  endforeach()
+  # Extract public deps from regular interface libraries only
+  ipExternPackageExtractDepNames(_pub_deps "${_regular_iface}" "${P_TARGETS}")
+  # Extract private deps from both LINK_LIBRARIES and LINK_ONLY interface libraries
+  set(_all_private ${_all_link} ${_link_only_iface})
+  ipExternPackageExtractDepNames(_pvt_deps "${_all_private}" "${P_TARGETS}")
+  # Remove any public deps from private deps to avoid duplication
   if(_pvt_deps AND _pub_deps)
     list(REMOVE_ITEM _pvt_deps ${_pub_deps})
   endif()
