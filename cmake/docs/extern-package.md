@@ -50,14 +50,15 @@ In repos using externpro, the provided CMakePresets automatically set up the dep
   - Only one may be set.
 
 - `DEPS`
-  - List of externpro dependency names. Used to generate `xpFindPkg(PKGS ...)` in the consumer config.
-  - If not specified, dependencies will be automatically inferred from `LIBRARIES` and `EXE` targets.
+  - **Consumer dependencies** (what downstream projects need). Automatically added to consumer config via `xpFindPkg(PKGS ...)` calls and included in the manifest.
+  - If not specified, dependencies will be automatically inferred from `LIBRARIES` targets (PUBLIC + PRIVATE dependencies).
   - Use `NO_INFER_DEPS` option to disable automatic dependency inference.
   - When specified, inferred dependencies are audited against provided ones and differences are reported if the `XP_EXTERNPACKAGE_AUDIT_DEPS` option is enabled.
 
 - `PVT_DEPS`
-  - Private dependencies written to the manifest but not included in the consumer config.
-  - If not specified, private dependencies will be automatically inferred from `LIBRARIES` and `EXE` targets.
+  - **Build dependencies** (what only the current project needs). Written to the manifest but NOT included in the consumer config.
+  - These include build tools (e.g., yasm executable) and executable target dependencies.
+  - If not specified, dependencies will be automatically inferred from `EXE` targets.
 
 - `FIND_XPRO_CMAKE`
   - Creates a `findxpro.cmake` marker file that forces `find_package()` to use cmake script files instead of CPS files for this package.
@@ -105,6 +106,7 @@ These fields are written into the generated manifest file (`.manifest.cmake` or 
 
 - `xprodeps.md` and `xprodeps.svg` (optional)
   - Generated when `DEPS` or `PVT_DEPS` is provided.
+  - Shows dependency relationships for both consumer and build dependencies.
   - The graph generation depends on Graphviz `dot` being available.
 
 ## Packaging behavior

@@ -1858,7 +1858,7 @@ function(ipExternPackageExtractDepNames _out items project_targets)
   set(${_out} "${_names}" PARENT_SCOPE)
 endfunction()
 
-function(ipExternPackageInferDeps _out_deps _out_pvt_deps)
+function(ipExternPackageInferDeps _out_deps)
   cmake_parse_arguments(P "" "" "TARGETS" ${ARGN})
   foreach(_t IN LISTS P_TARGETS)
     if(NOT TARGET ${_t})
@@ -1873,39 +1873,19 @@ function(ipExternPackageInferDeps _out_deps _out_pvt_deps)
       list(APPEND _all_link ${_link})
     endif()
   endforeach()
-  # Separate INTERFACE_LINK_LIBRARIES into regular interface and LINK_ONLY deps
-  foreach(_it IN LISTS _all_iface)
-    if(_it MATCHES "^\\\$<LINK_ONLY:")
-      list(APPEND _link_only_iface "${_it}")
-    else()
-      list(APPEND _regular_iface "${_it}")
-    endif()
-  endforeach()
-  # Extract public deps from regular interface libraries only
-  ipExternPackageExtractDepNames(_pub_deps "${_regular_iface}" "${P_TARGETS}")
-  # Extract private deps from both LINK_LIBRARIES and LINK_ONLY interface libraries
-  set(_all_private ${_all_link} ${_link_only_iface})
-  ipExternPackageExtractDepNames(_pvt_deps "${_all_private}" "${P_TARGETS}")
-  # Remove any public deps from private deps to avoid duplication
-  if(_pvt_deps AND _pub_deps)
-    list(REMOVE_ITEM _pvt_deps ${_pub_deps})
+  # Combine all dependencies (INTERFACE_LINK_LIBRARIES + LINK_LIBRARIES)
+  set(_all_deps ${_all_iface} ${_all_link})
+  # Extract dependency names
+  ipExternPackageExtractDepNames(_deps "${_all_deps}" "${P_TARGETS}")
+  # Remove duplicates
+  if(_deps)
+    list(REMOVE_DUPLICATES _deps)
   endif()
-  if(_pub_deps)
-    list(REMOVE_DUPLICATES _pub_deps)
-  endif()
-  if(_pvt_deps)
-    list(REMOVE_DUPLICATES _pvt_deps)
-  endif()
-  # Set variables, but unset them if empty to avoid downstream DEFINED checks
-  if(_pub_deps)
-    set(${_out_deps} "${_pub_deps}" PARENT_SCOPE)
+  # Set variable, but unset if empty to avoid downstream DEFINED checks
+  if(_deps)
+    set(${_out_deps} "${_deps}" PARENT_SCOPE)
   else()
     unset(${_out_deps} PARENT_SCOPE)
-  endif()
-  if(_pvt_deps)
-    set(${_out_pvt_deps} "${_pvt_deps}" PARENT_SCOPE)
-  else()
-    unset(${_out_pvt_deps} PARENT_SCOPE)
   endif()
 endfunction()
 
@@ -1925,49 +1905,36 @@ function(ipExternPackageComputeDiffs missing_var extra_var infer_list provided_l
 endfunction()
 
 # Helper function to report dependency differences
-function(ipExternPackageReportDiffs missing_deps extra_deps missing_pvt extra_pvt)
-  if(missing_deps OR extra_deps OR missing_pvt OR extra_pvt)
+function(ipExternPackageReportDiffs missing_deps extra_deps)
+  if(missing_deps OR extra_deps)
     if(missing_deps)
       message(STATUS "missing DEPS: '${missing_deps}'")
     endif()
     if(extra_deps)
       message(STATUS "extra DEPS: '${extra_deps}'")
     endif()
-    if(missing_pvt)
-      message(STATUS "missing PVT_DEPS: '${missing_pvt_deps}'")
-    endif()
-    if(extra_pvt)
-      message(STATUS "extra PVT_DEPS: '${extra_pvt_deps}'")
-    endif()
   else()
     message(STATUS "inferred and provided dependencies match")
   endif()
 endfunction()
 
-function(ipExternPackageAuditDeps provided_deps provided_pvt_deps targets)
+function(ipExternPackageAuditDeps provided_deps targets)
   # Infer dependencies for comparison
-  ipExternPackageInferDeps(_infer_deps _infer_pvt_deps TARGETS ${targets})
+  ipExternPackageInferDeps(_infer_deps TARGETS ${targets})
   # Sort lists for comparison
   if(_infer_deps)
     list(SORT _infer_deps)
   endif()
-  if(_infer_pvt_deps)
-    list(SORT _infer_pvt_deps)
-  endif()
   if(provided_deps)
     list(SORT provided_deps)
   endif()
-  if(provided_pvt_deps)
-    list(SORT provided_pvt_deps)
-  endif()
   # Compute differences
   ipExternPackageComputeDiffs(_missing_deps _extra_deps "${_infer_deps}" "${provided_deps}")
-  ipExternPackageComputeDiffs(_missing_pvt _extra_pvt "${_infer_pvt_deps}" "${provided_pvt_deps}")
   # Show comparison
-  if(_infer_deps OR _infer_pvt_deps OR provided_deps OR provided_pvt_deps)
-    message(STATUS "inferred DEPS='${_infer_deps}' PVT_DEPS='${_infer_pvt_deps}'")
-    message(STATUS "provided DEPS='${provided_deps}' PVT_DEPS='${provided_pvt_deps}'")
-    ipExternPackageReportDiffs("${_missing_deps}" "${_extra_deps}" "${_missing_pvt}" "${_extra_pvt}")
+  if(_infer_deps OR provided_deps)
+    message(STATUS "inferred DEPS='${_infer_deps}'")
+    message(STATUS "provided DEPS='${provided_deps}'")
+    ipExternPackageReportDiffs("${_missing_deps}" "${_extra_deps}")
   endif()
 endfunction()
 
@@ -2020,16 +1987,15 @@ function(xpExternPackage)
   #    fetch: diff adds cmake and utilizes FetchContent
   set(multiValueArgs DEFAULT_TARGETS DEPS LIBRARIES PVT_DEPS)
   # DEFAULT_TARGETS are for default CMake targets; passed to install(PACKAGE_INFO)
-  # DEPS are for library dependencies; leveraged by use script and manifest
-  #   If not specified, dependencies will be automatically inferred from LIBRARIES and EXE targets
-  #   Use NO_INFER_DEPS option to disable automatic dependency inference
+  # DEPS are for consumer dependencies (what downstream projects need); automatically added
+  #   to use script via xpFindPkg() calls and included in the manifest. If not specified,
+  #   dependencies will be automatically inferred from LIBRARIES targets (PUBLIC + PRIVATE dependencies).
+  #   Use NO_INFER_DEPS option to disable automatic dependency inference.
   # LIBRARIES are for CMake library targets; included in the use script
-  # PVT_DEPS are for private dependencies (often an executable or internal
-  #   dependency); part of manifest and NOT part of use script (a project
-  #   may have private dependencies that don't need to be found by projects
-  #   that use the project that has private dependencies)
-  #   If not specified, private dependencies will be automatically inferred from LIBRARIES and EXE targets
-  #   Use NO_INFER_DEPS option to disable automatic dependency inference
+  # PVT_DEPS are for build dependencies (what only the current project needs); written to
+  #   the manifest but NOT added to use script. These include build tools (e.g., yasm executable) and
+  #   executable target dependencies. If not specified, dependencies will be
+  #   automatically inferred from EXE targets. Use NO_INFER_DEPS option to disable automatic dependency inference.
   cmake_parse_arguments(P "${opts}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
   if(DEFINED P_ALIAS_NAMESPACE)
     message(AUTHOR_WARNING "xpExternPackage: ALIAS_NAMESPACE parameter is deprecated and ignored. Use CREATE_ALIASES option to create 'xpro' aliases instead.")
@@ -2062,17 +2028,23 @@ function(xpExternPackage)
   file(MAKE_DIRECTORY "${xproBinDir}")
   ###############
   # dependency processing
-  if(DEFINED P_LIBRARIES OR DEFINED P_EXE)
-    set(_targets ${P_LIBRARIES} ${P_EXE})
-  endif()
   option(XP_EXTERNPACKAGE_AUDIT_DEPS "Audit inferred vs provided DEPS/PVT_DEPS in xpExternPackage" OFF)
   # Audit dependencies first to see what's missing before inference
-  if(XP_EXTERNPACKAGE_AUDIT_DEPS AND _targets)
-    ipExternPackageAuditDeps("${P_DEPS}" "${P_PVT_DEPS}" "${_targets}")
+  if(XP_EXTERNPACKAGE_AUDIT_DEPS)
+    if(DEFINED P_DEPS)
+      ipExternPackageAuditDeps("${P_DEPS}" "${P_LIBRARIES}")
+    endif()
+    if(DEFINED P_PVT_DEPS)
+      ipExternPackageAuditDeps("${P_PVT_DEPS}" "${P_EXE}")
+    endif()
   endif()
-  # Infer dependencies if DEPS/PVT_DEPS not specified and NO_INFER_DEPS not set
-  if(_targets AND NOT P_NO_INFER_DEPS AND NOT DEFINED P_DEPS AND NOT DEFINED P_PVT_DEPS)
-    ipExternPackageInferDeps(P_DEPS P_PVT_DEPS TARGETS ${_targets})
+  # Infer consumer dependencies from libraries if DEPS not specified and NO_INFER_DEPS not set
+  if(DEFINED P_LIBRARIES AND NOT P_NO_INFER_DEPS AND NOT DEFINED P_DEPS)
+    ipExternPackageInferDeps(P_DEPS TARGETS ${P_LIBRARIES})
+  endif()
+  # Infer build dependencies from executables if PVT_DEPS not specified and NO_INFER_DEPS not set
+  if(DEFINED P_EXE AND NOT P_NO_INFER_DEPS AND NOT DEFINED P_PVT_DEPS)
+    ipExternPackageInferDeps(P_PVT_DEPS TARGETS ${P_EXE})
   endif()
   ###############
   # use script
