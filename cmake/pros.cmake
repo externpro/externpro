@@ -13,15 +13,18 @@ set(xp_azmq REPO github.com/externpro/azmq TAG xpv1.0.3.3
 set(xp_boost REPO github.com/externpro/boost TAG xpv1.76.0.5
   MANIFEST_SHA256 a55d61f2b2e18269f21ee534b8029cae7956cf4824803f232ef33f7a1080f99d
   )
+set(ap_Boost boost)
 set(xp_bzip2 REPO github.com/externpro/bzip2 TAG xpv1.0.8.4
   MANIFEST_SHA256 a4ff27c9d22e9c1631744efed436f6646ea61df0d10a15f03574f600fe6bb9c6
   )
+set(ap_BZip2 bzip2)
 set(xp_c-ares REPO github.com/externpro/c-ares TAG xpv1.18.1.3
   MANIFEST_SHA256 17ad0a475364d1e3e79239b8ccadb966712658724aa4403e97ee19394c1f1dc7
   )
 set(xp_ceres-solver REPO github.com/externpro/ceres-solver TAG xpv2.2.0.4
   MANIFEST_SHA256 c0fa774627b206e6d49c374f1368943268dbbe8f3c86cf67b4aea688ac709fce
   )
+set(ap_Ceres ceres-solver)
 set(xp_clang-format REPO github.com/externpro/clang-format TAG xpv19.1.5.3
   MANIFEST_SHA256 983e528d2a12bf00f596183032d8c465834460565dc714dbb08bf45ac9485546
   )
@@ -31,9 +34,11 @@ set(xp_cppzmq REPO github.com/externpro/cppzmq TAG xpv4.7.1.3
 set(xp_curl REPO github.com/externpro/curl TAG xpv7.80.0.4
   MANIFEST_SHA256 c3e620e11af6f71600d18dbe0910fae4c94943a532965b160b4872a360ad1cd9
   )
+set(ap_CURL curl)
 set(xp_eigen REPO github.com/externpro/eigen TAG xpv3.4.0.3
   MANIFEST_SHA256 63af710c14984eab4e99ab7909e9d130735a6e5635316e6b900a1206ab179a32
   )
+set(ap_Eigen3 eigen)
 set(xp_fecpp REPO github.com/externpro/fecpp TAG xpv0.9.3
   MANIFEST_SHA256 4745ae069ba2cd06db6f1dee80052e21bb297b40ab03ca4f3505c50b17ac53a5
   )
@@ -53,21 +58,26 @@ set(xp_fmt REPO github.com/externpro/fmt TAG xpv12.1.0.6
 set(xp_geos REPO github.com/externpro/geos TAG xpv3.13.0.6
   MANIFEST_SHA256 2860cdf7324ad83682b1add3351046b5aa6d35a45a39600a3242bd529d873b44
   )
+set(ap_GEOS geos)
 set(xp_geotranz REPO github.com/externpro/geotranz TAG xpv2.4.2.3
   MANIFEST_SHA256 34e54a480f67bed7490b807cb4f60a945a8f854bb8523e5d861379bf0ae202aa
   )
 set(xp_glew REPO github.com/externpro/glew TAG xpv1.13.0.4
   MANIFEST_SHA256 4abc8659f1371face3ca6c77db20f309fe95ac7ab5b8963a1c1175e308abdc80
   )
+set(ap_GLEW glew)
 set(xp_googletest REPO github.com/externpro/googletest TAG xpv1.16.0.3
   MANIFEST_SHA256 7d46c0146ca52067fb2c7a19cc8783889e6dea78c2cc1d571b51aa4bdbca189c
   )
+set(ap_GTest googletest)
 set(xp_hdf5 REPO github.com/externpro/hdf5 TAG xpv1.14.6.7
   MANIFEST_SHA256 5ded50bbc5b3117f05d4e156638590a1b494d732e70563021497e4e459fc1ba0
   )
+set(ap_HDF5 hdf5)
 set(xp_jasper REPO github.com/externpro/jasper TAG xpv1.900.1.3
   MANIFEST_SHA256 685d1dd0c5aebcec57fa354764061b951a851ffddfed70a1b93d95da3bf73847
   )
+set(ap_Jasper jasper)
 set(xp_jpegxp REPO github.com/externpro/jpegxp TAG xpv6.25.3
   MANIFEST_SHA256 db9b9d5093fa321ae52722132448545ae8811f86885741f958fdc93a405b6283
   )
@@ -77,6 +87,7 @@ set(xp_jxrlib REPO github.com/externpro/jxrlib TAG xpv2019.10.9.3
 set(xp_libexpat REPO github.com/externpro/libexpat TAG xpv2.2.5.3
   MANIFEST_SHA256 8aaed012e038c0e800a580f647b1ca9605950f912ce2518d8bff97bb2559c26a
   )
+set(ap_EXPAT libexpat)
 set(xp_libgeotiff REPO github.com/externpro/libgeotiff TAG xpv1.2.4.4
   MANIFEST_SHA256 3caaee2286b16f981ace33a8dac62438a4bc64d4ebe616a0dd3bf6546c7dbf7b
   )
@@ -107,6 +118,7 @@ set(xp_libzmq REPO github.com/externpro/libzmq TAG xpv4.3.4.4
 set(xp_lua REPO github.com/externpro/lua TAG xpv5.2.3.3
   MANIFEST_SHA256 5fccade658a5ae70b229958fa925b3f0000ed437bd66fcef2797a8f697a27339
   )
+set(ap_Lua lua)
 set(xp_LuaBridge REPO github.com/externpro/LuaBridge TAG xpv2.10.5
   MANIFEST_SHA256 f4b9bf6b22217d9ab07d121a55b7709e146ccfcbeef421e66112b93c40868195
   )
@@ -148,12 +160,15 @@ set(xp_openh264 REPO github.com/externpro/openh264 TAG xpv1.4.0.3
 set(xp_openssl REPO github.com/externpro/openssl TAG xpv1.1.1l.4
   MANIFEST_SHA256 7c65fa87cd7692947e31933ac18799ca29b10831fcefc2d31af2d22e9183886a
   )
+set(ap_OpenSSL openssl)
 set(xp_patch REPO github.com/externpro/patch TAG xpv2.7.6.6
   MANIFEST_SHA256 2e1093831a6c8d8f11e74ae5f30e44612f2d4003afca302cc7d7d8cc29fdbf36
   )
+set(ap_Patch patch)
 set(xp_protobuf REPO github.com/externpro/protobuf TAG xpv3.14.0.5
   MANIFEST_SHA256 bf04752cad38209ea758399b08de9d91f5c180c85ed3505fbbf2655365c30c94
   )
+set(ap_Protobuf protobuf)
 set(xp_rapidjson REPO github.com/externpro/rapidjson TAG xpv1.1.0-763.3
   MANIFEST_SHA256 31f6aaa00f93098ef06f3a6d08a68e971f6f034bd1f3dc855d3f815619b84125
   )
@@ -196,6 +211,7 @@ set(xp_yasm REPO github.com/externpro/yasm TAG xpv1.3.0.3
 set(xp_zlib REPO github.com/externpro/zlib TAG xpv1.3.1.4
   MANIFEST_SHA256 dea8d8a23fea78ca4ffd7d683cb3e03b3ed850b1724bc3236bac6df338de0e19
   )
+set(ap_ZLIB zlib)
 set(xp_zmqpp REPO github.com/externpro/zmqpp TAG xpv4.2.0-47.3
   MANIFEST_SHA256 a100f9711301a66981f4de3a4ed7bb6032190266b962592cebd0a0c22d2032e8
   )
