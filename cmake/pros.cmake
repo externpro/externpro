@@ -4,8 +4,8 @@ set(xp_activemq-cpp REPO github.com/externpro/activemq-cpp TAG xpv3.9.5.3
 set(xp_apr REPO github.com/externpro/apr TAG xpv1.7.6.3
   MANIFEST_SHA256 f8fcedf8040c2f48f0cbc6d82a44ae454deec3a5dcb23b50e9f1e27a73f32c8f
   )
-set(xp_argon2 REPO github.com/externpro/argon2 TAG xpv20210625.4
-  MANIFEST_HASH SHA256=9880e5b8b09974f4ed988f00c99139ad5fe433f5a58114c371d7298d06b00fe9
+set(xp_argon2 REPO github.com/externpro/argon2 TAG xpv20210625.5
+  MANIFEST_HASH SHA256=b5b6633ee2c3dfb912c71ea379f212e1932b6e91e29b5d161dbea79e9e45d492
   )
 set(xp_azmq REPO github.com/externpro/azmq TAG xpv1.0.3.3
   MANIFEST_SHA256 7a9f08e987641d6f0763144634c1b2bb031fc3381a2b31bf89cb1d0457628c23
