@@ -853,11 +853,15 @@ function(xpFindPkg)
         BYPASS_PROVIDER PATHS ${find_paths} NO_DEFAULT_PATH
         )
       mark_as_advanced(${package}_DIR)
-      if(NOT DEFINED __xp_${package}_cps_message_shown
-         AND DEFINED ${package}_CONFIG
-         AND ${package}_CONFIG MATCHES "\\.cps$")
-        message(STATUS "Found ${package}.cps: ${${package}_VERSION}")
-        set(__xp_${package}_cps_message_shown TRUE CACHE INTERNAL "Flag to track if ${package}.cps message was shown")
+      if(DEFINED ${package}_CONFIG AND ${package}_CONFIG MATCHES "\\.cps$")
+        if(NOT DEFINED __xp_${package}_cps_message_shown)
+          message(STATUS "Found ${package}.cps: ${${package}_VERSION}")
+          set(__xp_${package}_cps_message_shown TRUE CACHE INTERNAL "Flag to track if ${package}.cps message was shown")
+        endif()
+        # Check for and include cmake extensions file
+        if(EXISTS ${pth}/share/cmake/${pkg}-usext.cmake)
+          include(${pth}/share/cmake/${pkg}-usext.cmake)
+        endif()
       endif()
       # Handle FOUND variables - ensure the requested package name gets set
       if(DEFINED ${package}_FOUND)
@@ -1950,13 +1954,14 @@ endfunction()
 function(xpExternPackage)
   # NOTE: if CMAKE_INSTALL_CMAKEDIR is not defined, it will be set here
   #   and available in PARENT_SCOPE
-  set(opts CREATE_ALIASES FIND_THREADS FIND_XPRO_CMAKE NO_INFER_DEPS)
+  set(opts CREATE_ALIASES FIND_THREADS FIND_XPRO_CMAKE NO_INFER_DEPS PKG_CMAKE_USEXT)
   # CREATE_ALIASES is an optional parameter to indicate ALIAS targets should be
   #   created with hard-coded 'xpro' namespace for EXE and LIBRARIES
   # FIND_THREADS is deprecated; add 'Threads' to DEPS parameter instead
   #   Previously indicated the use script should find the Threads::Threads target
   # FIND_XPRO_CMAKE creates findxpro.cmake marker to force cmake script find_package()
   # NO_INFER_DEPS disables automatic dependency inference when DEPS/PVT_DEPS not specified
+  # PKG_CMAKE_USEXT bundles cmake extensions in ${lcRepoName}-usext.cmake for CPS consumers
   set(oneValueArgs ALIAS_NAMESPACE COMPONENT EXE EXE_PATH EXPORT NAMESPACE REPO_NAME TARGETS_FILE)
   # ALIAS_NAMESPACE is deprecated; now hard-coded internally to 'xpro' as an alternative
   #   CMake namespace. add_[executable|library] ALIAS[es] will be included in the use script
@@ -2118,6 +2123,10 @@ function(xpExternPackage)
   endif()
   set(xpUseCMakeFile ${xproBinDir}/${lcRepoName}-config.cmake)
   configure_file(${xpThisDir}/xpuse.cmake.in ${xpUseCMakeFile} @ONLY NEWLINE_STYLE LF)
+  if(P_PKG_CMAKE_USEXT)
+    set(xpUsextCMakeFile ${xproBinDir}/${lcRepoName}-usext.cmake)
+    configure_file(${xpThisDir}/xpusext.cmake.in ${xpUsextCMakeFile} @ONLY NEWLINE_STYLE LF)
+  endif()
   ###############
   # manifest.cmake file
   # NOTE: metadata in manifest file is consistent across all platforms
@@ -2241,7 +2250,7 @@ function(xpExternPackage)
     set(CMAKE_INSTALL_CMAKEDIR ${CMAKE_INSTALL_DATADIR}/cmake)
     set(CMAKE_INSTALL_CMAKEDIR ${CMAKE_INSTALL_CMAKEDIR} PARENT_SCOPE)
   endif()
-  install(FILES ${xpUseCMakeFile} ${xpManifestCMakeFile}
+  install(FILES ${xpUseCMakeFile} ${xpUsextCMakeFile} ${xpManifestCMakeFile}
     DESTINATION ${CMAKE_INSTALL_CMAKEDIR} ${XP_COMPONENT}
     )
   ###############
