@@ -1956,15 +1956,16 @@ function(xpExternPackage)
   #   and available in PARENT_SCOPE
   set(opts CREATE_ALIASES FIND_THREADS FIND_XPRO_CMAKE NO_INFER_DEPS PKG_CMAKE_USEXT)
   # CREATE_ALIASES is an optional parameter to indicate ALIAS targets should be
-  #   created with hard-coded 'xpro' namespace for EXE and LIBRARIES
+  #   created for EXE and LIBRARIES. Uses ALIAS_NAMESPACE if provided, otherwise 'xpro'
   # FIND_THREADS is deprecated; add 'Threads' to DEPS parameter instead
   #   Previously indicated the use script should find the Threads::Threads target
   # FIND_XPRO_CMAKE creates findxpro.cmake marker to force cmake script find_package()
   # NO_INFER_DEPS disables automatic dependency inference when DEPS/PVT_DEPS not specified
   # PKG_CMAKE_USEXT bundles cmake extensions in ${lcRepoName}-usext.cmake for CPS consumers
   set(oneValueArgs ALIAS_NAMESPACE COMPONENT EXE EXE_PATH EXPORT NAMESPACE REPO_NAME TARGETS_FILE)
-  # ALIAS_NAMESPACE is deprecated; now hard-coded internally to 'xpro' as an alternative
-  #   CMake namespace. add_[executable|library] ALIAS[es] will be included in the use script
+  # ALIAS_NAMESPACE is the namespace to use for alias targets when CREATE_ALIASES
+  #   option is specified - if not provided, defaults to 'xpro'
+  #   add_[executable|library] ALIAS[es] will be included in the use script
   #   for EXE and LIBRARIES when CREATE_ALIASES option is specified
   # COMPONENT is for CPack/install component name (optional, used if project has COMPONENTs)
   # EXE is for a CMake executable target name; included in the use script
@@ -2011,8 +2012,8 @@ function(xpExternPackage)
   #   executable target dependencies. If not specified, dependencies will be
   #   automatically inferred from EXE targets. Use NO_INFER_DEPS option to disable automatic dependency inference.
   cmake_parse_arguments(P "${opts}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
-  if(DEFINED P_ALIAS_NAMESPACE)
-    message(AUTHOR_WARNING "xpExternPackage: ALIAS_NAMESPACE parameter is deprecated and ignored. Use CREATE_ALIASES option to create 'xpro' aliases instead.")
+  if(DEFINED P_ALIAS_NAMESPACE AND NOT P_CREATE_ALIASES)
+    message(AUTHOR_WARNING "xpExternPackage: ALIAS_NAMESPACE parameter specified but CREATE_ALIASES option not set. ALIAS_NAMESPACE only has effect when CREATE_ALIASES is enabled.")
   endif()
   if(DEFINED P_NAMESPACE)
     message(AUTHOR_WARNING "xpExternPackage: NAMESPACE parameter is deprecated and ignored. Using package name as namespace instead.")
@@ -2036,7 +2037,11 @@ function(xpExternPackage)
     set(P_REPO_NAME ${CMAKE_PROJECT_NAME})
   endif()
   set(P_NAMESPACE ${P_REPO_NAME})
-  set(P_ALIAS_NAMESPACE xpro) # hard-coded alias namespace
+  # Set P_ALIAS_NAMESPACE to default (xpro) if CREATE_ALIASES
+  # is set but ALIAS_NAMESPACE is not provided
+  if(P_CREATE_ALIASES AND NOT DEFINED P_ALIAS_NAMESPACE)
+    set(P_ALIAS_NAMESPACE xpro)
+  endif()
   xpGetVersionString(VER)
   set(xproBinDir "${CMAKE_CURRENT_BINARY_DIR}/xpro")
   file(MAKE_DIRECTORY "${xproBinDir}")

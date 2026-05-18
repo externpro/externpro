@@ -66,6 +66,11 @@ In repos using externpro, the provided CMakePresets automatically set up the dep
   - Can be used conditionally per platform (e.g., only on Windows).
   - Global `FIND_PACKAGE_CMAKE_SCRIPT` option can override this behavior for testing.
 
+- `ALIAS_NAMESPACE`
+  - Namespace to use for alias targets when `CREATE_ALIASES` option is specified.
+  - If not provided, defaults to `xpro`.
+  - Only has effect when `CREATE_ALIASES` option is enabled.
+
 - `FIND_THREADS` (deprecated)
   - Previously emitted `find_package(Threads REQUIRED)` into the consumer config.
   - Add 'Threads' to `DEPS` parameter instead.
