@@ -153,6 +153,9 @@ set(xp_nodexp REPO github.com/externpro/nodexp TAG xpv22.19.0.3
 set(xp_nvJPEG2000 REPO github.com/externpro/nvJPEG2000 TAG xpv0.8.1.5
   MANIFEST_SHA256 85fe46cb76e1bde9e7ddf87480ae1b0d7c56ea05563d2ae786abf0cb45be94b5
   )
+set(xp_OpenGL REPO github.com/externpro/OpenGL TAG xpv1.0.0
+  MANIFEST_HASH SHA256=4d607ada8ed4b2de72c285b0a30e6d295cb0d96940a899300fba9a58d3b88178
+  )
 set(xp_openh264 REPO github.com/externpro/openh264 TAG xpv1.4.0.3
   MANIFEST_SHA256 6864f5d1e04313ffdd9b34099b0c08802e482e298657df53d0a8f0be25998b4e
   )
