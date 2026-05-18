@@ -2274,12 +2274,12 @@ function(xpExternPackage)
   ###############
   # CPS/SBOM: package metadata
   set(xpInfoProject)
-  if(NOT "${P_REPO_NAME}" STREQUAL "${CMAKE_PROJECT_NAME}")
+  if(NOT "${P_REPO_NAME}" STREQUAL "${PROJECT_NAME}")
     # By default, if the specified <package-name> matches the current CMake PROJECT_NAME,
     # package metadata will be inherited from the project. The PROJECT <project-name>
     # option may be used to specify a different project from which to inherit metadata.
     # In any case, any metadata values specified in the install command will take precedence.
-    set(xpInfoProject PROJECT ${CMAKE_PROJECT_NAME})
+    set(xpInfoProject PROJECT ${PROJECT_NAME})
   endif()
   string(REGEX REPLACE "^xpv" "" xpInfoVerCandidate "${VER}")
   string(REGEX REPLACE "-[0-9]+-g[0-9a-f]+(-.*)?$" "" xpInfoVerCandidate "${xpInfoVerCandidate}")
