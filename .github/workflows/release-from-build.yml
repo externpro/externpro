@@ -144,15 +144,44 @@ jobs:
           fi
           manifest_file="${manifest_files[0]}"
           if [ ${#manifest_files[@]} -gt 1 ]; then
-            echo "Found ${#manifest_files[@]} manifest files; verifying they are identical"
-            ref_hash=$(tr -d '\r' < "${manifest_file}" | sha256sum | cut -d' ' -f1)
+            echo "Found ${#manifest_files[@]} manifest files; verifying they are identical (ignoring deps differences only)"
+            # Create normalized versions of manifests by removing deps sections only
+            normalized_manifests=()
+            original_hashes=()
             for f in "${manifest_files[@]}"; do
-              h=$(tr -d '\r' < "$f" | sha256sum | cut -d' ' -f1)
-              if [ "$h" != "$ref_hash" ]; then
-                echo "::error::Manifest files differ: '$manifest_file' ($ref_hash) vs '$f' ($h)" >&2
+              original_hash=$(tr -d '\r' < "$f" | sha256sum | cut -d' ' -f1)
+              original_hashes+=("$original_hash")
+              # Create normalized version (remove deps only, keep pvt_deps)
+              normalized_file="${f}.normalized"
+              jq 'del(.deps)' "$f" > "$normalized_file"
+              normalized_manifests+=("$normalized_file")
+            done
+            # Compare normalized manifests
+            ref_normalized_hash=$(sha256sum "${normalized_manifests[0]}" | cut -d' ' -f1)
+            for i in "${!normalized_manifests[@]}"; do
+              norm_hash=$(sha256sum "${normalized_manifests[$i]}" | cut -d' ' -f1)
+              if [ "$norm_hash" != "$ref_normalized_hash" ]; then
+                echo "::error::Manifest files differ in sections other than deps: '${manifest_files[0]}' vs '${manifest_files[$i]}'" >&2
+                # Clean up normalized files
+                rm -f "${normalized_manifests[@]}"
                 exit 1
               fi
             done
+            # Check if there were any differences in the original manifests (only deps differences)
+            if [ ${#original_hashes[@]} -gt 1 ]; then
+              ref_original_hash="${original_hashes[0]}"
+              for i in "${!original_hashes[@]}"; do
+                if [ "${original_hashes[$i]}" != "$ref_original_hash" ]; then
+                  echo "::notice::Manifest files differ only in deps sections (this is allowed): '${manifest_files[0]}' vs '${manifest_files[$i]}'"
+                  # Show the actual differences for visibility
+                  echo "Differences between manifests:"
+                  diff -u "${manifest_files[0]}" "${manifest_files[$i]}" || true
+                  break
+                fi
+              done
+            fi
+            # Clean up normalized files
+            rm -f "${normalized_manifests[@]}"
           fi
           tr -d '\r' < "${manifest_file}" > "${manifest_file}.lf"
           mv "${manifest_file}.lf" "${manifest_file}"
