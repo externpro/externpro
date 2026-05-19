@@ -66,8 +66,8 @@ set(xp_glew REPO github.com/externpro/glew TAG xpv1.13.0.5
   MANIFEST_HASH SHA256=724701294c0c406f431a3e43d795283346681a09530cadcc9cfec08f7e4e4cc7
   )
 set(ap_GLEW glew)
-set(xp_googletest REPO github.com/externpro/googletest TAG xpv1.16.0.3
-  MANIFEST_SHA256 7d46c0146ca52067fb2c7a19cc8783889e6dea78c2cc1d571b51aa4bdbca189c
+set(xp_googletest REPO github.com/externpro/googletest TAG xpv1.16.0.6
+  MANIFEST_HASH SHA256=14f8d119af5eb33b3c771d8210cd188b369126a2b8569447360196462b59bff4
   )
 set(ap_GTest googletest)
 set(xp_hdf5 REPO github.com/externpro/hdf5 TAG xpv1.14.6.7
