@@ -175,7 +175,7 @@ jobs:
                   echo "::notice::Manifest files differ only in deps sections (this is allowed): '${manifest_files[0]}' vs '${manifest_files[$i]}'"
                   # Show the actual differences for visibility
                   echo "Differences between manifests:"
-                  diff -u "${manifest_files[0]}" "${manifest_files[$i]}" || true
+                  diff -u --strip-trailing-cr "${manifest_files[0]}" "${manifest_files[$i]}" || true
                   break
                 fi
               done
