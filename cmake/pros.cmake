@@ -14,8 +14,8 @@ set(xp_boost REPO github.com/externpro/boost TAG xpv1.76.0.5
   MANIFEST_SHA256 a55d61f2b2e18269f21ee534b8029cae7956cf4824803f232ef33f7a1080f99d
   )
 set(ap_Boost boost)
-set(xp_bzip2 REPO github.com/externpro/bzip2 TAG xpv1.0.8.4
-  MANIFEST_SHA256 a4ff27c9d22e9c1631744efed436f6646ea61df0d10a15f03574f600fe6bb9c6
+set(xp_bzip2 REPO github.com/externpro/bzip2 TAG xpv1.0.8.5
+  MANIFEST_HASH SHA256=9aac20e3725940f8410613c1c261195435cc4ec68c74bf80a6b8b5af5a3f4fbe
   )
 set(ap_BZip2 bzip2)
 set(xp_c-ares REPO github.com/externpro/c-ares TAG xpv1.18.1.3
