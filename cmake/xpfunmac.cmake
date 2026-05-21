@@ -838,6 +838,8 @@ function(xpFindPkg)
       set(PKG_NAMES)
       if(EXISTS ${pth}/share/cmake/xpuse-${pkg}-config.cmake)
         set(PKG_NAMES NAMES xpuse-${pkg})
+      elseif(EXISTS ${pth}/share/cmake/${pkg}-deps.cmake)
+        include(${pth}/share/cmake/${pkg}-deps.cmake)
       endif()
       # Priority: Global OFF > Global ON > Package marker > Default CPS
       set(use_cmake_script ${FIND_PACKAGE_CMAKE_SCRIPT})
@@ -2075,6 +2077,8 @@ function(xpExternPackage)
   if(DEFINED P_DEPS)
     list(JOIN P_DEPS " " deps) # list to string with spaces
     set(FIND_DEPS "xpFindPkg(PKGS ${deps}) # dependencies\n")
+    set(xpDepsCMakeFile ${xproBinDir}/${lcRepoName}-deps.cmake)
+    configure_file(${xpThisDir}/xpdeps.cmake.in ${xpDepsCMakeFile} @ONLY NEWLINE_STYLE LF)
   endif()
   if(DEFINED P_TARGETS_FILE)
     set(TARGETS_FILE "include(\${CMAKE_CURRENT_LIST_DIR}/${P_TARGETS_FILE}.cmake)\n")
@@ -2256,7 +2260,7 @@ function(xpExternPackage)
     set(CMAKE_INSTALL_CMAKEDIR ${CMAKE_INSTALL_DATADIR}/cmake)
     set(CMAKE_INSTALL_CMAKEDIR ${CMAKE_INSTALL_CMAKEDIR} PARENT_SCOPE)
   endif()
-  install(FILES ${xpUseCMakeFile} ${xpUsextCMakeFile} ${xpManifestCMakeFile}
+  install(FILES ${xpUseCMakeFile} ${xpUsextCMakeFile} ${xpManifestCMakeFile} ${xpDepsCMakeFile}
     DESTINATION ${CMAKE_INSTALL_CMAKEDIR} ${XP_COMPONENT}
     )
   ###############
