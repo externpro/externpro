@@ -211,8 +211,8 @@ set(xp_wxx REPO github.com/externpro/wxx TAG xpv26.02
 set(xp_yasm REPO github.com/externpro/yasm TAG xpv1.3.0.3
   MANIFEST_SHA256 e8b3d3b3f43c06c2ae74670594cd734a4b1ddb23d8b11dbd46eb33efde757959
   )
-set(xp_zlib REPO github.com/externpro/zlib TAG xpv1.3.1.4
-  MANIFEST_SHA256 dea8d8a23fea78ca4ffd7d683cb3e03b3ed850b1724bc3236bac6df338de0e19
+set(xp_zlib REPO github.com/externpro/zlib TAG xpv1.3.1.5
+  MANIFEST_HASH SHA256=45ba09fa9fd0a083832aa1b6bd64c0b031787db24d33e1113fbcc40daf8b221c
   )
 set(ap_ZLIB zlib)
 set(xp_zmqpp REPO github.com/externpro/zmqpp TAG xpv4.2.0-47.3
