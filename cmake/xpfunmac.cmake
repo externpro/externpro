@@ -835,9 +835,11 @@ function(xpFindPkg)
     if(DEFINED xp_${package})
       ipGetProPath(pth PKG ${pkg} ${xp_${package}})
       unset(${package}_DIR CACHE)
-      set(PKG_NAMES)
+      set(PKG_OPTS)
       if(EXISTS ${pth}/share/cmake/xpuse-${pkg}-config.cmake)
-        set(PKG_NAMES NAMES xpuse-${pkg})
+        set(PKG_OPTS NAMES xpuse-${pkg})
+      elseif(package STREQUAL "boost" AND EXISTS ${pth}/share/cmake/boost-config.cmake)
+        set(PKG_OPTS CONFIGS boost-config.cmake) # TRICKY: don't find Boost-<VER>/BoostConfig.cmake
       elseif(EXISTS ${pth}/share/cmake/${pkg}-deps.cmake)
         include(${pth}/share/cmake/${pkg}-deps.cmake)
       endif()
@@ -852,7 +854,7 @@ function(xpFindPkg)
       else()
         set(find_paths ${pth} ${pth}/share/cmake)
       endif()
-      find_package(${package} ${PKG_NAMES} REQUIRED CONFIG GLOBAL
+      find_package(${package} ${PKG_OPTS} REQUIRED CONFIG GLOBAL
         BYPASS_PROVIDER PATHS ${find_paths} NO_DEFAULT_PATH
         )
       mark_as_advanced(${package}_DIR)
