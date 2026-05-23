@@ -1957,12 +1957,13 @@ endfunction()
 function(xpExternPackage)
   # NOTE: if CMAKE_INSTALL_CMAKEDIR is not defined, it will be set here
   #   and available in PARENT_SCOPE
-  set(opts CREATE_ALIASES FIND_THREADS FIND_XPRO_CMAKE NO_INFER_DEPS PKG_CMAKE_USEXT)
+  set(opts CREATE_ALIASES FIND_THREADS FIND_XPRO_CMAKE NO_EXPORT NO_INFER_DEPS PKG_CMAKE_USEXT)
   # CREATE_ALIASES is an optional parameter to indicate ALIAS targets should be
   #   created for EXE and LIBRARIES. Uses ALIAS_NAMESPACE if provided, otherwise 'xpro'
   # FIND_THREADS is deprecated; add 'Threads' to DEPS parameter instead
   #   Previously indicated the use script should find the Threads::Threads target
   # FIND_XPRO_CMAKE creates findxpro.cmake marker to force cmake script find_package()
+  # NO_EXPORT prevents automatic export setup when TARGETS_FILE is provided
   # NO_INFER_DEPS disables automatic dependency inference when DEPS/PVT_DEPS not specified
   # PKG_CMAKE_USEXT bundles cmake extensions in ${lcRepoName}-usext.cmake for CPS consumers
   set(oneValueArgs ALIAS_NAMESPACE COMPONENT EXE EXE_PATH EXPORT NAMESPACE REPO_NAME TARGETS_FILE)
@@ -2024,8 +2025,8 @@ function(xpExternPackage)
   if(P_FIND_THREADS)
     message(AUTHOR_WARNING "xpExternPackage: FIND_THREADS option is deprecated and ignored. Add 'Threads' to DEPS parameter instead.")
   endif()
-  # Set P_EXPORT to P_TARGETS_FILE if P_EXPORT is not defined
-  if(NOT DEFINED P_EXPORT)
+  # Set P_EXPORT to P_TARGETS_FILE if P_EXPORT is not defined and NO_EXPORT is not set
+  if(NOT DEFINED P_EXPORT AND NOT P_NO_EXPORT)
     if(DEFINED P_TARGETS_FILE)
       set(P_EXPORT ${P_TARGETS_FILE})
     endif()
