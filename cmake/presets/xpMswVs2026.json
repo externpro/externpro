@@ -14,8 +14,7 @@
       "generator": "Visual Studio 18 2026",
       "architecture": "x64",
       "cacheVariables": {
-        "CMAKE_PROJECT_TOP_LEVEL_INCLUDES": ".devcontainer/cmake/xproinc.cmake",
-        "Boost_COMPILER": "vc143"
+        "CMAKE_PROJECT_TOP_LEVEL_INCLUDES": ".devcontainer/cmake/xproinc.cmake"
       }
     }
   ],
