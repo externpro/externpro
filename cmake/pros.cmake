@@ -168,8 +168,8 @@ set(xp_patch REPO github.com/externpro/patch TAG xpv2.7.6.7
   MANIFEST_HASH SHA256=6f1be64b1dc10ca0cd87b73805e5a076d9d22b64e1665a56cf3f10e1ee20e5ab
   )
 set(ap_Patch patch)
-set(xp_protobuf REPO github.com/externpro/protobuf TAG xpv3.14.0.5
-  MANIFEST_SHA256 bf04752cad38209ea758399b08de9d91f5c180c85ed3505fbbf2655365c30c94
+set(xp_protobuf REPO github.com/externpro/protobuf TAG xpv3.14.0.6
+  MANIFEST_HASH SHA256=2a0e48cc39da85c0bfc015cd8296452e3c9706db1cc7578c0ee53478d539f261
   )
 set(ap_Protobuf protobuf)
 set(xp_rapidjson REPO github.com/externpro/rapidjson TAG xpv1.1.0-763.6
