@@ -841,6 +841,11 @@ function(xpFindPkg)
       elseif(package STREQUAL "boost" AND EXISTS ${pth}/share/cmake/boost-config.cmake)
         set(PKG_OPTS CONFIGS boost-config.cmake) # TRICKY: don't find Boost-<VER>/BoostConfig.cmake
       elseif(EXISTS ${pth}/share/cmake/${pkg}-deps.cmake)
+        # Force cmake script for googletest only when Threads::Threads is already valid (found previously)
+        # This avoids CPS validation scope issues when Threads was already processed
+        if(${package} STREQUAL "googletest" AND TARGET Threads::Threads)
+          set(FIND_PACKAGE_CMAKE_SCRIPT ON)
+        endif()
         include(${pth}/share/cmake/${pkg}-deps.cmake)
       endif()
       # Priority: Global OFF > Global ON > Package marker > Default CPS
