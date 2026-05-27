@@ -70,8 +70,8 @@ set(xp_googletest REPO github.com/externpro/googletest TAG xpv1.16.0.7
   MANIFEST_HASH SHA256=174587136d51c177d7843e55e2fe5409a4ef3c5ab2b89eced583bc9ac3d218f1
   )
 set(ap_GTest googletest)
-set(xp_hdf5 REPO github.com/externpro/hdf5 TAG xpv1.14.6.7
-  MANIFEST_SHA256 5ded50bbc5b3117f05d4e156638590a1b494d732e70563021497e4e459fc1ba0
+set(xp_hdf5 REPO github.com/externpro/hdf5 TAG xpv1.14.6.8
+  MANIFEST_HASH SHA256=8cff4e7d440265309180ce84e860becb4abe650c2464b696298e4bc5b998896a
   )
 set(ap_HDF5 hdf5)
 set(xp_jasper REPO github.com/externpro/jasper TAG xpv1.900.1.4
