@@ -199,8 +199,8 @@ set(xp_wirehair REPO github.com/externpro/wirehair TAG xpv23.12.02.4
 set(xp_wxWidgets REPO github.com/externpro/wxWidgets TAG xpv3.1.0.6
   MANIFEST_SHA256 029276ba7e00f383616d6044c4a03baeb99fa909e20ecfc5af76c453d3f5ccab
   )
-set(xp_wxInclude REPO github.com/externpro/wxInclude TAG xpv1.2.3
-  MANIFEST_SHA256 48e7bfa35b929d8c43839a1806b466a39c2e500ba529fd8b22c19a60d6b63e63
+set(xp_wxInclude REPO github.com/externpro/wxInclude TAG xpv1.2.4
+  MANIFEST_HASH SHA256=102f392aa96b520e38249c60d0119211a13ccd5b072d0b550a025e173d55be1a
   )
 set(xp_wxTetris REPO github.com/smanders/wxTetris TAG xpv1.3.1
   MANIFEST_SHA256 93e1c05c1baa829ce407b8cc3e29acd85d7e98c0a0d15e1b029458904474201f
