@@ -39,8 +39,8 @@ set(xp_eigen REPO github.com/externpro/eigen TAG xpv3.4.0.3
   MANIFEST_SHA256 63af710c14984eab4e99ab7909e9d130735a6e5635316e6b900a1206ab179a32
   )
 set(ap_Eigen3 eigen)
-set(xp_fecpp REPO github.com/externpro/fecpp TAG xpv0.9.4
-  MANIFEST_HASH SHA256=6c3f799973699299c83c83208f8421030af040fffa66b1fd33c20cd4423ffd1d
+set(xp_fecpp REPO github.com/externpro/fecpp TAG xpv0.10.1
+  MANIFEST_HASH SHA256=545bf7346c6f8f8a05c9655b6768a65107d8b42ebbbac0eef702328abc856f0b
   )
 # pre-release: no windows package
 set(xp_FFmpeg REPO github.com/externpro/FFmpeg TAG xpv4.3.1.4
