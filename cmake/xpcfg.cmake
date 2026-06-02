@@ -1,8 +1,10 @@
+include(CheckCCompilerFlag)
 include(CheckCSourceCompiles)
 include(CheckCSourceRuns)
 include(CheckFunctionExists)
 include(CheckIncludeFile)
 include(CheckLibraryExists)
+include(CheckLinkerFlag)
 include(CheckStructHasMember)
 include(CheckSymbolExists)
 include(CheckTypeSize)
@@ -41,6 +43,38 @@ macro(xpcfgCheckIncludeFile incfile var)
   endif(${var})
 endmacro()
 
+# called from: libsodium
+macro(xpcfgCheckIncludeFileDef incfile var)
+  check_include_file("${incfile}" ${var})
+  if(${var})
+    list(APPEND XP_DEFS ${var}=1)
+  endif()
+endmacro()
+
+# called from: libsodium
+macro(xpcfgCheckCompilesDef var src)
+  check_c_source_compiles("${src}" ${var})
+  if(${var})
+    list(APPEND XP_DEFS ${var}=1)
+  endif()
+endmacro()
+
+# called from: libsodium
+macro(xpcfgCheckRunsDef var src)
+  check_c_source_runs("${src}" ${var})
+  if(${var})
+    list(APPEND XP_DEFS ${var}=1)
+  endif()
+endmacro()
+
+# called from: libsodium
+macro(xpcfgCheckFuncExistsDef func def)
+  check_function_exists(${func} ${def})
+  if(${def})
+    list(APPEND XP_DEFS ${def}=1)
+  endif()
+endmacro()
+
 # called from: activemq-cpp, apr, librttopo, libspatialite, spatialite-tools, jasper
 macro(xpcfgCheckSymFnExists func var)
   check_symbol_exists("${func}" "${XP_INCLUDE_LIST}" ${var})
@@ -75,6 +109,44 @@ macro(xpcfgCheckTypeSize)
   check_type_size(size_t SIZEOF_SIZE_T) # sets HAVE_SIZEOF_SIZE_T
   cmake_pop_check_state()
 endmacro()
+
+# called from: libsodium
+function(xpcfgCheckCompilerOpts compilerOpts id)
+  # Start with existing content if variable exists and is not the variable name
+  if(DEFINED ${compilerOpts} AND NOT "${${compilerOpts}}" STREQUAL "${compilerOpts}")
+    set(resultList ${${compilerOpts}})
+  else()
+    set(resultList)
+  endif()
+  foreach(opt ${ARGN})
+    string(REPLACE "-" "_" opt_ ${opt})
+    string(REPLACE "=" "_" opt_ ${opt_})
+    check_c_compiler_flag("${opt}" has_${id}_c${opt_})
+    if(has_${id}_c${opt_})
+      list(APPEND resultList ${opt})
+    endif()
+  endforeach()
+  set(${compilerOpts} ${resultList} PARENT_SCOPE)
+endfunction()
+
+# called from: libsodium
+function(xpcfgCheckLinkOpts linkOpts id)
+  # Start with existing content if variable exists and is not the variable name
+  if(DEFINED ${linkOpts} AND NOT "${${linkOpts}}" STREQUAL "${linkOpts}")
+    set(resultList ${${linkOpts}})
+  else()
+    set(resultList)
+  endif()
+  foreach(opt ${ARGN})
+    string(REPLACE "-" "_" opt_ ${opt})
+    string(REPLACE "," "_" opt_ ${opt_})
+    check_linker_flag(C "${opt}" has_${id}_ln${opt_})
+    if(has_${id}_ln${opt_})
+      list(APPEND resultList ${opt})
+    endif()
+  endforeach()
+  set(${linkOpts} ${resultList} PARENT_SCOPE)
+endfunction()
 
 # called from: activemq-cpp, librttopo, libspatialite, spatialite-tools
 macro(xpcfgLtObjdir var)
