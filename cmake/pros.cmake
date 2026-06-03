@@ -112,8 +112,8 @@ set(xp_libssh2 REPO github.com/externpro/libssh2 TAG xpv1.9.0.4
 set(xp_libstrophe REPO github.com/externpro/libstrophe TAG xpv0.9.1.5
   MANIFEST_SHA256 c2c92a6e94deb2b72a1a9b653543fbd552c85eb3a4ca3c6c076157adb26bb49d
   )
-set(xp_libzmq REPO github.com/externpro/libzmq TAG xpv4.3.5.1
-  MANIFEST_HASH SHA256=51f4c6d7dfb0ccd9bd008575ba339f87e85fc81622309f6a3a8dc0325eebf8ff
+set(xp_libzmq REPO github.com/externpro/libzmq TAG xpv4.3.5.2
+  MANIFEST_HASH SHA256=367305f0f130a199ba8055b82da0243f4fd49df9181772c74da275323ea82376
   )
 set(xp_lua REPO github.com/externpro/lua TAG xpv5.2.3.3
   MANIFEST_SHA256 5fccade658a5ae70b229958fa925b3f0000ed437bd66fcef2797a8f697a27339
