@@ -44,7 +44,7 @@ For CMake toolkit docs, see [cmake/docs/README.md](docs/README.md).
 |<a id='libspatialite' />[libspatialite](https://www.gaia-gis.it/fossil/libspatialite/home)|[MPL-1.1](https://www.gaia-gis.it/fossil/libspatialite/home 'MPL tri-license: choose MPL-1.1, GPL-2.0-or-later, LGPL-2.1-or-later')|extends capabilities of SQLite, enabling it to handle spatial data and perform spatial queries [deps: _geos, libiconv, sqlite3, zlib_]|[xpv5.1.0.8](https://github.com/externpro/libspatialite/releases/tag/xpv5.1.0.8 'release')|[repo](https://github.com/externpro/libspatialite 'github.com/externpro/libspatialite')|[diff](https://github.com/externpro/libspatialite/compare/5.1.0...xpv5.1.0.8 'github.com/externpro/libspatialite/compare/5.1.0...xpv5.1.0.8') [auto]|
 |<a id='libssh2' />[libssh2](http://www.libssh2.org/)|[BSD-3-Clause](http://www.libssh2.org/license.html 'BSD 3-Clause New or Revised License')|client-side C library implementing SSH2 protocol [deps: _openssl, zlib_]|[xpv1.9.0.4](https://github.com/externpro/libssh2/releases/tag/xpv1.9.0.4 'release')|[repo](https://github.com/externpro/libssh2 'github.com/externpro/libssh2') [upstream](https://github.com/libssh2/libssh2 'github.com/libssh2/libssh2')|[diff](https://github.com/externpro/libssh2/compare/libssh2-1.9.0...xpv1.9.0.4 'github.com/externpro/libssh2/compare/libssh2-1.9.0...xpv1.9.0.4') [patch]|
 |<a id='libstrophe' />[libstrophe](http://strophe.im/libstrophe/)|[MIT or GPL-3.0](https://github.com/strophe/libstrophe/blob/0.9.1/LICENSE.txt 'dual licensed under MIT and GPLv3 licenses')|A simple, lightweight C library for writing XMPP client [deps: _libexpat, openssl_]|[xpv0.9.1.5](https://github.com/externpro/libstrophe/releases/tag/xpv0.9.1.5 'release')|[repo](https://github.com/externpro/libstrophe 'github.com/externpro/libstrophe') [upstream](https://github.com/strophe/libstrophe 'github.com/strophe/libstrophe')|[diff](https://github.com/externpro/libstrophe/compare/0.9.1...xpv0.9.1.5 'github.com/externpro/libstrophe/compare/0.9.1...xpv0.9.1.5') [intro]|
-|<a id='libzmq' />[libzmq](https://zeromq.org/)|[MPL-2.0](http://wiki.zeromq.org/area:licensing 'Mozilla Public License 2.0')|high-performance asynchronous messaging library [deps: _libsodium_]|[xpv4.3.4.4](https://github.com/externpro/libzmq/releases/tag/xpv4.3.4.4 'release')|[repo](https://github.com/externpro/libzmq 'github.com/externpro/libzmq') [upstream](https://github.com/zeromq/libzmq 'github.com/zeromq/libzmq')|[diff](https://github.com/externpro/libzmq/compare/v4.3.4...xpv4.3.4.4 'github.com/externpro/libzmq/compare/v4.3.4...xpv4.3.4.4') [patch]|
+|<a id='libzmq' />[libzmq](https://zeromq.org/)|[MPL-2.0](http://wiki.zeromq.org/area:licensing 'Mozilla Public License 2.0')|high-performance asynchronous messaging library [deps: _libsodium_]|[xpv4.3.5.2](https://github.com/externpro/libzmq/releases/tag/xpv4.3.5.2 'release')|[repo](https://github.com/externpro/libzmq 'github.com/externpro/libzmq') [upstream](https://github.com/zeromq/libzmq 'github.com/zeromq/libzmq')|[diff](https://github.com/externpro/libzmq/compare/v4.3.5...xpv4.3.5.2 'github.com/externpro/libzmq/compare/v4.3.5...xpv4.3.5.2') [patch]|
 |<a id='lua' />[lua](http://www.lua.org/)|[MIT](http://www.lua.org/license.html 'MIT License')|a powerful, fast, lightweight, embeddable scripting language|[xpv5.2.3.3](https://github.com/externpro/lua/releases/tag/xpv5.2.3.3 'release')|[repo](https://github.com/externpro/lua 'github.com/externpro/lua') [upstream](https://github.com/lua/lua 'github.com/lua/lua')|[diff](https://github.com/externpro/lua/compare/v5.2.3...xpv5.2.3.3 'github.com/externpro/lua/compare/v5.2.3...xpv5.2.3.3') [patch]|
 |<a id='nasm' />[nasm](https://www.nasm.us/)|[BSD-2-Clause](https://www.nasm.us/ 'BSD 2-Clause Simplified License')|The Netwide Assembler - an 80x86 and x86-64 assembler (MSW-only)|[xpv2.14.02.4](https://github.com/externpro/nasm/releases/tag/xpv2.14.02.4 'release')|[repo](https://github.com/externpro/nasm 'github.com/externpro/nasm')|[diff](https://github.com/externpro/nasm/compare/v0...xpv2.14.02.4 'github.com/externpro/nasm/compare/v0...xpv2.14.02.4') [bin]|
 |<a id='nlohmann_json' />[nlohmann_json](https://json.nlohmann.me)|[MIT](https://github.com/nlohmann/json/blob/develop/LICENSE.MIT 'MIT License')|JSON for Modern C++|[xpv3.12.0.4](https://github.com/externpro/nlohmann_json/releases/tag/xpv3.12.0.4 'release')|[repo](https://github.com/externpro/nlohmann_json 'github.com/externpro/nlohmann_json') [upstream](https://github.com/nlohmann/json 'github.com/nlohmann/json')|[diff](https://github.com/externpro/nlohmann_json/compare/v3.12.0...xpv3.12.0.4 'github.com/externpro/nlohmann_json/compare/v3.12.0...xpv3.12.0.4') [patch]|
@@ -76,15 +76,21 @@ Dependency version mismatches (pinned vs parent manifest):
 - azmq -> boost<br>
   pinned:   TAG=xpv1.91.0.1  SHA=4d1da9ca  REPO=github.com/externpro/boost<br>
   manifest: TAG=xpv1.76.0.5  SHA=a55d61f2  REPO=github.com/externpro/boost<br>
+- azmq -> libzmq<br>
+  pinned:   TAG=xpv4.3.5.2  SHA=367305f0  REPO=github.com/externpro/libzmq<br>
+  manifest: TAG=xpv4.3.4.4  SHA=580d6af0  REPO=github.com/externpro/libzmq<br>
+- cppzmq -> libzmq<br>
+  pinned:   TAG=xpv4.3.5.2  SHA=367305f0  REPO=github.com/externpro/libzmq<br>
+  manifest: TAG=xpv4.3.4.4  SHA=580d6af0  REPO=github.com/externpro/libzmq<br>
 - libspatialite -> zlib<br>
   pinned:   TAG=xpv1.3.2.1  SHA=8d79b8d6  REPO=github.com/externpro/zlib<br>
   manifest: TAG=xpv1.3.1.4  SHA=dea8d8a2  REPO=github.com/externpro/zlib<br>
 - libssh2 -> zlib<br>
   pinned:   TAG=xpv1.3.2.1  SHA=8d79b8d6  REPO=github.com/externpro/zlib<br>
   manifest: TAG=xpv1.3.1.4  SHA=dea8d8a2  REPO=github.com/externpro/zlib<br>
-- libzmq -> libsodium<br>
-  pinned:   TAG=xpv1.0.22.2  SHA=7fbd4de0  REPO=github.com/externpro/libsodium<br>
-  manifest: TAG=xpv1.0.18.233  SHA=2eb86281  REPO=github.com/externpro/libsodium<br>
+- zmqpp -> libzmq<br>
+  pinned:   TAG=xpv4.3.5.2  SHA=367305f0  REPO=github.com/externpro/libzmq<br>
+  manifest: TAG=xpv4.3.4.4  SHA=580d6af0  REPO=github.com/externpro/libzmq<br>
 
 
 |diff  |description|
