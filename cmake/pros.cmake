@@ -28,8 +28,8 @@ set(ap_Ceres ceres-solver)
 set(xp_clang-format REPO github.com/externpro/clang-format TAG xpv19.1.5.4
   MANIFEST_HASH SHA256=394c736ead4b881280d38dff154cb84cfe2e55fc6ac4179862c58a62833cc591
   )
-set(xp_cppzmq REPO github.com/externpro/cppzmq TAG xpv4.7.1.4
-  MANIFEST_HASH SHA256=13d6e16da5a3085d04eea599a1f95506f109e56b4fed6557ed03100e631ffcd6
+set(xp_cppzmq REPO github.com/externpro/cppzmq TAG xpv4.11.0.1
+  MANIFEST_HASH SHA256=17ac5e95826182c29e3a09026cc4ba096d9b43e0abb9c51e825ac2933a9a49e5
   )
 set(xp_curl REPO github.com/externpro/curl TAG xpv7.80.0.4
   MANIFEST_SHA256 c3e620e11af6f71600d18dbe0910fae4c94943a532965b160b4872a360ad1cd9
