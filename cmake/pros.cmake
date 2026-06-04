@@ -215,6 +215,6 @@ set(xp_zlib REPO github.com/externpro/zlib TAG xpv1.3.2.1
   MANIFEST_HASH SHA256=8d79b8d67c6027ad763e003fc26dc7d5b04595e354717888800a4da34fbd8a81
   )
 set(ap_ZLIB zlib)
-set(xp_zmqpp REPO github.com/externpro/zmqpp TAG xpv4.2.0-47.3
-  MANIFEST_SHA256 a100f9711301a66981f4de3a4ed7bb6032190266b962592cebd0a0c22d2032e8
+set(xp_zmqpp REPO github.com/externpro/zmqpp TAG xpv4.2.0-47.4
+  MANIFEST_HASH SHA256=4ade7c5217e5895a687ceeaea3685f9d27ca65b10a7bcb5ee7a120fca39e2f55
   )
