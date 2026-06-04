@@ -134,29 +134,41 @@
 <ellipse fill="none" stroke="#64748b" cx="825.26" cy="-234" rx="27" ry="18"/>
 <text text-anchor="middle" x="825.26" y="-231.5" font-family="Times-Roman" font-size="10.00" fill="#64748b">azmq</text>
 </g>
-<!-- boost -->
-<g id="node12" class="node">
-<title>boost</title>
-<ellipse fill="none" stroke="#64748b" cx="748.26" cy="-162" rx="27" ry="18"/>
-<text text-anchor="middle" x="748.26" y="-159.5" font-family="Times-Roman" font-size="10.00" fill="#64748b">boost</text>
-</g>
-<!-- azmq&#45;&gt;boost -->
-<g id="edge7" class="edge">
-<title>azmq&#45;&gt;boost</title>
-<path fill="none" stroke="#64748b" d="M809.68,-218.83C798.65,-208.81 783.67,-195.19 771.27,-183.92"/>
-<polygon fill="#64748b" stroke="#64748b" points="773.31,-181.04 763.56,-176.91 768.6,-186.22 773.31,-181.04"/>
-</g>
 <!-- libzmq -->
-<g id="node13" class="node">
+<g id="node12" class="node">
 <title>libzmq</title>
 <ellipse fill="none" stroke="#64748b" cx="896.26" cy="-162" rx="29.37" ry="18"/>
 <text text-anchor="middle" x="896.26" y="-159.5" font-family="Times-Roman" font-size="10.00" fill="#64748b">libzmq</text>
 </g>
 <!-- azmq&#45;&gt;libzmq -->
-<g id="edge8" class="edge">
+<g id="edge7" class="edge">
 <title>azmq&#45;&gt;libzmq</title>
 <path fill="none" stroke="#64748b" d="M839.97,-218.5C849.74,-208.86 862.75,-196.04 873.81,-185.14"/>
 <polygon fill="#64748b" stroke="#64748b" points="876.42,-187.48 881.08,-177.97 871.5,-182.5 876.42,-187.48"/>
+</g>
+<!-- boost -->
+<g id="node13" class="node">
+<title>boost</title>
+<ellipse fill="none" stroke="#64748b" cx="748.26" cy="-162" rx="27" ry="18"/>
+<text text-anchor="middle" x="748.26" y="-159.5" font-family="Times-Roman" font-size="10.00" fill="#64748b">boost</text>
+</g>
+<!-- azmq&#45;&gt;boost -->
+<g id="edge8" class="edge">
+<title>azmq&#45;&gt;boost</title>
+<path fill="none" stroke="#64748b" d="M809.68,-218.83C798.65,-208.81 783.67,-195.19 771.27,-183.92"/>
+<polygon fill="#64748b" stroke="#64748b" points="773.31,-181.04 763.56,-176.91 768.6,-186.22 773.31,-181.04"/>
+</g>
+<!-- libsodium -->
+<g id="node32" class="node">
+<title>libsodium</title>
+<ellipse fill="none" stroke="#64748b" cx="895.26" cy="-90" rx="38.03" ry="18"/>
+<text text-anchor="middle" x="895.26" y="-87.5" font-family="Times-Roman" font-size="10.00" fill="#64748b">libsodium</text>
+</g>
+<!-- libzmq&#45;&gt;libsodium -->
+<g id="edge32" class="edge">
+<title>libzmq&#45;&gt;libsodium</title>
+<path fill="none" stroke="#64748b" d="M896.02,-143.7C895.91,-135.98 895.77,-126.71 895.65,-118.11"/>
+<polygon fill="#64748b" stroke="#64748b" points="899.15,-118.05 895.51,-108.1 892.15,-118.15 899.15,-118.05"/>
 </g>
 <!-- bzip2 -->
 <g id="node14" class="node">
@@ -181,18 +193,6 @@
 <title>boost&#45;&gt;zlib</title>
 <path fill="none" stroke="#64748b" d="M731.87,-147.5C719.29,-137.14 701.72,-122.67 687.52,-110.97"/>
 <polygon fill="#64748b" stroke="#64748b" points="689.55,-108.11 679.6,-104.46 685.1,-113.51 689.55,-108.11"/>
-</g>
-<!-- libsodium -->
-<g id="node32" class="node">
-<title>libsodium</title>
-<ellipse fill="none" stroke="#64748b" cx="895.26" cy="-90" rx="38.03" ry="18"/>
-<text text-anchor="middle" x="895.26" y="-87.5" font-family="Times-Roman" font-size="10.00" fill="#64748b">libsodium</text>
-</g>
-<!-- libzmq&#45;&gt;libsodium -->
-<g id="edge32" class="edge">
-<title>libzmq&#45;&gt;libsodium</title>
-<path fill="none" stroke="#64748b" d="M896.02,-143.7C895.91,-135.98 895.77,-126.71 895.65,-118.11"/>
-<polygon fill="#64748b" stroke="#64748b" points="899.15,-118.05 895.51,-108.1 892.15,-118.15 899.15,-118.05"/>
 </g>
 <!-- ceres&#45;solver -->
 <g id="node16" class="node">
