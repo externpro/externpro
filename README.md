@@ -136,8 +136,11 @@ The CI pipelines are designed to run on GitHub-hosted runners, providing a consi
 
 ## Getting Started
 
-- For adopting externpro into a project, see [How to adopt externpro](./cmake/docs/how-to-adopt-externpro.md).
-- For workflow prerequisites before running `xpInit`, see [xpInit preconditions](.github/docs/caller-workflows.md#preconditions-before-running-xpinit).
+**Bootstrap Script**: Automates several setup steps - see [Bootstrap Guide](./.github/docs/bootstrap.md)
+
+**Complete Guide**: For understanding the full externpro adoption process and manual steps, see [How to adopt externpro](./cmake/docs/how-to-adopt-externpro.md)
+
+- For prerequisites before running `xpInit`, see [xpInit preconditions](./.github/docs/caller-workflows.md#preconditions-before-running-xpinit).
 - For a hands-on example repo that walks through forking a project, adding externpro as a submodule, running `xpInit`, and producing a release that downstream projects can consume, see [externpro/tutorial](https://github.com/externpro/tutorial).
 
 Optimally, externpro is added to any project as a submodule at the path `.devcontainer`:

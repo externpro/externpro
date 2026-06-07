@@ -28,17 +28,25 @@ Copy these templates into the project repo:
 
 ### Preconditions (before running `xpInit`)
 
+**Required (manual)**:
 1. Start a new repo or fork the upstream repo.
 2. Identify a BASE tag (fork) or create `v0` at the first commit (new repo).
-3. Create branch `xpro` and set it as the default branch.
-4. Add externpro as a submodule:
+3. Add externpro as a submodule:
 
 ```sh
 git submodule add https://github.com/externpro/externpro .devcontainer
 ```
 
-5. Copy `.devcontainer/.github/wf-templates/xpinit.yml` into the repo’s `.github/workflows/` and commit.
-6. Push `xpro` to GitHub.
+**Then choose one of the following**:
+
+**Automated Setup**: Run the [bootstrap script](../docs/bootstrap.md) to perform the manual steps listed below (plus additional automation like XPRO_TOKEN setup and default branch verification).
+
+**Manual Setup**:
+
+4. Create branch `xpro` and set it as the default branch.
+5. Commit the submodule addition.
+6. Copy `.devcontainer/.github/wf-templates/xpinit.yml` into the repo's `.github/workflows/` and commit.
+7. Push `xpro` to GitHub.
 
 For the repo wiring and CMake integration checklist, see [How-to: adopt externpro](../../cmake/docs/how-to-adopt-externpro.md).
 

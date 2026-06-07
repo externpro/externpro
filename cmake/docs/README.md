@@ -23,6 +23,9 @@ This directory contains short, developer-facing notes about the externpro CMake 
 
 ## Repo adoption
 
+- [Bootstrap script](../.github/docs/bootstrap.md)
+  - Automated setup script for externpro adoption (recommended).
+
 - [How-to: adopt externpro](how-to-adopt-externpro.md)
   - Practical steps to wire externpro into a repo.
 

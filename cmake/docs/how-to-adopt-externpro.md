@@ -2,6 +2,27 @@
 
 This page describes the typical steps to modify a project to build with externpro, and to leverage externpro CMake, docker build images, and GitHub Actions workflows to create xpro packages.
 
+## Quick Start
+
+For a streamlined adoption process:
+
+1. **Add externpro as a submodule**:
+   ```bash
+   git submodule add https://github.com/externpro/externpro .devcontainer
+   ```
+
+2. **Run the bootstrap script**:
+   ```bash
+   ./.devcontainer/scripts/bootstrap.sh
+   ```
+
+3. **Run the xpInit workflow**:
+   ```bash
+   gh workflow run xpinit.yml --ref xpro
+   ```
+
+See the detailed breakdown below for what each step does and manual alternatives.
+
 ## Project setup
 
 1. Find the upstream project and fork it (or create a new repo)
@@ -14,17 +35,17 @@ This page describes the typical steps to modify a project to build with externpr
 git submodule add https://github.com/externpro/externpro .devcontainer
 ```
 
-3. Add docker-compose links
+3. Add CMakePresets
+
+```bash
+cp .devcontainer/cmake/presets/CMakePresets* .
+```
+
+4. Add docker-compose links (for Linux build container launching)
 
 ```bash
 ln -s .devcontainer/compose.pro.sh docker-compose.sh
 ln -s .devcontainer/compose.bld.yml docker-compose.yml
-```
-
-4. Add CMakePresets
-
-```bash
-cp .devcontainer/cmake/presets/CMakePresets* .
 ```
 
 5. Update `.gitignore` with externpro ignores
@@ -36,7 +57,9 @@ _bld*/
 docker-compose.override.yml
 ```
 
-Note: steps 3-5 can also be handled by running the `xpInit` caller workflow (`.github/workflows/xpinit.yml`, copied from [`xpinit.yml`](../../.github/wf-templates/xpinit.yml)). See the `xpInit` docs in [Caller workflows](../../.github/docs/caller-workflows.md#xpinit-xpinityml).
+Note: The [Bootstrap Script](../../.github/docs/bootstrap.md) can automate parts of this setup (CMakePresets copying, GitHub workflow setup, git branch management, and repository configuration), but does not currently handle docker-compose links or .gitignore updates.
+
+Alternatively, steps 3-5 can be handled by running the `xpInit` caller workflow (`.github/workflows/xpinit.yml`, copied from [`xpinit.yml`](../../.github/wf-templates/xpinit.yml)). See the `xpInit` docs in [Caller workflows](../../.github/docs/caller-workflows.md#xpinit-xpinityml).
 
 ## GitHub Actions workflows
 
