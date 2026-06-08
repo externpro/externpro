@@ -287,28 +287,110 @@ find_best_remote() {
     echo "$best_remote"
 }
 
-# Function to verify two commits exist and push xpro branch
+# Function to verify commits and push xpro branch
 push_xpro_branch() {
     local repo_root="$1"
 
-    # Verify we have exactly the two expected commits
-    local commit_count=$(git log --oneline HEAD~2..HEAD 2>/dev/null | wc -l)
-    if [ "$commit_count" -ne 2 ]; then
-        print_warning "Expected 2 commits on xpro branch, found $commit_count"
+    # First, check if the current working tree has the required files
+    local has_devcontainer=false
+    local has_bootstrap_files=false
+
+    if [ -d "$repo_root/.devcontainer" ]; then
+        has_devcontainer=true
+    fi
+
+    if [ -f "$repo_root/.github/workflows/xpinit.yml" ]; then
+        has_bootstrap_files=true
+    fi
+
+    if [ "$has_devcontainer" = false ]; then
+        print_warning "externpro submodule not found in working tree"
+        print_info "Skipping push - add externpro as submodule first"
+        return 0
+    fi
+
+    # Search the entire xpro branch history for required commits
+    local has_externpro_commit=false
+    local has_bootstrap_commit=false
+
+    # Find the merge base with main to limit our search to xpro-specific commits
+    local main_branch="main"
+    local merge_base
+
+    # Try to find main branch (could be master, main, etc.)
+    for branch in main master develop; do
+        if git rev-parse --verify "origin/$branch" >/dev/null 2>&1; then
+            main_branch="$branch"
+            break
+        fi
+    done
+
+    # Get the merge base between current branch and main
+    merge_base=$(git merge-base "origin/$main_branch" HEAD 2>/dev/null)
+    if [ $? -ne 0 ] || [ -z "$merge_base" ]; then
+        # Fallback: just search all commits on current branch
+        merge_base=$(git rev-list --max-parents=0 HEAD 2>/dev/null)
+    fi
+
+    if [ -n "$merge_base" ]; then
+        print_info "Checking xpro branch history for required commits..."
+
+        # Get all commits from merge base to HEAD (exclusive of merge base)
+        local xpro_commits=$(git rev-list --reverse "$merge_base"..HEAD 2>/dev/null)
+
+        if [ -z "$xpro_commits" ]; then
+            print_warning "No commits found on xpro branch"
+            print_info "Skipping push - manual verification needed"
+            return 0
+        fi
+
+        for commit_hash in $xpro_commits; do
+            # Check if commit contains .devcontainer submodule
+            if git ls-tree "$commit_hash" | grep -q "\.devcontainer"; then
+                has_externpro_commit=true
+            fi
+
+            # Check if commit contains bootstrap files (check multiple indicators)
+            local bootstrap_file_count=0
+
+            # Check for GitHub workflow
+            if git ls-tree "$commit_hash" | grep -q "\.github/workflows/xpinit.yml"; then
+                ((bootstrap_file_count++))
+            fi
+
+            # Check for CMakePresets files
+            if git ls-tree "$commit_hash" | grep -q "CMakePresets.json"; then
+                ((bootstrap_file_count++))
+            fi
+
+            if git ls-tree "$commit_hash" | grep -q "CMakePresetsBase.json"; then
+                ((bootstrap_file_count++))
+            fi
+
+            # If we found at least 2 bootstrap files, consider it a bootstrap commit
+            if [ "$bootstrap_file_count" -ge 2 ]; then
+                has_bootstrap_commit=true
+            fi
+        done
+    else
+        print_warning "Could not determine branch history range"
         print_info "Skipping push - manual verification needed"
         return 0
     fi
 
-    # Check if we have the expected commit messages
-    local first_commit=$(git log --format=%s -n 1 HEAD~1)
-    local second_commit=$(git log --format=%s -n 1 HEAD)
-
-    if [[ "$first_commit" != *"externpro"* ]] || [[ "$second_commit" != *"Add externpro bootstrap setup"* ]]; then
-        print_warning "Unexpected commit messages found"
-        print_info "First commit: $first_commit"
-        print_info "Second commit: $second_commit"
+    if [ "$has_externpro_commit" = false ]; then
+        print_warning "No externpro submodule commit found in xpro branch history"
+        print_info "Searched $(echo "$xpro_commits" | wc -l) commits"
         print_info "Skipping push - manual verification needed"
         return 0
+    fi
+
+    if [ "$has_bootstrap_commit" = false ]; then
+        print_info "Bootstrap setup commit not found in xpro branch history"
+        print_info "  This is normal if bootstrap files were added manually"
+        print_info "  Current working tree has bootstrap files: $has_bootstrap_files"
+    else
+        print_success "Bootstrap setup commit found in xpro branch history"
     fi
 
     # Find the best remote for pushing
@@ -350,23 +432,47 @@ commit_externpro_submodule() {
     local repo_root="$1"
     local devcontainer_dir="$repo_root/.devcontainer"
 
-    # Check if .devcontainer is staged (new submodule)
-    if ! git status --porcelain | grep -q "^AM.*\.devcontainer$"; then
-        print_info "Submodule already committed or not staged"
+    # Check if externpro submodule needs to be committed
+    local needs_commit=false
+
+    # Check if .devcontainer exists as a submodule but is not yet committed
+    if [ -d "$devcontainer_dir" ]; then
+        # Check if .devcontainer is tracked as a submodule in the current commit
+        if ! git ls-tree HEAD | grep -q "\.devcontainer"; then
+            needs_commit=true
+            print_info "externpro submodule detected but not yet committed"
+        else
+            print_info "externpro submodule already committed"
+        fi
+    else
+        print_warning "externpro submodule not found at: $devcontainer_dir"
+        return 1
+    fi
+
+    if [ "$needs_commit" = false ]; then
         return 0
     fi
 
-    local externpro_version=$(get_externpro_version "$devcontainer_dir")
-    print_info "Committing externpro submodule (version: $externpro_version)..."
+    # Stage the submodule files
+    git add .devcontainer .gitmodules
 
-    # Explicitly commit only the submodule files
-    git commit -m "externpro $externpro_version" .devcontainer .gitmodules
+    # Check if staging was successful
+    if ! git diff --cached --quiet .devcontainer .gitmodules; then
+        local externpro_version=$(get_externpro_version "$devcontainer_dir")
+        print_info "Committing externpro submodule (version: $externpro_version)..."
 
-    if [ $? -eq 0 ]; then
-        print_success "externpro submodule committed successfully"
-        return 0
+        # Explicitly commit only the submodule files
+        git commit -m "externpro $externpro_version" .devcontainer .gitmodules
+
+        if [ $? -eq 0 ]; then
+            print_success "externpro submodule committed successfully"
+            return 0
+        else
+            print_error "Failed to commit externpro submodule"
+            return 1
+        fi
     else
-        print_warning "Failed to commit externpro submodule"
+        print_warning "No changes to stage for submodule"
         return 1
     fi
 }
@@ -486,22 +592,12 @@ main() {
     local repo_root="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
     print_info "Repository root: $repo_root"
 
-    # Check if we have staged submodule files BEFORE switching branches
-    local has_staged_submodule=false
-    local git_status=$(git status --porcelain)
-
-    # Check for staged submodule files (format: "AM filename" for new submodule, "M  filename" for modified .gitmodules)
-    if echo "$git_status" | grep -q "^AM.*\.devcontainer$" && echo "$git_status" | grep -q "^M.*\.gitmodules$"; then
-        has_staged_submodule=true
-    fi
-
     # Ensure we're on the xpro branch FIRST
     ensure_xpro_branch
 
-    # Commit externpro submodule on xpro branch
-    if [ "$has_staged_submodule" = true ]; then
-        commit_externpro_submodule "$repo_root"
-    fi
+    # ALWAYS check if externpro submodule needs to be committed
+    # This ensures the two-commit strategy works regardless of when submodule was added
+    commit_externpro_submodule "$repo_root"
 
     # Check if we're in the right directory structure
     local devcontainer_dir="$repo_root/.devcontainer"
