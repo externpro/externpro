@@ -18,8 +18,10 @@ For a streamlined adoption process:
 
 3. **Run the xpInit workflow**:
    ```bash
-   gh workflow run xpinit.yml --ref xpro
+   gh workflow run xpinit.yml --ref xpro --repo OWNER/REPO
    ```
+
+   Replace `OWNER/REPO` with your actual repository (e.g., `myusername/myproject`).
 
 See the detailed breakdown below for what each step does and manual alternatives.
 
