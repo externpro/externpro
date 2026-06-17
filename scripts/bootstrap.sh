@@ -486,13 +486,15 @@ commit_bootstrap_changes() {
         ".github/workflows/xpinit.yml"
         "CMakePresets.json"
         "CMakePresetsBase.json"
+        "docker-compose.sh"
+        "docker-compose.yml"
     )
 
     local files_to_add=()
 
     # Check which of our target files actually exist and need to be committed
     for file in "${files_to_commit[@]}"; do
-        if [ -f "$repo_root/$file" ]; then
+        if [ -f "$repo_root/$file" ] || [ -L "$repo_root/$file" ]; then
             files_to_add+=("$file")
         fi
     done
@@ -501,9 +503,12 @@ commit_bootstrap_changes() {
         # Check if any of these files actually have changes
         local has_changes=false
         for file in "${files_to_add[@]}"; do
-            if [ -f "$repo_root/$file" ] && ! git diff --quiet "$repo_root/$file"; then
-                has_changes=true
-                break
+            if [ -f "$repo_root/$file" ] || [ -L "$repo_root/$file" ]; then
+                # Check if file is untracked or has changes
+                if ! git ls-files --error-unmatch "$repo_root/$file" >/dev/null 2>&1 || ! git diff --quiet "$repo_root/$file"; then
+                    has_changes=true
+                    break
+                fi
             fi
         done
 
@@ -515,7 +520,8 @@ commit_bootstrap_changes() {
             git commit -m "Add externpro bootstrap setup
 
 - Add xpinit.yml workflow to .github/workflows
-- Add CMakePresets.json and CMakePresetsBase.json to root"
+- Add CMakePresets.json and CMakePresetsBase.json to root
+- Add docker-compose links"
 
             if [ $? -eq 0 ]; then
                 print_success "Bootstrap changes committed successfully"
@@ -644,7 +650,7 @@ main() {
 
         if [ -f "$src" ]; then
             if copy_with_commit_confirmation "$src" "$dst"; then
-                ((copied_count++))
+                copied_count=$(expr $copied_count + 1)
             fi
         else
             print_warning "Preset file not found: $src"
@@ -657,6 +663,21 @@ main() {
         print_warning "No CMake preset files were copied"
         print_info "Bootstrap setup cannot continue without CMake preset files."
         exit 1
+    fi
+
+    # Create docker-compose symbolic links
+    print_info "Creating docker-compose links..."
+    cd "$repo_root"
+
+    # Create symbolic links if they don't exist or are broken
+    if [ ! -L "docker-compose.sh" ] || [ ! -e "docker-compose.sh" ]; then
+        ln -sf .devcontainer/compose.pro.sh docker-compose.sh
+        print_info "Created docker-compose.sh link"
+    fi
+
+    if [ ! -L "docker-compose.yml" ] || [ ! -e "docker-compose.yml" ]; then
+        ln -sf .devcontainer/compose.bld.yml docker-compose.yml
+        print_info "Created docker-compose.yml link"
     fi
 
     # Verify setup
