@@ -1,0 +1,401 @@
+name: Sync externpro
+env:
+  XPRO_SUBMODULE_PATH: .devcontainer
+  XPRO_BUILD_CONTAINER: rocky9-gcc13
+on:
+  workflow_call:
+    inputs:
+      target_ref:
+        description: 'Branch or tag to sync externpro to (e.g., "main" or "25.07.4")'
+        required: false
+        type: string
+        default: 'main'
+      preserve_existing_branches:
+        description: 'Whether to preserve existing branches in caller workflows (default: use branches from wf-templates)'
+        required: false
+        type: boolean
+        default: false
+    secrets:
+      automation_token:
+        description: 'Optional token used for automation (push/PR/labels; may need workflow permission when updating workflows). If not set, uses GITHUB_TOKEN.'
+        required: false
+jobs:
+  externpro:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      packages: write
+    steps:
+      -
+        name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          token: ${{ secrets.automation_token || github.token }}
+          persist-credentials: false
+          fetch-depth: 0   # fetches all history
+          fetch-tags: true # explicitly fetches tags
+          submodules: true
+      -
+        name: Checkout xpsync branch if exists
+        run: |
+          # Check if xpsync branch exists and checkout if it does
+          if git rev-parse --verify origin/xpsync >/dev/null 2>&1; then
+            echo "xpsync branch exists, checking it out"
+            git checkout -B xpsync origin/xpsync
+          else
+            echo "xpsync branch does not exist, staying on default branch"
+          fi
+      -
+        name: Validate externpro submodule
+        id: validate
+        uses: externpro/externpro/.github/actions/externpro-validate@main
+        with:
+          submodule_path: ${{ env.XPRO_SUBMODULE_PATH }}
+      -
+        name: Get current externpro HEAD
+        id: current_head
+        run: |
+          cd "${{ steps.validate.outputs.submodule_path }}"
+          CURRENT_HEAD=$(git rev-parse HEAD)
+          echo "current_head=$CURRENT_HEAD" >> $GITHUB_OUTPUT
+          echo "Current externpro HEAD: $CURRENT_HEAD"
+      -
+        name: Update externpro submodule
+        id: update
+        run: |
+          cd "${{ steps.validate.outputs.submodule_path }}"
+          TARGET_REF="${{ inputs.target_ref }}"
+          # Fetch latest changes
+          git fetch origin
+          # Check if target_ref is a tag or branch
+          if git rev-parse --verify "origin/$TARGET_REF" >/dev/null 2>&1; then
+            # It's a branch
+            TARGET_TYPE="branch"
+            echo "target_type=branch" >> $GITHUB_OUTPUT
+            LATEST_HEAD=$(git rev-parse origin/"$TARGET_REF")
+          elif git rev-parse --verify "$TARGET_REF" >/dev/null 2>&1; then
+            # It's a tag or commit
+            LATEST_HEAD=$(git rev-parse "$TARGET_REF")
+            TARGET_TYPE="tag"
+            echo "target_type=tag" >> $GITHUB_OUTPUT
+          else
+            echo "Error: Target ref '$TARGET_REF' not found"
+            exit 1
+          fi
+          echo "latest_head=$LATEST_HEAD" >> $GITHUB_OUTPUT
+          echo "Target ref: $TARGET_REF ($TARGET_TYPE)"
+          echo "Latest externpro HEAD: $LATEST_HEAD"
+          # Check if update is needed
+          if [ "${{ steps.current_head.outputs.current_head }}" = "$LATEST_HEAD" ]; then
+            echo "externpro submodule is already at target ref"
+            echo "update_needed=false" >> $GITHUB_OUTPUT
+          else
+            echo "externpro submodule needs update"
+            echo "update_needed=true" >> $GITHUB_OUTPUT
+            # Update to target
+            if [ "$TARGET_TYPE" = "branch" ]; then
+              git checkout -B "$TARGET_REF" "origin/$TARGET_REF"
+            else
+              git checkout --detach "$LATEST_HEAD"
+            fi
+          fi
+      -
+        name: Get externpro version tag
+        id: version
+        run: |
+          cd "${{ steps.validate.outputs.submodule_path }}"
+          VERSION_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "no-tag")
+          DESCRIBE=$(git describe --tags 2>/dev/null || git rev-parse --short HEAD)
+          echo "version_tag=$VERSION_TAG" >> $GITHUB_OUTPUT
+          echo "describe=$DESCRIBE" >> $GITHUB_OUTPUT
+          echo "externpro version: $VERSION_TAG"
+          echo "externpro describe: $DESCRIBE"
+      -
+        name: Configure Git
+        uses: ./.devcontainer/.github/actions/git-configure-bot
+        with:
+          submodule_path: ${{ steps.validate.outputs.submodule_path }}
+      -
+        name: Update caller workflows
+        id: update_workflows
+        if: ${{ always() }}
+        uses: ./.devcontainer/.github/actions/sync-caller-workflows
+        with:
+          workflow_dir: .github/workflows
+          template_dir: ${{ steps.validate.outputs.submodule_path }}/.github/wf-templates
+          preserve_existing_branches: ${{ inputs.preserve_existing_branches }}
+      -
+        name: Compare CMakePresets
+        id: cmake_presets
+        if: ${{ always() }}
+        uses: ./.devcontainer/.github/actions/compare-cmake-presets
+        with:
+          presets_dir: .
+          template_dir: ${{ steps.validate.outputs.submodule_path }}/cmake/presets
+      -
+        name: Create release-tag intent (if missing)
+        id: release_intent
+        if: ${{ always() }}
+        uses: ./.devcontainer/.github/actions/release-tag-intent
+      -
+        name: GHCR access
+        id: ghcr
+        uses: ./.devcontainer/.github/actions/ghcr-access
+        with:
+          build_container: ${{ env.XPRO_BUILD_CONTAINER }}
+          automation_token: ${{ secrets.automation_token }}
+      -
+        name: Configure and snapshot dependency artifacts
+        id: deps
+        uses: ./.devcontainer/.github/actions/externpro-deps-configure
+        with:
+          submodule_path: ${{ steps.validate.outputs.submodule_path }}
+          build_container: ${{ env.XPRO_BUILD_CONTAINER }}
+          automation_token: ${{ secrets.automation_token }}
+      -
+        name: Get final externpro version/head
+        id: final_version
+        run: |
+          cd "${{ steps.validate.outputs.submodule_path }}"
+          FINAL_HEAD=$(git rev-parse HEAD)
+          VERSION_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "no-tag")
+          DESCRIBE=$(git describe --tags 2>/dev/null || git rev-parse --short HEAD)
+          echo "final_head=$FINAL_HEAD" >> $GITHUB_OUTPUT
+          echo "version_tag=$VERSION_TAG" >> $GITHUB_OUTPUT
+          echo "describe=$DESCRIBE" >> $GITHUB_OUTPUT
+          echo "externpro final head: $FINAL_HEAD"
+          echo "externpro final version: $VERSION_TAG"
+          echo "externpro final describe: $DESCRIBE"
+      -
+        name: Stage submodule pointer update
+        id: stage_submodule
+        if: ${{ always() }}
+        run: |
+          # Stage submodule pointer update after any submodule commits (and/or after switching target ref)
+          git add "${{ steps.validate.outputs.submodule_path }}"
+          if git diff --cached --quiet -- "${{ steps.validate.outputs.submodule_path }}"; then
+            echo "✓ No submodule pointer changes staged for ${{ steps.validate.outputs.submodule_path }}"
+          else
+            echo "✓ Staged submodule pointer update for ${{ steps.validate.outputs.submodule_path }}"
+          fi
+      -
+        name: Determine if PR is needed
+        id: pr_needed
+        if: ${{ always() }}
+        run: |
+          if git diff --cached --quiet; then
+            echo "pr_needed=false" >> $GITHUB_OUTPUT
+            echo "No staged changes (no PR needed)"
+          else
+            echo "pr_needed=true" >> $GITHUB_OUTPUT
+            echo "Staged changes detected (PR needed)"
+          fi
+      -
+        name: Create branch
+        id: branch
+        if: steps.pr_needed.outputs.pr_needed == 'true'
+        run: |
+          DESCRIBE="${{ steps.final_version.outputs.describe }}"
+          # Clean describe for branch name (remove invalid chars)
+          CLEAN_DESCRIBE="$(echo "$DESCRIBE" | sed 's/[^a-zA-Z0-9.-]/-/g')"
+          # Include a unique suffix so reruns don't collide on the same describe.
+          UNIQUE_SUFFIX="${{ github.run_id }}-${{ github.run_attempt }}"
+          BRANCH_NAME="xpsync-${CLEAN_DESCRIBE}-${UNIQUE_SUFFIX}"
+          git checkout -b "$BRANCH_NAME"
+          echo "branch_name=$BRANCH_NAME" >> $GITHUB_OUTPUT
+      -
+        name: Commit submodule update
+        if: steps.update.outputs.update_needed == 'true' && steps.pr_needed.outputs.pr_needed == 'true'
+        run: |
+          COMMIT_MSG="externpro ${{ steps.final_version.outputs.describe }}"
+          git commit -m "$COMMIT_MSG" -- "${{ steps.validate.outputs.submodule_path }}"
+          echo "Commit created: $COMMIT_MSG"
+      -
+        name: Commit dependency updates
+        if: steps.pr_needed.outputs.pr_needed == 'true'
+        run: |
+          FILES="${{ steps.deps.outputs.dependency_files }}"
+          FILES=$(printf '%s\n' "$FILES" | sed '/^$/d' | tr '\n' ' ')
+          if [ -z "$FILES" ]; then
+            echo "No dependency changes staged"
+            exit 0
+          fi
+          git commit -m "dependency updates" -- $FILES
+      -
+        name: Commit release-tag intent
+        if: steps.pr_needed.outputs.pr_needed == 'true' && steps.release_intent.outputs.intent_modified == 'true'
+        run: |
+          INTENT_FILE="${{ steps.release_intent.outputs.intent_file }}"
+          if [ -z "${INTENT_FILE}" ] || [ ! -f "${INTENT_FILE}" ]; then
+            echo "release-tag intent file missing; nothing to commit"
+            exit 0
+          fi
+          if git diff --cached --quiet -- "${INTENT_FILE}"; then
+            echo "release-tag intent not staged; nothing to commit"
+            exit 0
+          fi
+          git commit -m "update .github/release-tag.json" -- "${INTENT_FILE}"
+      -
+        name: Commit and push externpro updates
+        if: steps.pr_needed.outputs.pr_needed == 'true'
+        run: |
+          NEEDS_WORKFLOW_TOKEN=false
+          if git diff --cached --name-only | grep -q '^\.github/workflows/'; then
+            NEEDS_WORKFLOW_TOKEN=true
+          else
+            NEEDS_WORKFLOW_TOKEN=false
+          fi
+          TOKEN="${{ secrets.automation_token }}"
+          if [ "${NEEDS_WORKFLOW_TOKEN}" = true ] && [ -z "${TOKEN}" ]; then
+            echo "Error: workflow updates include .github/workflows/*; provide automation_token (PAT with workflow permission)." >&2
+            exit 1
+          fi
+          if [ -z "${TOKEN}" ]; then
+            TOKEN="${{ github.token }}"
+            echo "Using github.token for push"
+          else
+            TOKEN=$(printf '%s' "${TOKEN}" | tr -d '\r\n' | xargs)
+            echo "Using automation_token for push (length=${#TOKEN})"
+          fi
+          TOKEN_TYPE="unknown"
+          case "${TOKEN}" in
+            ghp_*) TOKEN_TYPE="classic_pat" ;;
+            github_pat_*) TOKEN_TYPE="fine_grained_pat" ;;
+            ghs_*) TOKEN_TYPE="github_actions_token" ;;
+          esac
+          echo "Push token type: ${TOKEN_TYPE}"
+          # actions/checkout injects an http extraheader for github.com using the checkout token.
+          # When checkout uses github.token, that header can override PAT-in-URL auth for later pushes.
+          # Clear it and force an empty extraheader for the push so the URL credential is used.
+          git config --unset-all http.https://github.com/.extraheader || true
+          git remote set-url origin "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          if ! git diff --cached --quiet; then
+            COMMIT_MSG="externpro ${{ steps.final_version.outputs.describe }} updates"
+            git commit -m "$COMMIT_MSG"
+            echo "Commit created: $COMMIT_MSG"
+          fi
+          git -c http.extraheader= push --set-upstream origin "${{ steps.branch.outputs.branch_name }}"
+      -
+        name: Ensure labels exist
+        if: steps.pr_needed.outputs.pr_needed == 'true'
+        uses: ./.devcontainer/.github/actions/labels-mgmt
+        env:
+          GH_TOKEN: ${{ secrets.automation_token || github.token }}
+        with:
+          cleanup_legacy_labels: ""
+      -
+        name: Create Pull Request
+        id: create_pr
+        if: steps.pr_needed.outputs.pr_needed == 'true'
+        env:
+          WORKFLOW_REPORT: ${{ steps.update_workflows.outputs.workflow_report }}
+          CMAKE_PRESETS_REPORT: ${{ steps.cmake_presets.outputs.report }}
+        run: |
+          set -euo pipefail
+          GH_TOKEN="${{ secrets.automation_token }}"
+          if [ -z "${GH_TOKEN}" ]; then
+            GH_TOKEN="${{ github.token }}"
+          fi
+          export GH_TOKEN
+          GH_RETRY=(bash .devcontainer/.github/actions/gh-retry/gh-retry.sh)
+          BASE_BRANCH="${{ github.event.repository.default_branch }}"
+          HEAD_BRANCH="${{ steps.branch.outputs.branch_name }}"
+          export HEAD_BRANCH
+          TITLE="externpro ${{ steps.final_version.outputs.describe }}"
+          BODY_FILE="/tmp/pr-body.md"
+          : > "$BODY_FILE"
+          echo "## Summary" >> "$BODY_FILE"
+          echo >> "$BODY_FILE"
+          if [ "${{ steps.update.outputs.update_needed }}" = "true" ]; then
+            echo "Update externpro submodule to \`${{ steps.final_version.outputs.describe }}\`" >> "$BODY_FILE"
+          else
+            echo "Sync caller workflows from templates" >> "$BODY_FILE"
+          fi
+          echo >> "$BODY_FILE"
+          echo "## Changes" >> "$BODY_FILE"
+          echo >> "$BODY_FILE"
+          if [ "${{ steps.update.outputs.update_needed }}" = "true" ]; then
+            echo "- Updated \`${{ steps.validate.outputs.submodule_path }}\` to externpro \`${{ steps.final_version.outputs.describe }}\`" >> "$BODY_FILE"
+            echo "- Previous HEAD: \`${{ steps.current_head.outputs.current_head }}\`" >> "$BODY_FILE"
+            echo "- New HEAD: \`${{ steps.final_version.outputs.final_head }}\`" >> "$BODY_FILE"
+            if [ "${{ steps.final_version.outputs.final_head }}" != "${{ steps.update.outputs.latest_head }}" ]; then
+              echo "  - Target ref HEAD: \`${{ steps.update.outputs.latest_head }}\`" >> "$BODY_FILE"
+            fi
+          fi
+          if [ "${{ steps.deps.outputs.dependency_updated }}" = "true" ]; then
+            echo "- Updated dependency files" >> "$BODY_FILE"
+            if [ -n "${{ steps.deps.outputs.dependency_files }}" ]; then
+              echo "  - Files:" >> "$BODY_FILE"
+              while IFS= read -r f; do
+                [ -n "$f" ] && echo "    - \`$f\`" >> "$BODY_FILE"
+              done < <(printf '%s\n' "${{ steps.deps.outputs.dependency_files }}")
+            fi
+          fi
+          if [ "${{ steps.deps.outputs.submodule_dependency_commit }}" = "true" ]; then
+            echo "- Updated externpro submodule dependency artifacts (pushed to \`${{ steps.deps.outputs.submodule_dependency_push_ref }}\`)" >> "$BODY_FILE"
+          fi
+          if [ "${{ steps.release_intent.outputs.intent_modified }}" = "true" ]; then
+            if [ "${{ steps.release_intent.outputs.intent_created }}" = "true" ]; then
+              echo "- Created \`.github/release-tag.json\` (tag: \`${{ steps.release_intent.outputs.intent_tag }}\`)" >> "$BODY_FILE"
+            else
+              echo "- Updated \`.github/release-tag.json\` (tag: \`${{ steps.release_intent.outputs.intent_tag }}\`)" >> "$BODY_FILE"
+            fi
+            echo "  - Optional: add the \"release:tag\" label to trigger tagging, release builds, and draft release notes" >> "$BODY_FILE"
+          fi
+          if [ -n "${{ steps.release_intent.outputs.intent_tag }}" ]; then
+            echo "- If you add the \\\"release:tag\\\" label, the tag will be \\\`${{ steps.release_intent.outputs.intent_tag }}\\\`" >> "$BODY_FILE"
+            if [ "${{ steps.release_intent.outputs.intent_tag_exists }}" = "true" ]; then
+              echo "  - WARNING: that tag already exists; update \\\".github/release-tag.json\\\" to the next desired tag value" >> "$BODY_FILE"
+              echo "    - https://github.com/${{ github.repository }}/blob/$HEAD_BRANCH/.github/release-tag.json" >> "$BODY_FILE"
+            fi
+          fi
+          if [ "${{ steps.update_workflows.outputs.workflows_updated }}" = "true" ]; then
+            echo "- Updated caller workflows to match templates" >> "$BODY_FILE"
+          fi
+          if [ -n "${CMAKE_PRESETS_REPORT}" ]; then
+            echo "- CMakePresets.json review needed" >> "$BODY_FILE"
+            echo "  - See details below" >> "$BODY_FILE"
+          fi
+          if [ -n "${WORKFLOW_REPORT}" ]; then
+            echo >> "$BODY_FILE"
+            echo "### Workflow Update Report" >> "$BODY_FILE"
+            echo >> "$BODY_FILE"
+            printf '%s\n' "$WORKFLOW_REPORT" >> "$BODY_FILE"
+          fi
+          if [ -n "${CMAKE_PRESETS_REPORT}" ]; then
+            echo >> "$BODY_FILE"
+            echo "### CMakePresets.json" >> "$BODY_FILE"
+            echo >> "$BODY_FILE"
+            printf '%s\n' "${CMAKE_PRESETS_REPORT}" >> "$BODY_FILE"
+          fi
+          echo >> "$BODY_FILE"
+          echo "---" >> "$BODY_FILE"
+          echo >> "$BODY_FILE"
+          echo "*This PR was created automatically by GitHub Actions*" >> "$BODY_FILE"
+          if "${GH_RETRY[@]}" gh pr view "$HEAD_BRANCH" --json url --jq .url >/dev/null 2>&1; then
+            PR_URL=$("${GH_RETRY[@]}" gh pr view "$HEAD_BRANCH" --json url --jq .url)
+            echo "PR already exists for $HEAD_BRANCH: $PR_URL"
+          else
+            PR_URL=$("${GH_RETRY[@]}" gh pr create \
+            --base "$BASE_BRANCH" \
+            --head "$HEAD_BRANCH" \
+            --title "$TITLE" \
+            --body-file "$BODY_FILE")
+            echo "Created PR: $PR_URL"
+          fi
+          echo "pr_url=$PR_URL" >> "$GITHUB_OUTPUT"
+          "${GH_RETRY[@]}" gh pr edit "$PR_URL" --add-label "dependencies" >/dev/null 2>&1 || echo "Label 'dependencies' not found; skipping"
+          "${GH_RETRY[@]}" gh pr edit "$PR_URL" --add-label "xpsync" >/dev/null 2>&1 || echo "Label 'xpsync' not found; skipping"
+      -
+        name: Close superseded PRs
+        if: steps.pr_needed.outputs.pr_needed == 'true'
+        uses: ./.devcontainer/.github/actions/pr-close-superseded
+        env:
+          GH_TOKEN: ${{ secrets.automation_token || github.token }}
+        with:
+          head_branch_prefix: xpsync-
+          keep_head_branch: ${{ steps.branch.outputs.branch_name }}
+          label_name: xpsync
+          pr_url: ${{ steps.create_pr.outputs.pr_url }}
+          delete_branches: "true"
