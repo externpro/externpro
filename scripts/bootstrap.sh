@@ -2,7 +2,7 @@
 
 # Bootstrap script for externpro setup
 # This script sets up the minimum requirements for a developer to run cmake successfully
-# before the xpInit workflow is ever run.
+# before the xpSync workflow is ever run.
 
 set -e  # Exit on any error
 
@@ -123,7 +123,7 @@ check_xpro_token() {
 
     # If we can't check via CLI, provide setup instructions
     print_warning "XPRO_TOKEN may not be configured yet"
-    print_info "XPRO_TOKEN is required for xpInit workflow to work properly"
+    print_info "XPRO_TOKEN is required for xpSync workflow to work properly"
 
     # Provide the pre-filled PAT template URL
     local pat_url="https://github.com/settings/personal-access-tokens/new?name=EXTERNPRO_GITHUB_TOKEN&description=Used%20by%20externpro%20GitHub%20Actions%20for%20automation%20when%20pushing%20commits%2Ftags%20or%20creating%2Fupdating%20PRs%20(may%20include%20workflow%20file%20updates).&contents=write&pull_requests=write&workflows=write"
@@ -192,7 +192,7 @@ check_default_branch() {
     # Default branch is not xpro, provide instructions
     print_warning "Default branch is currently '$default_branch', should be 'xpro'"
     echo
-    print_info "Before running the xpInit workflow, you must set 'xpro' as the default branch:"
+    print_info "Before running the xpSync workflow, you must set 'xpro' as the default branch:"
     echo
     print_info "  1. Go to repository settings:"
     print_info "     https://github.com/$repo_name/settings"
@@ -299,7 +299,7 @@ push_xpro_branch() {
         has_devcontainer=true
     fi
 
-    if [ -f "$repo_root/.github/workflows/xpinit.yml" ]; then
+    if [ -f "$repo_root/.github/workflows/xpsync.yml" ]; then
         has_bootstrap_files=true
     fi
 
@@ -354,7 +354,7 @@ push_xpro_branch() {
             local bootstrap_file_count=0
 
             # Check for GitHub workflow
-            if git ls-tree "$commit_hash" | grep -q "\.github/workflows/xpinit.yml"; then
+            if git ls-tree "$commit_hash" | grep -q "\.github/workflows/xpsync.yml"; then
                 ((bootstrap_file_count++))
             fi
 
@@ -483,12 +483,19 @@ commit_bootstrap_changes() {
 
     # Explicitly stage only the files we created
     local files_to_commit=(
-        ".github/workflows/xpinit.yml"
         "CMakePresets.json"
         "CMakePresetsBase.json"
         "docker-compose.sh"
         "docker-compose.yml"
     )
+
+    # Add any externpro workflows that exist
+    for workflow_file in "$repo_root/.github/workflows"/xp*.yml; do
+        if [ -f "$workflow_file" ]; then
+            local rel_path="${workflow_file#$repo_root/}"
+            files_to_commit+=("$rel_path")
+        fi
+    done
 
     local files_to_add=()
 
@@ -513,15 +520,57 @@ commit_bootstrap_changes() {
         done
 
         if [ "$has_changes" = true ]; then
+            # Build dynamic commit message based on actual changes BEFORE staging
+            local commit_body="Add externpro bootstrap setup"
+            local bullet_points=()
+
+            # Check what was actually changed
+            local workflows_added=false
+            local cmake_added=false
+            local docker_added=false
+
+            for file in "${files_to_add[@]}"; do
+                if [ -f "$repo_root/$file" ] || [ -L "$repo_root/$file" ]; then
+                    # Check if file is untracked or has changes
+                    if ! git ls-files --error-unmatch "$repo_root/$file" >/dev/null 2>&1 || ! git diff --quiet "$repo_root/$file"; then
+                        case "$file" in
+                            .github/workflows/xp*.yml)
+                                workflows_added=true
+                                ;;
+                            CMakePresets*.json)
+                                cmake_added=true
+                                ;;
+                            docker-compose.*)
+                                docker_added=true
+                                ;;
+                        esac
+                    fi
+                fi
+            done
+
+            # Add bullet points for actual changes
+            if [ "$workflows_added" = true ]; then
+                bullet_points+=("- Add externpro caller workflows to .github/workflows")
+            fi
+            if [ "$cmake_added" = true ]; then
+                bullet_points+=("- Add CMakePresets")
+            fi
+            if [ "$docker_added" = true ]; then
+                bullet_points+=("- Add docker-compose links")
+            fi
+
+            # Build commit message
+            if [ ${#bullet_points[@]} -gt 0 ]; then
+                commit_body="$commit_body
+
+$(printf '%s\n' "${bullet_points[@]}")"
+            fi
+
             print_info "Staging bootstrap files..."
             git add "${files_to_add[@]}"
 
             print_info "Committing bootstrap changes..."
-            git commit -m "Add externpro bootstrap setup
-
-- Add xpinit.yml workflow to .github/workflows
-- Add CMakePresets.json and CMakePresetsBase.json to root
-- Add docker-compose links"
+            git commit -m "$commit_body"
 
             if [ $? -eq 0 ]; then
                 print_success "Bootstrap changes committed successfully"
@@ -614,20 +663,39 @@ main() {
         exit 1
     fi
 
-    # Copy xpinit.yml to .github/workflows
+    # Copy all externpro caller workflows to .github/workflows
     print_info "Verifying GitHub workflows..."
     local workflows_dir="$repo_root/.github/workflows"
     ensure_dir "$workflows_dir"
 
-    local xpinit_src="$devcontainer_dir/.github/wf-templates/xpinit.yml"
-    local xpinit_dst="$workflows_dir/xpinit.yml"
+    local templates_dir="$devcontainer_dir/.github/wf-templates"
+    local workflow_copied=false
 
-    if [ -f "$xpinit_src" ]; then
-        if copy_with_commit_confirmation "$xpinit_src" "$xpinit_dst"; then
-            print_success "GitHub workflow xpinit.yml verified"
+    if [ -d "$templates_dir" ]; then
+        # Copy all xp*.yml workflow files ONLY if they don't already exist
+        for workflow_template in "$templates_dir"/xp*.yml; do
+            if [ -f "$workflow_template" ]; then
+                local workflow_name=$(basename "$workflow_template")
+                local workflow_dst="$workflows_dir/$workflow_name"
+
+                # Only copy if the destination doesn't exist
+                if [ ! -f "$workflow_dst" ]; then
+                    if copy_with_commit_confirmation "$workflow_template" "$workflow_dst"; then
+                        print_success "GitHub workflow $workflow_name added"
+                        workflow_copied=true
+                    fi
+                else
+                    print_info "GitHub workflow $workflow_name already exists, skipping"
+                    workflow_copied=true
+                fi
+            fi
+        done
+
+        if [ "$workflow_copied" = false ]; then
+            print_warning "No externpro workflow templates found in $templates_dir"
         fi
     else
-        print_error "xpinit.yml template not found at: $xpinit_src"
+        print_error "externpro workflow templates directory not found: $templates_dir"
         exit 1
     fi
 
@@ -722,9 +790,10 @@ main() {
     print_info "  3. Run cmake workflow and fix any issues:"
     print_info "     cmake --workflow --preset=<platform>"
     print_info "     (commit and push any changes)"
-    print_info "  4. With XPRO_TOKEN successfully configured, run xpInit workflow when ready:"
+    print_info "  4. With XPRO_TOKEN successfully configured, run xpSync workflow when ready:"
     local repo_name=$(get_repo_name "$repo_root")
-    print_info "     https://github.com/$repo_name/actions/workflows/xpinit.yml"
+    print_info "     https://github.com/$repo_name/actions/workflows/xpsync.yml"
+    print_info "     Or via CLI: gh workflow run xpsync.yml --ref xpro --repo $repo_name"
     echo
     print_info "For more information, see the externpro documentation: https://github.com/externpro/externpro/#documentation"
 }
