@@ -47,8 +47,44 @@ jobs:
             echo "xpsync branch does not exist, staying on default branch"
           fi
       -
+        name: Create branch
+        id: branch
+        run: |
+          set -euo pipefail
+          # Include a unique suffix so reruns don't collide.
+          # GITHUB_RUN_ID is globally unique across all GitHub repositories
+          # GITHUB_RUN_ATTEMPT is unique per workflow run
+          # The combination is mathematically guaranteed to be unique
+          UNIQUE_SUFFIX="${{ github.run_id }}-${{ github.run_attempt }}"
+          BRANCH_NAME="xpsync-${UNIQUE_SUFFIX}"
+          git checkout -b "$BRANCH_NAME"
+          echo "branch_name=$BRANCH_NAME" >> $GITHUB_OUTPUT
+      -
+        name: Detect patch series
+        id: patches
+        shell: bash
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          patches=(patches/*.patch)
+          if [ -d patches ] && [ "${#patches[@]}" -gt 0 ]; then
+            echo "Found ${#patches[@]} patch(es) under patches/"
+            echo "present=true" >> $GITHUB_OUTPUT
+            echo "patch_count=${#patches[@]}" >> $GITHUB_OUTPUT
+          else
+            echo "No patches/*.patch found"
+            echo "present=false" >> $GITHUB_OUTPUT
+            echo "patch_count=0" >> $GITHUB_OUTPUT
+          fi
+      -
+        name: Apply patches
+        if: steps.patches.outputs.present == 'true'
+        uses: externpro/externpro/.github/actions/git-am-patches@main
+        with:
+          patch_dir: patches
+      -
         name: Validate externpro submodule
-        id: validate
+        id: validate_submodule
         uses: externpro/externpro/.github/actions/externpro-validate@main
         with:
           submodule_path: ${{ env.XPRO_SUBMODULE_PATH }}
@@ -56,15 +92,15 @@ jobs:
         name: Get current externpro HEAD
         id: current_head
         run: |
-          cd "${{ steps.validate.outputs.submodule_path }}"
+          cd "${{ steps.validate_submodule.outputs.submodule_path }}"
           CURRENT_HEAD=$(git rev-parse HEAD)
           echo "current_head=$CURRENT_HEAD" >> $GITHUB_OUTPUT
           echo "Current externpro HEAD: $CURRENT_HEAD"
       -
         name: Update externpro submodule
-        id: update
+        id: update_submodule
         run: |
-          cd "${{ steps.validate.outputs.submodule_path }}"
+          cd "${{ steps.validate_submodule.outputs.submodule_path }}"
           TARGET_REF="${{ inputs.target_ref }}"
           # Fetch latest changes
           git fetch origin
@@ -101,43 +137,112 @@ jobs:
             fi
           fi
       -
-        name: Get externpro version tag
-        id: version
+        name: Log externpro version/describe
         run: |
-          cd "${{ steps.validate.outputs.submodule_path }}"
+          cd "${{ steps.validate_submodule.outputs.submodule_path }}"
           VERSION_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "no-tag")
           DESCRIBE=$(git describe --tags 2>/dev/null || git rev-parse --short HEAD)
-          echo "version_tag=$VERSION_TAG" >> $GITHUB_OUTPUT
-          echo "describe=$DESCRIBE" >> $GITHUB_OUTPUT
           echo "externpro version: $VERSION_TAG"
           echo "externpro describe: $DESCRIBE"
       -
         name: Configure Git
         uses: ./.devcontainer/.github/actions/git-configure-bot
         with:
-          submodule_path: ${{ steps.validate.outputs.submodule_path }}
+          submodule_path: ${{ steps.validate_submodule.outputs.submodule_path }}
       -
-        name: Update caller workflows
-        id: update_workflows
+        name: Sync GitHub Actions caller workflows
+        id: sync_workflows
         if: ${{ always() }}
         uses: ./.devcontainer/.github/actions/sync-caller-workflows
         with:
           workflow_dir: .github/workflows
-          template_dir: ${{ steps.validate.outputs.submodule_path }}/.github/wf-templates
+          template_dir: ${{ steps.validate_submodule.outputs.submodule_path }}/.github/wf-templates
           preserve_existing_branches: ${{ inputs.preserve_existing_branches }}
       -
-        name: Compare CMakePresets
-        id: cmake_presets
+        name: Add CMakePresets (if missing)
+        id: add_cmake_presets
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Only add CMakePresets if none exist
+          if ls CMakePresets* 1> /dev/null 2>&1; then
+            echo "CMakePresets files already exist"
+            echo "cmake_added=false" >> $GITHUB_OUTPUT
+          else
+            echo "Adding CMakePresets from template"
+            cp -f .devcontainer/cmake/presets/CMakePresets* .
+            git add CMakePresets*
+            echo "cmake_added=true" >> $GITHUB_OUTPUT
+          fi
+      -
+        name: Sync CMakePresets
+        id: sync_cmake_presets
         if: ${{ always() }}
         uses: ./.devcontainer/.github/actions/compare-cmake-presets
         with:
           presets_dir: .
-          template_dir: ${{ steps.validate.outputs.submodule_path }}/cmake/presets
+          template_dir: ${{ steps.validate_submodule.outputs.submodule_path }}/cmake/presets
       -
         name: Create release-tag intent (if missing)
         id: release_intent
         if: ${{ always() }}
         uses: ./.devcontainer/.github/actions/release-tag-intent
+      -
+        name: Add docker-compose links
+        id: docker_compose
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Only create links if they don't exist or are broken
+          LINKS_CREATED=false
+          if [ ! -f "docker-compose.sh" ] || [ ! -L "docker-compose.sh" ]; then
+            echo "Creating docker-compose.sh link"
+            ln -sf .devcontainer/compose.pro.sh docker-compose.sh
+            LINKS_CREATED=true
+          fi
+          if [ ! -f "docker-compose.yml" ] || [ ! -L "docker-compose.yml" ]; then
+            echo "Creating docker-compose.yml link"
+            ln -sf .devcontainer/compose.bld.yml docker-compose.yml
+            LINKS_CREATED=true
+          fi
+          if [ "$LINKS_CREATED" = true ]; then
+            git add docker-compose.sh docker-compose.yml
+            echo "links_staged=true" >> $GITHUB_OUTPUT
+          else
+            echo "docker-compose links already exist"
+            echo "links_staged=false" >> $GITHUB_OUTPUT
+          fi
+      -
+        name: Add externpro .gitignore
+        id: gitignore_add
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Ensure .gitignore exists
+          touch .gitignore
+          IGNORES_ADDED=false
+          required_lines=(
+            "# externpro"
+            ".env"
+            "_bld*/"
+            "docker-compose.override.yml"
+          )
+          for line in "${required_lines[@]}"; do
+            if grep -Fxq -- "$line" .gitignore; then
+              echo "gitignore already contains: $line"
+            else
+              echo "adding to gitignore: $line"
+              printf '%s\n' "$line" >> .gitignore
+              IGNORES_ADDED=true
+            fi
+          done
+          if [ "$IGNORES_ADDED" = true ]; then
+            git add .gitignore
+            echo "gitignore_staged=true" >> $GITHUB_OUTPUT
+          else
+            echo "No new gitignore entries needed"
+            echo "gitignore_staged=false" >> $GITHUB_OUTPUT
+          fi
       -
         name: GHCR access
         id: ghcr
@@ -150,14 +255,14 @@ jobs:
         id: deps
         uses: ./.devcontainer/.github/actions/externpro-deps-configure
         with:
-          submodule_path: ${{ steps.validate.outputs.submodule_path }}
+          submodule_path: ${{ steps.validate_submodule.outputs.submodule_path }}
           build_container: ${{ env.XPRO_BUILD_CONTAINER }}
           automation_token: ${{ secrets.automation_token }}
       -
         name: Get final externpro version/head
         id: final_version
         run: |
-          cd "${{ steps.validate.outputs.submodule_path }}"
+          cd "${{ steps.validate_submodule.outputs.submodule_path }}"
           FINAL_HEAD=$(git rev-parse HEAD)
           VERSION_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "no-tag")
           DESCRIBE=$(git describe --tags 2>/dev/null || git rev-parse --short HEAD)
@@ -173,11 +278,11 @@ jobs:
         if: ${{ always() }}
         run: |
           # Stage submodule pointer update after any submodule commits (and/or after switching target ref)
-          git add "${{ steps.validate.outputs.submodule_path }}"
-          if git diff --cached --quiet -- "${{ steps.validate.outputs.submodule_path }}"; then
-            echo "✓ No submodule pointer changes staged for ${{ steps.validate.outputs.submodule_path }}"
+          git add "${{ steps.validate_submodule.outputs.submodule_path }}"
+          if git diff --cached --quiet -- "${{ steps.validate_submodule.outputs.submodule_path }}"; then
+            echo "✓ No submodule pointer changes staged for ${{ steps.validate_submodule.outputs.submodule_path }}"
           else
-            echo "✓ Staged submodule pointer update for ${{ steps.validate.outputs.submodule_path }}"
+            echo "✓ Staged submodule pointer update for ${{ steps.validate_submodule.outputs.submodule_path }}"
           fi
       -
         name: Determine if PR is needed
@@ -192,59 +297,65 @@ jobs:
             echo "Staged changes detected (PR needed)"
           fi
       -
-        name: Create branch
-        id: branch
+        name: Commit changes
         if: steps.pr_needed.outputs.pr_needed == 'true'
         run: |
-          DESCRIBE="${{ steps.final_version.outputs.describe }}"
-          # Clean describe for branch name (remove invalid chars)
-          CLEAN_DESCRIBE="$(echo "$DESCRIBE" | sed 's/[^a-zA-Z0-9.-]/-/g')"
-          # Include a unique suffix so reruns don't collide on the same describe.
-          UNIQUE_SUFFIX="${{ github.run_id }}-${{ github.run_attempt }}"
-          BRANCH_NAME="xpsync-${CLEAN_DESCRIBE}-${UNIQUE_SUFFIX}"
-          git checkout -b "$BRANCH_NAME"
-          echo "branch_name=$BRANCH_NAME" >> $GITHUB_OUTPUT
-      -
-        name: Commit submodule update
-        if: steps.update.outputs.update_needed == 'true' && steps.pr_needed.outputs.pr_needed == 'true'
-        run: |
-          COMMIT_MSG="externpro ${{ steps.final_version.outputs.describe }}"
-          git commit -m "$COMMIT_MSG" -- "${{ steps.validate.outputs.submodule_path }}"
-          echo "Commit created: $COMMIT_MSG"
-      -
-        name: Commit dependency updates
-        if: steps.pr_needed.outputs.pr_needed == 'true'
-        run: |
+          # Commit submodule update first (primary version change)
+          if [ "${{ steps.update_submodule.outputs.update_needed }}" = "true" ] || [ "${{ steps.deps.outputs.submodule_dependency_commit }}" = "true" ]; then
+            COMMIT_MSG="externpro ${{ steps.final_version.outputs.describe }}"
+            git commit -m "$COMMIT_MSG" -- "${{ steps.validate_submodule.outputs.submodule_path }}"
+            echo "Commit created: $COMMIT_MSG"
+          fi
+          # Commit docker-compose links if staged
+          if [ "${{ steps.docker_compose.outputs.links_staged }}" = "true" ]; then
+            git commit -m "add docker-compose links" -- docker-compose.sh docker-compose.yml
+            echo "Committed docker-compose links"
+          fi
+          # Commit GitHub Actions workflows if updated
+          if [ "${{ steps.sync_workflows.outputs.workflows_updated }}" = "true" ]; then
+            git commit -m "sync GitHub Actions workflows" -- .github/workflows
+            echo "Committed GitHub Actions workflows"
+          fi
+          # Commit CMakePresets if added
+          if [ "${{ steps.add_cmake_presets.outputs.cmake_added }}" = "true" ]; then
+            git commit -m "add CMakePresets" -- CMakePresets*
+            echo "Committed CMakePresets"
+          fi
+          # Commit gitignore changes if staged
+          if [ "${{ steps.gitignore_add.outputs.gitignore_staged }}" = "true" ]; then
+            git commit -m "gitignore: add externpro ignores" -- .gitignore
+            echo "Committed gitignore changes"
+          fi
+          # Commit release-tag intent if modified
+          if [ "${{ steps.release_intent.outputs.intent_modified }}" = "true" ]; then
+            INTENT_FILE="${{ steps.release_intent.outputs.intent_file }}"
+            if [ -n "${INTENT_FILE}" ] && [ -f "${INTENT_FILE}" ]; then
+              if ! git diff --cached --quiet -- "${INTENT_FILE}"; then
+                git commit -m "update .github/release-tag.json" -- "${INTENT_FILE}"
+                echo "Committed release-tag intent"
+              fi
+            fi
+          fi
+          # Commit dependency updates
           FILES="${{ steps.deps.outputs.dependency_files }}"
           FILES=$(printf '%s\n' "$FILES" | sed '/^$/d' | tr '\n' ' ')
-          if [ -z "$FILES" ]; then
-            echo "No dependency changes staged"
-            exit 0
+          if [ -n "$FILES" ]; then
+            git commit -m "dependency updates" -- $FILES
+            echo "Committed dependency updates"
           fi
-          git commit -m "dependency updates" -- $FILES
+          # Catch-all commit for any remaining staged changes
+          if ! git diff --cached --quiet; then
+            COMMIT_MSG="externpro ${{ steps.final_version.outputs.describe }} updates"
+            git commit -m "$COMMIT_MSG"
+            echo "Catch-all commit created: $COMMIT_MSG"
+          fi
       -
-        name: Commit release-tag intent
-        if: steps.pr_needed.outputs.pr_needed == 'true' && steps.release_intent.outputs.intent_modified == 'true'
-        run: |
-          INTENT_FILE="${{ steps.release_intent.outputs.intent_file }}"
-          if [ -z "${INTENT_FILE}" ] || [ ! -f "${INTENT_FILE}" ]; then
-            echo "release-tag intent file missing; nothing to commit"
-            exit 0
-          fi
-          if git diff --cached --quiet -- "${INTENT_FILE}"; then
-            echo "release-tag intent not staged; nothing to commit"
-            exit 0
-          fi
-          git commit -m "update .github/release-tag.json" -- "${INTENT_FILE}"
-      -
-        name: Commit and push externpro updates
+        name: Push externpro commits
         if: steps.pr_needed.outputs.pr_needed == 'true'
         run: |
           NEEDS_WORKFLOW_TOKEN=false
-          if git diff --cached --name-only | grep -q '^\.github/workflows/'; then
+          if [ "${{ steps.sync_workflows.outputs.workflows_updated }}" = "true" ]; then
             NEEDS_WORKFLOW_TOKEN=true
-          else
-            NEEDS_WORKFLOW_TOKEN=false
           fi
           TOKEN="${{ secrets.automation_token }}"
           if [ "${NEEDS_WORKFLOW_TOKEN}" = true ] && [ -z "${TOKEN}" ]; then
@@ -270,11 +381,6 @@ jobs:
           # Clear it and force an empty extraheader for the push so the URL credential is used.
           git config --unset-all http.https://github.com/.extraheader || true
           git remote set-url origin "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
-          if ! git diff --cached --quiet; then
-            COMMIT_MSG="externpro ${{ steps.final_version.outputs.describe }} updates"
-            git commit -m "$COMMIT_MSG"
-            echo "Commit created: $COMMIT_MSG"
-          fi
           git -c http.extraheader= push --set-upstream origin "${{ steps.branch.outputs.branch_name }}"
       -
         name: Ensure labels exist
@@ -289,52 +395,56 @@ jobs:
         id: create_pr
         if: steps.pr_needed.outputs.pr_needed == 'true'
         env:
-          WORKFLOW_REPORT: ${{ steps.update_workflows.outputs.workflow_report }}
-          CMAKE_PRESETS_REPORT: ${{ steps.cmake_presets.outputs.report }}
+          WORKFLOW_REPORT: ${{ steps.sync_workflows.outputs.workflow_report }}
+          CMAKE_PRESETS_REPORT: ${{ steps.sync_cmake_presets.outputs.report }}
         run: |
           set -euo pipefail
+          # Setup GitHub CLI
           GH_TOKEN="${{ secrets.automation_token }}"
-          if [ -z "${GH_TOKEN}" ]; then
-            GH_TOKEN="${{ github.token }}"
-          fi
+          [ -z "${GH_TOKEN}" ] && GH_TOKEN="${{ github.token }}"
           export GH_TOKEN
           GH_RETRY=(bash .devcontainer/.github/actions/gh-retry/gh-retry.sh)
           BASE_BRANCH="${{ github.event.repository.default_branch }}"
           HEAD_BRANCH="${{ steps.branch.outputs.branch_name }}"
           export HEAD_BRANCH
-          TITLE="externpro ${{ steps.final_version.outputs.describe }}"
+          TITLE="externpro ${{ steps.final_version.outputs.describe }} sync"
           BODY_FILE="/tmp/pr-body.md"
           : > "$BODY_FILE"
+          # Summary section
           echo "## Summary" >> "$BODY_FILE"
           echo >> "$BODY_FILE"
-          if [ "${{ steps.update.outputs.update_needed }}" = "true" ]; then
+          if [ "${{ steps.update_submodule.outputs.update_needed }}" = "true" ] || [ "${{ steps.deps.outputs.submodule_dependency_commit }}" = "true" ]; then
             echo "Update externpro submodule to \`${{ steps.final_version.outputs.describe }}\`" >> "$BODY_FILE"
           else
-            echo "Sync caller workflows from templates" >> "$BODY_FILE"
+            echo "Sync externpro configuration and files" >> "$BODY_FILE"
           fi
+          # Changes section (logical order matching commits)
           echo >> "$BODY_FILE"
           echo "## Changes" >> "$BODY_FILE"
           echo >> "$BODY_FILE"
-          if [ "${{ steps.update.outputs.update_needed }}" = "true" ]; then
-            echo "- Updated \`${{ steps.validate.outputs.submodule_path }}\` to externpro \`${{ steps.final_version.outputs.describe }}\`" >> "$BODY_FILE"
+          # Submodule update
+          if [ "${{ steps.update_submodule.outputs.update_needed }}" = "true" ] || [ "${{ steps.deps.outputs.submodule_dependency_commit }}" = "true" ]; then
+            echo "- Updated \`${{ steps.validate_submodule.outputs.submodule_path }}\` to externpro \`${{ steps.final_version.outputs.describe }}\`" >> "$BODY_FILE"
             echo "- Previous HEAD: \`${{ steps.current_head.outputs.current_head }}\`" >> "$BODY_FILE"
             echo "- New HEAD: \`${{ steps.final_version.outputs.final_head }}\`" >> "$BODY_FILE"
-            if [ "${{ steps.final_version.outputs.final_head }}" != "${{ steps.update.outputs.latest_head }}" ]; then
-              echo "  - Target ref HEAD: \`${{ steps.update.outputs.latest_head }}\`" >> "$BODY_FILE"
+            if [ "${{ steps.final_version.outputs.final_head }}" != "${{ steps.update_submodule.outputs.latest_head }}" ]; then
+              echo "  - Target ref HEAD: \`${{ steps.update_submodule.outputs.latest_head }}\`" >> "$BODY_FILE"
             fi
           fi
-          if [ "${{ steps.deps.outputs.dependency_updated }}" = "true" ]; then
-            echo "- Updated dependency files" >> "$BODY_FILE"
-            if [ -n "${{ steps.deps.outputs.dependency_files }}" ]; then
-              echo "  - Files:" >> "$BODY_FILE"
-              while IFS= read -r f; do
-                [ -n "$f" ] && echo "    - \`$f\`" >> "$BODY_FILE"
-              done < <(printf '%s\n' "${{ steps.deps.outputs.dependency_files }}")
-            fi
+          # File changes
+          if [ "${{ steps.sync_workflows.outputs.workflows_updated }}" = "true" ]; then
+            echo "- Updated caller workflows to match templates" >> "$BODY_FILE"
           fi
-          if [ "${{ steps.deps.outputs.submodule_dependency_commit }}" = "true" ]; then
-            echo "- Updated externpro submodule dependency artifacts (pushed to \`${{ steps.deps.outputs.submodule_dependency_push_ref }}\`)" >> "$BODY_FILE"
+          if [ "${{ steps.add_cmake_presets.outputs.cmake_added }}" = "true" ]; then
+            echo "- Added CMakePresets files" >> "$BODY_FILE"
           fi
+          if [ "${{ steps.docker_compose.outputs.links_staged }}" = "true" ]; then
+            echo "- Added docker-compose links" >> "$BODY_FILE"
+          fi
+          if [ "${{ steps.gitignore_add.outputs.gitignore_staged }}" = "true" ]; then
+            echo "- Updated .gitignore with externpro patterns" >> "$BODY_FILE"
+          fi
+          # Release-tag intent
           if [ "${{ steps.release_intent.outputs.intent_modified }}" = "true" ]; then
             if [ "${{ steps.release_intent.outputs.intent_created }}" = "true" ]; then
               echo "- Created \`.github/release-tag.json\` (tag: \`${{ steps.release_intent.outputs.intent_tag }}\`)" >> "$BODY_FILE"
@@ -350,13 +460,20 @@ jobs:
               echo "    - https://github.com/${{ github.repository }}/blob/$HEAD_BRANCH/.github/release-tag.json" >> "$BODY_FILE"
             fi
           fi
-          if [ "${{ steps.update_workflows.outputs.workflows_updated }}" = "true" ]; then
-            echo "- Updated caller workflows to match templates" >> "$BODY_FILE"
+          # Dependency updates
+          if [ "${{ steps.deps.outputs.dependency_updated }}" = "true" ]; then
+            echo "- Updated dependency files" >> "$BODY_FILE"
+            if [ -n "${{ steps.deps.outputs.dependency_files }}" ]; then
+              echo "  - Files:" >> "$BODY_FILE"
+              while IFS= read -r f; do
+                [ -n "$f" ] && echo "    - \`$f\`" >> "$BODY_FILE"
+              done < <(printf '%s\n' "${{ steps.deps.outputs.dependency_files }}")
+            fi
           fi
-          if [ -n "${CMAKE_PRESETS_REPORT}" ]; then
-            echo "- CMakePresets.json review needed" >> "$BODY_FILE"
-            echo "  - See details below" >> "$BODY_FILE"
+          if [ "${{ steps.deps.outputs.submodule_dependency_commit }}" = "true" ]; then
+            echo "- Updated externpro submodule dependency artifacts (pushed to \`${{ steps.deps.outputs.submodule_dependency_push_ref }}\`)" >> "$BODY_FILE"
           fi
+          # Reports section
           if [ -n "${WORKFLOW_REPORT}" ]; then
             echo >> "$BODY_FILE"
             echo "### Workflow Update Report" >> "$BODY_FILE"
@@ -368,11 +485,15 @@ jobs:
             echo "### CMakePresets.json" >> "$BODY_FILE"
             echo >> "$BODY_FILE"
             printf '%s\n' "${CMAKE_PRESETS_REPORT}" >> "$BODY_FILE"
+            echo >> "$BODY_FILE"
+            echo "- CMakePresets.json review needed" >> "$BODY_FILE"
           fi
+          # Footer
           echo >> "$BODY_FILE"
           echo "---" >> "$BODY_FILE"
           echo >> "$BODY_FILE"
           echo "*This PR was created automatically by GitHub Actions*" >> "$BODY_FILE"
+          # Create or update PR
           if "${GH_RETRY[@]}" gh pr view "$HEAD_BRANCH" --json url --jq .url >/dev/null 2>&1; then
             PR_URL=$("${GH_RETRY[@]}" gh pr view "$HEAD_BRANCH" --json url --jq .url)
             echo "PR already exists for $HEAD_BRANCH: $PR_URL"
@@ -384,7 +505,7 @@ jobs:
             --body-file "$BODY_FILE")
             echo "Created PR: $PR_URL"
           fi
-          echo "pr_url=$PR_URL" >> "$GITHUB_OUTPUT"
+          echo "pr_url=$PR_URL" >> $GITHUB_OUTPUT
           "${GH_RETRY[@]}" gh pr edit "$PR_URL" --add-label "dependencies" >/dev/null 2>&1 || echo "Label 'dependencies' not found; skipping"
           "${GH_RETRY[@]}" gh pr edit "$PR_URL" --add-label "xpsync" >/dev/null 2>&1 || echo "Label 'xpsync' not found; skipping"
       -
