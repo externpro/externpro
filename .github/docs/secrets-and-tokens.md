@@ -105,9 +105,79 @@ If you manage many repositories, you can add `XPRO_TOKEN` once at the organizati
 
    ![Org secrets populated](assets/org_03_secrets-populated.png)
 
+## GHCR authentication and retry mechanism
+
+The `xpbuild.yml` caller workflow specifies `secrets.GHCR_TOKEN` for the Linux build job to enable a retry mechanism when pushing Docker images to GitHub Container Registry (GHCR).
+
+### When is GHCR_TOKEN needed?
+
+`GHCR_TOKEN` is optional and only used in specific edge cases:
+
+- **Normal operation**: The workflow uses `github.token` which has `packages: write` permission from the workflow permissions
+- **Retry scenarios**: When a Docker push fails with `permission_denied: write_package` error, typically due to orphaned packages after repository deletion/refork
+
+### Creating a classic PAT for GHCR
+
+**Important**: GHCR authentication requires a **classic personal access token** (not fine-grained) with the following scopes:
+
+- `read:packages` - Download packages from GHCR
+- `write:packages` - Upload packages to GHCR
+
+If you prefer, you can use this pre-filled template link (you will still need to choose an expiration period):
+
+https://github.com/settings/tokens/new?description=GHCR_TOKEN%20-%20externpro%20GitHub%20Actions%20GHCR%20push%20retry&scopes=read:packages,write:packages
+
+1. Go to GitHub settings:
+   - `Settings` -> `Developer settings` -> `Personal access tokens` -> **Tokens (classic)**
+
+2. Click **Generate new token**.
+
+3. Set:
+   - **Note**: `GHCR_TOKEN` (or descriptive name)
+   - **Expiration**: Choose appropriate expiration period
+   - **Scopes**: Check `read:packages` and `write:packages`
+
+4. Click **Generate token** and copy the value immediately.
+
+### Adding GHCR_TOKEN to repository or organization
+
+**Repository level:**
+1. Go to repository settings: `Settings` -> `Secrets and variables` -> `Actions`
+2. Click **New repository secret**
+3. **Name**: `GHCR_TOKEN`
+4. **Secret**: paste the classic PAT value
+
+**Organization level:**
+1. Go to organization settings: `Organization` -> `Settings` -> `Secrets and variables` -> `Actions`
+2. Click **New organization secret**
+3. **Name**: `GHCR_TOKEN`
+4. **Secret**: paste the classic PAT value
+5. **Repository access**: choose which repositories should receive the secret
+
+### How the retry mechanism works
+
+1. **Initial push**: Uses `github.token` with workflow `packages: write` permission
+2. **On failure**: If `docker push` fails with `permission_denied: write_package`, the action checks if `automation_token` (GHCR_TOKEN) is provided
+3. **Retry attempt**: If GHCR_TOKEN is available, it authenticates with the classic PAT and retries the push
+4. **Success/failure**: If retry succeeds, workflow continues; if not, provides error message with manual resolution options
+
 ## Troubleshooting
 
+### XPRO_TOKEN issues
 - If you see errors mentioning `automation_token` or inability to push updates under `.github/workflows/*`, confirm the PAT has **Workflows: Read and write**.
 - If git pushes or file updates fail, confirm the PAT has repository access and **Contents: Read and write**.
 - If PR operations fail (create/edit/close PRs, add labels), confirm the PAT has **Pull requests: Read and write**.
   - If **Pull requests** permissions are not available when creating a fine-grained PAT, verify the **resource owner** and check organization policies/restrictions for fine-grained PAT permissions.
+
+### GHCR_TOKEN issues
+- If Docker push fails with `permission_denied: write_package` and you don't have `GHCR_TOKEN` configured, create a classic PAT with `read:packages` and `write:packages` scopes.
+- If you encounter "The token provided does not match expected scopes" error, ensure you're using a **classic PAT** (not fine-grained) with the correct package scopes.
+- If the retry mechanism still fails, manually delete orphaned packages from GHCR or contact externpro support.
+
+### Token comparison
+
+| Token | Type | Required for | Permissions | When needed |
+| --- | --- | --- | --- | --- |
+| `XPRO_TOKEN` | Fine-grained PAT | Workflow automation (commits, PRs, tags) | Contents, Pull requests, Workflows | `xpinit`, `xpupdate`, `xptag` workflows |
+| `GHCR_TOKEN` | Classic PAT | GHCR push retry on permission errors | `read:packages`, `write:packages` | Optional: orphaned package scenarios |
+| `github.token` | Built-in | Default GHCR authentication | From workflow permissions | Normal GHCR operations |
