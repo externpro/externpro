@@ -106,12 +106,28 @@ get_repo_name() {
     cd - >/dev/null
 }
 
+# Function to detect repository owner type (User vs Organization)
+detect_repo_owner_type() {
+    local repo_name="$1"
+
+    if command -v gh >/dev/null 2>&1; then
+        local owner_type=$(gh api "repos/$repo_name" --jq '.owner.type' 2>/dev/null || echo "")
+        echo "$owner_type"
+    else
+        echo "Unknown"
+    fi
+}
+
 # Function to check if XPRO_TOKEN is configured
 check_xpro_token() {
     local repo_root="$1"
     local repo_name=$(get_repo_name "$repo_root")
 
     print_info "Checking XPRO_TOKEN configuration..."
+
+    # Detect if this is a user or organization repository
+    local owner_type=$(detect_repo_owner_type "$repo_name")
+    local org_name=$(echo "$repo_name" | cut -d'/' -f1)
 
     # Try to check if the secret exists via GitHub CLI (if available)
     if command -v gh >/dev/null 2>&1; then
@@ -121,54 +137,61 @@ check_xpro_token() {
             return 0
         fi
 
-        # Extract organization name and check organization-level secrets
-        local org_name=$(echo "$repo_name" | cut -d'/' -f1)
-        # Check organization secrets with explicit error handling to prevent set -e from exiting
-        if gh secret list --org "$org_name" 2>/dev/null | grep -q "XPRO_TOKEN"; then
-            print_success "XPRO_TOKEN is configured in organization secrets"
-            return 0
-        elif ! gh secret list --org "$org_name" >/dev/null 2>&1; then
-            # If we get a permission error, check if user has org admin rights and offer to verify
-            print_info "Unable to verify organization secrets (requires admin permissions)"
-            print_info "If XPRO_TOKEN is configured at organization level, xpSync will still work"
+        # Handle organization vs user repositories differently
+        if [ "$owner_type" = "Organization" ]; then
+            # For organization repos, check organization-level secrets
+            if gh secret list --org "$org_name" 2>/dev/null | grep -q "XPRO_TOKEN"; then
+                print_success "XPRO_TOKEN is configured in organization secrets"
+                return 0
+            elif ! gh secret list --org "$org_name" >/dev/null 2>&1; then
+                # If we get a permission error, check if user has org admin rights and offer to verify
+                print_info "Unable to verify organization secrets (requires admin permissions)"
+                print_info "If XPRO_TOKEN is configured at organization level, xpSync will still work"
 
-            # Check if user is org admin and offer verification
-            if gh api user/orgs --jq '.[].login' 2>/dev/null | grep -q "^${org_name}$"; then
-                echo
-                read -p "You appear to be an admin of the '$org_name' organization. Would you like to verify XPRO_TOKEN at organization level? (y/N): " -n 1 -r
-                echo
-                if [[ $REPLY =~ ^[Yy]$ ]]; then
-                    # Try to list org secrets with better error handling
-                    local secret_check_output
-                    secret_check_output=$(gh secret list --org "$org_name" 2>&1 || true)
-                    local exit_code=$?
+                # Check if user is org admin and offer verification
+                if gh api user/orgs --jq '.[].login' 2>/dev/null | grep -q "^${org_name}$"; then
+                    echo
+                    read -p "You appear to be an admin of the '$org_name' organization. Would you like to verify XPRO_TOKEN at organization level? (y/N): " -n 1 -r
+                    echo
+                    if [[ $REPLY =~ ^[Yy]$ ]]; then
+                        # Try to list org secrets with better error handling
+                        local secret_check_output
+                        secret_check_output=$(gh secret list --org "$org_name" 2>&1 || true)
+                        local exit_code=$?
 
-                    # Check if it's an authentication error
-                    if echo "$secret_check_output" | grep -q "HTTP 403\|You must be an org admin\|actions secrets fine-grained permission"; then
-                        # Authentication issue, not missing secret
-                        print_warning "Unable to verify organization secrets due to authentication scope"
-                        echo
-                        print_info "To verify organization secrets, you have two options:"
-                        print_info "  1. Re-authenticate GitHub CLI with admin:org scope:"
-                        print_info "     gh auth logout"
-                        print_info "     gh auth login --scopes \"admin:org,repo,read:org,gist\""
-                        print_info "  2. Check manually in GitHub UI:"
-                        print_info "     https://github.com/organizations/$org_name/settings/secrets/actions"
-                        echo
-                        print_info "If XPRO_TOKEN is configured at organization level, xpSync will still work"
-                    elif [ $exit_code -eq 0 ] && echo "$secret_check_output" | grep -q "XPRO_TOKEN"; then
-                        print_success "XPRO_TOKEN is configured in organization secrets"
-                        return 0
-                    elif [ $exit_code -eq 0 ]; then
-                        print_warning "XPRO_TOKEN not found in organization secrets"
-                        print_info "You may need to configure it at: https://github.com/organizations/$org_name/settings/secrets/actions"
-                    else
-                        print_warning "Unexpected error while checking organization secrets"
-                        print_info "Error: $secret_check_output"
+                        # Check if it's an authentication error
+                        if echo "$secret_check_output" | grep -q "HTTP 403\|You must be an org admin\|actions secrets fine-grained permission"; then
+                            # Authentication issue, not missing secret
+                            print_warning "Unable to verify organization secrets due to authentication scope"
+                            echo
+                            print_info "To verify organization secrets, you have two options:"
+                            print_info "  1. Re-authenticate GitHub CLI with admin:org scope:"
+                            print_info "     gh auth logout"
+                            print_info "     gh auth login --scopes \"admin:org,repo,read:org,gist\""
+                            print_info "  2. Check manually in GitHub UI:"
+                            print_info "     https://github.com/organizations/$org_name/settings/secrets/actions"
+                            echo
+                            print_info "If XPRO_TOKEN is configured at organization level, xpSync will still work"
+                        elif [ $exit_code -eq 0 ] && echo "$secret_check_output" | grep -q "XPRO_TOKEN"; then
+                            print_success "XPRO_TOKEN is configured in organization secrets"
+                            return 0
+                        elif [ $exit_code -eq 0 ]; then
+                            print_warning "XPRO_TOKEN not found in organization secrets"
+                            print_info "You may need to configure it at: https://github.com/organizations/$org_name/settings/secrets/actions"
+                        else
+                            print_warning "Unexpected error while checking organization secrets"
+                            print_info "Error: $secret_check_output"
+                        fi
                     fi
                 fi
+                return 0
             fi
-            return 0
+        elif [ "$owner_type" = "User" ]; then
+            # For user repositories, organization secrets don't apply
+            print_info "This is a user repository - organization secrets are not applicable"
+            print_info "XPRO_TOKEN must be configured at the repository level"
+        else
+            print_warning "Unable to determine repository owner type"
         fi
     fi
 
@@ -184,12 +207,24 @@ check_xpro_token() {
     print_info "  1. Create a fine-grained PAT using this pre-filled link:"
     print_info "     $pat_url"
     print_info "  2. Add the PAT as a secret named 'XPRO_TOKEN':"
-    local org_name=$(echo "$repo_name" | cut -d'/' -f1)
-    print_info "     - Repository level: https://github.com/$repo_name/settings/secrets/actions"
-    print_info "     - Organization level: https://github.com/organizations/$org_name/settings/secrets/actions"
-    print_info "     - Click 'New repository/organization secret'"
-    print_info "     - Name: XPRO_TOKEN"
-    print_info "     - Secret: [paste the PAT value]"
+
+    # Provide different instructions based on repository type
+    if [ "$owner_type" = "Organization" ]; then
+        print_info "     Choose where to add the secret:"
+        print_info "     - Repository level: https://github.com/$repo_name/settings/secrets/actions"
+        print_info "     - Organization level: https://github.com/organizations/$org_name/settings/secrets/actions"
+        print_info "       (recommended for shared secrets across multiple repos)"
+        echo
+        print_info "     For both options:"
+        print_info "     - Click 'New repository/organization secret'"
+        print_info "     - Name: XPRO_TOKEN"
+        print_info "     - Secret: [paste the PAT value]"
+    else
+        print_info "     - Repository level: https://github.com/$repo_name/settings/secrets/actions"
+        print_info "     - Click 'New repository secret'"
+        print_info "     - Name: XPRO_TOKEN"
+        print_info "     - Secret: [paste the PAT value]"
+    fi
     echo
 
     # Ask if user wants to open the PAT creation URL
