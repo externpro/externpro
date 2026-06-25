@@ -2981,7 +2981,7 @@ macro(xpSetFlagsMsvc)
     )
   xpStringAppendIfDne(CMAKE_EXE_LINKER_FLAGS_DEBUG "/MANIFEST:NO")
   # Remove Linker > System > Stack Reserve Size setting
-  string(REPLACE "/STACK:10000000" "" CMAKE_EXE_LINKER_FLAGS ${CMAKE_EXE_LINKER_FLAGS})
+  string(REPLACE "/STACK:10000000" "" CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}")
   # Add Linker > System > Enable Large Addresses
   xpStringAppendIfDne(CMAKE_EXE_LINKER_FLAGS "/LARGEADDRESSAWARE")
   option(XP_BUILD_VERBOSE "use verbose compiler and linker options" OFF)
