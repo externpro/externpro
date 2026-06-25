@@ -28,8 +28,7 @@ runs:
 
         # Create/update labels (create is idempotent; ignore if it already exists).
         "${GH_RETRY[@]}" gh label create "dependencies" --color "0B3D2E" --description "dependency updates" >/dev/null 2>&1 || true
-        "${GH_RETRY[@]}" gh label create "xpinit" --color "0B3D2E" --description "externpro initialization" >/dev/null 2>&1 || true
-        "${GH_RETRY[@]}" gh label create "xpupdate" --color "0B3D2E" --description "externpro update automation" >/dev/null 2>&1 || true
+        "${GH_RETRY[@]}" gh label create "xpsync" --color "0B3D2E" --description "externpro sync" >/dev/null 2>&1 || true
         "${GH_RETRY[@]}" gh label create "release:tag" --color "FF6A00" --description "Tag release on merge" >/dev/null 2>&1 || true
 
         CLEANUP_LIST='${{ inputs.cleanup_legacy_labels }}'
