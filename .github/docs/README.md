@@ -7,7 +7,7 @@ An "xpro package" is an externpro-produced release artifact (plus its manifest m
 ## Quick map
 
 - [`.github/wf-templates/`](../wf-templates/)
-  - Caller workflow templates vendored into project repos (copied into the project’s `.github/workflows/`)
+  - Caller workflow templates vendored into project repos (copied into the project's `.github/workflows/`)
 - [`.github/workflows/`](../workflows/)
   - Reusable workflows called by the caller workflows
 - [`.github/actions/`](../actions/)
@@ -17,18 +17,33 @@ An "xpro package" is an externpro-produced release artifact (plus its manifest m
 
 This is the typical flow for adopting externpro workflows in a project repo:
 
-1. Create (or fork) the repo and create branch `xpro` (set it as the default branch).
+1. Create (or fork) the repo.
 2. Add externpro as a submodule at `.devcontainer`:
    ```sh
    git submodule add https://github.com/externpro/externpro .devcontainer
    ```
-3. Copy the `xpInit` caller workflow template into the repo and commit.
-4. Configure `XPRO_TOKEN`.
-5. Run `xpInit` (Actions tab). It opens a PR that standardizes presets, workflows, and repo wiring.
+3. Run the bootstrap script:
+   ```sh
+   ./.devcontainer/scripts/bootstrap.sh
+   ```
+   The script creates the `xpro` branch, copies workflow templates, checks XPRO_TOKEN configuration, and commits the setup.
+4. Verify the setup works locally:
+   ```sh
+   cmake --list-presets
+   cmake --preset=<platform>
+   cmake --workflow --preset=<platform>
+   ```
+   Commit and push any cmake configuration changes.
+5. Run `xpSync` workflow:
+   - **Via Actions tab**: https://github.com/OWNER/REPO/actions/workflows/xpsync.yml
+   - **Via CLI**: `gh workflow run xpsync.yml --ref xpro --repo OWNER/REPO`
+
+   This opens a PR that standardizes presets, workflows, and repo wiring.
 6. Merge the PR. Builds run via `xpBuild`. If you add the `release:tag` label, merging also drives tag -> tagged build -> draft release.
 
 See:
-- [xpInit preconditions](caller-workflows.md#preconditions-before-running-xpinit)
+- [Bootstrap guide](bootstrap.md)
+- [xpSync preconditions](caller-workflows.md#preconditions-before-running-xpsync)
 - [Secrets and tokens](secrets-and-tokens.md)
 - [Release flow](release-flow.md)
 - [Architecture overview](architecture-overview.md)
@@ -37,17 +52,21 @@ See:
 
 - `XPRO_TOKEN`
   - Used by caller workflow templates as `secrets.XPRO_TOKEN`, passed through to reusable workflows as `automation_token`.
-  - Required for `xpinit`.
-  - Commonly needed for `xpupdate` (push/PR/label operations).
+  - Required for `xpsync` when workflow changes are needed.
   - Recommended for `xptag` when tag pushes must trigger downstream workflows.
+  - Setup details: see [Secrets and tokens](secrets-and-tokens.md).
+- `GHCR_TOKEN`
+  - Classic PAT with `read:packages` and `write:packages` scopes.
+  - Used by `xpbuild` for GHCR push retry on permission errors.
+  - Optional: `github.token` works for most GHCR operations.
   - Setup details: see [Secrets and tokens](secrets-and-tokens.md).
 
 ## Documentation index
 
 - [Caller workflows](caller-workflows.md)
-  - `xpinit`, `xpupdate`, `xpbuild`, `xptag`, `xprelease` (what triggers them and what they call)
+  - `xpsync`, `xpbuild`, `xptag`, `xprelease` (what triggers them and what they call)
 - [Reusable workflows](reusable-workflows.md)
-  - `init-externpro`, `update-externpro`, `build-*`, `tag-release`, `release-from-build`
+  - `sync-externpro`, `build-*`, `tag-release`, `release-from-build`
 - [Release flow](release-flow.md)
   - PR merge + `release:tag` -> tag -> tagged build -> draft GitHub Release
 - [Build customization](build-customizations.md)
@@ -55,6 +74,6 @@ See:
 - [Supply chain](supply-chain.md)
   - SBOM and provenance/attestations
 - [Secrets and tokens](secrets-and-tokens.md)
-  - `XPRO_TOKEN`, when it’s required, and how to configure it
+  - `XPRO_TOKEN` and `GHCR_TOKEN`, when they're required, and how to configure them
 - [Architecture overview](architecture-overview.md)
   - How the workflow and packaging pieces fit together

@@ -27,7 +27,7 @@ Linux builds run inside buildpro-based Docker containers and use a matrix of:
 
 ### Customizing Linux
 
-In your repo’s `xpbuild.yml`, override inputs to the `build-linux.yml` job.
+In your repo's `xpbuild.yml`, override inputs to the `build-linux.yml` job.
 
 Examples:
 
@@ -71,7 +71,7 @@ Windows builds run on GitHub-hosted runners and use a matrix of Visual Studio to
 
 ### Customizing Windows
 
-In your repo’s `xpbuild.yml`, override `vs_compilers`:
+In your repo's `xpbuild.yml`, override `vs_compilers`:
 
 ```yaml
 with:

@@ -49,28 +49,20 @@ Builds the project on GitHub-hosted Windows runners (matrix of Visual Studio too
 
 ## Repo automation workflows
 
-### `init-externpro.yml`
+### `sync-externpro.yml`
 
-Bootstraps a repo to use externpro and opens a PR with the changes.
+Handles both initial externpro setup and ongoing updates, opens a PR with the changes.
 
+- Detects and applies patches from `patches/*.patch` (advanced feature for custom modifications).
+  > **Note**: This feature is primarily used for specialized cases like the externpro/tutorial repository. Most repositories will not need patch files.
+- Updates the externpro submodule pointer to a target ref (branch/tag/commit, defaults to `main`).
 - Adds docker-compose links.
-- Adds CMake presets.
-- Adds the `xp*.yml` caller workflows.
+- Adds/compares CMake presets.
+- Adds/syncs the `xp*.yml` caller workflows from templates.
 - Ensures `.github/release-tag.json` exists.
 - Adds externpro entries to `.gitignore`.
-- Optionally applies `patches/*.patch`.
 - Configures/snapshots dependency artifacts.
-- Pushes a branch and creates a PR (and closes superseded `xpinit-*` PRs).
-
-### `update-externpro.yml`
-
-Updates a repo’s externpro integration and opens a PR with the changes.
-
-- Updates the externpro submodule pointer to a target ref (branch/tag/commit).
-- Syncs caller workflows from templates.
-- Compares/updates CMake presets.
-- Updates dependency artifacts.
-- Pushes a branch and creates a PR (and closes superseded `xpupdate-*` PRs).
+- Pushes a branch and creates a PR (and closes superseded `xpsync-*` PRs).
 
 ### `tag-release.yml`
 

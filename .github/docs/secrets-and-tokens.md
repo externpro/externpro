@@ -1,10 +1,10 @@
 # Secrets and tokens
 
-This document covers creation and configuration of `XPRO_TOKEN`, which is mapped by the caller workflow templates to the reusable workflows’ `automation_token` secret.
+This document covers creation and configuration of `XPRO_TOKEN`, which is mapped by the caller workflow templates to the reusable workflows' `automation_token` secret.
 
 ## When do I need `XPRO_TOKEN`?
 
-The caller workflow templates (`xpinit`, `xpupdate`, and `xptag`) are written to provide `automation_token` from `secrets.XPRO_TOKEN`.
+The caller workflow templates (`xpsync` and `xptag`) are written to provide `automation_token` from `secrets.XPRO_TOKEN`.
 
 In general, you should provide `XPRO_TOKEN` if the automation needs to:
 
@@ -16,9 +16,9 @@ In general, you should provide `XPRO_TOKEN` if the automation needs to:
 
 | Workflow | Uses `automation_token` | When `XPRO_TOKEN` is required |
 | --- | --- | --- |
-| `xpinit` | Yes (always) | Always required (creates/updates `.github/workflows/*`, pushes commits, opens PRs) |
-| `xpupdate` | Yes | Required when the update includes changes under `.github/workflows/*` or when pushing commits to `externpro/externpro` is enabled; otherwise the workflow may fall back to `github.token` |
+| `xpsync` | Yes | Required when the sync includes changes under `.github/workflows/*` or when pushing commits to `externpro/externpro` is enabled; otherwise the workflow may fall back to `github.token` |
 | `xptag` | Yes | Recommended if you rely on tags to trigger downstream workflows; `github.token` tag pushes may not trigger other workflows |
+| `xpbuild` | No | Uses `github.token` for GHCR operations; may use `GHCR_TOKEN` for retry on permission errors |
 
 ## Creating a fine-grained PAT
 
@@ -178,6 +178,6 @@ https://github.com/settings/tokens/new?description=GHCR_TOKEN%20-%20externpro%20
 
 | Token | Type | Required for | Permissions | When needed |
 | --- | --- | --- | --- | --- |
-| `XPRO_TOKEN` | Fine-grained PAT | Workflow automation (commits, PRs, tags) | Contents, Pull requests, Workflows | `xpinit`, `xpupdate`, `xptag` workflows |
+| `XPRO_TOKEN` | Fine-grained PAT | Workflow automation (commits, PRs, tags) | Contents, Pull requests, Workflows | `xpsync`, `xptag` workflows |
 | `GHCR_TOKEN` | Classic PAT | GHCR push retry on permission errors | `read:packages`, `write:packages` | Optional: orphaned package scenarios |
 | `github.token` | Built-in | Default GHCR authentication | From workflow permissions | Normal GHCR operations |

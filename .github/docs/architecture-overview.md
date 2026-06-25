@@ -1,6 +1,6 @@
 # Architecture overview
 
-This page gives a quick mental model of how externpro’s CMake dependency provider and GitHub Actions workflows fit together.
+This page gives a quick mental model of how externpro's CMake dependency provider and GitHub Actions workflows fit together.
 
 ## CMake dependency provider (consuming packages)
 

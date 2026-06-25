@@ -8,25 +8,26 @@ They provide stable entrypoints for common operations while delegating the actua
 
 Copy these templates into the project repo:
 
-- [`xpinit.yml`](../wf-templates/xpinit.yml)
-- [`xpupdate.yml`](../wf-templates/xpupdate.yml)
+- [`xpsync.yml`](../wf-templates/xpsync.yml)
 - [`xpbuild.yml`](../wf-templates/xpbuild.yml)
 - [`xptag.yml`](../wf-templates/xptag.yml)
 - [`xprelease.yml`](../wf-templates/xprelease.yml)
 
-## `xpInit` (`xpinit.yml`)
+## `xpSync` (`xpsync.yml`)
 
 - **Trigger**
   - manual `workflow_dispatch`
 - **Calls**
-  - [`init-externpro.yml`](../workflows/init-externpro.yml)
+  - [`sync-externpro.yml`](../workflows/sync-externpro.yml)
 - **Purpose**
-  - bootstrap a repo to "speak externpro": add standard compose links, presets, and caller workflows; initialize dependency metadata
+  - Handles both initial externpro setup and ongoing updates
 - **When to use**
-  - first-time externpro initialization in a repo
-  - re-initialize when moving the project to a new BASE upstream tag/ref (i.e., a new upstream release)
+  - **First-time externpro initialization** in a repo
+  - **Ongoing updates** to externpro submodule pointer
+  - **Re-initialization** when moving to a new BASE upstream tag/ref
+  - Any externpro maintenance tasks
 
-### Preconditions (before running `xpInit`)
+### Preconditions (before running `xpSync`)
 
 **Required (manual)**:
 1. Start a new repo or fork the upstream repo.
@@ -45,33 +46,26 @@ git submodule add https://github.com/externpro/externpro .devcontainer
 
 4. Create branch `xpro` and set it as the default branch.
 5. Commit the submodule addition.
-6. Copy `.devcontainer/.github/wf-templates/xpinit.yml` into the repo's `.github/workflows/` and commit.
+6. Copy `.devcontainer/.github/wf-templates/xpsync.yml` into the repo's `.github/workflows/` and commit.
 7. Push `xpro` to GitHub.
 
 For the repo wiring and CMake integration checklist, see [How-to: adopt externpro](../../cmake/docs/how-to-adopt-externpro.md).
 
-### What `init-externpro` does (high level)
+### What `sync-externpro` does (high level)
 
 - Validates the externpro submodule path (`.devcontainer`).
-- Creates a unique `xpinit-*` branch.
+- Creates a unique `xpsync-*` branch.
+- Detects and applies patches from `patches/*.patch` via `git am` (advanced feature for custom modifications).
+  > **Note**: This feature is primarily used for specialized cases like the externpro/tutorial repository. Most repositories will not need patch files.
+- Updates externpro submodule to `target_ref` (branch/tag/commit, defaults to `main`).
 - Adds/updates:
   - `docker-compose.sh` + `docker-compose.yml` links
   - `CMakePresets*`
   - `.github/workflows/xp*.yml` caller workflows
   - `.github/release-tag.json` (release intent)
   - `.gitignore` externpro entries
-- Optionally applies `patches/*.patch` via `git am`.
 - Configures/snapshots dependency artifacts.
-- Pushes a branch and opens a PR (labels include `xpinit`, `dependencies`), closing superseded `xpinit-*` PRs.
-
-## `xpUpdate` (`xpupdate.yml`)
-
-- **Trigger**
-  - manual `workflow_dispatch`
-- **Calls**
-  - [`update-externpro.yml`](../workflows/update-externpro.yml)
-- **Purpose**
-  - update the externpro submodule pointer, sync caller workflows from templates, refresh presets/dependency artifacts, and open a PR
+- Pushes a branch and opens a PR (labels include `xpsync`, `dependencies`), closing superseded `xpsync-*` PRs.
 
 ### Inputs
 
@@ -79,14 +73,6 @@ For the repo wiring and CMake integration checklist, see [How-to: adopt externpr
   - update externpro to a branch/tag/commit
 - `preserve_existing_branches` (default: `false`)
   - preserve branch filters in existing caller workflows rather than taking them from templates
-
-### What `update-externpro` does (high level)
-
-- Updates the externpro submodule to `target_ref` (if needed).
-- Syncs `.github/workflows/` from templates (unless preserving).
-- Compares/updates CMake presets.
-- Updates dependency artifacts.
-- If anything changed, pushes a branch and opens a PR (labels include `xpupdate`, `dependencies`), closing superseded `xpupdate-*` PRs.
 
 ## `xpBuild` (`xpbuild.yml`)
 
@@ -122,4 +108,4 @@ For the repo wiring and CMake integration checklist, see [How-to: adopt externpr
 - **Calls**
   - [`release-from-build.yml`](../workflows/release-from-build.yml)
 - **Purpose**
-  - create a draft GitHub Release from a build run’s artifacts (and attach provenance)
+  - create a draft GitHub Release from a build run's artifacts (and attach provenance)

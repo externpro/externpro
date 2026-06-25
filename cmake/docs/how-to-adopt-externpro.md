@@ -16,10 +16,17 @@ For a streamlined adoption process:
    ./.devcontainer/scripts/bootstrap.sh
    ```
 
-3. **Run the xpInit workflow**:
+3. **Verify the setup works locally**:
    ```bash
-   gh workflow run xpinit.yml --ref xpro --repo OWNER/REPO
+   cmake --list-presets
+   cmake --preset=<platform>
+   cmake --workflow --preset=<platform>
    ```
+   Commit and push any cmake configuration changes.
+
+4. **Run the xpSync workflow**:
+   - **Via Actions tab**: https://github.com/OWNER/REPO/actions/workflows/xpsync.yml
+   - **Via CLI**: `gh workflow run xpsync.yml --ref xpro --repo OWNER/REPO`
 
    Replace `OWNER/REPO` with your actual repository (e.g., `myusername/myproject`).
 
@@ -59,13 +66,21 @@ _bld*/
 docker-compose.override.yml
 ```
 
-Note: The [Bootstrap Script](../../.github/docs/bootstrap.md) can automate parts of this setup (CMakePresets copying, GitHub workflow setup, git branch management, and repository configuration), but does not currently handle docker-compose links or .gitignore updates.
+Note: The [Bootstrap Script](../../.github/docs/bootstrap.md) can automate most of this setup:
+- **CMakePresets copying** - Copies CMakePresets.json and CMakePresetsBase.json
+- **GitHub workflow setup** - Copies all xp*.yml workflow templates (only if they don't exist)
+- **Docker-compose links** - Creates symbolic links for docker-compose.sh and docker-compose.yml
+- **Git branch management** - Creates/switches to xpro branch and manages commits
+- **Repository configuration** - Handles XPRO_TOKEN detection and default branch setup
+- **Local validation** - Verifies cmake installation and preset functionality
 
-Alternatively, steps 3-5 can be handled by running the `xpInit` caller workflow (`.github/workflows/xpinit.yml`, copied from [`xpinit.yml`](../../.github/wf-templates/xpinit.yml)). See the `xpInit` docs in [Caller workflows](../../.github/docs/caller-workflows.md#xpinit-xpinityml).
+The bootstrap script does NOT currently handle .gitignore updates.
+
+Alternatively, steps 3-5 can be handled by running the `xpSync` caller workflow (`.github/workflows/xpsync.yml`, copied from [`xpsync.yml`](../../.github/wf-templates/xpsync.yml)). See the `xpSync` docs in [Caller workflows](../../.github/docs/caller-workflows.md#xpsync-xpsyncyml).
 
 ## GitHub Actions workflows
 
-For the recommended first-time workflow setup (including copying `xpinit.yml` and prerequisites before running it), see [xpInit preconditions](../../.github/docs/caller-workflows.md#preconditions-before-running-xpinit).
+For the recommended first-time workflow setup (including copying `xpsync.yml` and prerequisites before running it), see [xpSync preconditions](../../.github/docs/caller-workflows.md#preconditions-before-running-xpsync).
 
 - If you are doing this manually (or want to understand what the workflows are doing), the core step is simply to copy the caller workflow templates from `.devcontainer/.github/wf-templates/` into your repo’s `.github/workflows/`.
 

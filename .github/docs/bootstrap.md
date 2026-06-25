@@ -2,7 +2,7 @@
 
 **Script location**: [`bootstrap.sh`](../../scripts/bootstrap.sh)
 
-The `bootstrap.sh` script automates the initial setup of externpro in a repository, from initial configuration to pushing changes and preparing for the xpInit workflow.
+The `bootstrap.sh` script automates the initial setup of externpro in a repository, from initial configuration to pushing changes and preparing for the xpSync workflow.
 
 ## Prerequisites
 
@@ -39,14 +39,16 @@ The script will work without the optional utilities, but will provide manual ins
 The bootstrap script performs the following automated actions:
 
 1. **Creates/switches to `xpro` branch** - All changes are made in a dedicated branch
-2. **Commits externpro submodule** - Creates first commit with submodule and version tag from `git describe --tags`
-3. **Copies GitHub workflow** - Copies `.devcontainer/.github/wf-templates/xpinit.yml` to `.github/workflows/`
-4. **Copies CMake presets** - Copies CMakePresets files from `.devcontainer/cmake/presets/` to repository root
-5. **Handles file conflicts** - Overwrites existing files with commit confirmation for tracked files
-6. **Commits bootstrap changes** - Creates second commit with setup files
-7. **Pushes to remote** - Automatically pushes `xpro` branch using smart remote selection
-8. **Verifies default branch** - Checks if `xpro` is set as default branch and provides setup instructions
-9. **XPRO_TOKEN detection** - Checks if XPRO_TOKEN is configured and provides setup assistance
+1. **Commits externpro submodule** - Creates first commit with submodule and version tag from `git describe --tags`
+1. **Copies GitHub workflows** - Copies all `xp*.yml` workflow templates from `.devcontainer/.github/wf-templates/` to `.github/workflows/` (only if they don't already exist)
+1. **Copies CMake presets** - Copies CMakePresets.json and CMakePresetsBase.json from `.devcontainer/cmake/presets/` to repository root
+1. **Creates Docker Compose links** - Creates symbolic links for `docker-compose.sh` and `docker-compose.yml` pointing to externpro compose files
+1. **Handles file conflicts** - Overwrites existing files with commit confirmation for tracked files
+1. **Commits bootstrap changes** - Creates second commit with setup files
+1. **Pushes to remote** - Automatically pushes `xpro` branch using smart remote selection
+1. **Verifies default branch** - Checks if `xpro` is set as default branch and provides setup instructions
+1. **XPRO_TOKEN detection** - Checks if XPRO_TOKEN is configured and provides setup assistance
+1. **CMake validation** - Verifies cmake installation and tests preset functionality
 
 ## Features
 
@@ -61,6 +63,8 @@ The bootstrap script performs the following automated actions:
 - **File comparison** - Only prompts for confirmation when files actually differ
 - **File conflict handling** - Smart detection and confirmation for tracked vs untracked files
 - **Overwrite strategy** - Always copies files, with commit confirmation for tracked files
+- **Workflow copying** - Only copies workflow templates if they don't already exist
+- **Symbolic links** - Creates Docker Compose symlinks for development environment
 
 ### User Experience
 - **Error handling** - Comprehensive error checking and user-friendly messages
@@ -70,9 +74,11 @@ The bootstrap script performs the following automated actions:
 
 ### Automation & Integration
 - **XPRO_TOKEN automation** - Detects token configuration and provides pre-filled setup URLs
+- **Organization vs user repos** - Different handling for organization vs user repository secrets
 - **Browser integration** - Opens setup URLs automatically on supported platforms
 - **Default branch guidance** - Checks and guides on setting `xpro` as default branch
 - **Direct links** - Provides clickable URLs for PAT creation, repository settings, and workflow execution
+- **CMake validation** - Verifies cmake installation and preset functionality
 
 ## Running the Script
 
@@ -95,9 +101,9 @@ The script works on Windows using any bash environment:
 
 ## Platform Compatibility
 
-- ✅ macOS (native bash)
-- ✅ Linux (native bash)
-- ✅ Windows (via Git Bash, WSL, or GitHub CLI)
+- macOS (native bash)
+- Linux (native bash)
+- Windows (via Git Bash, WSL, or GitHub CLI)
 
 ## After Running the Script
 
@@ -108,15 +114,17 @@ Once the bootstrap script completes, follow these steps:
    cmake --list-presets
    ```
 
-2. **Configure with cmake:**
+1. **Configure with cmake:**
    ```bash
    cmake --preset=<platform>
    ```
 
-3. **Run cmake workflow and fix any issues:**
+1. **Run cmake workflow and fix any issues:**
    ```bash
    cmake --workflow --preset=<platform>
    ```
    *(Commit and push any cmake configuration changes)*
 
-4. **With XPRO_TOKEN configured, run the xpInit workflow** (direct link provided by script)
+1. **With XPRO_TOKEN configured, run the xpSync workflow**:
+   - **Via Actions tab**: Direct link provided by script
+   - **Via CLI**: `gh workflow run xpsync.yml --ref xpro --repo OWNER/REPO`

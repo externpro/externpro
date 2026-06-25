@@ -1,7 +1,7 @@
 # CMake Update Checklist
 
 ## Core Updates
-- <input type="checkbox"> cp .devcontainer/.github/wf-templates/xpupdate.yml .github/workflows
+- <input type="checkbox"> cp .devcontainer/.github/wf-templates/xpsync.yml .github/workflows
 - <input type="checkbox"> Update `cmake_minimum_required` to 4.3 (related to issue https://github.com/externpro/externpro/issues/315)
 - <input type="checkbox"> Remove `set(CMAKE_PROJECT_TOP_LEVEL_INCLUDES)` from root CMakeLists.txt (related to issue https://github.com/externpro/externpro/issues/316)
 - <input type="checkbox"> Update CMakePresetsBase.json, removing `XP_NAMESPACE` and use `if(COMMAND` as mentioned in issue https://github.com/externpro/externpro/issues/307#issuecomment-4130807987 and reduce the number of changes from upstream
