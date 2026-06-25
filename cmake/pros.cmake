@@ -138,10 +138,6 @@ set(xp_nodeng
   XPRO_PATH /bpvol/workspace/nodeng/_bld-Linux/nodeng-v22.19.0.2-2-g2e296c8-gcc13-Linux-arm64-xpro.tar.xz
   MANIFEST_FILE /bpvol/workspace/nodeng/_bld-Linux/nodeng-v22.19.0.2-2-g2e296c8.manifest.cmake
   )
-# override xp_nodeng with pre-release from CI-built xpro package
-set(xp_nodeng REPO github.com/externpro/nodeng TAG v22.19.0.2-2-g3a430c8
-  MANIFEST_SHA256 60f9d99fb469a6f013924b938be607f6258b8337711eeb0b93e8d1ff1ee28772
-  )
 # last xp_nodeng set is used
 set(xp_nodeng REPO github.com/externpro/nodeng TAG xpv24.13.0.6
   MANIFEST_HASH SHA256=8fd6cfc5bf0dd9e7f0c10d2a5c673bdd613e99b768622442eea1661b0ca52ab6
