@@ -1,5 +1,7 @@
 # externpro
 
+**BYOS: build your own stack**
+
 A CMake build platform and dependency provider with reusable CI (continuous integration) pipelines.
 
 **Contents**
@@ -35,12 +37,12 @@ What makes externpro different?
 
 Why not just use a package manager? externpro is complementary, but it optimizes for a different workflow: cross-repo reuse + patch-friendly packages + CI-generated provenance.
 
-A strength of CMake is that it has a low adoption cost: you can start with "just a compiler" and grow from there. externpro aims for the same "low ceremony" adoption model for builds and dependencies: you can add externpro as a submodule and start benefiting from consistent toolchains, dependency packaging, and CI workflows without first onboarding to a separate package-manager toolchain.
+A strength of CMake is that it has a low adoption cost: you can start with "just a compiler" and grow from there. externpro aims for the same "low ceremony" adoption model for builds and dependencies: you can add externpro as a submodule and start benefiting from consistent toolchains, dependency packaging, and CI workflows using the CMake skills you already have, without first onboarding to a separate package-manager toolchain.
 
 externpro is compatible with package managers (like vcpkg and Conan) — you can use them together.
 
 How externpro differs from vcpkg/Conan/other package managers:
-- Adoption is repo-native: add externpro as a submodule; no separate bootstrap step is required just to participate in the externpro workflow.
+- **CMake-native approach**: externpro uses CMake to consume and produce packages for your software stack. There are no separate executables or commands to learn - just CMake functions and the familiar `find_package()` interface you already know.
 - Dependencies are delivered as build artifacts/packages that can be shared across projects and CI runs.
 - Patch-friendly dependency workflows: if you need to carry a change (static analysis fixes, compiler compatibility, backports, bug fixes or features not yet upstream), externpro makes it straightforward to build and publish a patched variant as part of the normal pipeline.
 
@@ -59,12 +61,12 @@ Best fit:
 
 ## What externpro provides
 
-externpro is intentionally "small surface area, big leverage". When you add externpro as a submodule to a git repository you get:
+externpro is intentionally "small surface area, big leverage". When you add externpro as a submodule to a git repository you get the foundation to **build your own stack**:
 - [CMake Build Platform](#cmake-build-platform)
 - [Dependency Provider](#dependency-provider)
 - [Reusable CI Pipelines](#reusable-ci-pipelines)
 
-The goal is simple: make "develop -> build -> test -> release" fast and consistent across multiple platforms. Also make dependency sharing, tracking, and attestation easy across projects.
+The goal is simple: make "develop -> build -> test -> release" fast and consistent across multiple platforms. Also make dependency sharing, tracking, and attestation easy across projects. With externpro, you control the complete software stack - external and internal dependencies required to build and deliver your deliverables.
 
 ### CMake Build Platform
 - Multiple OS: Linux, macOS, Windows
