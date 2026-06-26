@@ -55,8 +55,8 @@ set(xp_flatbuffers REPO github.com/externpro/flatbuffers TAG xpv25.2.10.6
 set(xp_fmt REPO github.com/externpro/fmt TAG xpv12.1.0.6
   MANIFEST_HASH SHA256=f4d136d1386d2564adcdbb471a5963ba1f421025e02982ebe22a8fefb099862b
   )
-set(xp_geos REPO github.com/externpro/geos TAG xpv3.13.0.6
-  MANIFEST_SHA256 2860cdf7324ad83682b1add3351046b5aa6d35a45a39600a3242bd529d873b44
+set(xp_geos REPO github.com/externpro/geos TAG xpv3.13.0.7
+  MANIFEST_HASH SHA256=52b8c1214f0246473564e05300357e586c862073cf2bb6384ed1f98c66f5abef
   )
 set(ap_GEOS geos)
 set(xp_geotranz REPO github.com/externpro/geotranz TAG xpv2.4.2.4
