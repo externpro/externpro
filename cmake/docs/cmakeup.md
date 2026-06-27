@@ -25,3 +25,40 @@
 ## Release Updates
 - <input type="checkbox"> Make a clean git commit history (follow similar steps that were done with spdlog https://github.com/externpro/spdlog/pull/9#issue-4190607786)
 - <input type="checkbox"> Update to newer release of project, if available
+
+```
+git switch xpro
+git reset --soft <current_tag>
+git restore --staged .
+git stash push --include-untracked -m "stash xpro bootstrap files" -- .github/workflows/xp*.yml CMakePresets* docker-compose* .gitmodules
+git stash push --include-untracked -m "stash .github" -- .github/
+git stash push -m "stash changes to tracked files"
+git switch --detach <new_tag>
+git push cm <new_tag>
+git branch -D xpro
+git switch -c xpro
+git push --force-with-lease cm xpro
+git submodule add https://github.com/externpro/externpro .devcontainer
+./.devcontainer/scripts/bootstrap.sh
+git stash pop stash@{1}
+<keep .github/release-tag.json as-is>
+git add .github/release-tag.json
+git commit -m "add .github/release-tag.json" .github/release-tag.json
+<modify .github/workflows/ as needed (upstream workflows)>
+git commit -m "workflows: upstream ..." .github/workflows/
+git push cm xpro
+git switch -c xpsync
+rm .github/workflows/xp*.yml .gitmodules CMakePresets*.json docker-compose*
+git stash pop stash@{2}
+<add/commit changes to bootstrap files>
+<update .github/release-tag.json>
+git commit -m "update .github/release-tag.json" .github/release-tag.json
+git stash pop stash@{0}
+git add -p .gitignore
+git commit -m "gitignore: externpro ignores" .gitignore
+<changes to make cmake externpro-ready>
+git add -p .
+git commit -m "cmake: xpExternPackage, externpro-ready"
+git push cm xpsync
+<clean up 'git stash list'>
+```
