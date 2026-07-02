@@ -94,8 +94,8 @@ set(xp_libgeotiff REPO github.com/externpro/libgeotiff TAG xpv1.2.4.4
 set(xp_libgit2 REPO github.com/externpro/libgit2 TAG xpv1.3.0.3
   MANIFEST_SHA256 bc5e2ceecd29540dbdf492744e1df4c87c2d40d7a2c3cd5be85147dc213b5995
   )
-set(xp_libiconv REPO github.com/externpro/libiconv TAG xpv1.18.8
-  MANIFEST_SHA256 c2a0736df8be511da5c4ac507e8fa2acf1d01cba7b5cb3074b94f7cfaeeb5cf0
+set(xp_libiconv REPO github.com/externpro/libiconv TAG xpv1.18.9
+  MANIFEST_HASH SHA256=bdfa1aa2270a550772647fbac7795d5fafa7fce2b1345dd94f740dda88e05dc4
   )
 set(xp_librttopo REPO github.com/externpro/librttopo TAG xpv1.1.0.5
   MANIFEST_SHA256 62b7b806bcc513f434672235970543b1d2463fd5111c9492fb2102c110013718
