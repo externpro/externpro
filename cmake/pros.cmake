@@ -183,8 +183,8 @@ set(xp_spatialite-tools REPO github.com/externpro/spatialite-tools TAG xpv5.1.0.
 set(xp_spdlog REPO github.com/externpro/spdlog TAG xpv1.17.0.6
   MANIFEST_HASH SHA256=f7aa365d324f4d35ff5e56f6f5ea4ff6e00e1f2d571a79f7e6f5f9fa32fa0333
   )
-set(xp_SQLite3 REPO github.com/externpro/SQLite3 TAG xpv3.38.2.3
-  MANIFEST_SHA256 a41857465c8b760e7f500f0115bdd83d1151da6f4cefabe9c0baf2ae52cb13a6
+set(xp_SQLite3 REPO github.com/externpro/SQLite3 TAG xpv3.38.2.4
+  MANIFEST_HASH SHA256=6a5e7fd47dc555ed17e1d27a0c77092750aec74edfa37a407c10cd21b3c5b13c
   )
 set(xp_Threads REPO github.com/externpro/Threads TAG xpv1.0.4
   MANIFEST_HASH SHA256=0b2958ff43e4e370713bdf46c76cba4c5a295b47629945a776e0b5aabb837043
