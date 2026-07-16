@@ -2374,11 +2374,18 @@ function(xpExternPackage)
   ###############
   # SBOM: software bill of materials
   if(CMAKE_VERSION VERSION_GREATER_EQUAL 4.3 AND DEFINED P_EXPORT)
-    if(CMAKE_EXPERIMENTAL_GENERATE_SBOM STREQUAL "ca494ed3-b261-4205-a01f-603c95e4cae0")
+    if(CMAKE_VERSION VERSION_LESS 4.4)
+      set(sbom_uuid "ca494ed3-b261-4205-a01f-603c95e4cae0")
+      set(sbom_export EXPORT ${P_EXPORT})
+    else()
+      set(sbom_uuid "2d856d6d-53e8-488b-a17f-d486d2cac317")
+      set(sbom_export EXPORTS ${P_EXPORT})
+    endif()
+    if(CMAKE_EXPERIMENTAL_GENERATE_SBOM STREQUAL "${sbom_uuid}")
       if(NOT DEFINED CMAKE_INSTALL_SBOMDIR)
         set(CMAKE_INSTALL_SBOMDIR ${CMAKE_INSTALL_DATADIR}/sbom)
       endif()
-      install(SBOM ${P_REPO_NAME} EXPORT ${P_EXPORT}
+      install(SBOM ${P_REPO_NAME} ${sbom_export}
         ${xpInfoProject} ${xpInfoVersion} ${xpInfoLicense} ${xpInfoDesc} ${xpInfoHome}
         DESTINATION ${CMAKE_INSTALL_SBOMDIR} ${XP_COMPONENT}
         )
