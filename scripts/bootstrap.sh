@@ -98,7 +98,7 @@ get_repo_name() {
     # https://github.com/user/repo.git -> user/repo
     # git@github.com:user/repo.git -> user/repo
     # https://github.com/user/repo -> user/repo
-    if [[ "$remote_url" =~ github\.com[/:]([^/]+/[^/]+)(\.git)?$ ]]; then
+    if [[ "$remote_url" =~ github\.com[/:]([^/]+/[^/.]+)(\.git)?$ ]]; then
         echo "${BASH_REMATCH[1]}"
     else
         echo "unknown/repo"
