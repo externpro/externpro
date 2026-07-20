@@ -499,6 +499,27 @@ push_xpro_branch() {
         return 0
     fi
 
+    # Check if remote has tags
+    local remote_tags=$(git ls-remote --tags "$best_remote" 2>/dev/null | wc -l)
+    local local_tags=$(git tag -l | wc -l)
+
+    if [ "$remote_tags" -eq 0 ]; then
+        if [ "$local_tags" -eq 0 ]; then
+            print_error "Remote '$best_remote' has no tags and there are no local tags to push"
+            print_info "git describe --tags will fail in CI without tags"
+            print_info "Create a tag first: git tag <tagname> && git push $best_remote --tags"
+            return 1
+        else
+            print_info "Remote has no tags, pushing local tags..."
+            if git push "$best_remote" --tags; then
+                print_success "Tags pushed successfully to $best_remote"
+            else
+                print_warning "Failed to push tags to $best_remote"
+                return 1
+            fi
+        fi
+    fi
+
     # Push the branch
     print_info "Pushing xpro branch to remote $best_remote..."
     if git push -u "$best_remote" xpro; then
