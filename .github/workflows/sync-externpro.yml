@@ -60,6 +60,11 @@ jobs:
           git checkout -b "$BRANCH_NAME"
           echo "branch_name=$BRANCH_NAME" >> $GITHUB_OUTPUT
       -
+        name: Configure Git
+        uses: externpro/externpro/.github/actions/git-configure-bot@main
+        with:
+          submodule_path: ${{ env.XPRO_SUBMODULE_PATH }}
+      -
         name: Detect patch series
         id: patches
         shell: bash
@@ -144,11 +149,6 @@ jobs:
           DESCRIBE=$(git describe --tags 2>/dev/null || git rev-parse --short HEAD)
           echo "externpro version: $VERSION_TAG"
           echo "externpro describe: $DESCRIBE"
-      -
-        name: Configure Git
-        uses: ./.devcontainer/.github/actions/git-configure-bot
-        with:
-          submodule_path: ${{ steps.validate_submodule.outputs.submodule_path }}
       -
         name: Sync GitHub Actions caller workflows
         id: sync_workflows
