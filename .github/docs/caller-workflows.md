@@ -40,7 +40,7 @@ git submodule add https://github.com/externpro/externpro .devcontainer
 
 **Then choose one of the following**:
 
-**Automated Setup**: Run the [bootstrap script](../docs/bootstrap.md) to perform the manual steps listed below (plus additional automation like XPRO_TOKEN setup and default branch verification).
+**Automated Setup**: Run the [bootstrap script](../docs/bootstrap.md) to perform the manual steps listed below (plus additional automation like XPRO_TOKEN setup and default branch configuration).
 
 **Manual Setup**:
 

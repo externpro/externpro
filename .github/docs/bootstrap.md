@@ -46,7 +46,7 @@ The bootstrap script performs the following automated actions:
 1. **Handles file conflicts** - Overwrites existing files with commit confirmation for tracked files
 1. **Commits bootstrap changes** - Creates second commit with setup files
 1. **Pushes to remote** - Automatically pushes `xpro` branch using smart remote selection
-1. **Verifies default branch** - Checks if `xpro` is set as default branch and provides setup instructions
+1. **Sets default branch** - Attempts to set `xpro` as the default branch via GitHub API (requires gh CLI and admin permissions)
 1. **XPRO_TOKEN detection** - Checks if XPRO_TOKEN is configured and provides setup assistance
 1. **CMake validation** - Verifies cmake installation and tests preset functionality
 
@@ -76,7 +76,7 @@ The bootstrap script performs the following automated actions:
 - **XPRO_TOKEN automation** - Detects token configuration and provides pre-filled setup URLs
 - **Organization vs user repos** - Different handling for organization vs user repository secrets
 - **Browser integration** - Opens setup URLs automatically on supported platforms
-- **Default branch guidance** - Checks and guides on setting `xpro` as default branch
+- **Default branch automation** - Attempts to set `xpro` as default branch via GitHub API (requires gh CLI and admin permissions)
 - **Direct links** - Provides clickable URLs for PAT creation, repository settings, and workflow execution
 - **CMake validation** - Verifies cmake installation and preset functionality
 
