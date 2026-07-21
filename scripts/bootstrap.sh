@@ -277,49 +277,25 @@ check_default_branch() {
         return 0
     fi
 
-    # Default branch is not xpro, provide instructions
-    print_warning "Default branch is currently '$default_branch', should be 'xpro'"
-    echo
-    print_info "Before running the xpSync workflow, you must set 'xpro' as the default branch:"
-    echo
-    print_info "  1. Go to repository settings:"
-    print_info "     https://github.com/$repo_name/settings"
-    echo
-    print_info "  2. In the 'Default branch' section:"
-    print_info "     - Click on button with tooltip 'Switch to another branch'"
-    print_info "     - Select 'xpro' from the dropdown"
-    print_info "     - Confirm the change"
-    echo
-    print_info "  3. Verify the change:"
-    print_info "     - The default branch should now show 'xpro'"
-    print_info "     - The repository URL should show the xpro branch by default"
-    echo
+    # Default branch is not xpro, try to change it using gh
+    print_warning "Default branch is currently '$default_branch', changing to 'xpro'"
 
-    # Ask if user wants to open the repository settings
-    read -p "Do you want to open the repository settings in your browser? (y/N): " -n 1 -r
-    echo
-    if [[ $REPLY =~ ^[Yy]$ ]]; then
-        local settings_url="https://github.com/$repo_name/settings"
-        # Try to open URL based on platform
-        case "$(uname -s)" in
-            Darwin*)    open "$settings_url" ;;
-            Linux*)
-                if command -v xdg-open >/dev/null 2>&1; then
-                    xdg-open "$settings_url"
-                else
-                    print_info "Please open the URL manually: $settings_url"
-                fi
-                ;;
-            CYGWIN*|MINGW*|MSYS*)
-                start "$settings_url"
-                ;;
-            *)
-                print_info "Please open the URL manually: $settings_url"
-                ;;
-        esac
+    if command -v gh >/dev/null 2>&1; then
+        print_info "Setting default branch to 'xpro' via GitHub API..."
+        if gh api "repos/$repo_name" --method PATCH -f default_branch=xpro >/dev/null 2>&1; then
+            print_success "Default branch changed to 'xpro'"
+            return 0
+        else
+            print_warning "Failed to change default branch via GitHub API"
+            print_info "You may need admin permissions or additional scopes"
+            print_info "Try re-authenticating with: gh auth login --scopes repo,admin:org"
+            return 1
+        fi
+    else
+        print_warning "GitHub CLI not found, cannot change default branch automatically"
+        print_info "Install gh: https://cli.github.com/"
+        return 1
     fi
-
-    return 1
 }
 
 # Function to find the best remote for pushing
