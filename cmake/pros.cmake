@@ -119,8 +119,8 @@ set(xp_lua REPO github.com/externpro/lua TAG xpv5.2.3.4
   MANIFEST_HASH SHA256=7bbbe26832943a877b7ca3c0d5f3df67e8e4daa595fe12fcd68ffc41ac279dd9
   )
 set(ap_Lua lua)
-set(xp_LuaBridge REPO github.com/externpro/LuaBridge TAG xpv2.10.5
-  MANIFEST_SHA256 f4b9bf6b22217d9ab07d121a55b7709e146ccfcbeef421e66112b93c40868195
+set(xp_LuaBridge REPO github.com/externpro/LuaBridge TAG xpv2.10.6
+  MANIFEST_HASH SHA256=14b3664e3aa3d92ff48e493c82c4b50ac698f0c06e8a7c6a56c41628360dcd65
   )
 set(xp_nasm REPO github.com/externpro/nasm TAG xpv2.14.02.4
   MANIFEST_SHA256 656b4637c1d6e5293cd3302ad05d26c58f081cb6dfab81c3e55a24c39e706c17
