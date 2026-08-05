@@ -2004,7 +2004,7 @@ endfunction()
 function(xpExternPackage)
   # NOTE: if CMAKE_INSTALL_CMAKEDIR is not defined, it will be set here
   #   and available in PARENT_SCOPE
-  set(opts CREATE_ALIASES FIND_THREADS FIND_XPRO_CMAKE NO_EXPORT NO_INFER_DEPS PKG_CMAKE_USEXT)
+  set(opts CREATE_ALIASES FIND_THREADS FIND_XPRO_CMAKE NO_EXPORT NO_INFER_DEPS)
   # CREATE_ALIASES is an optional parameter to indicate ALIAS targets should be
   #   created for EXE and LIBRARIES. Uses ALIAS_NAMESPACE if provided, otherwise 'xpro'
   # FIND_THREADS is deprecated; add 'Threads' to DEPS parameter instead
@@ -2012,7 +2012,6 @@ function(xpExternPackage)
   # FIND_XPRO_CMAKE creates findxpro.cmake marker to force cmake script find_package()
   # NO_EXPORT prevents automatic export setup when TARGETS_FILE is provided
   # NO_INFER_DEPS disables automatic dependency inference when DEPS/PVT_DEPS not specified
-  # PKG_CMAKE_USEXT bundles cmake extensions in ${lcRepoName}-usext.cmake for CPS consumers
   set(oneValueArgs ALIAS_NAMESPACE COMPONENT EXE EXE_PATH EXPORT NAMESPACE REPO_NAME TARGETS_FILE)
   # ALIAS_NAMESPACE is the namespace to use for alias targets when CREATE_ALIASES
   #   option is specified - if not provided, defaults to 'xpro'
@@ -2181,7 +2180,9 @@ function(xpExternPackage)
   endif()
   set(xpUseCMakeFile ${xproBinDir}/${lcRepoName}-config.cmake)
   configure_file(${xpThisDir}/xpuse.cmake.in ${xpUseCMakeFile} @ONLY NEWLINE_STYLE LF)
-  if(P_PKG_CMAKE_USEXT)
+  # in the conditional check below, cmake vars should match the ones in xpusext.cmake.in
+  if(DEFINED EXT1 OR DEFINED EXT2 OR DEFINED EXT3 OR DEFINED EXT4 OR DEFINED ALIASES)
+    # bundle cmake extensions in ${lcRepoName}-usext.cmake for CPS consumers
     set(xpUsextCMakeFile ${xproBinDir}/${lcRepoName}-usext.cmake)
     configure_file(${xpThisDir}/xpusext.cmake.in ${xpUsextCMakeFile} @ONLY NEWLINE_STYLE LF)
   endif()
