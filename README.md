@@ -125,7 +125,7 @@ The goal is simple: make "develop -> build -> test -> release" fast and consiste
 
 ### Reusable CI Pipelines
 - The caller workflows (`xpsync`, `xpbuild`, `xptag`, `xprelease`) are vendored into project repos under `.github/workflows/`.
-- They call reusable workflows provided by externpro (build, update, tag, release).
+- They call reusable workflows provided by externpro (sync, build, tag, release).
 - See [GitHub Actions docs index](.github/docs/README.md).
 
 #### GitHub-hosted Runners
