@@ -35,8 +35,8 @@ set(xp_curl REPO github.com/externpro/curl TAG xpv7.80.0.4
   MANIFEST_SHA256 c3e620e11af6f71600d18dbe0910fae4c94943a532965b160b4872a360ad1cd9
   )
 set(ap_CURL curl)
-set(xp_eigen REPO github.com/externpro/eigen TAG xpv3.4.0.4
-  MANIFEST_HASH SHA256=b740e0c887043d310fea3088eae824d3c382d84049c6d3e3e9bee43d889e64b9
+set(xp_eigen REPO github.com/externpro/eigen TAG xpv3.4.0.5
+  MANIFEST_HASH SHA256=2a5c858d997fb089a2cbde5095192a5f84f2a230b7ff42a1d1db84c5ad6b4e28
   )
 set(ap_Eigen3 eigen)
 set(xp_fecpp REPO github.com/externpro/fecpp TAG xpv0.10.1
