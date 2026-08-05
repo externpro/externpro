@@ -2062,8 +2062,8 @@ function(xpExternPackage)
   #   executable target dependencies. If not specified, dependencies will be
   #   automatically inferred from EXE targets. Use NO_INFER_DEPS option to disable automatic dependency inference.
   cmake_parse_arguments(P "${opts}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
-  if(DEFINED P_ALIAS_NAMESPACE AND NOT P_CREATE_ALIASES)
-    message(AUTHOR_WARNING "xpExternPackage: ALIAS_NAMESPACE parameter specified but CREATE_ALIASES option not set. ALIAS_NAMESPACE only has effect when CREATE_ALIASES is enabled.")
+  if((DEFINED P_ALIAS_NAMESPACE) AND NOT P_CREATE_ALIASES)
+    set(P_CREATE_ALIASES ON)
   endif()
   if(DEFINED P_NAMESPACE)
     message(AUTHOR_WARNING "xpExternPackage: NAMESPACE parameter is deprecated and ignored. Using package name as namespace instead.")

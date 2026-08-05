@@ -67,9 +67,9 @@ In repos using externpro, the provided CMakePresets automatically set up the dep
   - Global `FIND_PACKAGE_CMAKE_SCRIPT` option can override this behavior for testing.
 
 - `ALIAS_NAMESPACE`
-  - Namespace to use for alias targets when `CREATE_ALIASES` option is specified.
+  - Namespace to use for alias targets when `CREATE_ALIASES` is enabled.
   - If not provided, defaults to `xpro`.
-  - Only has effect when `CREATE_ALIASES` option is enabled.
+  - Specifying `ALIAS_NAMESPACE` automatically enables `CREATE_ALIASES`.
 
 - `FIND_THREADS` (deprecated)
   - Previously emitted `find_package(Threads REQUIRED)` into the consumer config.
