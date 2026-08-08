@@ -192,8 +192,8 @@ set(xp_Threads REPO github.com/externpro/Threads TAG xpv1.0.4
 set(xp_wirehair REPO github.com/externpro/wirehair TAG xpv23.12.02.4
   MANIFEST_HASH SHA256=bdc7e669c4bf6395261a6a68ababce0bbafad7be8d55f028184fbb0fdf329243
   )
-set(xp_wxWidgets REPO github.com/externpro/wxWidgets TAG xpv3.1.0.6
-  MANIFEST_SHA256 029276ba7e00f383616d6044c4a03baeb99fa909e20ecfc5af76c453d3f5ccab
+set(xp_wxWidgets REPO github.com/externpro/wxWidgets TAG xpv3.1.0.7
+  MANIFEST_HASH SHA256=19d5162240599fafdfa66d8868cf14ca9e41ba48810f4bc19fca3aa03000c5db
   )
 set(ap_wx wxWidgets)
 set(ap_wxwidgets wxWidgets)
