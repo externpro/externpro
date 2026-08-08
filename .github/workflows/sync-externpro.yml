@@ -39,10 +39,20 @@ jobs:
       -
         name: Checkout xpsync branch if exists
         run: |
+          set -euo pipefail
           # Check if xpsync branch exists and checkout if it does
           if git rev-parse --verify origin/xpsync >/dev/null 2>&1; then
             echo "xpsync branch exists, checking it out"
             git checkout -B xpsync origin/xpsync
+            # Re-sync any non-externpro submodules that are out of sync with xpsync
+            if [ -f .gitmodules ]; then
+              git submodule status --recursive | while read -r sha path _; do
+                if [[ "${sha:0:1}" =~ [+-U] ]] && [ "$path" != "${{ env.XPRO_SUBMODULE_PATH }}" ]; then
+                  echo "Updating submodule: $path"
+                  git submodule update --init --recursive "$path"
+                fi
+              done
+            fi
           else
             echo "xpsync branch does not exist, staying on default branch"
           fi
