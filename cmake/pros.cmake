@@ -200,8 +200,8 @@ set(ap_wxwidgets wxWidgets)
 set(xp_wxInclude REPO github.com/externpro/wxInclude TAG xpv1.2.4
   MANIFEST_HASH SHA256=102f392aa96b520e38249c60d0119211a13ccd5b072d0b550a025e173d55be1a
   )
-set(xp_wxTetris REPO github.com/smanders/wxTetris TAG xpv1.3.1
-  MANIFEST_SHA256 93e1c05c1baa829ce407b8cc3e29acd85d7e98c0a0d15e1b029458904474201f
+set(xp_wxTetris REPO github.com/smanders/wxTetris TAG xpv1.3.2
+  MANIFEST_HASH SHA256=42eb99203e2a39fd16222e98a67c3a5255dac1ab4b1575b5949303633ea6823b
   )
 set(xp_wxx REPO github.com/externpro/wxx TAG xpv26.03
   MANIFEST_HASH SHA256=12584c96c3f3c59aef29dd93b53684c1a66dbd5da993d3d680d6fafd12b3d40d
