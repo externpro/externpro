@@ -891,6 +891,9 @@ function(xpFindPkg)
       else()
         set(find_paths ${pth} ${pth}/share/cmake)
       endif()
+      if(DEFINED __xp_${package}_config_message_shown AND __xp_${package}_config_message_shown)
+        list(APPEND PKG_OPTS QUIET)
+      endif()
       find_package(${package} ${PKG_OPTS} REQUIRED CONFIG GLOBAL
         BYPASS_PROVIDER PATHS ${find_paths} NO_DEFAULT_PATH
         )
@@ -912,6 +915,8 @@ function(xpFindPkg)
         if(EXISTS ${pth}/share/cmake/${pkg}-usext.cmake)
           include(${pth}/share/cmake/${pkg}-usext.cmake)
         endif()
+      elseif(DEFINED ${package}_FOUND AND ${package}_FOUND)
+        set(__xp_${package}_config_message_shown TRUE CACHE INTERNAL "Flag to track if ${package} config message was shown")
       endif()
       # Handle FOUND variables - ensure the requested package name gets set
       if(DEFINED ${package}_FOUND)
