@@ -43,8 +43,8 @@ set(xp_fecpp REPO github.com/externpro/fecpp TAG xpv0.10.1
   MANIFEST_HASH SHA256=545bf7346c6f8f8a05c9655b6768a65107d8b42ebbbac0eef702328abc856f0b
   )
 # pre-release: no windows package
-set(xp_FFmpeg REPO github.com/externpro/FFmpeg TAG xpv4.3.1.5
-  MANIFEST_HASH SHA256=f13b9582c84664a7b721bce546433ea15dc2a8a511ad6b15a48b401b88690163
+set(xp_FFmpeg REPO github.com/externpro/FFmpeg TAG xpv4.3.1.6
+  MANIFEST_HASH SHA256=dd103fe7797bad16726edd70fe43180b5e24940f3e84180df520af53840bccd9
   )
 set(xp_FFmpeg REPO github.com/externpro/FFmpeg TAG xpv2.6.2.5
   MANIFEST_HASH SHA256=1d175a804c18cbcf7c49f31108c40a73c39c931ca7c2fc1b5ee2eccc130080d3
