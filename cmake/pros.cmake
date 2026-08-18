@@ -46,8 +46,8 @@ set(xp_fecpp REPO github.com/externpro/fecpp TAG xpv0.10.1
 set(xp_FFmpeg REPO github.com/externpro/FFmpeg TAG xpv4.3.1.4
   MANIFEST_SHA256 ac239ba1ec1d33f56ddfb7dd819dfa3f77436b5def4ebf593cf9aaa9f647e8d2
   )
-set(xp_FFmpeg REPO github.com/externpro/FFmpeg TAG xpv2.6.2.4
-  MANIFEST_SHA256 fa72af4a7b04799d441c41fb500273e0fe3ff8e74b16eab3767e4d78526a93e2
+set(xp_FFmpeg REPO github.com/externpro/FFmpeg TAG xpv2.6.2.5
+  MANIFEST_HASH SHA256=1d175a804c18cbcf7c49f31108c40a73c39c931ca7c2fc1b5ee2eccc130080d3
   )
 set(xp_flatbuffers REPO github.com/externpro/flatbuffers TAG xpv25.2.10.6
   MANIFEST_HASH SHA256=699f4b87578c5d14a74c48a74a57e5be522121c9d48097a04269c1759d10c229
