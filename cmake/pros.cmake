@@ -152,8 +152,8 @@ set(xp_nvJPEG2000 REPO github.com/externpro/nvJPEG2000 TAG xpv0.10.0.1
 set(xp_OpenGL REPO github.com/externpro/OpenGL TAG xpv1.0.1
   MANIFEST_HASH SHA256=6cc41479a736f2354390aaa7fdf0ba0987c8675c1aa2ccbec730ea6454583769
   )
-set(xp_openh264 REPO github.com/externpro/openh264 TAG xpv1.4.0.3
-  MANIFEST_SHA256 6864f5d1e04313ffdd9b34099b0c08802e482e298657df53d0a8f0be25998b4e
+set(xp_openh264 REPO github.com/externpro/openh264 TAG xpv1.4.0.4
+  MANIFEST_HASH SHA256=9750f64da1e618ecd7801fa4cc50100c2ac80b7d1b2297b771eee1815a7a4486
   )
 # TRICKY: nodexp, openssl versions coordinated
 set(xp_openssl REPO github.com/externpro/openssl TAG xpv1.1.1l.4
