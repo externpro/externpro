@@ -195,12 +195,24 @@ jobs:
         buildpro_image: ${{ fromJson(inputs.buildpro_images) }}
     steps:
       -
-        name: Install skopeo (for tag listing)
+        name: Ensure skopeo and jq are available
         shell: bash
+        timeout-minutes: 5
         run: |
           set -euo pipefail
-          sudo apt-get update
-          sudo apt-get install -y skopeo
+          if command -v skopeo >/dev/null 2>&1 && command -v jq >/dev/null 2>&1; then
+            echo "skopeo and jq are already installed"
+            skopeo --version
+            jq --version
+            exit 0
+          fi
+          sudo apt-get update \
+            -o Acquire::Retries=3 \
+            -o Acquire::http::Timeout=15 \
+            -o Acquire::https::Timeout=15
+          sudo apt-get install -y \
+            -o Acquire::Retries=3 \
+            skopeo jq
       -
         name: Determine package SHAs to keep
         id: keep_shas
