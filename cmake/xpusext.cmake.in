@@ -1,1 +1,3 @@
-@EXT1@@EXT2@@ALIASES@@EXT3@@EXT4@
+set(@ucRepoName@_VER "@VER@")
+set(reqVars @ucRepoName@_VER)
+@EXT1@@EXT2@@LIBS@@ALIASES@@EXT3@@EXT4@
