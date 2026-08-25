@@ -18,8 +18,8 @@ set(xp_bzip2 REPO github.com/externpro/bzip2 TAG xpv1.0.8.5
   MANIFEST_HASH SHA256=9aac20e3725940f8410613c1c261195435cc4ec68c74bf80a6b8b5af5a3f4fbe
   )
 set(ap_BZip2 bzip2)
-set(xp_c-ares REPO github.com/externpro/c-ares TAG xpv1.18.1.3
-  MANIFEST_SHA256 17ad0a475364d1e3e79239b8ccadb966712658724aa4403e97ee19394c1f1dc7
+set(xp_c-ares REPO github.com/externpro/c-ares TAG xpv1.18.1.4
+  MANIFEST_HASH SHA256=4d86e00786487fd5ef7869b1534c93747e95f7a768c14dd23c691485c154c475
   )
 set(xp_ceres-solver REPO github.com/externpro/ceres-solver TAG xpv2.2.0.5
   MANIFEST_HASH SHA256=b44a0a56e6222272efe51a76245402122ef8ce6bbf2af4e0740279d24f566c8c
