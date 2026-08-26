@@ -31,8 +31,8 @@ set(xp_clang-format REPO github.com/externpro/clang-format TAG xpv19.1.5.4
 set(xp_cppzmq REPO github.com/externpro/cppzmq TAG xpv4.11.0.1
   MANIFEST_HASH SHA256=17ac5e95826182c29e3a09026cc4ba096d9b43e0abb9c51e825ac2933a9a49e5
   )
-set(xp_curl REPO github.com/externpro/curl TAG xpv7.80.0.4
-  MANIFEST_SHA256 c3e620e11af6f71600d18dbe0910fae4c94943a532965b160b4872a360ad1cd9
+set(xp_curl REPO github.com/externpro/curl TAG xpv7.80.0.5
+  MANIFEST_HASH SHA256=e7d442a954558b8208bad7f163d74272a2dc70af09bad4302a38fd5e5d9034ca
   )
 set(ap_CURL curl)
 set(xp_eigen REPO github.com/externpro/eigen TAG xpv3.4.0.5
