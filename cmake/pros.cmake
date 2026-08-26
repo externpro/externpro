@@ -109,6 +109,8 @@ set(xp_libspatialite REPO github.com/externpro/libspatialite TAG xpv5.1.0.9
 set(xp_libssh2 REPO github.com/externpro/libssh2 TAG xpv1.9.0.5
   MANIFEST_HASH SHA256=a644e4c39f7441f3408a2406184e17722ef6e8c8b3b7f97c7e22cf6a12f234d2
   )
+set(ap_LibSSH2 libssh2)
+set(ap_Libssh2 libssh2)
 set(xp_libstrophe REPO github.com/externpro/libstrophe TAG xpv0.9.1.7
   MANIFEST_HASH SHA256=af2edbac25a74abec8364eebd947e643e1681ec715a88b89e1b3c9b04e97a4e3
   )
