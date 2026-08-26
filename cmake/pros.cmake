@@ -91,8 +91,8 @@ set(ap_EXPAT libexpat)
 set(xp_libgeotiff REPO github.com/externpro/libgeotiff TAG xpv1.2.4.6
   MANIFEST_HASH SHA256=d1d6b0c94fe2db5998f22da380341db766d625734320a635a98fa2d6527b8c8c
   )
-set(xp_libgit2 REPO github.com/externpro/libgit2 TAG xpv1.3.0.3
-  MANIFEST_SHA256 bc5e2ceecd29540dbdf492744e1df4c87c2d40d7a2c3cd5be85147dc213b5995
+set(xp_libgit2 REPO github.com/externpro/libgit2 TAG xpv1.3.0.4
+  MANIFEST_HASH SHA256=8f44c5e3df84a74fa4089c150ae5d4abd1ecdc57f62b255f3bf874167232784e
   )
 set(xp_libiconv REPO github.com/externpro/libiconv TAG xpv1.18.9
   MANIFEST_HASH SHA256=bdfa1aa2270a550772647fbac7795d5fafa7fce2b1345dd94f740dda88e05dc4
