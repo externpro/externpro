@@ -10,8 +10,8 @@ set(xp_argon2 REPO github.com/externpro/argon2 TAG xpv20210625.7
 set(xp_azmq REPO github.com/externpro/azmq TAG xpv2025.11.30.1
   MANIFEST_HASH SHA256=965251246a23f37e94a46fc2e5c407541cb05618e5e4b62b9fe13e0843c2a0fd
   )
-set(xp_boost REPO github.com/externpro/boost TAG xpv1.91.0.1
-  MANIFEST_HASH SHA256=4d1da9ca4fa52fd4fc1d9afc918b34399181caee4ce220cb323a7452379f23fe
+set(xp_boost REPO github.com/externpro/boost TAG xpv1.92.0.1
+  MANIFEST_HASH SHA256=85f4d01a662fcc7baf61d1fce7c96bec2da95181efa99460d358ab8fafbe98f2
   )
 set(ap_Boost boost)
 set(xp_bzip2 REPO github.com/externpro/bzip2 TAG xpv1.0.8.5
