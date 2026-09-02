@@ -378,22 +378,23 @@ push_xpro_branch() {
     local has_bootstrap_commit=false
 
     # Find the merge base with main to limit our search to xpro-specific commits
-    local main_branch="main"
+    local main_branch="origin/main"
     local merge_base
 
-    # Try to find main branch (could be master, main, etc.)
-    for branch in main master develop; do
-        if git rev-parse --verify "origin/$branch" >/dev/null 2>&1; then
-            main_branch="$branch"
-            break
-        fi
+    # Try to find main branch (could be master, main, etc.) across remotes
+    for remote in origin upstream; do
+        for branch in main master develop; do
+            if git rev-parse --verify "$remote/$branch" >/dev/null 2>&1; then
+                main_branch="$remote/$branch"
+                break 2
+            fi
+        done
     done
 
     # Get the merge base between current branch and main
-    merge_base=$(git merge-base "origin/$main_branch" HEAD 2>/dev/null)
-    if [ $? -ne 0 ] || [ -z "$merge_base" ]; then
+    if ! merge_base=$(git merge-base "$main_branch" HEAD 2>/dev/null) || [ -z "$merge_base" ]; then
         # Fallback: just search all commits on current branch
-        merge_base=$(git rev-list --max-parents=0 HEAD 2>/dev/null)
+        merge_base=$(git rev-list --max-parents=0 HEAD 2>/dev/null | head -n 1) || true
     fi
 
     if [ -n "$merge_base" ]; then
