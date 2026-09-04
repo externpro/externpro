@@ -3,7 +3,8 @@ cd "$( dirname "$0" )"
 pushd .. > /dev/null
 source ./.devcontainer/funcs.sh
 BPROIMG=${1:-${BPROIMG_DEFAULT}}
-if [[ $(basename -s .git `git config --get remote.origin.url`) == buildpro ]]; then
+remote_url=$(git config --get remote.origin.url 2>/dev/null)
+if [[ -n "${remote_url}" && $(basename -s .git "${remote_url}") == buildpro ]]; then
   BPROTAG=`git describe --tags`
   if [ -n "$(git status --porcelain --untracked=no)" ] || [[ ${BPROTAG} == *"-g"* ]]; then
     BPROTAG=latest
