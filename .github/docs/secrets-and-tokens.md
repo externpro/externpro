@@ -161,6 +161,35 @@ https://github.com/settings/tokens/new?description=GHCR_TOKEN%20-%20externpro%20
 3. **Retry attempt**: If GHCR_TOKEN is available, it authenticates with the classic PAT and retries the push
 4. **Success/failure**: If retry succeeds, workflow continues; if not, provides error message with manual resolution options
 
+## Deleting GHCR packages in a fork
+
+The `build-linux` reusable workflow pushes build images to `ghcr.io/<owner>/<repo>/bldimg-<arch>-<image>`. In a fork these packages accumulate under the fork owner's account — for a user, `https://github.com/<user>?tab=packages`; for an org, `https://github.com/orgs/<org>/packages`.
+
+This matters most when you delete the fork and re-fork to start over: the deleted repo's packages are orphaned but keep their `<repo>/bldimg-*` names, which blocks image pushes in the new fork (`permission_denied: write_package` — the retry mechanism described above). Deleting the orphaned packages lets the re-forked repo own them cleanly.
+
+`.devcontainer/scripts/delete-ghcr-packages.sh` deletes them. It defaults to a dry run listing the matching packages; pass `--yes` to delete. The script is standalone (needs only `gh` and a token) and does not have to run inside the repo — useful when the repo has already been deleted:
+
+```
+# inside a clone of the repo (repo name is read from the origin remote):
+.devcontainer/scripts/delete-ghcr-packages.sh      # dry-run: list matches
+.devcontainer/scripts/delete-ghcr-packages.sh -y   # delete them
+
+# after the repo is gone, run it from anywhere with an explicit repo name:
+./delete-ghcr-packages.sh --repo <repo> -y
+```
+
+Deleting packages requires a **classic PAT** (fine-grained PATs cannot delete packages) with `read:packages` and `delete:packages` scopes:
+
+https://github.com/settings/tokens/new?description=GHCR_TOKEN&scopes=read:packages,delete:packages
+
+Provide it via a `.env` file (gitignored):
+
+```
+GHCR_TOKEN=<classic PAT>
+```
+
+or export `GHCR_TOKEN` in the environment, or refresh the `gh` CLI token with `gh auth refresh -s read:packages,delete:packages`.
+
 ## Troubleshooting
 
 ### XPRO_TOKEN issues
@@ -172,7 +201,8 @@ https://github.com/settings/tokens/new?description=GHCR_TOKEN%20-%20externpro%20
 ### GHCR_TOKEN issues
 - If Docker push fails with `permission_denied: write_package` and you don't have `GHCR_TOKEN` configured, create a classic PAT with `read:packages` and `write:packages` scopes.
 - If you encounter "The token provided does not match expected scopes" error, ensure you're using a **classic PAT** (not fine-grained) with the correct package scopes.
-- If the retry mechanism still fails, manually delete orphaned packages from GHCR or contact externpro support.
+- If `delete-ghcr-packages.sh` fails with `Resource not accessible by personal access token` (HTTP 403), the token is likely a **fine-grained** PAT — package APIs require a classic PAT.
+- If the retry mechanism still fails, run `.devcontainer/scripts/delete-ghcr-packages.sh` to delete the orphaned packages (see "Deleting GHCR packages in a fork" above) — the next push will recreate them owned by the new repo. Alternatives: delete the packages manually in the GitHub UI (`https://github.com/<user>?tab=packages` for a user, `https://github.com/orgs/<org>/packages` for an org), or contact externpro support.
 
 ### Token comparison
 
