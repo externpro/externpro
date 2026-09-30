@@ -3,16 +3,23 @@
   "service": "bld",
   "workspaceFolder": "/bpvol",
   "initializeCommand": ["./.devcontainer/denv.sh"],
-  "settings": {
-    "terminal.integrated.shell.linux": "/bin/bash"
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "bash"
+      },
+      "extensions": [
+        "ms-vscode.cpptools",
+        "ms-vscode.cmake-tools",
+        "ms-azuretools.vscode-docker",
+        "davidanson.vscode-markdownlint",
+        "mhutchie.git-graph"
+      ]
+    }
   },
-  "postStartCommand": "git config --global --add safe.directory ${containerWorkspaceFolder}",
-  "extensions": [
-    "ms-vscode.cpptools",
-    "ms-vscode.cmake-tools",
-    "ms-azuretools.vscode-docker",
-    "davidanson.vscode-markdownlint",
-    "mhutchie.git-graph",
-    "twxs.cmake"
-  ]
+  "containerEnv": {
+    "GIT_CONFIG_COUNT": "1",
+    "GIT_CONFIG_KEY_0": "safe.directory",
+    "GIT_CONFIG_VALUE_0": "*"
+  }
 }

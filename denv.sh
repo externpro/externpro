@@ -97,6 +97,8 @@ else
   RUN_IT="rm ${TEMP_DIR}/LICENSE"
 fi
 env="${env}\nCOPY_IT=${COPY_IT}\nRUN_IT=${RUN_IT}"
+# TRICKY: 'docker compose up -d' (devcontainer) selects no services without an active profile
+env="${env}\nCOMPOSE_PROFILES=pbld"
 ##############################
 echo -e "${env}" > .env
 popd > /dev/null
