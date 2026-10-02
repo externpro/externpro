@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 cd "$( dirname "$0" )"
-source ./.devcontainer/funcs.sh
+source ./.externpro/funcs.sh
 function usage
 {
   echo "`basename -- $0` usage:"

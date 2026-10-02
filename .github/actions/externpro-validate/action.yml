@@ -4,7 +4,7 @@ inputs:
   submodule_path:
     description: Path to externpro submodule
     required: false
-    default: .devcontainer
+    default: .externpro
 outputs:
   submodule_path:
     description: Validated submodule path

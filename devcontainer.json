@@ -2,7 +2,7 @@
   "dockerComposeFile": "../docker-compose.yml",
   "service": "bld",
   "workspaceFolder": "/bpvol",
-  "initializeCommand": ["./.devcontainer/denv.sh"],
+  "initializeCommand": ["./.externpro/denv.sh"],
   "customizations": {
     "vscode": {
       "settings": {

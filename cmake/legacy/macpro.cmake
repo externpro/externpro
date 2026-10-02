@@ -22,7 +22,7 @@ macro(proInit) # NOTE: called by top-level CMakeLists.txt
   if(NOT EXISTS ${DWNLD_DIR})
     execute_process(COMMAND ${CMAKE_COMMAND} -E make_directory ${DWNLD_DIR})
   endif()
-  set(MODULES_DIR ${CMAKE_SOURCE_DIR}/.devcontainer/cmake)
+  set(MODULES_DIR ${CMAKE_SOURCE_DIR}/.externpro/cmake)
   set_property(DIRECTORY PROPERTY "EP_BASE" ${CMAKE_BINARY_DIR}/xpbase) # ExternalProject
   set(NULL_DIR ${CMAKE_BINARY_DIR}/xpbase/tmp/nulldir)
   # the following *_folder for TARGET PROPERTY FOLDER (MSVC organization)

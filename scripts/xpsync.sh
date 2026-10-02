@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 cd "$( dirname "$0" )/../.."
-cd .devcontainer
+cd .externpro
 git fetch --all
 git checkout main
 git merge origin/main
@@ -12,7 +12,7 @@ if [ -f ".github/workflows/xpupdate.yml" ]; then
   git rm .github/workflows/xpupdate.yml
 fi
 if [ ! -f ".github/workflows/xpsync.yml" ]; then
-  cp .devcontainer/.github/wf-templates/xpsync.yml .github/workflows/xpsync.yml
+  cp .externpro/.github/wf-templates/xpsync.yml .github/workflows/xpsync.yml
   git add .github/workflows/xpsync.yml
 fi
 if [ -n "$(git status --porcelain .github/workflows/)" ]; then

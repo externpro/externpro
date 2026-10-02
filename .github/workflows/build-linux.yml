@@ -58,7 +58,7 @@ jobs:
       -
         name: Compute build image context tag
         id: image_tag
-        uses: ./.devcontainer/.github/actions/build-image-context-tag
+        uses: ./.externpro/.github/actions/build-image-context-tag
   docker-image:
     needs: prep
     runs-on: ${{ matrix.arch == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
@@ -118,14 +118,14 @@ jobs:
       -
         name: Push hash-tagged image (retry on permission_denied)
         if: ${{ steps.build_image.outputs.image_built == 'true' }}
-        uses: ./.devcontainer/.github/actions/docker-push-with-retry
+        uses: ./.externpro/.github/actions/docker-push-with-retry
         with:
           image: ${{ format('ghcr.io/{0}/bldimg-{1}-{2}:{3}', needs.prep.outputs.owner_repo, matrix.arch, matrix.buildpro_image, needs.prep.outputs.image_tag) }}
           automation_token: ${{ secrets.automation_token }}
       -
         name: Push latest image (retry on permission_denied)
         if: ${{ steps.build_image.outputs.image_built == 'true' }}
-        uses: ./.devcontainer/.github/actions/docker-push-with-retry
+        uses: ./.externpro/.github/actions/docker-push-with-retry
         with:
           image: ${{ format('ghcr.io/{0}/bldimg-{1}-{2}:latest', needs.prep.outputs.owner_repo, matrix.arch, matrix.buildpro_image) }}
           automation_token: ${{ secrets.automation_token }}
@@ -177,7 +177,7 @@ jobs:
           submodules: true
       -
         name: CMake Build
-        uses: ./.devcontainer/.github/actions/cmake-build
+        uses: ./.externpro/.github/actions/cmake-build
         with:
           artifact_pattern: ${{ inputs.artifact_pattern }}
           cmake_preset: Linux

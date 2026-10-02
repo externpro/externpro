@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # delete-ghcr-packages.sh - delete GHCR container packages (bldimg-*) created by
 # the build-linux workflow in a forked repository.
-# Details: .devcontainer/.github/docs/secrets-and-tokens.md ("Deleting GHCR
+# Details: .externpro/.github/docs/secrets-and-tokens.md ("Deleting GHCR
 # packages in a fork")
 set -euo pipefail
 

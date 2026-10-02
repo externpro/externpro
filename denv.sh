@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 cd "$( dirname "$0" )"
 pushd .. > /dev/null
-source ./.devcontainer/funcs.sh
+source ./.externpro/funcs.sh
 BPROIMG=${1:-${BPROIMG_DEFAULT}}
 remote_url=$(git config --get remote.origin.url 2>/dev/null)
 if [[ -n "${remote_url}" && $(basename -s .git "${remote_url}") == buildpro ]]; then
@@ -16,7 +16,7 @@ else
     BPROTAG=${BPROTAG_DEFAULT}
   fi
 fi
-dkr="$(findVer 'FROM' .devcontainer/local.dockerfile)"
+dkr="$(findVer 'FROM' .externpro/local.dockerfile)"
 dkr=$(eval echo ${dkr}) # ghcr.io/externpro/buildpro/${BPROIMG}:${BPROTAG}
 hst=$(echo "${dkr}" | cut -d/ -f1) # ghcr.io
 rel=$(echo "${dkr}" | cut -d/ -f4) # ${BPROIMG}:${BPROTAG}
@@ -79,7 +79,7 @@ env="${env}\nDISPLAY_ENV=${display_env}"
 env="${env}\nXAUTH_ENV=${xauth_env}"
 ##############################
 # populate env variables TOOLS, TOOLS_PATH
-source ./.devcontainer/tools.sh
+source ./.externpro/tools.sh
 ##############################
 CERT_DIR=/etc/pki/ca-trust/source/anchors
 TEMP_DIR=/usr/local/games # TRICKY: match use in local.dockerfile
@@ -89,7 +89,7 @@ if command -v host >/dev/null && host ${SECURE} | grep "has address" >/dev/null;
   isSecure=true
 fi
 if [[ -d ${CERT_DIR} && ${isSecure} ]]; then
-  mkdir -p .devcontainer/${XFER_DIR} && cp ${CERT_DIR}/* .devcontainer/${XFER_DIR}
+  mkdir -p .externpro/${XFER_DIR} && cp ${CERT_DIR}/* .externpro/${XFER_DIR}
   COPY_IT="${XFER_DIR}/*"
   RUN_IT="mkdir -p ${CERT_DIR} && cp ${TEMP_DIR}/* ${CERT_DIR} && rm ${TEMP_DIR}/* && update-ca-trust"
 else

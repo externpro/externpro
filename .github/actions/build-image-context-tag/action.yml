@@ -24,12 +24,12 @@ runs:
           exit 1
         fi
         files=(
-          ".devcontainer/compose.*.yml"
-          ".devcontainer/compose.*.sh"
-          ".devcontainer/denv.sh"
-          ".devcontainer/funcs.sh"
-          ".devcontainer/tools.sh"
-          ".devcontainer/local.dockerfile"
+          ".externpro/compose.*.yml"
+          ".externpro/compose.*.sh"
+          ".externpro/denv.sh"
+          ".externpro/funcs.sh"
+          ".externpro/tools.sh"
+          ".externpro/local.dockerfile"
         )
         tmp=$(mktemp)
         : > "$tmp"

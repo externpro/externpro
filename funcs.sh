@@ -3,8 +3,8 @@ BPROIMG_DEFAULT=rocky9-gcc13
 BPROTAG_DEFAULT=26.02
 function init
 {
-  if [[ -x .devcontainer/denv.sh ]]; then
-    ./.devcontainer/denv.sh ${BPROIMG}
+  if [[ -x .externpro/denv.sh ]]; then
+    ./.externpro/denv.sh ${BPROIMG}
     cat .env
   fi
 }
@@ -18,8 +18,8 @@ function ttyfix
 }
 function deinit
 {
-  if [ -d .devcontainer/_bldtmp ]; then
-    rm -rf .devcontainer/_bldtmp
+  if [ -d .externpro/_bldtmp ]; then
+    rm -rf .externpro/_bldtmp
   fi
 }
 function findVer

@@ -39,7 +39,7 @@ jobs:
           submodules: true
       -
         name: CMake Build
-        uses: ./.devcontainer/.github/actions/cmake-build
+        uses: ./.externpro/.github/actions/cmake-build
         with:
           artifact_pattern: ${{ inputs.artifact_pattern }}
           cmake_preset: Msw${{ matrix.vs_compiler }}

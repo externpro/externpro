@@ -1,5 +1,5 @@
 #!/bin/sh
-# cp .devcontainer/git_hooks_pre-commit .git/hooks/pre-commit
+# cp .externpro/git_hooks_pre-commit .git/hooks/pre-commit
 # Run clang-format on modified C++ files and leave changes unstaged
 echo "Running clang-format on modified C++ files..."
 # Get the list of modified C++ files (both staged and unstaged)

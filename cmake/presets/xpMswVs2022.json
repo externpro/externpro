@@ -14,7 +14,7 @@
       "generator": "Visual Studio 17 2022",
       "architecture": "x64",
       "cacheVariables": {
-        "CMAKE_PROJECT_TOP_LEVEL_INCLUDES": ".devcontainer/cmake/xproinc.cmake"
+        "CMAKE_PROJECT_TOP_LEVEL_INCLUDES": ".externpro/cmake/xproinc.cmake"
       }
     }
   ],

@@ -33,7 +33,7 @@ services:
   bld:
     <<: [*all-alias, *bld-alias]
     build:
-      context: .devcontainer
+      context: .externpro
       dockerfile: local.dockerfile
       network: host
       args:
@@ -45,7 +45,7 @@ services:
   gpu:
     <<: [*all-alias, *bld-alias]
     build:
-      context: .devcontainer
+      context: .externpro
       dockerfile: local.dockerfile
       network: host
       args:

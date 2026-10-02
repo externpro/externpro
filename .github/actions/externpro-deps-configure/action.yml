@@ -82,7 +82,7 @@ runs:
     -
       name: Compute build image context tag
       id: image_tag
-      uses: ./.devcontainer/.github/actions/build-image-context-tag
+      uses: ./.externpro/.github/actions/build-image-context-tag
     -
       name: Check build container image availability
       id: image_check
@@ -202,14 +202,14 @@ runs:
     -
       name: Push hash-tagged build image (retry on permission_denied)
       if: ${{ steps.image_build.outputs.image_built == 'true' }}
-      uses: ./.devcontainer/.github/actions/docker-push-with-retry
+      uses: ./.externpro/.github/actions/docker-push-with-retry
       with:
         image: ${{ steps.image_check.outputs.image }}
         automation_token: ${{ inputs.automation_token }}
     -
       name: Push latest build image (retry on permission_denied)
       if: ${{ steps.image_build.outputs.image_built == 'true' }}
-      uses: ./.devcontainer/.github/actions/docker-push-with-retry
+      uses: ./.externpro/.github/actions/docker-push-with-retry
       with:
         image: ${{ steps.image_check.outputs.image_latest }}
         automation_token: ${{ inputs.automation_token }}

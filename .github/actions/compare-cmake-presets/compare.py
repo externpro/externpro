@@ -27,9 +27,9 @@ def norm_includes(obj) -> list[str]:
 def normalize_repo_includes(includes: list[str]) -> list[str]:
     out: list[str] = []
     for inc in includes:
-        if inc == ".devcontainer/cmake/presets/xpWindowsVs2022.json":
-            out.append(".devcontainer/cmake/presets/xpMswVs2022.json")
-            out.append(".devcontainer/cmake/presets/xpMswVs2026.json")
+        if inc == ".externpro/cmake/presets/xpWindowsVs2022.json":
+            out.append(".externpro/cmake/presets/xpMswVs2022.json")
+            out.append(".externpro/cmake/presets/xpMswVs2026.json")
             continue
         out.append(inc)
     return out
@@ -56,9 +56,9 @@ def apply_windows_vs2022_include_fix(repo_presets: str) -> bool:
         if not isinstance(v, str):
             out.append(v)
             continue
-        if v == ".devcontainer/cmake/presets/xpWindowsVs2022.json":
-            out.append(".devcontainer/cmake/presets/xpMswVs2022.json")
-            out.append(".devcontainer/cmake/presets/xpMswVs2026.json")
+        if v == ".externpro/cmake/presets/xpWindowsVs2022.json":
+            out.append(".externpro/cmake/presets/xpMswVs2022.json")
+            out.append(".externpro/cmake/presets/xpMswVs2026.json")
             changed = True
             continue
         out.append(v)
@@ -97,11 +97,11 @@ def build_report(repo_presets: str, template_presets: str, *, fix: bool, stage: 
         if fixed:
             if stage:
                 lines.append(
-                    "- Auto-fix: replaced `.devcontainer/cmake/presets/xpWindowsVs2022.json` include and staged `CMakePresets.json`"
+                    "- Auto-fix: replaced `.externpro/cmake/presets/xpWindowsVs2022.json` include and staged `CMakePresets.json`"
                 )
             else:
                 lines.append(
-                    "- Auto-fix: replaced `.devcontainer/cmake/presets/xpWindowsVs2022.json` include"
+                    "- Auto-fix: replaced `.externpro/cmake/presets/xpWindowsVs2022.json` include"
                 )
             return "\n".join(lines)
         return ""
@@ -114,7 +114,7 @@ def build_report(repo_presets: str, template_presets: str, *, fix: bool, stage: 
     tmpl_inc = norm_includes(tmpl_json)
 
     has_legacy_windows_vs2022 = any(
-        x == ".devcontainer/cmake/presets/xpWindowsVs2022.json" for x in repo_inc_raw
+        x == ".externpro/cmake/presets/xpWindowsVs2022.json" for x in repo_inc_raw
     )
 
     repo_set = set(repo_inc_raw)
@@ -130,11 +130,11 @@ def build_report(repo_presets: str, template_presets: str, *, fix: bool, stage: 
     if fixed:
         if stage:
             lines.append(
-                "- Auto-fix: replaced `.devcontainer/cmake/presets/xpWindowsVs2022.json` include and staged `CMakePresets.json`"
+                "- Auto-fix: replaced `.externpro/cmake/presets/xpWindowsVs2022.json` include and staged `CMakePresets.json`"
             )
         else:
             lines.append(
-                "- Auto-fix: replaced `.devcontainer/cmake/presets/xpWindowsVs2022.json` include"
+                "- Auto-fix: replaced `.externpro/cmake/presets/xpWindowsVs2022.json` include"
             )
 
     if missing or extra:
@@ -153,10 +153,10 @@ def build_report(repo_presets: str, template_presets: str, *, fix: bool, stage: 
 
         if has_legacy_windows_vs2022:
             lines.append(
-                "- Action: replace `.devcontainer/cmake/presets/xpWindowsVs2022.json` with:"
+                "- Action: replace `.externpro/cmake/presets/xpWindowsVs2022.json` with:"
             )
-            lines.append('    ".devcontainer/cmake/presets/xpMswVs2022.json",')
-            lines.append('    ".devcontainer/cmake/presets/xpMswVs2026.json"')
+            lines.append('    ".externpro/cmake/presets/xpMswVs2022.json",')
+            lines.append('    ".externpro/cmake/presets/xpMswVs2026.json"')
 
         if (
             not has_legacy_windows_vs2022

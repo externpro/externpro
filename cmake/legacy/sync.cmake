@@ -1,4 +1,4 @@
-# usage: from the .devcontainer/ directory
+# usage: from the .externpro/ directory
 # command to get a list of projects with devel packages (have TAG) that have been modified in cmake/pros.cmake since the 25.01 tag
 #  git diff 25.01 HEAD -- pros.cmake | grep "+set(xp_" | grep TAG | sed 's/+set(xp_//' | cut -d" " -f1
 # create sync scripts for all the projects that have been changed

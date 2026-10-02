@@ -5,7 +5,7 @@ inputs:
     description: Directory containing the repository CMake presets files (e.g. ".")
     required: true
   template_dir:
-    description: Directory containing the template CMake presets files (e.g. ".devcontainer/cmake/presets")
+    description: Directory containing the template CMake presets files (e.g. ".externpro/cmake/presets")
     required: true
 outputs:
   report:
