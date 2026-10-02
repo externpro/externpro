@@ -1725,7 +1725,7 @@ function(xpCopyFilesToSrc readme graph)
   # linux is the only platform where we can ensure graphviz
   # (dot executable) is available, both locally and in CI, so
   # only copy files to source directory with linux build
-  # container used by update-externpro workflow
+  # container used by sync-externpro workflow
   set(build_container "rocky9-gcc13")
   xpHostnameMatches(${build_container} copyToSrc)
   xpFilesDifferent(${xpdepsFile} ${readme} isRdmeDiff)
