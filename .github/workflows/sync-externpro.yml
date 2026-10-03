@@ -67,7 +67,7 @@ jobs:
           UNIQUE_SUFFIX="${{ github.run_id }}-${{ github.run_attempt }}"
           BRANCH_NAME="xpsync-${UNIQUE_SUFFIX}"
           git checkout -b "$BRANCH_NAME"
-          echo "branch_name=$BRANCH_NAME" >> $GITHUB_OUTPUT
+          echo "branch_name=$BRANCH_NAME" >> "$GITHUB_OUTPUT"
       -
         name: Resolve externpro submodule path
         id: xpro_path
@@ -87,7 +87,7 @@ jobs:
           # ensure the submodule is initialized (e.g. after switching to an
           # xpsync branch whose submodule layout differs from the checkout's)
           git submodule update --init "$SUB"
-          echo "submodule_path=$SUB" >> $GITHUB_OUTPUT
+          echo "submodule_path=$SUB" >> "$GITHUB_OUTPUT"
           echo "externpro submodule path: $SUB"
       -
         name: Configure Git
@@ -104,12 +104,12 @@ jobs:
           patches=(patches/*.patch)
           if [ -d patches ] && [ "${#patches[@]}" -gt 0 ]; then
             echo "Found ${#patches[@]} patch(es) under patches/"
-            echo "present=true" >> $GITHUB_OUTPUT
-            echo "patch_count=${#patches[@]}" >> $GITHUB_OUTPUT
+            echo "present=true" >> "$GITHUB_OUTPUT"
+            echo "patch_count=${#patches[@]}" >> "$GITHUB_OUTPUT"
           else
             echo "No patches/*.patch found"
-            echo "present=false" >> $GITHUB_OUTPUT
-            echo "patch_count=0" >> $GITHUB_OUTPUT
+            echo "present=false" >> "$GITHUB_OUTPUT"
+            echo "patch_count=0" >> "$GITHUB_OUTPUT"
           fi
       -
         name: Apply patches
@@ -129,7 +129,7 @@ jobs:
         run: |
           cd "${{ steps.validate_submodule.outputs.submodule_path }}"
           CURRENT_HEAD=$(git rev-parse HEAD)
-          echo "current_head=$CURRENT_HEAD" >> $GITHUB_OUTPUT
+          echo "current_head=$CURRENT_HEAD" >> "$GITHUB_OUTPUT"
           echo "Current externpro HEAD: $CURRENT_HEAD"
       -
         name: Update externpro submodule
@@ -143,27 +143,27 @@ jobs:
           if git rev-parse --verify "origin/$TARGET_REF" >/dev/null 2>&1; then
             # It's a branch
             TARGET_TYPE="branch"
-            echo "target_type=branch" >> $GITHUB_OUTPUT
+            echo "target_type=branch" >> "$GITHUB_OUTPUT"
             LATEST_HEAD=$(git rev-parse origin/"$TARGET_REF")
           elif git rev-parse --verify "$TARGET_REF" >/dev/null 2>&1; then
             # It's a tag or commit
             LATEST_HEAD=$(git rev-parse "$TARGET_REF")
             TARGET_TYPE="tag"
-            echo "target_type=tag" >> $GITHUB_OUTPUT
+            echo "target_type=tag" >> "$GITHUB_OUTPUT"
           else
             echo "Error: Target ref '$TARGET_REF' not found"
             exit 1
           fi
-          echo "latest_head=$LATEST_HEAD" >> $GITHUB_OUTPUT
+          echo "latest_head=$LATEST_HEAD" >> "$GITHUB_OUTPUT"
           echo "Target ref: $TARGET_REF ($TARGET_TYPE)"
           echo "Latest externpro HEAD: $LATEST_HEAD"
           # Check if update is needed
           if [ "${{ steps.current_head.outputs.current_head }}" = "$LATEST_HEAD" ]; then
             echo "externpro submodule is already at target ref"
-            echo "update_needed=false" >> $GITHUB_OUTPUT
+            echo "update_needed=false" >> "$GITHUB_OUTPUT"
           else
             echo "externpro submodule needs update"
-            echo "update_needed=true" >> $GITHUB_OUTPUT
+            echo "update_needed=true" >> "$GITHUB_OUTPUT"
             # Update to target
             if [ "$TARGET_TYPE" = "branch" ]; then
               git checkout -B "$TARGET_REF" "origin/$TARGET_REF"
@@ -180,8 +180,8 @@ jobs:
           set -euo pipefail
           SUB="${{ steps.xpro_path.outputs.submodule_path }}"
           if [ "$SUB" != ".devcontainer" ]; then
-            echo "submodule_path=$SUB" >> $GITHUB_OUTPUT
-            echo "migrated=false" >> $GITHUB_OUTPUT
+            echo "submodule_path=$SUB" >> "$GITHUB_OUTPUT"
+            echo "migrated=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
           # The submodule was just updated to target_ref; migrate-layout.sh
@@ -197,8 +197,8 @@ jobs:
           cp "$MIG_SCRIPT" "$TMP_MIG"
           bash "$TMP_MIG"
           rm -f "$TMP_MIG"
-          echo "submodule_path=.externpro" >> $GITHUB_OUTPUT
-          echo "migrated=true" >> $GITHUB_OUTPUT
+          echo "submodule_path=.externpro" >> "$GITHUB_OUTPUT"
+          echo "migrated=true" >> "$GITHUB_OUTPUT"
       -
         name: Log externpro version/describe
         run: |
@@ -225,12 +225,12 @@ jobs:
           # Only add CMakePresets if none exist
           if ls CMakePresets* 1> /dev/null 2>&1; then
             echo "CMakePresets files already exist"
-            echo "cmake_added=false" >> $GITHUB_OUTPUT
+            echo "cmake_added=false" >> "$GITHUB_OUTPUT"
           else
             echo "Adding CMakePresets from template"
             cp -f "${{ steps.migrate.outputs.submodule_path }}"/cmake/presets/CMakePresets* .
             git add CMakePresets*
-            echo "cmake_added=true" >> $GITHUB_OUTPUT
+            echo "cmake_added=true" >> "$GITHUB_OUTPUT"
           fi
       -
         name: Sync CMakePresets
@@ -274,7 +274,7 @@ jobs:
           }
           commit_link docker-compose.sh "$SUB/compose.pro.sh"
           commit_link docker-compose.yml "$SUB/compose.bld.yml"
-          echo "links_staged=$LINKS_CREATED" >> $GITHUB_OUTPUT
+          echo "links_staged=$LINKS_CREATED" >> "$GITHUB_OUTPUT"
       -
         name: Add externpro .gitignore
         id: gitignore_add
@@ -301,10 +301,10 @@ jobs:
           done
           if [ "$IGNORES_ADDED" = true ]; then
             git add .gitignore
-            echo "gitignore_staged=true" >> $GITHUB_OUTPUT
+            echo "gitignore_staged=true" >> "$GITHUB_OUTPUT"
           else
             echo "No new gitignore entries needed"
-            echo "gitignore_staged=false" >> $GITHUB_OUTPUT
+            echo "gitignore_staged=false" >> "$GITHUB_OUTPUT"
           fi
       -
         name: GHCR access
@@ -329,9 +329,11 @@ jobs:
           FINAL_HEAD=$(git rev-parse HEAD)
           VERSION_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "no-tag")
           DESCRIBE=$(git describe --tags 2>/dev/null || git rev-parse --short HEAD)
-          echo "final_head=$FINAL_HEAD" >> $GITHUB_OUTPUT
-          echo "version_tag=$VERSION_TAG" >> $GITHUB_OUTPUT
-          echo "describe=$DESCRIBE" >> $GITHUB_OUTPUT
+          {
+            echo "final_head=$FINAL_HEAD"
+            echo "version_tag=$VERSION_TAG"
+            echo "describe=$DESCRIBE"
+          } >> "$GITHUB_OUTPUT"
           echo "externpro final head: $FINAL_HEAD"
           echo "externpro final version: $VERSION_TAG"
           echo "externpro final describe: $DESCRIBE"
@@ -353,10 +355,10 @@ jobs:
         if: ${{ always() }}
         run: |
           if git diff --cached --quiet; then
-            echo "pr_needed=false" >> $GITHUB_OUTPUT
+            echo "pr_needed=false" >> "$GITHUB_OUTPUT"
             echo "No staged changes (no PR needed)"
           else
-            echo "pr_needed=true" >> $GITHUB_OUTPUT
+            echo "pr_needed=true" >> "$GITHUB_OUTPUT"
             echo "Staged changes detected (PR needed)"
           fi
       -
@@ -416,9 +418,12 @@ jobs:
           fi
           # Commit dependency updates
           FILES="${{ steps.deps.outputs.dependency_files }}"
-          FILES=$(printf '%s\n' "$FILES" | sed '/^$/d' | tr '\n' ' ')
-          if [ -n "$FILES" ]; then
-            git commit -m "dependency updates" -- $FILES
+          FILE_ARR=()
+          while IFS= read -r f; do
+            [ -n "$f" ] && FILE_ARR+=("$f")
+          done < <(printf '%s\n' "$FILES")
+          if [ ${#FILE_ARR[@]} -gt 0 ]; then
+            git commit -m "dependency updates" -- "${FILE_ARR[@]}"
             echo "Committed dependency updates"
           fi
           # Catch-all commit for any remaining staged changes
@@ -497,17 +502,21 @@ jobs:
             echo "Sync externpro configuration and files" >> "$BODY_FILE"
           fi
           # Changes section (logical order matching commits)
-          echo >> "$BODY_FILE"
-          echo "## Changes" >> "$BODY_FILE"
-          echo >> "$BODY_FILE"
+          {
+            echo
+            echo "## Changes"
+            echo
+          } >> "$BODY_FILE"
           # Submodule update
           if [ "${{ steps.migrate.outputs.migrated }}" = "true" ]; then
             echo "- Migrated externpro submodule \`.devcontainer\` -> \`.externpro\`" >> "$BODY_FILE"
           fi
           if [ "${{ steps.update_submodule.outputs.update_needed }}" = "true" ] || [ "${{ steps.deps.outputs.submodule_dependency_commit }}" = "true" ]; then
-            echo "- Updated \`${{ steps.migrate.outputs.submodule_path }}\` to externpro \`${{ steps.final_version.outputs.describe }}\`" >> "$BODY_FILE"
-            echo "- Previous HEAD: \`${{ steps.current_head.outputs.current_head }}\`" >> "$BODY_FILE"
-            echo "- New HEAD: \`${{ steps.final_version.outputs.final_head }}\`" >> "$BODY_FILE"
+            {
+              echo "- Updated \`${{ steps.migrate.outputs.submodule_path }}\` to externpro \`${{ steps.final_version.outputs.describe }}\`"
+              echo "- Previous HEAD: \`${{ steps.current_head.outputs.current_head }}\`"
+              echo "- New HEAD: \`${{ steps.final_version.outputs.final_head }}\`"
+            } >> "$BODY_FILE"
             if [ "${{ steps.final_version.outputs.final_head }}" != "${{ steps.update_submodule.outputs.latest_head }}" ]; then
               echo "  - Target ref HEAD: \`${{ steps.update_submodule.outputs.latest_head }}\`" >> "$BODY_FILE"
             fi
@@ -556,24 +565,30 @@ jobs:
           fi
           # Reports section
           if [ -n "${WORKFLOW_REPORT}" ]; then
-            echo >> "$BODY_FILE"
-            echo "### Workflow Update Report" >> "$BODY_FILE"
-            echo >> "$BODY_FILE"
-            printf '%s\n' "$WORKFLOW_REPORT" >> "$BODY_FILE"
+            {
+              echo
+              echo "### Workflow Update Report"
+              echo
+              printf '%s\n' "$WORKFLOW_REPORT"
+            } >> "$BODY_FILE"
           fi
           if [ -n "${CMAKE_PRESETS_REPORT}" ]; then
-            echo >> "$BODY_FILE"
-            echo "### CMakePresets.json" >> "$BODY_FILE"
-            echo >> "$BODY_FILE"
-            printf '%s\n' "${CMAKE_PRESETS_REPORT}" >> "$BODY_FILE"
-            echo >> "$BODY_FILE"
-            echo "- CMakePresets.json review needed" >> "$BODY_FILE"
+            {
+              echo
+              echo "### CMakePresets.json"
+              echo
+              printf '%s\n' "${CMAKE_PRESETS_REPORT}"
+              echo
+              echo "- CMakePresets.json review needed"
+            } >> "$BODY_FILE"
           fi
           # Footer
-          echo >> "$BODY_FILE"
-          echo "---" >> "$BODY_FILE"
-          echo >> "$BODY_FILE"
-          echo "*This PR was created automatically by GitHub Actions*" >> "$BODY_FILE"
+          {
+            echo
+            echo "---"
+            echo
+            echo "*This PR was created automatically by GitHub Actions*"
+          } >> "$BODY_FILE"
           # Create or update PR
           if "${GH_RETRY[@]}" gh pr view "$HEAD_BRANCH" --json url --jq .url >/dev/null 2>&1; then
             PR_URL=$("${GH_RETRY[@]}" gh pr view "$HEAD_BRANCH" --json url --jq .url)
@@ -586,7 +601,7 @@ jobs:
             --body-file "$BODY_FILE")
             echo "Created PR: $PR_URL"
           fi
-          echo "pr_url=$PR_URL" >> $GITHUB_OUTPUT
+          echo "pr_url=$PR_URL" >> "$GITHUB_OUTPUT"
           "${GH_RETRY[@]}" gh pr edit "$PR_URL" --add-label "dependencies" >/dev/null 2>&1 || echo "Label 'dependencies' not found; skipping"
           "${GH_RETRY[@]}" gh pr edit "$PR_URL" --add-label "xpsync" >/dev/null 2>&1 || echo "Label 'xpsync' not found; skipping"
       -
