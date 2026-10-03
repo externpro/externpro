@@ -30,6 +30,25 @@ print_error() {
     echo -e "${RED}[ERROR]${NC} $1"
 }
 
+# commit_symlink <link-path> <target>
+# Commits a symlink via the index (mode 120000) rather than the working tree,
+# so the committed entry is a real symlink even on platforms (Windows) where
+# `ln -s` produces a copy or plain-text file. Never `git add` a symlink path.
+commit_symlink() {
+    local link="$1" target="$2" blob
+    blob=$(printf '%s' "$target" | git hash-object -w --stdin)
+    git update-index --add --cacheinfo "120000,$blob,$link"
+}
+
+# Paths committed via commit_symlink — must never be passed to `git add`
+# (a plain add of a symlink path on Windows stages mode 100644).
+is_index_link_path() {
+    case "$1" in
+        .devcontainer|docker-compose.sh|docker-compose.yml) return 0 ;;
+        *) return 1 ;;
+    esac
+}
+
 # Function to detect platform
 detect_platform() {
     case "$(uname -s)" in
@@ -76,10 +95,10 @@ ensure_xpro_branch() {
 
 # Function to get externpro version
 get_externpro_version() {
-    local devcontainer_dir="$1"
+    local externpro_dir="$1"
 
-    if [ -f "$devcontainer_dir/.git" ] || [ -d "$devcontainer_dir/.git" ]; then
-        cd "$devcontainer_dir"
+    if [ -f "$externpro_dir/.git" ] || [ -d "$externpro_dir/.git" ]; then
+        cd "$externpro_dir"
         local version=$(git describe --tags 2>/dev/null || echo "unknown")
         cd - >/dev/null
         echo "$version"
@@ -356,18 +375,18 @@ push_xpro_branch() {
     local repo_root="$1"
 
     # First, check if the current working tree has the required files
-    local has_devcontainer=false
+    local has_externpro=false
     local has_bootstrap_files=false
 
-    if [ -d "$repo_root/.devcontainer" ]; then
-        has_devcontainer=true
+    if [ -d "$repo_root/.externpro" ]; then
+        has_externpro=true
     fi
 
     if [ -f "$repo_root/.github/workflows/xpsync.yml" ]; then
         has_bootstrap_files=true
     fi
 
-    if [ "$has_devcontainer" = false ]; then
+    if [ "$has_externpro" = false ]; then
         print_warning "externpro submodule not found in working tree"
         print_info "Skipping push - add externpro as submodule first"
         return 0
@@ -410,8 +429,8 @@ push_xpro_branch() {
         fi
 
         for commit_hash in $xpro_commits; do
-            # Check if commit contains .devcontainer submodule
-            if git ls-tree "$commit_hash" | grep -q "\.devcontainer"; then
+            # Check if commit contains the externpro submodule (either layout)
+            if git ls-tree "$commit_hash" | grep -q "\.externpro\|\.devcontainer"; then
                 has_externpro_commit=true
             fi
 
@@ -503,7 +522,7 @@ push_xpro_branch() {
         print_success "xpro branch pushed successfully to $best_remote"
 
         # Set up upstream tracking if not already set
-        if ! git rev-parse --verify --symbolic-full-name @{u} >/dev/null 2>&1; then
+        if ! git rev-parse --verify --symbolic-full-name '@{u}' >/dev/null 2>&1; then
             git branch --set-upstream-to="$best_remote/xpro" xpro
             print_success "Upstream tracking set for xpro branch"
         fi
@@ -516,22 +535,22 @@ push_xpro_branch() {
 # Function to commit externpro submodule
 commit_externpro_submodule() {
     local repo_root="$1"
-    local devcontainer_dir="$repo_root/.devcontainer"
+    local externpro_dir="$repo_root/.externpro"
 
     # Check if externpro submodule needs to be committed
     local needs_commit=false
 
-    # Check if .devcontainer exists as a submodule but is not yet committed
-    if [ -d "$devcontainer_dir" ]; then
-        # Check if .devcontainer is tracked as a submodule in the current commit
-        if ! git ls-tree HEAD | grep -q "\.devcontainer"; then
+    # Check if .externpro exists as a submodule but is not yet committed
+    if [ -d "$externpro_dir" ]; then
+        # Check if .externpro is tracked as a submodule in the current commit
+        if ! git ls-tree HEAD | grep -q "\.externpro"; then
             needs_commit=true
             print_info "externpro submodule detected but not yet committed"
         else
             print_info "externpro submodule already committed"
         fi
     else
-        print_warning "externpro submodule not found at: $devcontainer_dir"
+        print_warning "externpro submodule not found at: $externpro_dir"
         return 1
     fi
 
@@ -540,15 +559,15 @@ commit_externpro_submodule() {
     fi
 
     # Stage the submodule files
-    git add .devcontainer .gitmodules
+    git add .externpro .gitmodules
 
     # Check if staging was successful
-    if ! git diff --cached --quiet .devcontainer .gitmodules; then
-        local externpro_version=$(get_externpro_version "$devcontainer_dir")
+    if ! git diff --cached --quiet .externpro .gitmodules; then
+        local externpro_version=$(get_externpro_version "$externpro_dir")
         print_info "Committing externpro submodule (version: $externpro_version)..."
 
         # Explicitly commit only the submodule files
-        git commit -m "externpro $externpro_version" .devcontainer .gitmodules
+        git commit -m "externpro $externpro_version" .externpro .gitmodules
 
         if [ $? -eq 0 ]; then
             print_success "externpro submodule committed successfully"
@@ -568,11 +587,14 @@ commit_bootstrap_changes() {
     local repo_root="$1"
 
     # Explicitly stage only the files we created
+    # (.devcontainer + docker-compose.* are committed via commit_symlink /
+    #  the index, never via git add — see is_index_link_path)
     local files_to_commit=(
         "CMakePresets.json"
         "CMakePresetsBase.json"
         "docker-compose.sh"
         "docker-compose.yml"
+        ".devcontainer"
     )
 
     # Add any externpro workflows that exist
@@ -597,8 +619,14 @@ commit_bootstrap_changes() {
         local has_changes=false
         for file in "${files_to_add[@]}"; do
             if [ -f "$repo_root/$file" ] || [ -L "$repo_root/$file" ]; then
+                if is_index_link_path "$file"; then
+                    # staged via the index — compare index vs HEAD
+                    if ! git diff --cached --quiet -- "$repo_root/$file"; then
+                        has_changes=true
+                        break
+                    fi
                 # Check if file is untracked or has changes
-                if ! git ls-files --error-unmatch "$repo_root/$file" >/dev/null 2>&1 || ! git diff --quiet "$repo_root/$file"; then
+                elif ! git ls-files --error-unmatch "$repo_root/$file" >/dev/null 2>&1 || ! git diff --quiet "$repo_root/$file"; then
                     has_changes=true
                     break
                 fi
@@ -614,11 +642,17 @@ commit_bootstrap_changes() {
             local workflows_added=false
             local cmake_added=false
             local docker_added=false
+            local devcontainer_added=false
 
             for file in "${files_to_add[@]}"; do
                 if [ -f "$repo_root/$file" ] || [ -L "$repo_root/$file" ]; then
-                    # Check if file is untracked or has changes
-                    if ! git ls-files --error-unmatch "$repo_root/$file" >/dev/null 2>&1 || ! git diff --quiet "$repo_root/$file"; then
+                    local file_changed=false
+                    if is_index_link_path "$file"; then
+                        git diff --cached --quiet -- "$repo_root/$file" || file_changed=true
+                    elif ! git ls-files --error-unmatch "$repo_root/$file" >/dev/null 2>&1 || ! git diff --quiet "$repo_root/$file"; then
+                        file_changed=true
+                    fi
+                    if [ "$file_changed" = true ]; then
                         case "$file" in
                             .github/workflows/xp*.yml)
                                 workflows_added=true
@@ -628,6 +662,9 @@ commit_bootstrap_changes() {
                                 ;;
                             docker-compose.*)
                                 docker_added=true
+                                ;;
+                            .devcontainer)
+                                devcontainer_added=true
                                 ;;
                         esac
                     fi
@@ -644,6 +681,9 @@ commit_bootstrap_changes() {
             if [ "$docker_added" = true ]; then
                 bullet_points+=("- Add docker-compose links")
             fi
+            if [ "$devcontainer_added" = true ]; then
+                bullet_points+=("- Add .devcontainer discovery link -> .externpro")
+            fi
 
             # Build commit message
             if [ ${#bullet_points[@]} -gt 0 ]; then
@@ -653,7 +693,14 @@ $(printf '%s\n' "${bullet_points[@]}")"
             fi
 
             print_info "Staging bootstrap files..."
-            git add "${files_to_add[@]}"
+            # Symlink paths are staged via commit_symlink (index), never git add
+            local add_list=()
+            for file in "${files_to_add[@]}"; do
+                is_index_link_path "$file" || add_list+=("$file")
+            done
+            if [ ${#add_list[@]} -gt 0 ]; then
+                git add "${add_list[@]}"
+            fi
 
             print_info "Committing bootstrap changes..."
             git commit -m "$commit_body"
@@ -726,6 +773,10 @@ main() {
     local platform=$(detect_platform)
     print_info "Detected platform: $platform"
 
+    if [ "$platform" = "windows" ]; then
+        print_warning "bootstrap is currently untested on Windows — proceeding anyway"
+    fi
+
     # Check if we're in a git repository
     check_git_repo
 
@@ -736,16 +787,47 @@ main() {
     # Ensure we're on the xpro branch FIRST
     ensure_xpro_branch
 
+    # Migrate a legacy .devcontainer externpro submodule to .externpro
+    # (detected via .gitmodules; foreign .devcontainer dirs are left alone)
+    local dc_path dc_url
+    dc_path=$(git config -f "$repo_root/.gitmodules" --get 'submodule..devcontainer.path' 2>/dev/null || true)
+    dc_url=$(git config -f "$repo_root/.gitmodules" --get 'submodule..devcontainer.url' 2>/dev/null || true)
+    if [ "$dc_path" = ".devcontainer" ] && echo "$dc_url" | grep -qE 'externpro/externpro(\.git)?$'; then
+        local script_dir
+        script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+        local mig_script="$script_dir/migrate-layout.sh"
+        if [ ! -f "$mig_script" ]; then
+            print_error "Legacy .devcontainer externpro submodule detected, but migrate-layout.sh not found at: $mig_script"
+            print_info "Update the externpro submodule to a release containing migrate-layout.sh, then re-run bootstrap"
+            exit 1
+        fi
+        # Copy out of the submodule before running — git mv would move the
+        # script out from under a shell that reads it incrementally
+        local tmp_script
+        tmp_script=$(mktemp 2>/dev/null || mktemp -t migrate-layout)
+        cp "$mig_script" "$tmp_script"
+        (cd "$repo_root" && bash "$tmp_script")
+        rm -f "$tmp_script"
+        (cd "$repo_root" && git commit -q -m "migrate externpro submodule to .externpro")
+        print_success "Migrated externpro submodule .devcontainer -> .externpro"
+    fi
+
     # ALWAYS check if externpro submodule needs to be committed
     # This ensures the two-commit strategy works regardless of when submodule was added
     commit_externpro_submodule "$repo_root"
 
-    # Check if we're in the right directory structure
-    local devcontainer_dir="$repo_root/.devcontainer"
-    if [ ! -d "$devcontainer_dir" ]; then
-        print_error ".devcontainer directory not found at: $devcontainer_dir"
+    # Check that the externpro submodule is present at .externpro and is really externpro
+    local externpro_dir="$repo_root/.externpro"
+    if [ ! -d "$externpro_dir" ]; then
+        print_error ".externpro directory not found at: $externpro_dir"
         print_info "Please ensure externpro is added as a submodule:"
-        print_info "  git submodule add https://github.com/externpro/externpro .devcontainer"
+        print_info "  git submodule add https://github.com/externpro/externpro .externpro"
+        exit 1
+    fi
+    local sub_url
+    sub_url=$(git config -f "$repo_root/.gitmodules" --get 'submodule..externpro.url' 2>/dev/null || true)
+    if ! echo "$sub_url" | grep -qE 'externpro/externpro(\.git)?$'; then
+        print_error "submodule at .externpro does not point to externpro/externpro (url: ${sub_url:-none})"
         exit 1
     fi
 
@@ -754,7 +836,7 @@ main() {
     local workflows_dir="$repo_root/.github/workflows"
     ensure_dir "$workflows_dir"
 
-    local templates_dir="$devcontainer_dir/.github/wf-templates"
+    local templates_dir="$externpro_dir/.github/wf-templates"
     local workflow_copied=false
 
     if [ -d "$templates_dir" ]; then
@@ -787,7 +869,7 @@ main() {
 
     # Copy CMakePresets files to repo root
     print_info "Verifying CMake presets..."
-    local presets_src_dir="$devcontainer_dir/cmake/presets"
+    local presets_src_dir="$externpro_dir/cmake/presets"
 
     if [ ! -d "$presets_src_dir" ]; then
         print_error "CMake presets directory not found at: $presets_src_dir"
@@ -819,20 +901,35 @@ main() {
         exit 1
     fi
 
-    # Create docker-compose symbolic links
-    print_info "Creating docker-compose links..."
+    # Create the .devcontainer discovery link if the path is free
+    print_info "Creating .devcontainer discovery link..."
     cd "$repo_root"
-
-    # Create symbolic links if they don't exist or are broken
-    if [ ! -L "docker-compose.sh" ] || [ ! -e "docker-compose.sh" ]; then
-        ln -sf .devcontainer/compose.pro.sh docker-compose.sh
-        print_info "Created docker-compose.sh link"
+    if [ -L ".devcontainer" ]; then
+        print_info ".devcontainer link already exists"
+    elif [ -e ".devcontainer" ]; then
+        print_info ".devcontainer already exists and is not a symlink — externpro devcontainer auto-discovery skipped"
+    else
+        ln -s .externpro .devcontainer 2>/dev/null || true  # best-effort for the working tree
+        commit_symlink .devcontainer .externpro
+        print_info "Created .devcontainer link -> .externpro"
     fi
 
-    if [ ! -L "docker-compose.yml" ] || [ ! -e "docker-compose.yml" ]; then
-        ln -sf .devcontainer/compose.bld.yml docker-compose.yml
-        print_info "Created docker-compose.yml link"
-    fi
+    # Create docker-compose symbolic links (re-point absent paths and existing
+    # symlinks; leave project-owned regular files untouched)
+    print_info "Creating docker-compose links..."
+    local link_pair
+    for link_pair in \
+        "docker-compose.sh .externpro/compose.pro.sh" \
+        "docker-compose.yml .externpro/compose.bld.yml"; do
+        set -- $link_pair
+        if [ ! -e "$1" ] || [ -L "$1" ]; then
+            ln -sf "$2" "$1" 2>/dev/null || true  # best-effort for the working tree
+            commit_symlink "$1" "$2"
+            print_info "Created $1 link -> $2"
+        else
+            print_warning "$1 is a project-owned regular file — left untouched"
+        fi
+    done
 
     # Verify setup
     print_info "Verifying setup..."
