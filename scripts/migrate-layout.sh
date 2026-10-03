@@ -73,13 +73,14 @@ fi
 for pair in \
   "docker-compose.sh .externpro/compose.pro.sh" \
   "docker-compose.yml .externpro/compose.bld.yml"; do
-  set -- $pair
-  if [ ! -e "$1" ] || [ -L "$1" ]; then
-    ln -sf "$2" "$1" || true               # best-effort for the working tree
-    commit_symlink "$1" "$2"
-    staged_links+=("$1")
+  link="${pair%% *}"
+  target="${pair#* }"
+  if [ ! -e "$link" ] || [ -L "$link" ]; then
+    ln -sf "$target" "$link" || true       # best-effort for the working tree
+    commit_symlink "$link" "$target"
+    staged_links+=("$link")
   else
-    echo "warning: $1 is a project-owned regular file — left untouched"
+    echo "warning: $link is a project-owned regular file — left untouched"
   fi
 done
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-cd "$( dirname "$0" )/../.."
+cd "$( dirname "$0" )/../.." || exit 1
 OS_NAME=$(uname -s)
 if [ -d "_bld-${OS_NAME}/_xpro/xpd" ]; then
   # Clean up any existing temporary backup

@@ -88,10 +88,6 @@ apply_preservation_rules() {
     [ -z "$job" ] && continue
     local repo_with_keys
     local tmpl_with_keys
-    local tmpl_with_json
-    local repo_with_json
-    tmpl_with_json=$(yq eval -o=json ".jobs.${job}.with // null" "$template_file" 2>/dev/null || true)
-    repo_with_json=$(yq eval -o=json ".jobs.${job}.with // null" "$workflow_backup" 2>/dev/null || true)
     repo_with_keys=$(yq eval ".jobs.${job}.with | keys | .[]" "$workflow_backup" 2>/dev/null | grep -v null || true)
     tmpl_with_keys=$(yq eval ".jobs.${job}.with | keys | .[]" "$template_file" 2>/dev/null | grep -v null || true)
     local added_keys

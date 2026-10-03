@@ -600,7 +600,7 @@ commit_bootstrap_changes() {
     # Add any externpro workflows that exist
     for workflow_file in "$repo_root/.github/workflows"/xp*.yml; do
         if [ -f "$workflow_file" ]; then
-            local rel_path="${workflow_file#$repo_root/}"
+            local rel_path="${workflow_file#"$repo_root"/}"
             files_to_commit+=("$rel_path")
         fi
     done
@@ -893,14 +893,14 @@ main() {
 
         if [ -f "$src" ]; then
             if copy_with_commit_confirmation "$src" "$dst"; then
-                copied_count=$(expr $copied_count + 1)
+                copied_count=$((copied_count + 1))
             fi
         else
             print_warning "Preset file not found: $src"
         fi
     done
 
-    if [ $copied_count -gt 0 ]; then
+    if [ "$copied_count" -gt 0 ]; then
         print_success "CMake presets verified"
     else
         print_warning "No CMake preset files were copied"
@@ -928,13 +928,15 @@ main() {
     for link_pair in \
         "docker-compose.sh .externpro/compose.pro.sh" \
         "docker-compose.yml .externpro/compose.bld.yml"; do
-        set -- $link_pair
-        if [ ! -e "$1" ] || [ -L "$1" ]; then
-            ln -sf "$2" "$1" 2>/dev/null || true  # best-effort for the working tree
-            commit_symlink "$1" "$2"
-            print_info "Created $1 link -> $2"
+        local link target
+        link="${link_pair%% *}"
+        target="${link_pair#* }"
+        if [ ! -e "$link" ] || [ -L "$link" ]; then
+            ln -sf "$target" "$link" 2>/dev/null || true  # best-effort for the working tree
+            commit_symlink "$link" "$target"
+            print_info "Created $link link -> $target"
         else
-            print_warning "$1 is a project-owned regular file — left untouched"
+            print_warning "$link is a project-owned regular file — left untouched"
         fi
     done
 

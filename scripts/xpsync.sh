@@ -1,10 +1,6 @@
 #!/usr/bin/env bash
-cd "$( dirname "$0" )/../.."
-cd .externpro
-git fetch --all
-git checkout main
-git merge origin/main
-cd ..
+cd "$( dirname "$0" )/../.." || exit 1
+( cd .externpro && git fetch --all && git checkout main && git merge origin/main ) || exit 1
 if [ -f ".github/workflows/xpinit.yml" ]; then
   git rm .github/workflows/xpinit.yml
 fi
@@ -21,4 +17,4 @@ if [ -n "$(git status --porcelain .github/workflows/)" ]; then
   git push cm xpsyncWorkflow
 fi
 OWNER_REPO=$(git remote get-url origin | sed -E 's/.*[:\/]([^\/]+)\/([^\/.]+)(\.git)?$/\1\/\2/')
-gh pr create --repo ${OWNER_REPO} --head xpsyncWorkflow --base xpro
+gh pr create --repo "${OWNER_REPO}" --head xpsyncWorkflow --base xpro
