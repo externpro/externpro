@@ -61,7 +61,7 @@ jobs:
           run_url="${{ inputs.workflow_run_url }}"
           if [[ "$run_url" =~ /actions/runs/([0-9]+) ]]; then
             run_id="${BASH_REMATCH[1]}"
-            echo "run_id=$run_id" >> $GITHUB_OUTPUT
+            echo "run_id=$run_id" >> "$GITHUB_OUTPUT"
             echo "Extracted run ID: $run_id"
           else
             echo "::error::Invalid workflow run URL format. Expected: https://github.com/owner/repo/actions/runs/123456789"
@@ -139,7 +139,7 @@ jobs:
               echo "is_prerelease=$is_prerelease"
               echo "manifest_file="
               echo "manifest_hash="
-            } >> $GITHUB_OUTPUT
+            } >> "$GITHUB_OUTPUT"
             exit 0
           fi
           manifest_file="${manifest_files[0]}"
@@ -235,7 +235,7 @@ jobs:
             echo "is_prerelease=$is_prerelease"
             echo "manifest_file=$manifest_file"
             echo "manifest_hash=$manifest_hash"
-          } >> $GITHUB_OUTPUT
+          } >> "$GITHUB_OUTPUT"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Attest artifacts
@@ -292,24 +292,26 @@ jobs:
           manifest_file="${{ steps.find_artifacts.outputs.manifest_file }}"
           if [ -n "$manifest_file" ] && [ -f "$manifest_file" ]; then
             manifest_hash=$(sha256sum "$manifest_file" | cut -d' ' -f1)
-            echo "### Manifest" >> "$RELEASE_NOTES_FILE"
-            echo '```' >> "$RELEASE_NOTES_FILE"
-            echo "MANIFEST_HASH SHA256=$manifest_hash" >> "$RELEASE_NOTES_FILE"
-            echo '```' >> "$RELEASE_NOTES_FILE"
+            {
+              echo "### Manifest"
+              echo '```'
+              echo "MANIFEST_HASH SHA256=$manifest_hash"
+              echo '```'
+            } >> "$RELEASE_NOTES_FILE"
           fi
           # Set flags based on release type
-          flags=""
+          flags=()
           if [[ "$is_prerelease" == "true" ]]; then
-            flags="$flags --prerelease"
+            flags+=(--prerelease)
           fi
           # Always create draft releases
-          flags="$flags --draft"
+          flags+=(--draft)
           # Create the release using the file for notes
           echo "Creating release for tag: $tag"
           release_output=$(gh release create "$tag" \
             --title "$release_name" \
             --notes-file "$RELEASE_NOTES_FILE" \
-            $flags 2>&1)
+            "${flags[@]}" 2>&1)
           # Clean up temp file
           rm -f "$RELEASE_NOTES_FILE"
           # Extract the release URL from the output
@@ -323,10 +325,10 @@ jobs:
               if [[ "$tag_or_id" == untagged-* ]]; then
                 # For untagged releases, we need to list all releases and find by URL
                 echo "Handling untagged release: $tag_or_id"
-                release_id=$(gh api repos/$GITHUB_REPOSITORY/releases --jq ".[] | select(.html_url == \"$release_url\") | .id")
+                release_id=$(gh api "repos/$GITHUB_REPOSITORY/releases" --jq ".[] | select(.html_url == \"$release_url\") | .id")
               else
                 # For tagged releases, we can query directly
-                release_id=$(gh api repos/$GITHUB_REPOSITORY/releases/tags/$tag --jq '.id')
+                release_id=$(gh api "repos/$GITHUB_REPOSITORY/releases/tags/$tag" --jq '.id')
               fi
             else
               echo "Warning: Could not extract tag or ID from URL: $release_url"
@@ -338,8 +340,10 @@ jobs:
             release_id="unknown"
           fi
           # Set outputs
-          echo "release_id=$release_id" >> $GITHUB_OUTPUT
-          echo "release_url=$release_url" >> $GITHUB_OUTPUT
+          {
+            echo "release_id=$release_id"
+            echo "release_url=$release_url"
+          } >> "$GITHUB_OUTPUT"
           echo "Created release: $tag"
       -
         name: Upload artifacts to release

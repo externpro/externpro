@@ -39,7 +39,7 @@ jobs:
         run: |
           set -euo pipefail
           if [ ! -f .github/release-tag.json ]; then
-            echo "intent_missing=true" >> $GITHUB_OUTPUT
+            echo "intent_missing=true" >> "$GITHUB_OUTPUT"
             exit 0
           fi
           TAG=$(python3 -c 'import json; print((json.load(open(".github/release-tag.json","r",encoding="utf-8")).get("tag") or "").strip())')
@@ -59,9 +59,11 @@ jobs:
           if [[ "$TAG" =~ ^v[0-9A-Za-z] ]]; then
             echo "WARNING: legacy 'v' tag prefix detected; prefer 'xpv' for new externpro tags" >&2
           fi
-          echo "intent_missing=false" >> $GITHUB_OUTPUT
-          echo "tag=$TAG" >> $GITHUB_OUTPUT
-          printf 'message<<EOF\n%s\nEOF\n' "$MESSAGE" >> $GITHUB_OUTPUT
+          {
+            echo "intent_missing=false"
+            echo "tag=$TAG"
+            printf 'message<<EOF\n%s\nEOF\n' "$MESSAGE"
+          } >> "$GITHUB_OUTPUT"
       -
         name: Comment on PR (missing release intent)
         if: ${{ steps.intent.outputs.intent_missing == 'true' }}
