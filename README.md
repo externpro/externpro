@@ -94,7 +94,7 @@ The goal is simple: make "develop -> build -> test -> release" fast and consiste
 - **Environment bootstrap**
   - [`denv.sh`](./denv.sh) generates a `.env` file used by compose for user IDs, host naming, X11 wiring, timezone, and optional certificate injection.
 - **Project portability**
-  - Designed to be vendored as a `.devcontainer` submodule so every project can share the same foundation.
+  - Designed to be vendored as an `.externpro` submodule so every project can share the same foundation.
 - **How it works (high level)**
   - The `compose.*.sh` scripts specify a buildpro image (example: [`compose.bld.sh`](./compose.bld.sh) uses `rocky-mdv`).
   - `denv.sh` computes values (tag, user/group IDs, host name, timezone, X11 env) and writes `.env`.
@@ -105,7 +105,7 @@ The goal is simple: make "develop -> build -> test -> release" fast and consiste
 ### Dependency Provider
 - Instead of CMake (or your "consuming" project) fetching/building a dependency itself, externpro "provides" that dependency to the build as an already-available package/target — so the consuming project can just link to it. See the CMake documentation overview on [dependency providers](https://cmake.org/cmake/help/latest/guide/using-dependencies/index.html#dependency-providers-overview).
 - For details on how externpro wires this into CMake, see [Dependency provider (xproinc)](./cmake/docs/dependency-provider.md).
-- Leverage externpro as a dependency provider by using the provided CMakePresets, which automatically inject `CMAKE_PROJECT_TOP_LEVEL_INCLUDES` to point to [`.devcontainer/cmake/xproinc.cmake`](./cmake/xproinc.cmake). The CMakePresets handle the injection automatically, so no manual `set()` call is needed in your `CMakeLists.txt`.
+- Leverage externpro as a dependency provider by using the provided CMakePresets, which automatically inject `CMAKE_PROJECT_TOP_LEVEL_INCLUDES` to point to [`.externpro/cmake/xproinc.cmake`](./cmake/xproinc.cmake). The CMakePresets handle the injection automatically, so no manual `set()` call is needed in your `CMakeLists.txt`.
 - See [cmake/README.md](./cmake/README.md) for externpro projects — each one is an example of vendoring externpro/externpro as a submodule and using it as the CMake build platform and dependency provider, with reusable CI pipelines, to create an xpro package (a release artifact plus its manifest metadata and generated CMake "use" config) that can be consumed by other "downstream" projects.
 
 #### Provide your project as a dependency for others
@@ -145,12 +145,12 @@ The CI pipelines are designed to run on GitHub-hosted runners, providing a consi
 - For prerequisites before running `xpSync`, see [xpSync preconditions](./.github/docs/caller-workflows.md#preconditions-before-running-xpsync).
 - For a hands-on example repo that walks through forking a project, adding externpro as a submodule, running `xpSync`, and producing a release that downstream projects can consume, see [externpro/tutorial](https://github.com/externpro/tutorial).
 
-Optimally, externpro is added to any project as a submodule at the path `.devcontainer`:
+externpro is added to a project as a submodule at the path `.externpro`:
 ```
-git submodule add https://github.com/externpro/externpro .devcontainer
+git submodule add https://github.com/externpro/externpro .externpro
 ```
 
-It is possible to add externpro as a submodule at a different path, but the workflows, templates, and documentation assume `.devcontainer` in many places, so using a different path requires updating those references.
+The workflows, templates, and scripts require this exact path. Repositories that vendored externpro at `.devcontainer` previously are migrated automatically — `bootstrap.sh` and the `xpSync` workflow detect a legacy `.devcontainer` externpro submodule and move it to `.externpro`. When the `.devcontainer` path is otherwise free, a `.devcontainer -> .externpro` symlink is committed so GitHub and VS Code still auto-discover the Dev Container config (`devcontainer.json`); if the project already has its own `.devcontainer`, it is left untouched and auto-discovery simply doesn't apply.
 
 ## History
 

@@ -35,7 +35,7 @@ Copy these templates into the project repo:
 3. Add externpro as a submodule:
 
 ```sh
-git submodule add https://github.com/externpro/externpro .devcontainer
+git submodule add https://github.com/externpro/externpro .externpro
 ```
 
 **Then choose one of the following**:
@@ -46,14 +46,14 @@ git submodule add https://github.com/externpro/externpro .devcontainer
 
 4. Create branch `xpro` and set it as the default branch.
 5. Commit the submodule addition.
-6. Copy `.devcontainer/.github/wf-templates/xpsync.yml` into the repo's `.github/workflows/` and commit.
+6. Copy `.externpro/.github/wf-templates/xpsync.yml` into the repo's `.github/workflows/` and commit.
 7. Push `xpro` to GitHub.
 
 For the repo wiring and CMake integration checklist, see [How-to: adopt externpro](../../cmake/docs/how-to-adopt-externpro.md).
 
 ### What `sync-externpro` does (high level)
 
-- Validates the externpro submodule path (`.devcontainer`).
+- Resolves the externpro submodule path (`.externpro`; a legacy `.devcontainer` externpro submodule is detected and migrated automatically).
 - Creates a unique `xpsync-*` branch.
 - Detects and applies patches from `patches/*.patch` via `git am` (advanced feature for custom modifications).
   > **Note**: This feature is primarily used for specialized cases like the externpro/tutorial repository. Most repositories will not need patch files.

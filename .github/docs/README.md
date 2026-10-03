@@ -18,13 +18,13 @@ An "xpro package" is an externpro-produced release artifact (plus its manifest m
 This is the typical flow for adopting externpro workflows in a project repo:
 
 1. Create (or fork) the repo.
-2. Add externpro as a submodule at `.devcontainer`:
+2. Add externpro as a submodule at `.externpro`:
    ```sh
-   git submodule add https://github.com/externpro/externpro .devcontainer
+   git submodule add https://github.com/externpro/externpro .externpro
    ```
 3. Run the bootstrap script:
    ```sh
-   ./.devcontainer/scripts/bootstrap.sh
+   ./.externpro/scripts/bootstrap.sh
    ```
    The script creates the `xpro` branch, copies workflow templates, checks XPRO_TOKEN configuration, and commits the setup.
 4. Verify the setup works locally:

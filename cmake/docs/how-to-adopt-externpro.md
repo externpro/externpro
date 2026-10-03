@@ -8,12 +8,12 @@ For a streamlined adoption process:
 
 1. **Add externpro as a submodule**:
    ```bash
-   git submodule add https://github.com/externpro/externpro .devcontainer
+   git submodule add https://github.com/externpro/externpro .externpro
    ```
 
 2. **Run the bootstrap script**:
    ```bash
-   ./.devcontainer/scripts/bootstrap.sh
+   ./.externpro/scripts/bootstrap.sh
    ```
 
 3. **Verify the setup works locally**:
@@ -41,20 +41,20 @@ See the detailed breakdown below for what each step does and manual alternatives
 2. Add externpro as a git submodule
 
 ```bash
-git submodule add https://github.com/externpro/externpro .devcontainer
+git submodule add https://github.com/externpro/externpro .externpro
 ```
 
 3. Add CMakePresets
 
 ```bash
-cp .devcontainer/cmake/presets/CMakePresets* .
+cp .externpro/cmake/presets/CMakePresets* .
 ```
 
 4. Add docker-compose links (for Linux build container launching)
 
 ```bash
-ln -s .devcontainer/compose.pro.sh docker-compose.sh
-ln -s .devcontainer/compose.bld.yml docker-compose.yml
+ln -s .externpro/compose.pro.sh docker-compose.sh
+ln -s .externpro/compose.bld.yml docker-compose.yml
 ```
 
 5. Update `.gitignore` with externpro ignores
@@ -82,11 +82,11 @@ Alternatively, steps 3-5 can be handled by running the `xpSync` caller workflow 
 
 For the recommended first-time workflow setup (including copying `xpsync.yml` and prerequisites before running it), see [xpSync preconditions](../../.github/docs/caller-workflows.md#preconditions-before-running-xpsync).
 
-- If you are doing this manually (or want to understand what the workflows are doing), the core step is simply to copy the caller workflow templates from `.devcontainer/.github/wf-templates/` into your repo’s `.github/workflows/`.
+- If you are doing this manually (or want to understand what the workflows are doing), the core step is simply to copy the caller workflow templates from `.externpro/.github/wf-templates/` into your repo’s `.github/workflows/`.
 
 ```bash
 mkdir -p .github/workflows
-cp .devcontainer/.github/wf-templates/xp*.yml .github/workflows/
+cp .externpro/.github/wf-templates/xp*.yml .github/workflows/
 git add .github/workflows
 ```
 
@@ -100,11 +100,11 @@ If your repo default branch is not `xpro`, you will likely need to adjust the ca
 
 ## CMake integration
 
-1. The CMakePresets automatically inject `CMAKE_PROJECT_TOP_LEVEL_INCLUDES` to point to `.devcontainer/cmake/xproinc.cmake`, so no manual setup is needed in your `CMakeLists.txt`.
+1. The CMakePresets automatically inject `CMAKE_PROJECT_TOP_LEVEL_INCLUDES` to point to `.externpro/cmake/xproinc.cmake`, so no manual setup is needed in your `CMakeLists.txt`.
 
 1. `xproinc.cmake` (automatically included via CMakePresets) currently:
     - defines `CMAKE_INSTALL_PREFIX` if not already defined
-    - appends `.devcontainer/cmake/` to `CMAKE_MODULE_PATH`
+    - appends `.externpro/cmake/` to `CMAKE_MODULE_PATH`
     - includes `pros.cmake` (default externpro dependency variables)
     - sets a dependency provider so `find_package()` calls can be satisfied by externpro
     - See [Dependency provider](dependency-provider.md) for details.

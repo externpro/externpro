@@ -10,10 +10,10 @@ Before running the bootstrap script, you must:
 
 **Add externpro as a submodule:**
 ```bash
-git submodule add https://github.com/externpro/externpro .devcontainer
+git submodule add https://github.com/externpro/externpro .externpro
 ```
 
-**Note:** Be aware of any conflicts with an existing `.devcontainer` directory or a `.gitignore` entry that ignores `.devcontainer`.
+**Note:** Be aware of any `.gitignore` entry that ignores `.externpro`. If the repository already has its own `.devcontainer` (directory, symlink, or file), bootstrap leaves it untouched — externpro's Dev Container config simply won't be auto-discovered there.
 
 ### Required Utilities
 
@@ -39,10 +39,12 @@ The script will work without the optional utilities, but will provide manual ins
 The bootstrap script performs the following automated actions:
 
 1. **Creates/switches to `xpro` branch** - All changes are made in a dedicated branch
+1. **Migrates legacy layout** - If externpro is vendored as a `.devcontainer` submodule (the previous layout), it is moved to `.externpro` via `scripts/migrate-layout.sh` and committed
 1. **Commits externpro submodule** - Creates first commit with submodule and version tag from `git describe --tags`
-1. **Copies GitHub workflows** - Copies all `xp*.yml` workflow templates from `.devcontainer/.github/wf-templates/` to `.github/workflows/` (only if they don't already exist)
-1. **Copies CMake presets** - Copies CMakePresets.json and CMakePresetsBase.json from `.devcontainer/cmake/presets/` to repository root
-1. **Creates Docker Compose links** - Creates symbolic links for `docker-compose.sh` and `docker-compose.yml` pointing to externpro compose files
+1. **Copies GitHub workflows** - Copies all `xp*.yml` workflow templates from `.externpro/.github/wf-templates/` to `.github/workflows/` (only if they don't already exist)
+1. **Copies CMake presets** - Copies CMakePresets.json and CMakePresetsBase.json from `.externpro/cmake/presets/` to repository root
+1. **Creates `.devcontainer` discovery link** - Creates a `.devcontainer -> .externpro` symlink (if the path is free) so GitHub and VS Code auto-discover externpro's `devcontainer.json`
+1. **Creates Docker Compose links** - Creates symbolic links for `docker-compose.sh` and `docker-compose.yml` pointing to externpro compose files (re-points existing links; leaves project-owned regular files untouched)
 1. **Handles file conflicts** - Overwrites existing files with commit confirmation for tracked files
 1. **Commits bootstrap changes** - Creates second commit with setup files
 1. **Pushes to remote** - Automatically pushes `xpro` branch using smart remote selection
@@ -86,24 +88,24 @@ The bootstrap script performs the following automated actions:
 
 ### On macOS and Linux
 ```bash
-./.devcontainer/scripts/bootstrap.sh
+./.externpro/scripts/bootstrap.sh
 ```
 
 ### On Windows
-The script works on Windows using any bash environment:
+The script is untested on Windows but attempts to run in any bash environment:
 - **Git Bash** (included with Git for Windows)
 - **WSL** (Windows Subsystem for Linux)
 - **GitHub CLI** (gh) bash environment
 
 ```bash
-./.devcontainer/scripts/bootstrap.sh
+./.externpro/scripts/bootstrap.sh
 ```
 
 ## Platform Compatibility
 
 - macOS (native bash)
 - Linux (native bash)
-- Windows (via Git Bash, WSL, or GitHub CLI)
+- Windows (via Git Bash, WSL, or GitHub CLI) — untested; the script warns but proceeds
 
 ## After Running the Script
 

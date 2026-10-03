@@ -1,7 +1,7 @@
 # CMake Update Checklist
 
 ## Core Updates
-- <input type="checkbox"> cp .devcontainer/.github/wf-templates/xpsync.yml .github/workflows
+- <input type="checkbox"> cp .externpro/.github/wf-templates/xpsync.yml .github/workflows
 - <input type="checkbox"> Update `cmake_minimum_required` to 4.3 (related to issue https://github.com/externpro/externpro/issues/315)
 - <input type="checkbox"> Remove `set(CMAKE_PROJECT_TOP_LEVEL_INCLUDES)` from root CMakeLists.txt (related to issue https://github.com/externpro/externpro/issues/316)
 - <input type="checkbox"> Update CMakePresetsBase.json, removing `XP_NAMESPACE` and use `if(COMMAND` as mentioned in issue https://github.com/externpro/externpro/issues/307#issuecomment-4130807987 and reduce the number of changes from upstream
@@ -38,8 +38,8 @@ git push cm <new_tag>
 git branch -D xpro
 git switch -c xpro
 git push --force-with-lease cm xpro
-git submodule add https://github.com/externpro/externpro .devcontainer
-./.devcontainer/scripts/bootstrap.sh
+git submodule add https://github.com/externpro/externpro .externpro
+./.externpro/scripts/bootstrap.sh
 git stash pop stash@{1}
 <keep .github/release-tag.json as-is>
 git add .github/release-tag.json
