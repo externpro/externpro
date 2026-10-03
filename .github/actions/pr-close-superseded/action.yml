@@ -56,7 +56,7 @@ runs:
           FILTER_JQ='.[] | select(.headRefName | startswith(env.HEAD_BRANCH_PREFIX)) | select(.headRefName != env.KEEP_HEAD_BRANCH) | "\(.number) \(.headRefName)"'
         fi
         export HEAD_BRANCH_PREFIX
-        SUPERSEDED_PRS=$(${GH_RETRY[@]} gh pr list --state open --json number,headRefName,labels --jq "$FILTER_JQ")
+        SUPERSEDED_PRS=$("${GH_RETRY[@]}" gh pr list --state open --json number,headRefName,labels --jq "$FILTER_JQ")
         if [ -z "$SUPERSEDED_PRS" ]; then
           echo "No superseded PRs found for prefix '$HEAD_BRANCH_PREFIX'"
           exit 0
@@ -68,7 +68,7 @@ runs:
           if [ -z "$PR_NUMBER" ] || [ -z "$SUPERSEDED_HEAD_REF" ]; then
             continue
           fi
-          ${GH_RETRY[@]} gh pr close "$PR_NUMBER" --comment "Superseded by $PR_URL" >/dev/null 2>&1 || echo "Failed to close PR #$PR_NUMBER"
+          "${GH_RETRY[@]}" gh pr close "$PR_NUMBER" --comment "Superseded by $PR_URL" >/dev/null 2>&1 || echo "Failed to close PR #$PR_NUMBER"
           if [ "$DELETE_BRANCHES" != "true" ]; then
             continue
           fi
@@ -78,7 +78,7 @@ runs:
           case "$SUPERSEDED_HEAD_REF" in
             ${HEAD_BRANCH_PREFIX}*)
               REF_ENC=$(printf '%s' "$SUPERSEDED_HEAD_REF" | sed 's|/|%2F|g')
-              if ${GH_RETRY[@]} gh api -X DELETE "repos/${{ github.repository }}/git/refs/heads/${REF_ENC}" >/dev/null 2>&1; then
+              if "${GH_RETRY[@]}" gh api -X DELETE "repos/${{ github.repository }}/git/refs/heads/${REF_ENC}" >/dev/null 2>&1; then
                 echo "Deleted superseded branch: $SUPERSEDED_HEAD_REF"
               else
                 echo "Could not delete branch '$SUPERSEDED_HEAD_REF' (missing/protected/insufficient permissions); skipping"
