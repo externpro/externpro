@@ -48,6 +48,13 @@ git submodule sync                         # refresh .git/config for new path/na
 git config --remove-section submodule..devcontainer || true  # drop stale local section
 git add .gitmodules
 
+# warn if .gitignore ignores the new path (e.g. a blanket '**/' entry) — the
+# gitlink commits fine but submodule checkouts/updates get confusing
+# (--no-index: plain check-ignore skips paths already tracked in the index)
+if git check-ignore -q --no-index .externpro; then
+  echo "warning: .externpro is ignored by .gitignore — add an '!.externpro' negation"
+fi
+
 # --- .devcontainer discovery link (only if the path is free) ----------------
 staged_links=()
 if [ ! -e .devcontainer ] && [ ! -L .devcontainer ]; then

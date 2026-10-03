@@ -13,7 +13,7 @@ Before running the bootstrap script, you must:
 git submodule add https://github.com/externpro/externpro .externpro
 ```
 
-**Note:** Be aware of any `.gitignore` entry that ignores `.externpro`. If the repository already has its own `.devcontainer` (directory, symlink, or file), bootstrap leaves it untouched — externpro's Dev Container config simply won't be auto-discovered there.
+**Note:** Ensure `.gitignore` doesn't ignore `.externpro` — a blanket ignore such as `**/` (e.g. SQLite's "ignore all subdirectories" entry) requires an explicit `!.externpro` negation. If the repository already has its own `.devcontainer` (directory, symlink, or file), bootstrap leaves it untouched — externpro's Dev Container config simply won't be auto-discovered there.
 
 ### Required Utilities
 

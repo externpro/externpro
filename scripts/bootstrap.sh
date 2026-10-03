@@ -831,6 +831,13 @@ main() {
         exit 1
     fi
 
+    # warn if .gitignore ignores the submodule path (e.g. a blanket '**/'
+    # entry) — checkouts/updates get confusing without an '!.externpro'
+    # negation (--no-index: plain check-ignore skips tracked paths)
+    if git -C "$repo_root" check-ignore -q --no-index .externpro; then
+        print_warning ".externpro is ignored by .gitignore — add an '!.externpro' negation"
+    fi
+
     # Copy all externpro caller workflows to .github/workflows
     print_info "Verifying GitHub workflows..."
     local workflows_dir="$repo_root/.github/workflows"
