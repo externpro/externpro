@@ -1,6 +1,5 @@
 name: Sync externpro
 env:
-  XPRO_SUBMODULE_PATH: .devcontainer
   XPRO_BUILD_CONTAINER: rocky9-gcc13
 on:
   workflow_call:
@@ -47,7 +46,7 @@ jobs:
             # Re-sync any non-externpro submodules that are out of sync with xpsync
             if [ -f .gitmodules ]; then
               git submodule status --recursive | while read -r sha path _; do
-                if [[ "${sha:0:1}" =~ [+-U] ]] && [ "$path" != "${{ env.XPRO_SUBMODULE_PATH }}" ]; then
+                if [[ "${sha:0:1}" =~ [+-U] ]] && [ "$path" != ".externpro" ] && [ "$path" != ".devcontainer" ]; then
                   echo "Updating submodule: $path"
                   git submodule update --init --recursive "$path"
                 fi
@@ -70,10 +69,31 @@ jobs:
           git checkout -b "$BRANCH_NAME"
           echo "branch_name=$BRANCH_NAME" >> $GITHUB_OUTPUT
       -
+        name: Resolve externpro submodule path
+        id: xpro_path
+        run: |
+          set -euo pipefail
+          # New layout is canonical; fall back to a legacy .devcontainer
+          # externpro submodule (verified via the .gitmodules url).
+          if [ "$(git config -f .gitmodules --get 'submodule..externpro.path' 2>/dev/null || true)" = ".externpro" ]; then
+            SUB=".externpro"
+          elif [ "$(git config -f .gitmodules --get 'submodule..devcontainer.path' 2>/dev/null || true)" = ".devcontainer" ] \
+            && git config -f .gitmodules --get 'submodule..devcontainer.url' | grep -qE 'externpro/externpro(\.git)?$'; then
+            SUB=".devcontainer"
+          else
+            echo "Error: no externpro submodule found at .externpro or legacy .devcontainer" >&2
+            exit 1
+          fi
+          # ensure the submodule is initialized (e.g. after switching to an
+          # xpsync branch whose submodule layout differs from the checkout's)
+          git submodule update --init "$SUB"
+          echo "submodule_path=$SUB" >> $GITHUB_OUTPUT
+          echo "externpro submodule path: $SUB"
+      -
         name: Configure Git
         uses: externpro/externpro/.github/actions/git-configure-bot@main
         with:
-          submodule_path: ${{ env.XPRO_SUBMODULE_PATH }}
+          submodule_path: ${{ steps.xpro_path.outputs.submodule_path }}
       -
         name: Detect patch series
         id: patches
@@ -102,7 +122,7 @@ jobs:
         id: validate_submodule
         uses: externpro/externpro/.github/actions/externpro-validate@main
         with:
-          submodule_path: ${{ env.XPRO_SUBMODULE_PATH }}
+          submodule_path: ${{ steps.xpro_path.outputs.submodule_path }}
       -
         name: Get current externpro HEAD
         id: current_head
@@ -152,9 +172,37 @@ jobs:
             fi
           fi
       -
+        name: Migrate legacy .devcontainer submodule to .externpro
+        id: migrate
+        if: ${{ always() }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          SUB="${{ steps.xpro_path.outputs.submodule_path }}"
+          if [ "$SUB" != ".devcontainer" ]; then
+            echo "submodule_path=$SUB" >> $GITHUB_OUTPUT
+            echo "migrated=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          # The submodule was just updated to target_ref; migrate-layout.sh
+          # must come from there. Copy it out before running — git mv would
+          # move the script out from under a shell that reads it incrementally.
+          MIG_SCRIPT="$SUB/scripts/migrate-layout.sh"
+          if [ ! -f "$MIG_SCRIPT" ]; then
+            echo "Error: legacy externpro submodule at .devcontainer, but $MIG_SCRIPT not found" >&2
+            echo "       target_ref must contain scripts/migrate-layout.sh" >&2
+            exit 1
+          fi
+          TMP_MIG="$(mktemp -t migrate-layout.XXXXXX)"
+          cp "$MIG_SCRIPT" "$TMP_MIG"
+          bash "$TMP_MIG"
+          rm -f "$TMP_MIG"
+          echo "submodule_path=.externpro" >> $GITHUB_OUTPUT
+          echo "migrated=true" >> $GITHUB_OUTPUT
+      -
         name: Log externpro version/describe
         run: |
-          cd "${{ steps.validate_submodule.outputs.submodule_path }}"
+          cd "${{ steps.migrate.outputs.submodule_path }}"
           VERSION_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "no-tag")
           DESCRIBE=$(git describe --tags 2>/dev/null || git rev-parse --short HEAD)
           echo "externpro version: $VERSION_TAG"
@@ -163,10 +211,10 @@ jobs:
         name: Sync GitHub Actions caller workflows
         id: sync_workflows
         if: ${{ always() }}
-        uses: ./.devcontainer/.github/actions/sync-caller-workflows
+        uses: ./.externpro/.github/actions/sync-caller-workflows
         with:
           workflow_dir: .github/workflows
-          template_dir: ${{ steps.validate_submodule.outputs.submodule_path }}/.github/wf-templates
+          template_dir: ${{ steps.migrate.outputs.submodule_path }}/.github/wf-templates
           preserve_existing_branches: ${{ inputs.preserve_existing_branches }}
       -
         name: Add CMakePresets (if missing)
@@ -180,7 +228,7 @@ jobs:
             echo "cmake_added=false" >> $GITHUB_OUTPUT
           else
             echo "Adding CMakePresets from template"
-            cp -f .devcontainer/cmake/presets/CMakePresets* .
+            cp -f "${{ steps.migrate.outputs.submodule_path }}"/cmake/presets/CMakePresets* .
             git add CMakePresets*
             echo "cmake_added=true" >> $GITHUB_OUTPUT
           fi
@@ -188,40 +236,45 @@ jobs:
         name: Sync CMakePresets
         id: sync_cmake_presets
         if: ${{ always() }}
-        uses: ./.devcontainer/.github/actions/compare-cmake-presets
+        uses: ./.externpro/.github/actions/compare-cmake-presets
         with:
           presets_dir: .
-          template_dir: ${{ steps.validate_submodule.outputs.submodule_path }}/cmake/presets
+          template_dir: ${{ steps.migrate.outputs.submodule_path }}/cmake/presets
       -
         name: Create release-tag intent (if missing)
         id: release_intent
         if: ${{ always() }}
-        uses: ./.devcontainer/.github/actions/release-tag-intent
+        uses: ./.externpro/.github/actions/release-tag-intent
       -
         name: Add docker-compose links
         id: docker_compose
         shell: bash
         run: |
           set -euo pipefail
-          # Only create links if they don't exist or are broken
+          # Absent paths and existing symlinks are (re)pointed at the externpro
+          # submodule; project-owned regular files are left untouched.
+          # Links are committed via the index (mode 120000), never git add —
+          # a plain add on Windows would stage a text file as 100644.
+          SUB="${{ steps.migrate.outputs.submodule_path }}"
           LINKS_CREATED=false
-          if [ ! -f "docker-compose.sh" ] || [ ! -L "docker-compose.sh" ]; then
-            echo "Creating docker-compose.sh link"
-            ln -sf .devcontainer/compose.pro.sh docker-compose.sh
-            LINKS_CREATED=true
-          fi
-          if [ ! -f "docker-compose.yml" ] || [ ! -L "docker-compose.yml" ]; then
-            echo "Creating docker-compose.yml link"
-            ln -sf .devcontainer/compose.bld.yml docker-compose.yml
-            LINKS_CREATED=true
-          fi
-          if [ "$LINKS_CREATED" = true ]; then
-            git add docker-compose.sh docker-compose.yml
-            echo "links_staged=true" >> $GITHUB_OUTPUT
-          else
-            echo "docker-compose links already exist"
-            echo "links_staged=false" >> $GITHUB_OUTPUT
-          fi
+          commit_link() {
+            local link="$1" target="$2" blob staged
+            if [ -e "$link" ] && [ ! -L "$link" ]; then
+              echo "::warning::$link is a project-owned regular file — left untouched"
+              return
+            fi
+            blob=$(printf '%s' "$target" | git hash-object -w --stdin)
+            staged=$(git ls-files -s -- "$link" | awk '{print $2}')
+            if [ "$staged" != "$blob" ]; then
+              ln -sf "$target" "$link" 2>/dev/null || true
+              git update-index --add --cacheinfo "120000,$blob,$link"
+              LINKS_CREATED=true
+              echo "created $link -> $target"
+            fi
+          }
+          commit_link docker-compose.sh "$SUB/compose.pro.sh"
+          commit_link docker-compose.yml "$SUB/compose.bld.yml"
+          echo "links_staged=$LINKS_CREATED" >> $GITHUB_OUTPUT
       -
         name: Add externpro .gitignore
         id: gitignore_add
@@ -256,23 +309,23 @@ jobs:
       -
         name: GHCR access
         id: ghcr
-        uses: ./.devcontainer/.github/actions/ghcr-access
+        uses: ./.externpro/.github/actions/ghcr-access
         with:
           build_container: ${{ env.XPRO_BUILD_CONTAINER }}
           automation_token: ${{ secrets.automation_token }}
       -
         name: Configure and snapshot dependency artifacts
         id: deps
-        uses: ./.devcontainer/.github/actions/externpro-deps-configure
+        uses: ./.externpro/.github/actions/externpro-deps-configure
         with:
-          submodule_path: ${{ steps.validate_submodule.outputs.submodule_path }}
+          submodule_path: ${{ steps.migrate.outputs.submodule_path }}
           build_container: ${{ env.XPRO_BUILD_CONTAINER }}
           automation_token: ${{ secrets.automation_token }}
       -
         name: Get final externpro version/head
         id: final_version
         run: |
-          cd "${{ steps.validate_submodule.outputs.submodule_path }}"
+          cd "${{ steps.migrate.outputs.submodule_path }}"
           FINAL_HEAD=$(git rev-parse HEAD)
           VERSION_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "no-tag")
           DESCRIBE=$(git describe --tags 2>/dev/null || git rev-parse --short HEAD)
@@ -288,11 +341,11 @@ jobs:
         if: ${{ always() }}
         run: |
           # Stage submodule pointer update after any submodule commits (and/or after switching target ref)
-          git add "${{ steps.validate_submodule.outputs.submodule_path }}"
-          if git diff --cached --quiet -- "${{ steps.validate_submodule.outputs.submodule_path }}"; then
-            echo "✓ No submodule pointer changes staged for ${{ steps.validate_submodule.outputs.submodule_path }}"
+          git add "${{ steps.migrate.outputs.submodule_path }}"
+          if git diff --cached --quiet -- "${{ steps.migrate.outputs.submodule_path }}"; then
+            echo "✓ No submodule pointer changes staged for ${{ steps.migrate.outputs.submodule_path }}"
           else
-            echo "✓ Staged submodule pointer update for ${{ steps.validate_submodule.outputs.submodule_path }}"
+            echo "✓ Staged submodule pointer update for ${{ steps.migrate.outputs.submodule_path }}"
           fi
       -
         name: Determine if PR is needed
@@ -310,11 +363,26 @@ jobs:
         name: Commit changes
         if: steps.pr_needed.outputs.pr_needed == 'true'
         run: |
+          # Commit the layout migration first (.gitmodules rename, .devcontainer
+          # discovery link, refreshed compose links); the new .externpro
+          # gitlink stays staged for the version commit below
+          if [ "${{ steps.migrate.outputs.migrated }}" = "true" ]; then
+            # commit only paths that actually have staged changes — a pathspec
+            # with no index entry (e.g. a skipped foreign file) would error
+            MIG_PATHS=()
+            for p in .gitmodules .devcontainer docker-compose.sh docker-compose.yml; do
+              git diff --cached --quiet -- "$p" || MIG_PATHS+=("$p")
+            done
+            git commit -m "migrate externpro submodule .devcontainer -> .externpro" -- "${MIG_PATHS[@]}"
+            echo "Committed .devcontainer -> .externpro migration"
+          fi
           # Commit submodule update first (primary version change)
           if [ "${{ steps.update_submodule.outputs.update_needed }}" = "true" ] || [ "${{ steps.deps.outputs.submodule_dependency_commit }}" = "true" ]; then
-            COMMIT_MSG="externpro ${{ steps.final_version.outputs.describe }}"
-            git commit -m "$COMMIT_MSG" -- "${{ steps.validate_submodule.outputs.submodule_path }}"
-            echo "Commit created: $COMMIT_MSG"
+            if ! git diff --cached --quiet -- "${{ steps.migrate.outputs.submodule_path }}"; then
+              COMMIT_MSG="externpro ${{ steps.final_version.outputs.describe }}"
+              git commit -m "$COMMIT_MSG" -- "${{ steps.migrate.outputs.submodule_path }}"
+              echo "Commit created: $COMMIT_MSG"
+            fi
           fi
           # Commit docker-compose links if staged
           if [ "${{ steps.docker_compose.outputs.links_staged }}" = "true" ]; then
@@ -395,7 +463,7 @@ jobs:
       -
         name: Ensure labels exist
         if: steps.pr_needed.outputs.pr_needed == 'true'
-        uses: ./.devcontainer/.github/actions/labels-mgmt
+        uses: ./.externpro/.github/actions/labels-mgmt
         env:
           GH_TOKEN: ${{ secrets.automation_token || github.token }}
         with:
@@ -413,7 +481,7 @@ jobs:
           GH_TOKEN="${{ secrets.automation_token }}"
           [ -z "${GH_TOKEN}" ] && GH_TOKEN="${{ github.token }}"
           export GH_TOKEN
-          GH_RETRY=(bash .devcontainer/.github/actions/gh-retry/gh-retry.sh)
+          GH_RETRY=(bash .externpro/.github/actions/gh-retry/gh-retry.sh)
           BASE_BRANCH="${{ github.event.repository.default_branch }}"
           HEAD_BRANCH="${{ steps.branch.outputs.branch_name }}"
           export HEAD_BRANCH
@@ -433,8 +501,11 @@ jobs:
           echo "## Changes" >> "$BODY_FILE"
           echo >> "$BODY_FILE"
           # Submodule update
+          if [ "${{ steps.migrate.outputs.migrated }}" = "true" ]; then
+            echo "- Migrated externpro submodule \`.devcontainer\` -> \`.externpro\`" >> "$BODY_FILE"
+          fi
           if [ "${{ steps.update_submodule.outputs.update_needed }}" = "true" ] || [ "${{ steps.deps.outputs.submodule_dependency_commit }}" = "true" ]; then
-            echo "- Updated \`${{ steps.validate_submodule.outputs.submodule_path }}\` to externpro \`${{ steps.final_version.outputs.describe }}\`" >> "$BODY_FILE"
+            echo "- Updated \`${{ steps.migrate.outputs.submodule_path }}\` to externpro \`${{ steps.final_version.outputs.describe }}\`" >> "$BODY_FILE"
             echo "- Previous HEAD: \`${{ steps.current_head.outputs.current_head }}\`" >> "$BODY_FILE"
             echo "- New HEAD: \`${{ steps.final_version.outputs.final_head }}\`" >> "$BODY_FILE"
             if [ "${{ steps.final_version.outputs.final_head }}" != "${{ steps.update_submodule.outputs.latest_head }}" ]; then
@@ -521,7 +592,7 @@ jobs:
       -
         name: Close superseded PRs
         if: steps.pr_needed.outputs.pr_needed == 'true'
-        uses: ./.devcontainer/.github/actions/pr-close-superseded
+        uses: ./.externpro/.github/actions/pr-close-superseded
         env:
           GH_TOKEN: ${{ secrets.automation_token || github.token }}
         with:
