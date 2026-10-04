@@ -281,29 +281,17 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          # Ensure .gitignore exists
-          touch .gitignore
-          IGNORES_ADDED=false
-          required_lines=(
-            "# externpro"
-            ".env"
-            "_bld*/"
-            "docker-compose.override.yml"
-          )
-          for line in "${required_lines[@]}"; do
-            if grep -Fxq -- "$line" .gitignore; then
-              echo "gitignore already contains: $line"
-            else
-              echo "adding to gitignore: $line"
-              printf '%s\n' "$line" >> .gitignore
-              IGNORES_ADDED=true
-            fi
-          done
-          if [ "$IGNORES_ADDED" = true ]; then
+          GITIGNORE_SCRIPT=./.externpro/scripts/ensure-gitignore.sh
+          if [ -f "$GITIGNORE_SCRIPT" ]; then
+            bash "$GITIGNORE_SCRIPT" .
+          else
+            echo "::warning::$GITIGNORE_SCRIPT not found at target ref — skipping .gitignore sync"
+          fi
+          if [ -n "$(git status --porcelain -- .gitignore)" ]; then
             git add .gitignore
             echo "gitignore_staged=true" >> "$GITHUB_OUTPUT"
           else
-            echo "No new gitignore entries needed"
+            echo "No .gitignore changes needed"
             echo "gitignore_staged=false" >> "$GITHUB_OUTPUT"
           fi
       -
@@ -403,7 +391,7 @@ jobs:
           fi
           # Commit gitignore changes if staged
           if [ "${{ steps.gitignore_add.outputs.gitignore_staged }}" = "true" ]; then
-            git commit -m "gitignore: add externpro ignores" -- .gitignore
+            git commit -m "gitignore: update externpro ignores" -- .gitignore
             echo "Committed gitignore changes"
           fi
           # Commit release-tag intent if modified

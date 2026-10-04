@@ -595,6 +595,7 @@ commit_bootstrap_changes() {
         "docker-compose.sh"
         "docker-compose.yml"
         ".devcontainer"
+        ".gitignore"
     )
 
     # Add any externpro workflows that exist
@@ -643,6 +644,7 @@ commit_bootstrap_changes() {
             local cmake_added=false
             local docker_added=false
             local devcontainer_added=false
+            local gitignore_added=false
 
             for file in "${files_to_add[@]}"; do
                 if [ -f "$repo_root/$file" ] || [ -L "$repo_root/$file" ]; then
@@ -666,6 +668,9 @@ commit_bootstrap_changes() {
                             .devcontainer)
                                 devcontainer_added=true
                                 ;;
+                            .gitignore)
+                                gitignore_added=true
+                                ;;
                         esac
                     fi
                 fi
@@ -683,6 +688,9 @@ commit_bootstrap_changes() {
             fi
             if [ "$devcontainer_added" = true ]; then
                 bullet_points+=("- Add .devcontainer discovery link -> .externpro")
+            fi
+            if [ "$gitignore_added" = true ]; then
+                bullet_points+=("- Update .gitignore externpro entries")
             fi
 
             # Build commit message
@@ -939,6 +947,11 @@ main() {
             print_warning "$link is a project-owned regular file — left untouched"
         fi
     done
+
+    # Ensure externpro .gitignore entries exist and the '# externpro' section
+    # comment heads the first managed entry
+    print_info "Checking .gitignore externpro entries..."
+    bash "$externpro_dir/scripts/ensure-gitignore.sh" "$repo_root"
 
     # Verify setup
     print_info "Verifying setup..."
