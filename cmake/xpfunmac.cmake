@@ -1887,21 +1887,6 @@ function(ipManifestDepsFromVarsJson _out deps)
   set(${_out} "${_deps_json}" PARENT_SCOPE)
 endfunction()
 
-function(ipManifestDepsFromVarsCMake _out deps)
-  foreach(dep ${deps})
-    if(DEFINED ap_${dep})
-      set(dep "${ap_${dep}}") # handle alias mapping
-    endif()
-    if(NOT DEFINED xp_${dep})
-      message(FATAL_ERROR "ipManifestDepsFromVars: 'xp_${dep}' is not defined")
-    endif()
-    string(REPLACE ";" " " xp_${dep} "${xp_${dep}}")
-    string(REPLACE " MANIFEST" "\n  MANIFEST" xp_${dep} "${xp_${dep}}")
-    set(out "${out}set(xp_${dep}_${P_REPO_NAME} ${xp_${dep}}\n  )\n")
-  endforeach()
-  set(${_out} "${out}" PARENT_SCOPE)
-endfunction()
-
 function(ipExternPackageExtractDepNames _out items project_targets)
   set(_names)
   foreach(_it IN LISTS items)
@@ -2048,7 +2033,7 @@ function(xpExternPackage)
   # TARGETS_FILE is for targets file name (see EXPORT parameter of install() command)
   #   the targets file is included in the use script
   list(APPEND oneValueArgs ATTRIBUTION BASE DESC LICENSE UPSTREAM WEB XPDIFF)
-  ### manifest - values that will be included in the generated manifest.cmake file
+  ### manifest - values that will be included in the generated manifest file
   # ATTRIBUTION is for attribution text that should be included in the manifest;
   #  some projects may not have attribution text, in which case this parameter
   #  should be left undefined
@@ -2210,50 +2195,6 @@ function(xpExternPackage)
     configure_file(${xpThisDir}/xpusext.cmake.in ${xpUsextCMakeFile} @ONLY NEWLINE_STYLE LF)
   endif()
   ###############
-  # manifest.cmake file
-  # NOTE: metadata in manifest file is consistent across all platforms
-  if(DEFINED P_ATTRIBUTION)
-    set(MANIFEST_VARS "${MANIFEST_VARS}\nset(XP_MANIFEST_ATTRIBUTION \"${P_ATTRIBUTION}\")")
-  endif()
-  if(DEFINED P_BASE)
-    set(MANIFEST_VARS "${MANIFEST_VARS}\nset(XP_MANIFEST_BASE ${P_BASE})")
-  endif()
-  if(DEFINED P_DESC)
-    set(MANIFEST_VARS "${MANIFEST_VARS}\nset(XP_MANIFEST_DESC \"${P_DESC}\")")
-  endif()
-  if(DEFINED P_LICENSE)
-    set(MANIFEST_VARS "${MANIFEST_VARS}\nset(XP_MANIFEST_LICENSE \"${P_LICENSE}\")")
-  endif()
-  if(DEFINED P_UPSTREAM)
-    set(MANIFEST_VARS "${MANIFEST_VARS}\nset(XP_MANIFEST_UPSTREAM \"${P_UPSTREAM}\")")
-  endif()
-  if(DEFINED P_WEB)
-    set(MANIFEST_VARS "${MANIFEST_VARS}\nset(XP_MANIFEST_WEB \"${P_WEB}\")")
-  endif()
-  if(DEFINED P_XPDIFF)
-    set(MANIFEST_VARS "${MANIFEST_VARS}\nset(XP_MANIFEST_XPDIFF \"${P_XPDIFF}\")")
-  endif()
-  if(DEFINED P_DEPS)
-    ipManifestDepsFromVarsCMake(MANIFEST_DEPS "${P_DEPS}")
-    list(JOIN P_DEPS " " deps) # list to string with spaces
-    set(MANIFEST_VARS "${MANIFEST_VARS}\nset(XP_MANIFEST_DEPS ${deps})")
-  endif()
-  if(DEFINED P_PVT_DEPS)
-    ipManifestDepsFromVarsCMake(MANIFEST_PVT_DEPS "${P_PVT_DEPS}")
-    set(MANIFEST_DEPS "${MANIFEST_DEPS}${MANIFEST_PVT_DEPS}")
-    list(JOIN P_PVT_DEPS " " pvtdeps) # list to string with spaces
-    set(MANIFEST_VARS "${MANIFEST_VARS}\nset(XP_MANIFEST_PVT_DEPS ${pvtdeps})")
-  endif()
-  set(xpManifestCMakeFile ${xproBinDir}/${P_REPO_NAME}-${VER}.manifest.cmake)
-  file(WRITE ${xpManifestCMakeFile}
-    "set(XP_MANIFEST_VERSION 1)\n"
-    "set(XP_MANIFEST_REPO \"${P_REPO_NAME}\")\n"
-    "set(XP_MANIFEST_TAG \"${VER}\")\n"
-    "${MANIFEST_VARS}\n"
-    "${MANIFEST_DEPS}\n"
-    "set(XP_MANIFEST_ARTIFACTS)\n"
-    )
-  ###############
   # manifest.json file
   # NOTE: metadata in manifest file is consistent across all platforms
   ipJsonOptionalString(_mj_attr P_ATTRIBUTION)
@@ -2320,7 +2261,7 @@ function(xpExternPackage)
     xpCopyFilesToSrc(${CMAKE_SOURCE_DIR}/xprodeps.md ${CMAKE_SOURCE_DIR}/xprodeps.svg)
   endif()
   ###############
-  # install sysinfo.txt, ${lcRepoName}-config.cmake, and manifest.cmake
+  # install sysinfo.txt and generated cmake files
   install(FILES ${xpSysinfoFile} DESTINATION ${CMAKE_INSTALL_DATADIR} ${XP_COMPONENT})
   if(NOT DEFINED CMAKE_INSTALL_DATADIR)
     include(GNUInstallDirs)
@@ -2332,7 +2273,7 @@ function(xpExternPackage)
     set(CMAKE_INSTALL_CMAKEDIR ${CMAKE_INSTALL_DATADIR}/cmake)
     set(CMAKE_INSTALL_CMAKEDIR ${CMAKE_INSTALL_CMAKEDIR} PARENT_SCOPE)
   endif()
-  install(FILES ${xpUseCMakeFile} ${xpUsextCMakeFile} ${xpManifestCMakeFile} ${xpDepsCMakeFile}
+  install(FILES ${xpUseCMakeFile} ${xpUsextCMakeFile} ${xpDepsCMakeFile}
     DESTINATION ${CMAKE_INSTALL_CMAKEDIR} ${XP_COMPONENT}
     )
   ###############
