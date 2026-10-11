@@ -13,7 +13,7 @@ BPROIMG=rocky-pin
 if [ $# -eq 0 ]; then
   buildreq
   init
-  bakebuild --profile pbld
+  docker compose --profile pbld build
   docker compose run --rm bld
   deinit
   exit 0
@@ -24,7 +24,7 @@ do
     b )
       buildreq
       init
-      bakebuild --profile pbld --profile pgpu
+      docker compose --profile pbld --profile pgpu build
       deinit
       exit 0
       ;;
@@ -33,7 +33,7 @@ do
       gpureq
       buildreq
       init
-      bakebuild --profile pgpu
+      docker compose --profile pgpu build
       docker compose run --rm gpu
       deinit
       exit 0

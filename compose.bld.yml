@@ -33,7 +33,6 @@ services:
     build:
       context: .externpro
       dockerfile: local.dockerfile
-      network: host
       args:
         <<: [*all-build-args-alias, *bld-build-args-alias]
     extra_hosts:

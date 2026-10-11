@@ -138,16 +138,6 @@ function defUsage
   echo " -i <img>    build and run using the specified buildpro image <img>"
   echo " -b -i <img> build the specified buildpro image <img> only (do not run container)"
 }
-# `docker compose build` fails on `network: host` builds: compose 5.x
-# delegates builds to `buildx bake`, which requires the network.host
-# entitlement but provides no way to grant it; generate the bake
-# definition with `build --print` and invoke bake with --allow
-# (`build --print` builds nothing, so compose warns "No services to build")
-function bakebuild
-{
-  docker compose "$@" build --print 2> >(grep -v 'No services to build' >&2) \
-    | docker buildx bake --file - --allow=network.host
-}
 # Option parsing:
 #   no args = build+run
 #   -b = build-only
@@ -192,7 +182,7 @@ function defOptions
   fi
   buildreq
   init
-  bakebuild --profile pbld
+  docker compose --profile pbld build
   ttyfix
   if [ ${do_build} -eq 0 ]; then
     docker compose run --rm bld
