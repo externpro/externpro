@@ -39,8 +39,8 @@ The script will work without the optional utilities, but will provide manual ins
 The bootstrap script performs the following automated actions:
 
 1. **Creates/switches to `xpro` branch** - All changes are made in a dedicated branch
-1. **Migrates legacy layout** - If externpro is vendored as a `.devcontainer` submodule (the previous layout), it is moved to `.externpro` via `scripts/migrate-layout.sh` and committed
-1. **Commits externpro submodule** - Creates first commit with submodule and version tag from `git describe --tags`
+1. **Commits externpro submodule** - Creates first commit with submodule and version tag from `git describe --tags` (an uncommitted `.devcontainer` submodule is committed at `.devcontainer` first)
+1. **Migrates legacy layout** - If externpro is vendored as a `.devcontainer` submodule (the previous layout), it is moved to `.externpro` via `scripts/migrate-layout.sh` in a separate commit
 1. **Copies GitHub workflows** - Copies all `xp*.yml` workflow templates from `.externpro/.github/wf-templates/` to `.github/workflows/` (only if they don't already exist)
 1. **Copies CMake presets** - Copies CMakePresets.json and CMakePresetsBase.json from `.externpro/cmake/presets/` to repository root
 1. **Creates `.devcontainer` discovery link** - Creates a `.devcontainer -> .externpro` symlink (if the path is free) so GitHub and VS Code auto-discover externpro's `devcontainer.json`

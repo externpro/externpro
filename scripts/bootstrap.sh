@@ -801,6 +801,21 @@ main() {
     dc_path=$(git config -f "$repo_root/.gitmodules" --get 'submodule..devcontainer.path' 2>/dev/null || true)
     dc_url=$(git config -f "$repo_root/.gitmodules" --get 'submodule..devcontainer.url' 2>/dev/null || true)
     if [ "$dc_path" = ".devcontainer" ] && echo "$dc_url" | grep -qE 'externpro/externpro(\.git)?$'; then
+        # Commit the submodule where the user added it first, so history shows
+        # the 'git submodule add' and the layout migration as separate commits.
+        # `git add .devcontainer` records the submodule's current checkout, so a
+        # HEAD the user moved after adding (e.g. to a feature branch) is what
+        # gets committed — and the migrate step won't rewind it.
+        if ! git -C "$repo_root" ls-tree HEAD -- .devcontainer 2>/dev/null | grep -q '^160000'; then
+            git -C "$repo_root" add .devcontainer .gitmodules
+            if ! git -C "$repo_root" diff --cached --quiet -- .devcontainer .gitmodules; then
+                local dc_version
+                dc_version=$(get_externpro_version "$repo_root/.devcontainer")
+                print_info "Committing externpro submodule at .devcontainer (version: $dc_version)..."
+                git -C "$repo_root" commit -q -m "externpro $dc_version" .devcontainer .gitmodules
+                print_success "externpro submodule committed at .devcontainer"
+            fi
+        fi
         local script_dir
         script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
         local mig_script="$script_dir/migrate-layout.sh"
@@ -951,7 +966,12 @@ main() {
     # Ensure externpro .gitignore entries exist and the '# externpro' section
     # comment heads the first managed entry
     print_info "Checking .gitignore externpro entries..."
-    bash "$externpro_dir/scripts/ensure-gitignore.sh" "$repo_root"
+    if [ -f "$externpro_dir/scripts/ensure-gitignore.sh" ]; then
+        bash "$externpro_dir/scripts/ensure-gitignore.sh" "$repo_root"
+    else
+        print_warning "ensure-gitignore.sh not found in externpro submodule — skipping .gitignore entries"
+        print_info "Update the externpro submodule to a release containing ensure-gitignore.sh"
+    fi
 
     # Verify setup
     print_info "Verifying setup..."

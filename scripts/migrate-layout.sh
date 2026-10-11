@@ -40,7 +40,10 @@ fi
 echo "Migrating externpro submodule: .devcontainer -> .externpro"
 
 # --- move the submodule -----------------------------------------------------
-git submodule update --init .devcontainer  # git mv needs it populated
+# git mv needs the submodule populated — update only if it isn't, so an
+# already-populated worktree isn't rewound to the recorded gitlink (e.g. when
+# the user moved the submodule HEAD after `git submodule add`)
+[ -e .devcontainer/.git ] || git submodule update --init .devcontainer
 git mv .devcontainer .externpro            # moves worktree + gitlink, updates .gitmodules path
 git config -f .gitmodules --rename-section \
   submodule..devcontainer submodule..externpro
