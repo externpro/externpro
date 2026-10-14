@@ -1,6 +1,6 @@
 {
   "version": 8,
-  "include": ["../../../CMakePresetsBase.json"],
+  "include": ["../../../xpPresetsBase.json"],
   "configurePresets": [
     {
       "name": "isMswVs2026",
@@ -48,7 +48,7 @@
     },
     {
       "name": "MswVs2026ReleaseTargets",
-      "displayName": "build Windows VS2026 Release Target(s) from CMakePresetsBase",
+      "displayName": "build Windows VS2026 Release Target(s) from xpPresetsBase",
       "inherits": ["MswVs2026ReleaseNoInstall", "build-base"]
     }
   ],

@@ -1,6 +1,6 @@
 {
   "version": 8,
-  "include": ["../../../CMakePresetsBase.json"],
+  "include": ["../../../xpPresetsBase.json"],
   "configurePresets": [
     {
       "name": "isLinux",
@@ -35,7 +35,7 @@
     },
     {
       "name": "LinuxReleaseTargets",
-      "displayName": "build Linux Release Target(s) from CMakePresetsBase",
+      "displayName": "build Linux Release Target(s) from xpPresetsBase",
       "inherits": ["isLinux", "build-base"],
       "configurePreset": "Linux",
       "configuration": "Release"

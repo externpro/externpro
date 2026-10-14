@@ -1,0 +1,9 @@
+{
+  "version": 8,
+  "include": [
+    "cmake/presets/xpLinuxNinja.json",
+    "cmake/presets/xpDarwinNinja.json",
+    "cmake/presets/xpMswVs2022.json",
+    "cmake/presets/xpMswVs2026.json"
+  ]
+}

@@ -1,6 +1,6 @@
 {
   "version": 8,
-  "include": ["../../../CMakePresetsBase.json"],
+  "include": ["../../../xpPresetsBase.json"],
   "configurePresets": [
     {
       "name": "isMswVs2022",
@@ -48,7 +48,7 @@
     },
     {
       "name": "MswVs2022ReleaseTargets",
-      "displayName": "build Windows VS2022 Release Target(s) from CMakePresetsBase",
+      "displayName": "build Windows VS2022 Release Target(s) from xpPresetsBase",
       "inherits": ["MswVs2022ReleaseNoInstall", "build-base"]
     }
   ],

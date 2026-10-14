@@ -1,6 +1,6 @@
 {
   "version": 8,
-  "include": ["../../../CMakePresetsBase.json"],
+  "include": ["../../../xpPresetsBase.json"],
   "configurePresets": [
     {
       "name": "isDarwin",
@@ -57,7 +57,7 @@
     },
     {
       "name": "DarwinReleaseTargets",
-      "displayName": "build Darwin Release Target(s) from CMakePresetsBase",
+      "displayName": "build Darwin Release Target(s) from xpPresetsBase",
       "inherits": ["DarwinReleaseNoInstall", "build-base"]
     }
   ],
