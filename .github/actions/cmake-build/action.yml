@@ -5,7 +5,7 @@ inputs:
     required: true
   cmake_version:
     required: false
-    default: "4.3.0"
+    default: "4.5.0-rc1"
   cmake_preset:
     required: true
   cmake_workflow_preset_suffix:
@@ -26,6 +26,18 @@ runs:
       run: |
         echo "workflow_preset=${{ inputs.cmake_preset }}${{ inputs.cmake_workflow_preset_suffix }}" >> $GITHUB_OUTPUT
         echo "no_install_preset=${{ inputs.cmake_preset }}ReleaseNoInstall" >> $GITHUB_OUTPUT
+        # --presets-file: a real xpPresets.json at repo root wins; otherwise use
+        # the externpro submodule shim. Empty falls back to the repo's own
+        # CMakePresets.json (pre-xpPresets externpro or upstream-managed file).
+        PRESETS_FILE=""
+        if [ -f xpPresets.json ] && [ ! -L xpPresets.json ]; then
+          PRESETS_FILE="xpPresets.json"
+        elif [ -f .externpro/xpPresets.json ]; then
+          PRESETS_FILE=".externpro/xpPresets.json"
+        elif [ -f .devcontainer/xpPresets.json ]; then
+          PRESETS_FILE=".devcontainer/xpPresets.json"
+        fi
+        echo "presets_file=${PRESETS_FILE}" >> $GITHUB_OUTPUT
     -
       name: Install CMake
       uses: ssrobins/install-cmake@v1
@@ -37,7 +49,8 @@ runs:
       shell: bash
       run: |
         cmake --version
-        cmake --preset=${{ inputs.cmake_preset }}
+        PF="${{ steps.presets.outputs.presets_file }}"
+        cmake ${PF:+--presets-file=$PF} --preset=${{ inputs.cmake_preset }}
     -
       name: Upload CMake logs
       uses: actions/upload-artifact@v6
@@ -56,7 +69,9 @@ runs:
       shell: bash
       id: cmake_workflow
       continue-on-error: true
-      run: cmake --workflow --preset=${{ steps.presets.outputs.workflow_preset }}
+      run: |
+        PF="${{ steps.presets.outputs.presets_file }}"
+        cmake --workflow ${PF:+--presets-file=$PF} --preset=${{ steps.presets.outputs.workflow_preset }}
     -
       name: Install tmate (on failure)
       if: ${{ inputs.enable_tmate == 'true' && steps.cmake_workflow.outcome == 'failure' }}

@@ -223,6 +223,20 @@ runs:
         DEPENDENCY_FILES="${{ inputs.dependency_files }}"
         SUBMODULE_DEP_FILES="${{ steps.pre.outputs.submodule_dep_files }}"
         IMAGE="${{ steps.image_check.outputs.image }}"
+        # --presets-file (cmake >= 4.4): a real xpPresets.json at repo root
+        # wins; otherwise use the submodule shim. Empty falls back to the
+        # repo's own CMakePresets.json (pre-xpPresets externpro).
+        PFILE=""
+        if [ -f xpPresets.json ] && [ ! -L xpPresets.json ]; then
+          PFILE="xpPresets.json"
+        elif [ -f "$SUBMODULE_PATH/xpPresets.json" ]; then
+          PFILE="$SUBMODULE_PATH/xpPresets.json"
+        fi
+        PF_ARG=""
+        if [ -n "$PFILE" ]; then
+          PF_ARG="--presets-file=$PFILE"
+        fi
+        echo "presets file: ${PFILE:-<repo CMakePresets.json>}"
         echo "Running CMake configure in container: ${IMAGE}"
         echo "--- dependency files before"
         ls -la $DEPENDENCY_FILES 2>/dev/null || true
@@ -241,8 +255,8 @@ runs:
             echo '--- cmake diagnostics'; \
             command -v cmake || { echo 'cmake not found in container' >&2; exit 127; }; \
             cmake --version; \
-            echo '--- running: cmake --preset=Linux --log-level=VERBOSE'; \
-            cmake --preset=Linux --log-level=VERBOSE; \
+            echo '--- running: cmake $PF_ARG --preset=Linux --log-level=VERBOSE'; \
+            cmake $PF_ARG --preset=Linux --log-level=VERBOSE; \
             echo '=== cmake configure: end ==='" 2>&1 | tee /tmp/cmake-configure.log
         echo "--- dependency files after"
         ls -la $DEPENDENCY_FILES 2>/dev/null || true
