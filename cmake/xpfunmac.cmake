@@ -882,6 +882,20 @@ function(xpFindPkg)
       if(NOT FIND_PACKAGE_CMAKE_SCRIPT AND EXISTS ${pth}/share/cmake/findxpro.cmake)
         set(use_cmake_script TRUE)
       endif()
+      if(NOT FIND_PACKAGE_CMAKE_SCRIPT AND NOT use_cmake_script
+          AND CMAKE_VERSION VERSION_LESS 4.5)
+        # cmake <4.5 cannot import executable targets via CPS (externpro#334).
+        # Packages built on >=4.5 no longer carry the findxpro.cmake marker,
+        # so detect executable components in the .cps files directly.
+        file(GLOB cps_files ${pth}/share/cps/*.cps)
+        foreach(cps ${cps_files})
+          file(READ ${cps} cps_json)
+          if(cps_json MATCHES "\"type\"[ ]*:[ ]*\"executable\"")
+            set(use_cmake_script TRUE)
+            break()
+          endif()
+        endforeach()
+      endif()
       if(use_cmake_script)
         set(find_paths ${pth}/share/cmake)
       else()
@@ -2066,12 +2080,6 @@ function(xpExternPackage)
   cmake_parse_arguments(P "${opts}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
   if((DEFINED P_ALIAS_NAMESPACE) AND NOT P_CREATE_ALIASES)
     set(P_CREATE_ALIASES ON)
-  endif()
-  if(DEFINED P_EXE AND NOT P_FIND_XPRO_CMAKE)
-    # auto-enable FIND_XPRO_CMAKE when EXE is specified
-    # see issue https://github.com/externpro/externpro/issues/334
-    # this should be a temporary thing until CMake fixes the issue
-    set(P_FIND_XPRO_CMAKE ON)
   endif()
   if(DEFINED P_NAMESPACE)
     message(AUTHOR_WARNING "xpExternPackage: NAMESPACE parameter is deprecated and ignored. Using package name as namespace instead.")
