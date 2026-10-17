@@ -253,11 +253,12 @@ jobs:
           set -euo pipefail
           # Absent paths and existing symlinks are (re)pointed at the externpro
           # submodule; project-owned regular files are left untouched.
-          # Links are committed via the index (mode 120000), never git add —
+          # Links are staged via the index (mode 120000), never git add —
           # a plain add on Windows would stage a text file as 100644.
           SUB="${{ steps.migrate.outputs.submodule_path }}"
           LINKS_CREATED=false
-          commit_link() {
+          . "$SUB/scripts/xplib.sh"
+          stage_link() {
             local link="$1" target="$2" blob staged
             if [ -e "$link" ] && [ ! -L "$link" ]; then
               echo "::warning::$link is a project-owned regular file — left untouched"
@@ -267,13 +268,13 @@ jobs:
             staged=$(git ls-files -s -- "$link" | awk '{print $2}')
             if [ "$staged" != "$blob" ]; then
               ln -sf "$target" "$link" 2>/dev/null || true
-              git update-index --add --cacheinfo "120000,$blob,$link"
+              stage_symlink "$link" "$target"
               LINKS_CREATED=true
               echo "created $link -> $target"
             fi
           }
-          commit_link docker-compose.sh "$SUB/compose.pro.sh"
-          commit_link docker-compose.yml "$SUB/compose.bld.yml"
+          stage_link docker-compose.sh "$SUB/compose.pro.sh"
+          stage_link docker-compose.yml "$SUB/compose.bld.yml"
           echo "links_staged=$LINKS_CREATED" >> "$GITHUB_OUTPUT"
       -
         name: Add externpro .gitignore

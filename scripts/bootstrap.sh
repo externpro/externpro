@@ -30,24 +30,12 @@ print_error() {
     echo -e "${RED}[ERROR]${NC} $1"
 }
 
-# commit_symlink <link-path> <target>
-# Commits a symlink via the index (mode 120000) rather than the working tree,
-# so the committed entry is a real symlink even on platforms (Windows) where
-# `ln -s` produces a copy or plain-text file. Never `git add` a symlink path.
-commit_symlink() {
-    local link="$1" target="$2" blob
-    blob=$(printf '%s' "$target" | git hash-object -w --stdin)
-    git update-index --add --cacheinfo "120000,$blob,$link"
-}
-
-# Paths committed via commit_symlink — must never be passed to `git add`
-# (a plain add of a symlink path on Windows stages mode 100644).
-is_index_link_path() {
-    case "$1" in
-        .devcontainer|docker-compose.sh|docker-compose.yml) return 0 ;;
-        *) return 1 ;;
-    esac
-}
+# Shared helpers
+script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if ! source "$script_dir/xplib.sh"; then
+    print_error "xplib.sh not found beside bootstrap.sh ($script_dir)"
+    exit 1
+fi
 
 # Function to detect platform
 detect_platform() {
@@ -587,7 +575,7 @@ commit_bootstrap_changes() {
     local repo_root="$1"
 
     # Explicitly stage only the files we created
-    # (.devcontainer + docker-compose.* are committed via commit_symlink /
+    # (.devcontainer + docker-compose.* are staged via stage_symlink /
     #  the index, never via git add — see is_index_link_path)
     local files_to_commit=(
         "CMakePresets.json"
@@ -701,7 +689,7 @@ $(printf '%s\n' "${bullet_points[@]}")"
             fi
 
             print_info "Staging bootstrap files..."
-            # Symlink paths are staged via commit_symlink (index), never git add
+            # Symlink paths are staged via stage_symlink (index), never git add
             local add_list=()
             for file in "${files_to_add[@]}"; do
                 is_index_link_path "$file" || add_list+=("$file")
@@ -816,8 +804,6 @@ main() {
                 print_success "externpro submodule committed at .devcontainer"
             fi
         fi
-        local script_dir
-        script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
         local mig_script="$script_dir/migrate-layout.sh"
         if [ ! -f "$mig_script" ]; then
             print_error "Legacy .devcontainer externpro submodule detected, but migrate-layout.sh not found at: $mig_script"
@@ -940,7 +926,7 @@ main() {
         print_info ".devcontainer already exists and is not a symlink — externpro devcontainer auto-discovery skipped"
     else
         ln -s .externpro .devcontainer 2>/dev/null || true  # best-effort for the working tree
-        commit_symlink .devcontainer .externpro
+        stage_symlink .devcontainer .externpro
         print_info "Created .devcontainer link -> .externpro"
     fi
 
@@ -956,7 +942,7 @@ main() {
         target="${link_pair#* }"
         if [ ! -e "$link" ] || [ -L "$link" ]; then
             ln -sf "$target" "$link" 2>/dev/null || true  # best-effort for the working tree
-            commit_symlink "$link" "$target"
+            stage_symlink "$link" "$target"
             print_info "Created $link link -> $target"
         else
             print_warning "$link is a project-owned regular file — left untouched"

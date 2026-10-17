@@ -16,16 +16,6 @@
 # Everything is staged but NOT committed — the caller owns the commit.
 set -euo pipefail
 
-# commit_symlink <link-path> <target>
-# Commits a symlink via the index (mode 120000) rather than the working tree,
-# so the committed entry is a real symlink even on platforms (Windows) where
-# `ln -s` produces a copy or plain-text file. Never `git add` a symlink path.
-commit_symlink() {
-  local link="$1" target="$2" blob
-  blob=$(printf '%s' "$target" | git hash-object -w --stdin)
-  git update-index --add --cacheinfo "120000,$blob,$link"
-}
-
 # --- detect legacy layout ---------------------------------------------------
 # Only migrate when .gitmodules registers a submodule at path .devcontainer
 # whose URL is externpro/externpro. A .devcontainer dir/link/file that isn't
@@ -36,6 +26,10 @@ dc_url=$(git config -f .gitmodules --get 'submodule..devcontainer.url' 2>/dev/nu
 if [ "$dc_path" != ".devcontainer" ] || ! echo "$dc_url" | grep -qE 'externpro/externpro(\.git)?$'; then
   exit 0  # nothing to migrate
 fi
+
+# Shared helpers — source before `git mv` relocates this directory (bash reads
+# the sourced file to EOF at source time). Path is superproject-relative.
+source .devcontainer/scripts/xplib.sh
 
 echo "Migrating externpro submodule: .devcontainer -> .externpro"
 
@@ -62,7 +56,7 @@ fi
 staged_links=()
 if [ ! -e .devcontainer ] && [ ! -L .devcontainer ]; then
   ln -s .externpro .devcontainer || true   # best-effort for the working tree
-  commit_symlink .devcontainer .externpro
+  stage_symlink .devcontainer .externpro
   staged_links+=(.devcontainer)
 else
   echo "note: .devcontainer already exists (dir/link/file) — leaving it" \
@@ -80,7 +74,7 @@ for pair in \
   target="${pair#* }"
   if [ ! -e "$link" ] || [ -L "$link" ]; then
     ln -sf "$target" "$link" || true       # best-effort for the working tree
-    commit_symlink "$link" "$target"
+    stage_symlink "$link" "$target"
     staged_links+=("$link")
   else
     echo "warning: $link is a project-owned regular file — left untouched"
