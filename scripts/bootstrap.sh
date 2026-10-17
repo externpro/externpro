@@ -435,7 +435,7 @@ push_xpro_branch() {
                 ((bootstrap_file_count++))
             fi
 
-            if git ls-tree "$commit_hash" | grep -q "CMakePresetsBase.json"; then
+            if git ls-tree "$commit_hash" | grep -q "xpPresetsBase.json"; then
                 ((bootstrap_file_count++))
             fi
 
@@ -575,11 +575,12 @@ commit_bootstrap_changes() {
     local repo_root="$1"
 
     # Explicitly stage only the files we created
-    # (.devcontainer + docker-compose.* are staged via stage_symlink /
-    #  the index, never via git add — see is_index_link_path)
+    # (.devcontainer, CMakePresets.json + docker-compose.* are staged via
+    #  stage_symlink / the index, never via git add — see is_index_link_path)
     local files_to_commit=(
         "CMakePresets.json"
-        "CMakePresetsBase.json"
+        "xpPresets.json"
+        "xpPresetsBase.json"
         "docker-compose.sh"
         "docker-compose.yml"
         ".devcontainer"
@@ -647,7 +648,7 @@ commit_bootstrap_changes() {
                             .github/workflows/xp*.yml)
                                 workflows_added=true
                                 ;;
-                            CMakePresets*.json)
+                            CMakePresets*.json|xpPresets*.json)
                                 cmake_added=true
                                 ;;
                             docker-compose.*)
@@ -669,7 +670,7 @@ commit_bootstrap_changes() {
                 bullet_points+=("- Add externpro caller workflows to .github/workflows")
             fi
             if [ "$cmake_added" = true ]; then
-                bullet_points+=("- Add CMakePresets")
+                bullet_points+=("- Add cmake presets")
             fi
             if [ "$docker_added" = true ]; then
                 bullet_points+=("- Add docker-compose links")
@@ -883,38 +884,15 @@ main() {
         exit 1
     fi
 
-    # Copy CMakePresets files to repo root
-    print_info "Verifying CMake presets..."
-    local presets_src_dir="$externpro_dir/cmake/presets"
-
-    if [ ! -d "$presets_src_dir" ]; then
-        print_error "CMake presets directory not found at: $presets_src_dir"
-        exit 1
-    fi
-
-    # Copy CMakePresets.json and CMakePresetsBase.json
-    local preset_files=("CMakePresets.json" "CMakePresetsBase.json")
-    local copied_count=0
-
-    for preset_file in "${preset_files[@]}"; do
-        local src="$presets_src_dir/$preset_file"
-        local dst="$repo_root/$preset_file"
-
-        if [ -f "$src" ]; then
-            if copy_with_commit_confirmation "$src" "$dst"; then
-                copied_count=$((copied_count + 1))
-            fi
-        else
-            print_warning "Preset file not found: $src"
-        fi
-    done
-
-    if [ "$copied_count" -gt 0 ]; then
-        print_success "CMake presets verified"
+    # Migrate root preset files to the xpPresets model: managed
+    # CMakePresets.json symlink, real xpPresets.json only for special
+    # includes, project-owned xpPresetsBase.json — all staged, not committed
+    print_info "Migrating cmake presets..."
+    if [ -f "$externpro_dir/scripts/ensure-presets.sh" ]; then
+        bash "$externpro_dir/scripts/ensure-presets.sh" "$repo_root" "$externpro_dir"
     else
-        print_warning "No CMake preset files were copied"
-        print_info "Bootstrap setup cannot continue without CMake preset files."
-        exit 1
+        print_warning "ensure-presets.sh not found in externpro submodule — skipping presets migration"
+        print_info "Update the externpro submodule to a release containing ensure-presets.sh"
     fi
 
     # Create the .devcontainer discovery link if the path is free
@@ -966,9 +944,26 @@ main() {
     if command -v cmake >/dev/null 2>&1; then
         print_success "cmake found in PATH"
 
-        # Try to run cmake --preset to test the presets
+        # Verify externpro presets resolve — plain --list-presets reads
+        # whatever CMakePresets.json is, so a foreign file would pass
+        # vacuously. Resolve the presets file the same way CI does:
+        # real xpPresets.json > .externpro/xpPresets.json > managed symlink.
         cd "$repo_root"
-        if cmake --list-presets >/dev/null 2>&1; then
+        local presets_file=""
+        if [ -f xpPresets.json ] && [ ! -L xpPresets.json ]; then
+            presets_file="xpPresets.json"
+        elif [ -f CMakePresets.json ] && [ ! -L CMakePresets.json ]; then
+            # foreign regular file — verify via the submodule shim if present
+            [ -f .externpro/xpPresets.json ] && presets_file=".externpro/xpPresets.json"
+        fi
+        if [ -n "$presets_file" ]; then
+            if cmake "--presets-file=$presets_file" --list-presets >/dev/null 2>&1; then
+                print_success "CMake presets are working correctly"
+            else
+                print_warning "CMake presets may have issues. Run 'cmake --presets-file=$presets_file --list-presets' to check."
+                print_info "(--presets-file requires cmake >= 4.4)"
+            fi
+        elif cmake --list-presets >/dev/null 2>&1; then
             print_success "CMake presets are working correctly"
         else
             print_warning "CMake presets may have issues. Run 'cmake --list-presets' to check."
@@ -994,12 +989,30 @@ main() {
     print_success "Bootstrap script completed successfully!"
     echo
     print_info "Next steps:"
-    print_info "  1. List available cmake presets:"
-    print_info "     cmake --list-presets"
-    print_info "  2. Configure with cmake:"
-    print_info "     cmake --preset=<platform>"
-    print_info "  3. Run cmake workflow and fix any issues:"
-    print_info "     cmake --workflow --preset=<platform>"
+    # Foreign CMakePresets.json → plain --preset/--workflow would configure
+    # with upstream presets; print the --presets-file forms instead, using
+    # the same resolution rule as CI (real xpPresets.json, else the shim).
+    local presets_hint=""
+    if [ -f "$repo_root/xpPresets.json" ] && [ ! -L "$repo_root/xpPresets.json" ]; then
+        presets_hint="xpPresets.json"
+    elif [ -f "$repo_root/CMakePresets.json" ] && [ ! -L "$repo_root/CMakePresets.json" ]; then
+        presets_hint=".externpro/xpPresets.json"
+    fi
+    if [ -n "$presets_hint" ]; then
+        print_info "  1. List available cmake presets:"
+        print_info "     cmake --presets-file=$presets_hint --list-presets"
+        print_info "  2. Configure with cmake:"
+        print_info "     cmake --presets-file=$presets_hint --preset=<platform>"
+        print_info "  3. Run cmake workflow and fix any issues:"
+        print_info "     cmake --workflow --presets-file=$presets_hint --preset=<platform>"
+    else
+        print_info "  1. List available cmake presets:"
+        print_info "     cmake --list-presets"
+        print_info "  2. Configure with cmake:"
+        print_info "     cmake --preset=<platform>"
+        print_info "  3. Run cmake workflow and fix any issues:"
+        print_info "     cmake --workflow --preset=<platform>"
+    fi
     print_info "     (commit and push any changes)"
     print_info "  4. With XPRO_TOKEN successfully configured, run xpSync workflow when ready:"
     local repo_name=$(get_repo_name "$repo_root")

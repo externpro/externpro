@@ -26,7 +26,7 @@ stage_symlink() {
 # (a plain add of a symlink path on Windows stages mode 100644).
 is_index_link_path() {
   case "$1" in
-    .devcontainer|docker-compose.sh|docker-compose.yml) return 0 ;;
+    .devcontainer|docker-compose.sh|docker-compose.yml|CMakePresets.json) return 0 ;;
     *) return 1 ;;
   esac
 }
