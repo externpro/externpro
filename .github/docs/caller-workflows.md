@@ -60,7 +60,7 @@ For the repo wiring and CMake integration checklist, see [How-to: adopt externpr
 - Updates externpro submodule to `target_ref` (branch/tag/commit, defaults to `main`).
 - Adds/updates:
   - `docker-compose.sh` + `docker-compose.yml` links
-  - `CMakePresets*`
+  - CMake presets (managed `CMakePresets.json` symlink + `xpPresetsBase.json`)
   - `.github/workflows/xp*.yml` caller workflows
   - `.github/release-tag.json` (release intent)
   - `.gitignore` externpro entries

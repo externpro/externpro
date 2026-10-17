@@ -18,7 +18,7 @@ At a high level it:
 
 Call `xpExternPackage()` from your top-level `CMakeLists.txt` after `project()`.
 
-In repos using externpro, the provided CMakePresets automatically set up the dependency provider before `project()` (see [Dependency provider](dependency-provider.md)).
+In repos using externpro, the provided cmake presets automatically set up the dependency provider before `project()` (see [Dependency provider](dependency-provider.md)).
 
 ## Key named arguments
 

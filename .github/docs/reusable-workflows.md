@@ -57,7 +57,7 @@ Handles both initial externpro setup and ongoing updates, opens a PR with the ch
   > **Note**: This feature is primarily used for specialized cases like the externpro/tutorial repository. Most repositories will not need patch files.
 - Updates the externpro submodule pointer to a target ref (branch/tag/commit, defaults to `main`).
 - Adds docker-compose links.
-- Adds/compares CMake presets.
+- Syncs CMake presets via `ensure-presets.sh` (managed `CMakePresets.json` symlink; leaves upstream-owned preset files untouched).
 - Adds/syncs the `xp*.yml` caller workflows from templates.
 - Ensures `.github/release-tag.json` exists.
 - Adds externpro entries to `.gitignore`.

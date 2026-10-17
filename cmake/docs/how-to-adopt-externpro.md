@@ -24,6 +24,8 @@ For a streamlined adoption process:
    ```
    Commit and push any cmake configuration changes.
 
+   > **Note:** These commands work because `CMakePresets.json` is a symlink into `.externpro/`. If your repo keeps its own upstream-owned `CMakePresets.json`, pass `--presets-file=.externpro/xpPresets.json` to each command instead (requires CMake >= 4.4).
+
 4. **Run the xpSync workflow**:
    - **Via Actions tab**: https://github.com/OWNER/REPO/actions/workflows/xpsync.yml
    - **Via CLI**: `gh workflow run xpsync.yml --ref xpro --repo OWNER/REPO`
@@ -44,11 +46,14 @@ See the detailed breakdown below for what each step does and manual alternatives
 git submodule add https://github.com/externpro/externpro .externpro
 ```
 
-3. Add CMakePresets
+3. Add CMake presets
 
 ```bash
-cp .externpro/cmake/presets/CMakePresets* .
+cp .externpro/cmake/presets/xpPresetsBase.json .
+ln -s .externpro/cmake/presets/xpPresets.json CMakePresets.json
 ```
+
+`xpPresetsBase.json` is the shared base preset file — it is copied once and is then project-owned (externpro never edits its contents). `CMakePresets.json` is a symlink into the submodule so externpro preset updates flow with submodule updates instead of drifting as copied files. If your repo already has an upstream-owned `CMakePresets.json`, keep it and use `--presets-file=.externpro/xpPresets.json` when invoking cmake (requires CMake >= 4.4).
 
 4. Add docker-compose links (for Linux build container launching)
 
@@ -67,7 +72,7 @@ docker-compose.override.yml
 ```
 
 Note: The [Bootstrap Script](../../.github/docs/bootstrap.md) can automate most of this setup:
-- **CMakePresets copying** - Copies CMakePresets.json and CMakePresetsBase.json
+- **CMake presets** - Stages the managed `CMakePresets.json` symlink and copies `xpPresetsBase.json` (leaves a project-owned `CMakePresets.json` untouched)
 - **GitHub workflow setup** - Copies all xp*.yml workflow templates (only if they don't exist)
 - **Docker-compose links** - Creates symbolic links for docker-compose.sh and docker-compose.yml
 - **Git branch management** - Creates/switches to xpro branch and manages commits
@@ -100,9 +105,9 @@ If your repo default branch is not `xpro`, you will likely need to adjust the ca
 
 ## CMake integration
 
-1. The CMakePresets automatically inject `CMAKE_PROJECT_TOP_LEVEL_INCLUDES` to point to `.externpro/cmake/xproinc.cmake`, so no manual setup is needed in your `CMakeLists.txt`.
+1. externpro's cmake presets automatically inject `CMAKE_PROJECT_TOP_LEVEL_INCLUDES` to point to `.externpro/cmake/xproinc.cmake`, so no manual setup is needed in your `CMakeLists.txt`.
 
-1. `xproinc.cmake` (automatically included via CMakePresets) currently:
+1. `xproinc.cmake` (automatically included via the externpro presets) currently:
     - defines `CMAKE_INSTALL_PREFIX` if not already defined
     - appends `.externpro/cmake/` to `CMAKE_MODULE_PATH`
     - includes `pros.cmake` (default externpro dependency variables)

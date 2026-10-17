@@ -42,7 +42,7 @@ The bootstrap script performs the following automated actions:
 1. **Commits externpro submodule** - Creates first commit with submodule and version tag from `git describe --tags` (an uncommitted `.devcontainer` submodule is committed at `.devcontainer` first)
 1. **Migrates legacy layout** - If externpro is vendored as a `.devcontainer` submodule (the previous layout), it is moved to `.externpro` via `scripts/migrate-layout.sh` in a separate commit
 1. **Copies GitHub workflows** - Copies all `xp*.yml` workflow templates from `.externpro/.github/wf-templates/` to `.github/workflows/` (only if they don't already exist)
-1. **Copies CMake presets** - Copies CMakePresets.json and CMakePresetsBase.json from `.externpro/cmake/presets/` to repository root
+1. **Ensures CMake presets** - Runs `scripts/ensure-presets.sh`, which stages `CMakePresets.json` as a symlink into `.externpro/cmake/presets/` and copies `xpPresetsBase.json` to the repository root (leaves a project-owned `CMakePresets.json` untouched)
 1. **Creates `.devcontainer` discovery link** - Creates a `.devcontainer -> .externpro` symlink (if the path is free) so GitHub and VS Code auto-discover externpro's `devcontainer.json`
 1. **Creates Docker Compose links** - Creates symbolic links for `docker-compose.sh` and `docker-compose.yml` pointing to externpro compose files (re-points existing links; leaves project-owned regular files untouched)
 1. **Handles file conflicts** - Overwrites existing files with commit confirmation for tracked files
@@ -66,7 +66,7 @@ The bootstrap script performs the following automated actions:
 - **File conflict handling** - Smart detection and confirmation for tracked vs untracked files
 - **Overwrite strategy** - Always copies files, with commit confirmation for tracked files
 - **Workflow copying** - Only copies workflow templates if they don't already exist
-- **Symbolic links** - Creates Docker Compose symlinks for development environment
+- **Symbolic links** - Creates Docker Compose and `CMakePresets.json` symlinks
 
 ### User Experience
 - **Error handling** - Comprehensive error checking and user-friendly messages
@@ -126,6 +126,8 @@ Once the bootstrap script completes, follow these steps:
    cmake --workflow --preset=<platform>
    ```
    *(Commit and push any cmake configuration changes)*
+
+   > **Note:** These commands work because `CMakePresets.json` is a symlink into `.externpro/`. If your repo keeps its own upstream-owned `CMakePresets.json`, pass `--presets-file=.externpro/xpPresets.json` to each command instead (requires CMake >= 4.4).
 
 1. **With XPRO_TOKEN configured, run the xpSync workflow**:
    - **Via Actions tab**: Direct link provided by script

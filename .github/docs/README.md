@@ -34,6 +34,7 @@ This is the typical flow for adopting externpro workflows in a project repo:
    cmake --workflow --preset=<platform>
    ```
    Commit and push any cmake configuration changes.
+   (If the repo keeps an upstream-owned `CMakePresets.json`, pass `--presets-file=.externpro/xpPresets.json` to each command instead — requires CMake >= 4.4.)
 5. Run `xpSync` workflow:
    - **Via Actions tab**: https://github.com/OWNER/REPO/actions/workflows/xpsync.yml
    - **Via CLI**: `gh workflow run xpsync.yml --ref xpro --repo OWNER/REPO`
