@@ -138,7 +138,6 @@ set(xp_nodeng DIST_DIR /bpvol/workspace/nodeng/_bld-Linux/dist/)
 # override xp_nodeng with locally built xpro package (cmake --preset=Linux; cmake --workflow --preset=LinuxRelease)
 set(xp_nodeng
   XPRO_PATH /bpvol/workspace/nodeng/_bld-Linux/nodeng-v22.19.0.2-2-g2e296c8-gcc13-Linux-arm64-xpro.tar.xz
-  MANIFEST_FILE /bpvol/workspace/nodeng/_bld-Linux/nodeng-v22.19.0.2-2-g2e296c8.manifest.cmake
   )
 # last xp_nodeng set is used
 set(xp_nodeng REPO github.com/externpro/nodeng TAG xpv24.13.0.6
