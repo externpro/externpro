@@ -2835,12 +2835,8 @@ function(xpSetPostfix)
 endfunction()
 
 macro(xpCommonFlags)
-  if(EXISTS ${xpThisDir}/xpopts.cmake)
-    include(${xpThisDir}/xpopts.cmake) # determine XP_BUILD_STATIC_RT
-  elseif(MSVC)
-    set(XP_BUILD_STATIC_RT ON)
-  else()
-    set(XP_BUILD_STATIC_RT)
+  if(MSVC)
+    set(XP_BUILD_STATIC_RT ON) # static runtime: /MT, -s/-sd postfixes
   endif()
   if(CMAKE_CONFIGURATION_TYPES)
     # https://gitlab.kitware.com/cmake/community/-/wikis/FAQ#how-can-i-specify-my-own-configurations-for-generators-that-allow-it-
