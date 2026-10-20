@@ -884,7 +884,8 @@ function(xpFindPkg)
       endif()
       if(NOT FIND_PACKAGE_CMAKE_SCRIPT AND NOT use_cmake_script
           AND CMAKE_VERSION VERSION_LESS 4.5)
-        # cmake <4.5 cannot import executable targets via CPS (externpro#334).
+        # cmake <4.5 cannot import executable targets via CPS.
+        # https://github.com/externpro/externpro/issues/334
         # Packages built on >=4.5 no longer carry the findxpro.cmake marker,
         # so detect executable components in the .cps files directly.
         file(GLOB cps_files ${pth}/share/cps/*.cps)
@@ -2358,6 +2359,9 @@ function(xpExternPackage)
         CMAKE_EXPERIMENTAL_GENERATE_SBOM STREQUAL "${sbom_uuid}")
       if(NOT DEFINED CMAKE_INSTALL_SBOMDIR)
         set(CMAKE_INSTALL_SBOMDIR ${CMAKE_INSTALL_DATADIR}/sbom)
+      endif()
+      if(CMAKE_VERSION VERSION_GREATER_EQUAL 4.5 AND DEFINED xpInfoLicense)
+        list(TRANSFORM xpInfoLicense REPLACE "^LICENSE$" "DEFAULT_LICENSE")
       endif()
       install(SBOM ${P_REPO_NAME} ${sbom_export}
         ${xpInfoProject} ${xpInfoVersion} ${xpInfoLicense} ${xpInfoDesc} ${xpInfoHome}
