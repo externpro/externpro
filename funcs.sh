@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 BPROIMG_DEFAULT=rocky9-gcc13
-BPROTAG_DEFAULT=26.02
+BPROTAG_DEFAULT=26.02.1
 function init
 {
   if [[ -x .externpro/denv.sh ]]; then
