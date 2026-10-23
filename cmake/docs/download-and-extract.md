@@ -52,17 +52,15 @@ ipGetProPath(pth PKG <dep> ${xp_<dep>})
   - This is most useful for local development/testing: you can build/package a dependency and validate the consumer flow without publishing a release.
   - It computes the archive SHA and treats it like a download URL (`file://...`).
 - `REPO` + `TAG` + manifest hash (the common case)
-  - Downloads the release manifest first.
-
-For the common case (REPO + TAG + manifest hash), `ipGetProPath()`:
-1. Calls `ipDownloadManifestFromRepo()` to download the manifest file
-2. Calls `ipGetPkgFromManifest()` to select the correct artifact
-3. Calls `ipDownloadExtract()` to download and extract the package
+  1. Calls `ipDownloadManifestFromRepo()` to download the manifest file — Step 3 below
+  2. Calls `ipGetPkgFromManifest()` to select the correct artifact — Step 4
+  3. Calls `ipDownloadExtract()` to download and extract the package — Step 5
 
 ## Step 3: ipDownloadManifestFromRepo() downloads the manifest
 
 `ipDownloadManifestFromRepo()` handles both `.manifest.cmake` and `.manifest.json` formats:
 
+- `.manifest.cmake` is deprecated — still read so that packages released before the JSON format continue to work, but current `xpExternPackage()` generates only `.manifest.json`
 - Determines the manifest format based on whether `MANIFEST_SHA256` or `MANIFEST_HASH` is provided
 - Downloads to `${XPRO_DIR}/xpd/manifests/<repo>-<tag>.manifest.<ext>`
 - Performs integrity checking with the provided SHA256
@@ -81,7 +79,7 @@ For the common case (REPO + TAG + manifest hash), `ipGetProPath()`:
 `ipDownloadExtract(url, sha, outPathVar)`:
 - downloads the `.tar.xz` into `${XPRO_DIR}/xpd/pkgs/<filename>.tar.xz`
 - extracts into `${XPRO_DIR}/xpx/`
-- uses a timestamp file to determine whether to re-extract when a newer archive is downloaded
+- re-extracts only when a newer archive has been downloaded
 - determines the CMake entry point path by probing for `${XPRO_DIR}/xpx/<pkgbase>-xpro/share/cmake` or `${XPRO_DIR}/xpx/<pkgbase>/share/cmake`
 
 ## Step 6: find_package(<dep>) loads the package config
