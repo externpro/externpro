@@ -817,9 +817,12 @@ function(ipGetPkgFromManifest manifestFile pkg sha)
 endfunction()
 
 function(ipGetProPath pth)
-  set(oneValueArgs PKG REPO TAG MANIFEST_SHA256 DIST_DIR XPRO_PATH MANIFEST_FILE)
+  set(oneValueArgs PKG REPO TAG MANIFEST_SHA256 DIST_DIR XPRO_PATH)
   set(multiValueArgs MANIFEST_HASH)
   cmake_parse_arguments(P "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+  if(P_UNPARSED_ARGUMENTS)
+    message(FATAL_ERROR "ipGetProPath: unrecognized arguments for xp_${P_PKG}: ${P_UNPARSED_ARGUMENTS}")
+  endif()
   # NOTE - XPRO_DIR is set and cached (configurable) in xproinc.cmake
   # NOTE - XPRO_DIR subdirs: xpd (downloaded), xpx (extracted)
   if(DEFINED P_DIST_DIR)
