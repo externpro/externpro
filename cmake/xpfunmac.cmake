@@ -2228,6 +2228,58 @@ function(ipWriteCpsFile out_file)
     )
 endfunction()
 
+# Declare an ALIAS for a component target, emitted into the generated use
+# script(s) for backwards-compatible target names (e.g. matching targets
+# provided by cmake find modules like FindOpenSSL.cmake: OpenSSL::Crypto,
+# OpenSSL::SSL). Call before xpExternPackage() to accumulate aliases:
+#   xpAlias(<alias> <component>)
+# <alias> is the full alias name (e.g. OpenSSL::Crypto); <component> may be a
+# bare component name (resolved to <repo>::<component>) or a fully-qualified
+# target name. The generated ALIAS uses add_library or add_executable based
+# on the component's type.
+macro(xpAlias alias component)
+  if(NOT "${alias}" IN_LIST XP_ALIASES)
+    list(APPEND XP_ALIASES ${alias})
+  endif()
+  set(XP_ALIAS_${alias} ${component})
+endmacro()
+
+# Consume aliases declared via xpAlias() and generate cmake script defining
+# ALIAS targets, for the use script. Alias specs are read from the
+# XP_ALIASES and XP_ALIAS_<alias> variables (visible via dynamic scope)
+function(ipProcessAliases outVar)
+  cmake_parse_arguments(P "" "NAMESPACE" "" ${ARGN})
+  set(_blocks)
+  foreach(alias ${XP_ALIASES})
+    set(_aliasComp ${XP_ALIAS_${alias}})
+    if(NOT _aliasComp MATCHES "::")
+      set(_aliasComp ${P_NAMESPACE}::${_aliasComp})
+    endif()
+    string(REGEX REPLACE "^.*::" "" _aliasBare "${_aliasComp}")
+    set(_addFn add_library)
+    unset(_aliasType)
+    if(TARGET ${_aliasComp})
+      get_target_property(_aliasType ${_aliasComp} TYPE)
+    elseif(TARGET ${_aliasBare})
+      # real targets are un-namespaced at build time (ns:: comes from the export)
+      get_target_property(_aliasType ${_aliasBare} TYPE)
+    elseif(_aliasBare IN_LIST XP_PREBUILT_COMPONENTS)
+      # prebuilt components are not targets; check the spec TYPE
+      cmake_parse_arguments(_AC "" "TYPE" "" ${XP_PREBUILT_COMPONENT_${_aliasBare}})
+      set(_aliasType ${_AC_TYPE})
+    endif()
+    if(_aliasType STREQUAL "EXECUTABLE" OR _aliasType STREQUAL "executable")
+      set(_addFn add_executable)
+    endif()
+    string(APPEND _blocks
+      "if(NOT TARGET ${alias})\n"
+      "  ${_addFn}(${alias} ALIAS ${_aliasComp})\n"
+      "endif()\n"
+      )
+  endforeach()
+  set(${outVar} "${_blocks}" PARENT_SCOPE)
+endfunction()
+
 function(xpExternPackage)
   # NOTE: if CMAKE_INSTALL_CMAKEDIR is not defined, it will be set here
   #   and available in PARENT_SCOPE
@@ -2419,6 +2471,10 @@ function(xpExternPackage)
       "list(APPEND reqVars ${ucRepoName}_EXE)"
       ""
       )
+  endif()
+  if(XP_ALIASES)
+    ipProcessAliases(_aliasBlocks NAMESPACE ${P_NAMESPACE})
+    string(APPEND ALIASES "${_aliasBlocks}")
   endif()
   set(xpUseCMakeFile ${xproBinDir}/${lcRepoName}-config.cmake)
   configure_file(${xpThisDir}/xpuse.cmake.in ${xpUseCMakeFile} @ONLY NEWLINE_STYLE LF)
