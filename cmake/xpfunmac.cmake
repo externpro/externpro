@@ -2018,6 +2018,216 @@ function(ipExternPackageAuditDeps provided_deps targets)
   ipExternPackageReportDiffs("${_missing_deps}" "${_extra_deps}")
 endfunction()
 
+# Declare a pre-built component (binary built elsewhere, e.g. XPDIFF "bin") to
+# be described in the generated use script and .cps file, as if it were built
+# by this project. Call before xpExternPackage() to accumulate specs:
+#   xpPrebuiltComponent(<name> TYPE <type>
+#     [LOCATION <path>]        # path relative to package root; required unless
+#                              # TYPE is interface; for TYPE executable the
+#                              # CMAKE_EXECUTABLE_SUFFIX is appended
+#     [IMPLIB_LOCATION <path>] # import library path for TYPE dylib
+#     [INCLUDES <dir>...]      # include dirs relative to package root
+#     [LINK_LANGUAGES <l>...]  # e.g. c cxx
+#     [REQUIRES <comp>...])    # dependencies: ns::comp or comp (this package)
+# TYPE is the CPS component type: executable archive dylib module interface
+#   (archive/dylib/module map to STATIC/SHARED/MODULE imported libraries)
+macro(xpPrebuiltComponent name)
+  if(NOT "${name}" IN_LIST XP_PREBUILT_COMPONENTS)
+    list(APPEND XP_PREBUILT_COMPONENTS ${name})
+  endif()
+  set(XP_PREBUILT_COMPONENT_${name} ${ARGN})
+endmacro()
+
+# Consume prebuilt component specs declared via xpPrebuiltComponent() and
+# generate both representations:
+#   outScript: cmake code defining IMPORTED targets, for the use script
+#   outCpsComps: JSON fragment for the "components" object of a .cps file
+# COMPONENTS is a list of component names; each component's spec is read from
+# the XP_PREBUILT_COMPONENT_<name> variable (visible via dynamic scope)
+function(ipProcessPrebuiltComponents outScript outCpsComps)
+  set(oneValueArgs NAMESPACE REPO_VAR)
+  set(multiValueArgs COMPONENTS)
+  cmake_parse_arguments(P "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+  set(_validTypes executable archive dylib module interface)
+  set(_script)
+  set(_cpsComps)
+  set(_needRoot FALSE)
+  set(_hasLib FALSE)
+  foreach(comp ${P_COMPONENTS})
+    cmake_parse_arguments(C "" "TYPE;LOCATION;IMPLIB_LOCATION"
+      "INCLUDES;LINK_LANGUAGES;REQUIRES" ${XP_PREBUILT_COMPONENT_${comp}})
+    set(C_NAME ${comp})
+    if(NOT DEFINED C_TYPE)
+      message(FATAL_ERROR "xpPrebuiltComponent(${C_NAME}): TYPE is required")
+    endif()
+    if(NOT C_TYPE IN_LIST _validTypes)
+      message(FATAL_ERROR "xpPrebuiltComponent(${C_NAME}): invalid TYPE '${C_TYPE}' (valid: ${_validTypes})")
+    endif()
+    if(C_TYPE STREQUAL "interface")
+      if(DEFINED C_LOCATION OR DEFINED C_IMPLIB_LOCATION)
+        message(FATAL_ERROR "xpPrebuiltComponent(${C_NAME}): TYPE interface may not specify LOCATION/IMPLIB_LOCATION")
+      endif()
+    elseif(NOT DEFINED C_LOCATION)
+      message(FATAL_ERROR "xpPrebuiltComponent(${C_NAME}): LOCATION is required for TYPE ${C_TYPE}")
+    endif()
+    if(DEFINED C_LOCATION OR DEFINED C_IMPLIB_LOCATION OR DEFINED C_INCLUDES)
+      set(_needRoot TRUE)
+    endif()
+    set(_loc ${C_LOCATION})
+    if(C_TYPE STREQUAL "executable")
+      string(APPEND _loc "${CMAKE_EXECUTABLE_SUFFIX}")
+    endif()
+    #### cps component json
+    set(_cj "{}")
+    string(JSON _cj SET ${_cj} type "\"${C_TYPE}\"")
+    if(DEFINED C_LOCATION)
+      string(JSON _cj SET ${_cj} location "\"@prefix@/${_loc}\"")
+    endif()
+    if(C_INCLUDES)
+      set(_arr)
+      foreach(d ${C_INCLUDES})
+        list(APPEND _arr "\"@prefix@/${d}\"")
+      endforeach()
+      list(JOIN _arr ", " _arrStr)
+      string(JSON _cj SET ${_cj} includes "[${_arrStr}]")
+    endif()
+    if(C_LINK_LANGUAGES)
+      set(_arr)
+      foreach(l ${C_LINK_LANGUAGES})
+        list(APPEND _arr "\"${l}\"")
+      endforeach()
+      list(JOIN _arr ", " _arrStr)
+      string(JSON _cj SET ${_cj} link_languages "[${_arrStr}]")
+    endif()
+    set(_reqs)
+    foreach(r ${C_REQUIRES})
+      if(r MATCHES "::")
+        list(APPEND _reqs ${r})
+      else()
+        list(APPEND _reqs ${P_NAMESPACE}::${r})
+      endif()
+    endforeach()
+    if(C_REQUIRES)
+      set(_arr)
+      foreach(r ${_reqs})
+        list(APPEND _arr "\"${r}\"")
+      endforeach()
+      list(JOIN _arr ", " _arrStr)
+      string(JSON _cj SET ${_cj} requires "[${_arrStr}]")
+    endif()
+    list(APPEND _cpsComps "    \"${C_NAME}\" : ${_cj}")
+    #### script
+    set(_block "if(NOT TARGET ${P_NAMESPACE}::${C_NAME})\n")
+    if(C_TYPE STREQUAL "executable")
+      string(APPEND _block "  add_executable(${P_NAMESPACE}::${C_NAME} IMPORTED)\n")
+    elseif(C_TYPE STREQUAL "interface")
+      string(APPEND _block "  add_library(${P_NAMESPACE}::${C_NAME} INTERFACE IMPORTED)\n")
+    else()
+      if(C_TYPE STREQUAL "archive")
+        set(_lt STATIC)
+      elseif(C_TYPE STREQUAL "dylib")
+        set(_lt SHARED)
+      else()
+        set(_lt MODULE)
+      endif()
+      string(APPEND _block "  add_library(${P_NAMESPACE}::${C_NAME} ${_lt} IMPORTED)\n")
+    endif()
+    set(_propsStr)
+    if(DEFINED C_LOCATION)
+      string(APPEND _propsStr "    IMPORTED_LOCATION \"\${PKG_ROOTDIR}/${_loc}\"\n")
+    endif()
+    if(DEFINED C_IMPLIB_LOCATION)
+      string(APPEND _propsStr "    IMPORTED_IMPLIB \"\${PKG_ROOTDIR}/${C_IMPLIB_LOCATION}\"\n")
+    endif()
+    if(C_LINK_LANGUAGES)
+      string(APPEND _propsStr "    IMPORTED_LINK_INTERFACE_LANGUAGES \"${C_LINK_LANGUAGES}\"\n")
+    endif()
+    if(C_INCLUDES)
+      set(_incsStr)
+      foreach(d ${C_INCLUDES})
+        string(APPEND _incsStr "\${PKG_ROOTDIR}/${d};")
+      endforeach()
+      string(REGEX REPLACE ";$" "" _incsStr "${_incsStr}")
+      string(APPEND _propsStr "    INTERFACE_INCLUDE_DIRECTORIES \"${_incsStr}\"\n")
+    endif()
+    if(C_REQUIRES)
+      list(JOIN _reqs ";" _reqsStr)
+      string(APPEND _propsStr "    INTERFACE_LINK_LIBRARIES \"${_reqsStr}\"\n")
+    endif()
+    if(_propsStr)
+      string(APPEND _block "  set_target_properties(${P_NAMESPACE}::${C_NAME} PROPERTIES\n${_propsStr}    )\n")
+    endif()
+    string(APPEND _block "endif()\n\n")
+    string(APPEND _script "${_block}")
+    if(NOT C_TYPE STREQUAL "executable")
+      set(_hasLib TRUE)
+      string(APPEND _script "list(APPEND ${P_REPO_VAR}_LIBRARIES ${P_NAMESPACE}::${C_NAME})\n")
+    endif()
+  endforeach()
+  if(_hasLib)
+    string(APPEND _script "list(APPEND reqVars ${P_REPO_VAR}_LIBRARIES)\n")
+  endif()
+  if(_needRoot)
+    string(PREPEND _script
+      "get_filename_component(PKG_ROOTDIR \${CMAKE_CURRENT_LIST_DIR}/../.. ABSOLUTE)\n"
+      "get_filename_component(PKG_ROOTDIR \${PKG_ROOTDIR} ABSOLUTE) # remove relative parts\n"
+      )
+  endif()
+  list(JOIN _cpsComps ",\n" _cpsCompsJson)
+  set(${outScript} "${_script}" PARENT_SCOPE)
+  set(${outCpsComps} "${_cpsCompsJson}" PARENT_SCOPE)
+endfunction()
+
+# Write a CPS (.cps) file describing pre-built components.
+# Used when there is no export set for install(PACKAGE_INFO) to consume,
+# e.g. repackaged binaries (XPDIFF "bin") built elsewhere. Emits a single
+# config-agnostic file (no per-configuration @<config>.cps appendices).
+# COMPONENTS_JSON is a fragment like '"comp" : {...},\n"comp2" : {...}'
+# generated by ipProcessPrebuiltComponents.
+function(ipWriteCpsFile out_file)
+  set(oneValueArgs NAME VERSION CPS_PATH COMPONENTS_JSON DESCRIPTION HOMEPAGE_URL LICENSE)
+  set(multiValueArgs DEFAULT_COMPONENTS)
+  cmake_parse_arguments(C "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+  foreach(arg NAME COMPONENTS_JSON)
+    if(NOT DEFINED C_${arg} OR "${C_${arg}}" STREQUAL "")
+      message(FATAL_ERROR "ipWriteCpsFile: missing required argument: ${arg}")
+    endif()
+  endforeach()
+  if(NOT DEFINED C_CPS_PATH)
+    set(C_CPS_PATH "@prefix@/share/cps")
+  endif()
+  set(_dc)
+  foreach(comp ${C_DEFAULT_COMPONENTS})
+    list(APPEND _dc "\"${comp}\"")
+  endforeach()
+  list(JOIN _dc ", " _dcs)
+  set(optJson)
+  if(C_VERSION)
+    string(APPEND optJson ",\n  \"version\" : \"${C_VERSION}\"")
+  endif()
+  if(C_DESCRIPTION)
+    string(APPEND optJson ",\n  \"description\" : \"${C_DESCRIPTION}\"")
+  endif()
+  if(C_HOMEPAGE_URL)
+    string(APPEND optJson ",\n  \"website\" : \"${C_HOMEPAGE_URL}\"")
+  endif()
+  if(C_LICENSE)
+    string(APPEND optJson ",\n  \"license\" : \"${C_LICENSE}\"")
+  endif()
+  file(WRITE ${out_file}
+    "{\n"
+    "  \"components\" :\n"
+    "  {\n"
+    "${C_COMPONENTS_JSON}\n"
+    "  },\n"
+    "  \"cps_path\" : \"${C_CPS_PATH}\",\n"
+    "  \"cps_version\" : \"0.14.1\",\n"
+    "  \"default_components\" : [ ${_dcs} ],\n"
+    "  \"name\" : \"${C_NAME}\"${optJson}\n"
+    "}\n"
+    )
+endfunction()
+
 function(xpExternPackage)
   # NOTE: if CMAKE_INSTALL_CMAKEDIR is not defined, it will be set here
   #   and available in PARENT_SCOPE
@@ -2035,10 +2245,13 @@ function(xpExternPackage)
   #   add_[executable|library] ALIAS[es] will be included in the use script
   #   for EXE and LIBRARIES when CREATE_ALIASES option is specified
   # COMPONENT is for CPack/install component name (optional, used if project has COMPONENTs)
-  # EXE is for a CMake executable target name; included in the use script
-  # EXE_PATH is for executable path (relative to package root, alternative to EXE)
-  #   useful when the executable is not a CMake target, e.g. a binary built
-  #   elsewhere; included in the use script
+  # EXE is for a CMake executable target name (a real target in this build or
+  #   a prebuilt component declared via xpPrebuiltComponent); included in the
+  #   use script
+  # EXE_PATH is deprecated; use xpPrebuiltComponent(<name> TYPE executable
+  #   LOCATION <path>) before xpExternPackage() instead. When combined with
+  #   EXE it is translated to such a spec; without EXE, the <PKG>_EXE variable
+  #   is set to the path directly (legacy behavior)
   # EXPORT is for export name used in install(PACKAGE_INFO) and install(SBOM) commands
   #   if not specified, defaults to TARGETS_FILE value
   # NAMESPACE is deprecated; CMAKE_PROJECT_NAME (or REPO_NAME if specified) is now
@@ -2104,6 +2317,14 @@ function(xpExternPackage)
     set(P_REPO_NAME ${CMAKE_PROJECT_NAME})
   endif()
   set(P_NAMESPACE ${P_REPO_NAME})
+  # EXE_PATH is deprecated; map to a prebuilt component spec
+  if(DEFINED P_EXE_PATH)
+    message(AUTHOR_WARNING "xpExternPackage: EXE_PATH is deprecated; use xpPrebuiltComponent(<name> TYPE executable LOCATION <path>) before xpExternPackage()")
+    if(DEFINED P_EXE)
+      xpPrebuiltComponent(${P_EXE} TYPE executable LOCATION ${P_EXE_PATH})
+      unset(P_EXE_PATH)
+    endif()
+  endif()
   # Set P_ALIAS_NAMESPACE to default (xpro) if CREATE_ALIASES
   # is set but ALIAS_NAMESPACE is not provided
   if(P_CREATE_ALIASES AND NOT DEFINED P_ALIAS_NAMESPACE)
@@ -2138,6 +2359,13 @@ function(xpExternPackage)
   # use script
   string(TOUPPER ${P_REPO_NAME} ucRepoName)
   string(TOLOWER ${P_REPO_NAME} lcRepoName)
+  # prebuilt components (binaries built elsewhere, e.g. XPDIFF "bin")
+  if(XP_PREBUILT_COMPONENTS)
+    ipProcessPrebuiltComponents(PREBUILT CPS_COMPONENTS_JSON
+      NAMESPACE ${P_NAMESPACE} REPO_VAR ${ucRepoName}
+      COMPONENTS ${XP_PREBUILT_COMPONENTS}
+      )
+  endif()
   if(DEFINED P_DEPS)
     list(JOIN P_DEPS " " deps) # list to string with spaces
     set(FIND_DEPS "xpFindPkg(PKGS ${deps}) # dependencies\n")
@@ -2168,9 +2396,6 @@ function(xpExternPackage)
       )
   endif()
   if(DEFINED P_EXE)
-    if(DEFINED P_EXE_PATH)
-      message(FATAL_ERROR "xpExternPackage: can only define EXE or EXE_PATH, not both")
-    endif()
     if(P_CREATE_ALIASES)
       string(JOIN "\n" alias
         "if(NOT TARGET ${P_ALIAS_NAMESPACE}::${P_EXE})"
@@ -2198,7 +2423,7 @@ function(xpExternPackage)
   set(xpUseCMakeFile ${xproBinDir}/${lcRepoName}-config.cmake)
   configure_file(${xpThisDir}/xpuse.cmake.in ${xpUseCMakeFile} @ONLY NEWLINE_STYLE LF)
   # in the conditional check below, cmake vars should match the ones in xpusext.cmake.in
-  if(DEFINED LIBS OR DEFINED EXT1 OR DEFINED EXT2 OR DEFINED EXT3 OR DEFINED EXT4 OR DEFINED ALIASES)
+  if(DEFINED LIBS OR DEFINED EXE OR DEFINED PREBUILT OR DEFINED EXT1 OR DEFINED EXT2 OR DEFINED EXT3 OR DEFINED EXT4 OR DEFINED ALIASES)
     # bundle cmake extensions in ${lcRepoName}-usext.cmake for CPS consumers
     set(xpUsextCMakeFile ${xproBinDir}/${lcRepoName}-usext.cmake)
     configure_file(${xpThisDir}/xpusext.cmake.in ${xpUsextCMakeFile} @ONLY NEWLINE_STYLE LF)
@@ -2335,6 +2560,24 @@ function(xpExternPackage)
   install(FILES ${xpManifestJsonFile}
     DESTINATION ${CMAKE_INSTALL_CPSDIR} ${XP_COMPONENT}
     )
+  if(NOT DEFINED P_EXPORT AND DEFINED CPS_COMPONENTS_JSON)
+    # pre-built components are not CMake targets, so no export set exists for
+    # install(PACKAGE_INFO); generate the .cps file describing them directly
+    set(_cpsFile ${xproBinDir}/${P_REPO_NAME}.cps)
+    ipWriteCpsFile(${_cpsFile}
+      NAME ${P_REPO_NAME}
+      CPS_PATH "@prefix@/${CMAKE_INSTALL_CPSDIR}"
+      COMPONENTS_JSON "${CPS_COMPONENTS_JSON}"
+      DEFAULT_COMPONENTS ${XP_PREBUILT_COMPONENTS}
+      ${xpInfoVersion} ${xpInfoDesc} ${xpInfoHome} ${xpInfoLicense}
+      )
+    install(FILES ${_cpsFile} DESTINATION ${CMAKE_INSTALL_CPSDIR} ${XP_COMPONENT})
+  elseif(DEFINED P_EXPORT AND XP_PREBUILT_COMPONENTS)
+    message(AUTHOR_WARNING "xpExternPackage: prebuilt components"
+      " (xpPrebuiltComponent or deprecated EXE_PATH) with EXPORT are not"
+      " included in the .cps generated by install(PACKAGE_INFO) -- mixed"
+      " built-target + prebuilt-binary packages are not supported")
+  endif()
   if(DEFINED P_DEFAULT_TARGETS)
     set(xpInfoDefaultTargets DEFAULT_TARGETS ${P_DEFAULT_TARGETS})
   endif()
