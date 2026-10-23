@@ -34,6 +34,7 @@ Independently of the CMake diff type, a project may still carry other patches to
 ## `bin`
 
 - Adds CMake packaging logic to repackage binaries built elsewhere.
+- Use `xpPrebuiltComponent()` to declare the repackaged executables/libraries so consumers get imported targets and CPS components (see [Extern package](extern-package.md#pre-built-components-xpprebuiltcomponent)).
 
 ## `fetch`
 

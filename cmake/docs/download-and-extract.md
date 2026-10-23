@@ -103,9 +103,12 @@ Where `<search_paths>` depends on the mode:
 The mode is determined by:
 1. Global `FIND_PACKAGE_CMAKE_SCRIPT` option
 2. Per-package `findxpro.cmake` marker file
-3. Default CPS behavior
+3. `.cps` files containing `"type" : "executable"` components (CMake < 4.5 cannot import them, so the package falls back to cmake script)
+4. Default CPS behavior
 
 This is how the package's imported targets/variables become available to the consuming project.
+
+Packages that repackage binaries built elsewhere (declared via `xpPrebuiltComponent`) provide the same imported targets through either mode: the cmake script defines them directly, and the `.cps` file describes them as CPS components.
 
 ## Related
 

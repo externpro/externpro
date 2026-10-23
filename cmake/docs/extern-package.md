@@ -11,6 +11,7 @@ At a high level it:
 - writes build metadata (`sysinfo.txt`)
 - generates SBOM (Software Bill Of Materials) files
 - generates CPS (Common Package Specification) files
+- generates imported-target definitions and CPS components for pre-built binaries ([`xpPrebuiltComponent`](#pre-built-components-xpprebuiltcomponent))
 - optionally generates dependency reports (`xprodeps.md` and `xprodeps.svg`) when dependency metadata is provided
 - configures basic archive packaging (TXZ) for the produced artifacts
 
@@ -45,9 +46,9 @@ In repos using externpro, the provided cmake presets automatically set up the de
   - List of default CMake targets passed to `install(PACKAGE_INFO)` for CPS generation.
 
 - `EXE` / `EXE_PATH`
-  - `EXE`: a CMake executable target name.
-  - `EXE_PATH`: a relative executable path inside the package when the executable is not a CMake target.
-  - Only one may be set.
+  - `EXE`: a CMake executable target name — either a real target in this build or a prebuilt component declared via `xpPrebuiltComponent`. Sets `<PKG>_EXE` in the use script.
+  - `EXE_PATH` (deprecated): a relative executable path inside the package. When combined with `EXE` it is translated to `xpPrebuiltComponent(<EXE> TYPE executable LOCATION <path>)`; without `EXE`, `<PKG>_EXE` is set to the path directly (legacy behavior).
+  - Use `xpPrebuiltComponent` instead — see [Pre-built components](#pre-built-components-xpprebuiltcomponent).
 
 - `DEPS`
   - **Consumer dependencies** (what downstream projects need). Automatically added to consumer config via `xpFindPkg(PKGS ...)` calls and included in the manifest.
@@ -70,6 +71,7 @@ In repos using externpro, the provided cmake presets automatically set up the de
   - Namespace to use for alias targets when `CREATE_ALIASES` is enabled.
   - If not provided, defaults to `xpro`.
   - Specifying `ALIAS_NAMESPACE` automatically enables `CREATE_ALIASES`.
+  - Maps every `LIBRARIES`/`EXE` component uniformly into the given namespace; for explicit name-mapped aliases (e.g. `OpenSSL::Crypto`), use [`xpAlias`](#explicit-aliases-xpalias) — the two may coexist.
 
 - `FIND_THREADS` (deprecated)
   - Previously emitted `find_package(Threads REQUIRED)` into the consumer config.
@@ -93,6 +95,69 @@ These fields are written into the generated manifest file (`.manifest.json`):
   - The upstream tag/commit that the externpro changes are based on.
 - `XPDIFF`
   - The externpro diff type for this project (see [Diff types](diff-types.md)).
+
+## Pre-built components (xpPrebuiltComponent)
+
+For binaries built elsewhere — e.g. `XPDIFF "bin"` repackaging — there is no CMake `EXPORT` set, so `install(EXPORT)`/`install(PACKAGE_INFO)` cannot describe them. Declare them with `xpPrebuiltComponent()` **before** `xpExternPackage()` (accumulating, like `install(TARGETS ... EXPORT)`):
+
+```cmake
+xpPrebuiltComponent(<name>
+  TYPE executable|archive|dylib|module|interface
+  [LOCATION <path>]         # relative to package root; required unless
+                            # TYPE interface; CMAKE_EXECUTABLE_SUFFIX
+                            # appended for TYPE executable
+  [IMPLIB_LOCATION <path>]  # import library path for TYPE dylib
+  [INCLUDES <dir>...]       # include dirs relative to package root
+  [LINK_LANGUAGES <l>...]   # e.g. c cxx
+  [REQUIRES <comp>...]      # deps: bare name = this package, or ns::name
+  )
+```
+
+Each spec generates both consumer representations:
+
+- `if(NOT TARGET)`-guarded imported-target definitions in the generated use script (`<repo>-config.cmake`) and `-usext.cmake` (for CPS consumers). `archive`/`dylib`/`module` map to `STATIC`/`SHARED`/`MODULE` imported libraries; `INCLUDES`/`LINK_LANGUAGES`/`REQUIRES` become `INTERFACE_INCLUDE_DIRECTORIES`/`IMPORTED_LINK_INTERFACE_LANGUAGES`/`INTERFACE_LINK_LIBRARIES`.
+- `"components"` entries in a generated `<repo>.cps`, installed alongside the manifest (only when no `EXPORT` is set — `install(PACKAGE_INFO)` cannot cover non-target components, so mixing real targets and prebuilt components emits an `AUTHOR_WARNING`).
+
+Non-executable components are appended to `<PKG>_LIBRARIES` (and `reqVars`). `EXE` may name a prebuilt component to set `<PKG>_EXE` to the imported target.
+
+Consumers get the same targets either way: CMake < 4.5 falls back to the cmake-script path (executable components trigger this automatically); CMake ≥ 4.5 imports them from the `.cps`.
+
+Example:
+
+```cmake
+if(WIN32)
+  xpPrebuiltComponent(node TYPE archive
+    LOCATION "lib/node${CMAKE_STATIC_LIBRARY_SUFFIX}"
+    LINK_LANGUAGES c cxx INCLUDES include include/node)
+else()
+  xpPrebuiltComponent(node TYPE interface INCLUDES include include/node)
+endif()
+xpExternPackage(...)
+```
+
+## Explicit aliases (xpAlias)
+
+Call `xpAlias(<alias> <component>)` before `xpExternPackage()` to emit `if(NOT TARGET)`-guarded `ALIAS` targets into the generated use scripts — for backwards-compatible target names expected by CMake's bundled find modules:
+
+```cmake
+xpAlias(OpenSSL::Crypto crypto)
+xpAlias(OpenSSL::SSL ssl)
+```
+
+emits
+
+```cmake
+if(NOT TARGET OpenSSL::Crypto)
+  add_library(OpenSSL::Crypto ALIAS openssl::crypto)
+endif()
+if(NOT TARGET OpenSSL::SSL)
+  add_library(OpenSSL::SSL ALIAS openssl::ssl)
+endif()
+```
+
+`<component>` may be a bare component name (resolved to `<repo>::<component>`) or a fully-qualified target name. `add_library` vs `add_executable` is inferred from the component: an existing fully-qualified target, then a bare build target, then a matching `xpPrebuiltComponent` spec's `TYPE`; defaults to `add_library`.
+
+Coexists with `CREATE_ALIASES`/`ALIAS_NAMESPACE` — e.g. `ALIAS_NAMESPACE xpro` gives uniform `xpro::crypto` aliases while `xpAlias` provides the name-mapped `OpenSSL::Crypto` for the same target. Collisions are first-wins under the `if(NOT TARGET)` guards.
 
 ## Generated files (in the build directory)
 
