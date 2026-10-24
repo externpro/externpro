@@ -130,8 +130,8 @@ set(xp_nasm REPO github.com/externpro/nasm TAG xpv2.14.02.5
 set(xp_nlohmann_json REPO github.com/externpro/nlohmann_json TAG xpv3.12.0.4
   MANIFEST_HASH SHA256=7a46b648034672eb3063b08d47c1c2ea92a6fabd0cb168984ae2b57191e8e136
   )
-set(xp_node-addon-api REPO github.com/externpro/node-addon-api TAG xpv8.5.0.4
-  MANIFEST_HASH SHA256=e75bad5cff80845d4adecc1adf402eca7954d7d9e4c3fffb2a8f02eb9f2cb03f
+set(xp_node-addon-api REPO github.com/externpro/node-addon-api TAG xpv8.5.0.5
+  MANIFEST_HASH SHA256=d2cd90621d98ee207fb04c7d3c8378ac285fe675bd65bdcd98c23e61c92a66f1
   )
 # override xp_nodeng with local dist directory
 set(xp_nodeng DIST_DIR /bpvol/workspace/nodeng/_bld-Linux/dist/)
