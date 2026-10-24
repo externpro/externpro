@@ -2048,14 +2048,13 @@ endmacro()
 # COMPONENTS is a list of component names; each component's spec is read from
 # the XP_PREBUILT_COMPONENT_<name> variable (visible via dynamic scope)
 function(ipProcessPrebuiltComponents outScript outCpsComps)
-  set(oneValueArgs NAMESPACE REPO_VAR)
+  set(oneValueArgs NAMESPACE)
   set(multiValueArgs COMPONENTS)
   cmake_parse_arguments(P "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
   set(_validTypes executable archive dylib module interface)
   set(_script)
   set(_cpsComps)
   set(_needRoot FALSE)
-  set(_hasLib FALSE)
   foreach(comp ${P_COMPONENTS})
     cmake_parse_arguments(C "" "TYPE;LOCATION;IMPLIB_LOCATION"
       "INCLUDES;LINK_LANGUAGES;REQUIRES" ${XP_PREBUILT_COMPONENT_${comp}})
@@ -2161,16 +2160,9 @@ function(ipProcessPrebuiltComponents outScript outCpsComps)
     if(_propsStr)
       string(APPEND _block "  set_target_properties(${P_NAMESPACE}::${C_NAME} PROPERTIES\n${_propsStr}    )\n")
     endif()
-    string(APPEND _block "endif()\n\n")
+    string(APPEND _block "endif()\n")
     string(APPEND _script "${_block}")
-    if(NOT C_TYPE STREQUAL "executable")
-      set(_hasLib TRUE)
-      string(APPEND _script "list(APPEND ${P_REPO_VAR}_LIBRARIES ${P_NAMESPACE}::${C_NAME})\n")
-    endif()
   endforeach()
-  if(_hasLib)
-    string(APPEND _script "list(APPEND reqVars ${P_REPO_VAR}_LIBRARIES)\n")
-  endif()
   if(_needRoot)
     string(PREPEND _script
       "get_filename_component(PKG_ROOTDIR \${CMAKE_CURRENT_LIST_DIR}/../.. ABSOLUTE)\n"
@@ -2342,11 +2334,15 @@ function(xpExternPackage)
   #    fetch: diff adds cmake and utilizes FetchContent
   set(multiValueArgs DEFAULT_TARGETS DEPS LIBRARIES PVT_DEPS)
   # DEFAULT_TARGETS are for default CMake targets; passed to install(PACKAGE_INFO)
+  #   and also used for default_components of the .cps generated for prebuilt
+  #   components (when no EXPORT is set)
   # DEPS are for consumer dependencies (what downstream projects need); automatically added
   #   to use script via xpFindPkg() calls and included in the manifest. If not specified,
   #   dependencies will be automatically inferred from LIBRARIES targets (PUBLIC + PRIVATE dependencies).
   #   Use NO_INFER_DEPS option to disable automatic dependency inference.
-  # LIBRARIES are for CMake library targets; included in the use script
+  # LIBRARIES are for CMake library targets (real targets in this build or
+  #   prebuilt components declared via xpPrebuiltComponent); included in the
+  #   use script
   # PVT_DEPS are for build dependencies (what only the current project needs); written to
   #   the manifest but NOT added to use script. These include build tools (e.g., yasm executable) and
   #   executable target dependencies. If not specified, dependencies will be
@@ -2422,8 +2418,7 @@ function(xpExternPackage)
   # prebuilt components (binaries built elsewhere, e.g. XPDIFF "bin")
   if(XP_PREBUILT_COMPONENTS)
     ipProcessPrebuiltComponents(PREBUILT CPS_COMPONENTS_JSON
-      NAMESPACE ${P_NAMESPACE} REPO_VAR ${ucRepoName}
-      COMPONENTS ${XP_PREBUILT_COMPONENTS}
+      NAMESPACE ${P_NAMESPACE} COMPONENTS ${XP_PREBUILT_COMPONENTS}
       )
   endif()
   if(DEFINED P_DEPS)
