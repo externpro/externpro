@@ -43,7 +43,7 @@ In repos using externpro, the provided cmake presets automatically set up the de
   - List of library target names that the consumer could link against.
 
 - `DEFAULT_TARGETS`
-  - List of default CMake targets passed to `install(PACKAGE_INFO)` for CPS generation.
+  - List of default CMake targets passed to `install(PACKAGE_INFO)` for CPS generation; also names the `default_components` of the `.cps` generated for prebuilt components (when no `EXPORT` is set).
 
 - `EXE` / `EXE_PATH`
   - `EXE`: a CMake executable target name — either a real target in this build or a prebuilt component declared via `xpPrebuiltComponent`. Sets `<PKG>_EXE` in the use script.
@@ -118,7 +118,7 @@ Each spec generates both consumer representations:
 - `if(NOT TARGET)`-guarded imported-target definitions in the generated use script (`<repo>-config.cmake`) and `-usext.cmake` (for CPS consumers). `archive`/`dylib`/`module` map to `STATIC`/`SHARED`/`MODULE` imported libraries; `INCLUDES`/`LINK_LANGUAGES`/`REQUIRES` become `INTERFACE_INCLUDE_DIRECTORIES`/`IMPORTED_LINK_INTERFACE_LANGUAGES`/`INTERFACE_LINK_LIBRARIES`.
 - `"components"` entries in a generated `<repo>.cps`, installed alongside the manifest (only when no `EXPORT` is set — `install(PACKAGE_INFO)` cannot cover non-target components, so mixing real targets and prebuilt components emits an `AUTHOR_WARNING`).
 
-Non-executable components are appended to `<PKG>_LIBRARIES` (and `reqVars`). `EXE` may name a prebuilt component to set `<PKG>_EXE` to the imported target.
+`<PKG>_LIBRARIES` and `<PKG>_EXE` are driven by the `LIBRARIES` and `EXE` parameters — same as for real targets. List a prebuilt component in `LIBRARIES` to add it to `<PKG>_LIBRARIES` (and `reqVars`); `EXE` may name a prebuilt component to set `<PKG>_EXE` to the imported target. Likewise, `DEFAULT_TARGETS` names the components written to `default_components` in the generated `.cps`.
 
 Consumers get the same targets either way: CMake < 4.5 falls back to the cmake-script path (executable components trigger this automatically); CMake ≥ 4.5 imports them from the `.cps`.
 
@@ -126,13 +126,13 @@ Example:
 
 ```cmake
 if(WIN32)
-  xpPrebuiltComponent(node TYPE archive
+  xpPrebuiltComponent(nodelib TYPE archive
     LOCATION "lib/node${CMAKE_STATIC_LIBRARY_SUFFIX}"
     LINK_LANGUAGES c cxx INCLUDES include include/node)
 else()
-  xpPrebuiltComponent(node TYPE interface INCLUDES include include/node)
+  xpPrebuiltComponent(nodelib TYPE interface INCLUDES include include/node)
 endif()
-xpExternPackage(...)
+xpExternPackage(LIBRARIES nodelib ...)
 ```
 
 ## Explicit aliases (xpAlias)
