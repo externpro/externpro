@@ -2200,11 +2200,15 @@ function(ipWriteCpsFile out_file)
   if(NOT DEFINED C_CPS_PATH)
     set(C_CPS_PATH "@prefix@/share/cps")
   endif()
-  set(_dc)
-  foreach(comp ${C_DEFAULT_COMPONENTS})
-    list(APPEND _dc "\"${comp}\"")
-  endforeach()
-  list(JOIN _dc ", " _dcs)
+  set(_dcJson)
+  if(C_DEFAULT_COMPONENTS)
+    set(_dc)
+    foreach(comp ${C_DEFAULT_COMPONENTS})
+      list(APPEND _dc "\"${comp}\"")
+    endforeach()
+    list(JOIN _dc ", " _dcs)
+    set(_dcJson "  \"default_components\" : [ ${_dcs} ],\n")
+  endif()
   set(optJson)
   if(C_VERSION)
     string(APPEND optJson ",\n  \"version\" : \"${C_VERSION}\"")
@@ -2226,7 +2230,7 @@ function(ipWriteCpsFile out_file)
     "  },\n"
     "  \"cps_path\" : \"${C_CPS_PATH}\",\n"
     "  \"cps_version\" : \"0.14.1\",\n"
-    "  \"default_components\" : [ ${_dcs} ],\n"
+    "${_dcJson}"
     "  \"name\" : \"${C_NAME}\"${optJson}\n"
     "}\n"
     )
@@ -2621,14 +2625,16 @@ function(xpExternPackage)
     DESTINATION ${CMAKE_INSTALL_CPSDIR} ${XP_COMPONENT}
     )
   if(NOT DEFINED P_EXPORT AND DEFINED CPS_COMPONENTS_JSON)
+    if(DEFINED P_DEFAULT_TARGETS)
+      set(xpDefaultComponents DEFAULT_COMPONENTS ${P_DEFAULT_TARGETS})
+    endif()
     # pre-built components are not CMake targets, so no export set exists for
     # install(PACKAGE_INFO); generate the .cps file describing them directly
     set(_cpsFile ${xproBinDir}/${P_REPO_NAME}.cps)
     ipWriteCpsFile(${_cpsFile}
       NAME ${P_REPO_NAME}
       CPS_PATH "@prefix@/${CMAKE_INSTALL_CPSDIR}"
-      COMPONENTS_JSON "${CPS_COMPONENTS_JSON}"
-      DEFAULT_COMPONENTS ${XP_PREBUILT_COMPONENTS}
+      COMPONENTS_JSON "${CPS_COMPONENTS_JSON}" ${xpDefaultComponents}
       ${xpInfoVersion} ${xpInfoDesc} ${xpInfoHome} ${xpInfoLicense}
       )
     install(FILES ${_cpsFile} DESTINATION ${CMAKE_INSTALL_CPSDIR} ${XP_COMPONENT})
