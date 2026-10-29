@@ -5,9 +5,26 @@ if(NOT DEFINED CMAKE_INSTALL_PREFIX)
     "Install path prefix, prepended onto install directories."
     )
 endif()
-if(NOT DEFINED XPRO_DIR)
-  set(XPRO_DIR ${CMAKE_BINARY_DIR}/_xpro CACHE PATH
-    "externpro working directory (downloaded manifests, pkgs; extracted xpro pkgs)"
+if(DEFINED XPRO_DIR)
+  message(DEPRECATION "XPRO_DIR is no longer used; downloads now go to XPD_DIR \
+(default ~/.cache/externpro) and extracted packages to <binary-dir>/_xpx"
+    )
+endif()
+if(NOT DEFINED XPD_DIR)
+  if(DEFINED ENV{XPD_DIR})
+    set(_xpd "$ENV{XPD_DIR}")
+  elseif(WIN32 AND DEFINED ENV{LOCALAPPDATA})
+    set(_xpd "$ENV{LOCALAPPDATA}/externpro")
+  elseif(DEFINED ENV{XDG_CACHE_HOME})
+    set(_xpd "$ENV{XDG_CACHE_HOME}/externpro")
+  elseif(DEFINED ENV{HOME})
+    set(_xpd "$ENV{HOME}/.cache/externpro")
+  else()
+    set(_xpd "${CMAKE_BINARY_DIR}/_xpd")
+    message(WARNING "XPD_DIR: no HOME/LOCALAPPDATA; falling back to build-dir cache")
+  endif()
+  set(XPD_DIR "${_xpd}" CACHE PATH
+    "externpro download cache (downloaded manifests, pkgs)"
     )
 endif()
 list(FIND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR} idx)

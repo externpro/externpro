@@ -15,6 +15,7 @@ x-bld: &bld-alias
     - /tmp/.X11-unix:/tmp/.X11-unix # mount X11 socket directory
     - ~/.ssh:/home/${USER}/.ssh
     - ~/.gitconfig:/home/${USER}/.gitconfig
+    - ${XDG_CACHE_HOME:-${HOME}/.cache}/externpro:/home/${USER}/.cache/externpro
 x-all-build-args: &all-build-args-alias
   BPROIMG: ${BPROIMG}
   BPROTAG: ${BPROTAG}

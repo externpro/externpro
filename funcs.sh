@@ -97,10 +97,15 @@ function composereq
     exit 1
   fi
 }
+function cachereq
+{
+  mkdir -p "${XDG_CACHE_HOME:-${HOME}/.cache}/externpro"
+}
 function buildreq
 {
   gitcfgreq
   composereq
+  cachereq
 }
 function gpureq
 {
