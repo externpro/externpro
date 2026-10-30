@@ -10,6 +10,9 @@ This directory contains short, developer-facing notes about the externpro CMake 
 - [Download and extract](download-and-extract.md)
   - How `xpFindPkg()` resolves an externpro dependency from a release manifest.
 
+- [Download cache](download-cache.md)
+  - Where downloaded manifests and package archives live (`XPD_DIR`), and how it interacts with containers, offline use, and CI.
+
 ## Producing packages
 
 - [Extern package](extern-package.md)

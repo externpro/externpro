@@ -10,23 +10,22 @@ The core flow is:
 - dependency provider calls `xpFindPkg(PKGS <dep>)`
 - `xpFindPkg()` calls `ipGetProPath()` to obtain a `PATHS` entry
 - `ipGetProPath()` downloads a release manifest (or uses a local artifact)
-- `ipDownloadExtract()` downloads the `.tar.xz` package and extracts it under `XPRO_DIR`
+- `ipDownloadExtract()` downloads the `.tar.xz` package into the shared download cache (`XPD_DIR`) and extracts it into the build directory (`XPX_DIR`)
 - `find_package(<dep> ... PATHS <search_paths> NO_DEFAULT_PATH)` loads either CPS files or the generated cmake script config from the extracted package
 
 All of this is implemented in [`cmake/xpfunmac.cmake`](../xpfunmac.cmake).
 
-## Working directory layout (`XPRO_DIR`)
+## Working directories (`XPD_DIR` and `XPX_DIR`)
 
-`XPRO_DIR` is set (and cached) by [`cmake/xproinc.cmake`](../xproinc.cmake) and defaults to:
+Two locations are used:
 
-- `${CMAKE_BINARY_DIR}/_xpro`
-
-Two important subdirectories are used:
-
-- `xpd/`
-  - downloaded files (manifests and package archives)
-- `xpx/`
+- `XPD_DIR`
+  - the shared, per-user download cache: downloaded manifests and package archives
+  - set (and cached) by [`cmake/xproinc.cmake`](../xproinc.cmake); defaults to `~/.cache/externpro` (`%LOCALAPPDATA%\externpro` on Windows)
+  - see [Download cache](download-cache.md)
+- `XPX_DIR`
   - extracted package contents
+  - defined in [`xpfunmac.cmake`](../xpfunmac.cmake) as `${CMAKE_BINARY_DIR}/_xpx` (per-build)
 
 ## Step 1: xpFindPkg() decides whether externpro can handle the package
 
@@ -62,7 +61,7 @@ ipGetProPath(pth PKG <dep> ${xp_<dep>})
 
 - `.manifest.cmake` is deprecated — still read so that packages released before the JSON format continue to work, but current `xpExternPackage()` generates only `.manifest.json`
 - Determines the manifest format based on whether `MANIFEST_SHA256` or `MANIFEST_HASH` is provided
-- Downloads to `${XPRO_DIR}/xpd/manifests/<repo>-<tag>.manifest.<ext>`
+- Downloads to `${XPD_DIR}/manifests/<repo>-<tag>.manifest.<ext>`
 - Performs integrity checking with the provided SHA256
 
 ## Step 4: ipGetPkgFromManifest() selects the right artifact
@@ -77,10 +76,10 @@ ipGetProPath(pth PKG <dep> ${xp_<dep>})
 ## Step 5: ipDownloadExtract() downloads and extracts
 
 `ipDownloadExtract(url, sha, outPathVar)`:
-- downloads the `.tar.xz` into `${XPRO_DIR}/xpd/pkgs/<filename>.tar.xz`
-- extracts into `${XPRO_DIR}/xpx/`
+- downloads the `.tar.xz` into `${XPD_DIR}/pkgs/<filename>.tar.xz`
+- extracts into `${XPX_DIR}/`
 - re-extracts only when a newer archive has been downloaded
-- determines the CMake entry point path by probing for `${XPRO_DIR}/xpx/<pkgbase>-xpro/share/cmake` or `${XPRO_DIR}/xpx/<pkgbase>/share/cmake`
+- determines the CMake entry point path by probing for `${XPX_DIR}/<pkgbase>-xpro/share/cmake` or `${XPX_DIR}/<pkgbase>/share/cmake`
 
 ## Step 6: find_package(<dep>) loads the package config
 
@@ -92,7 +91,7 @@ find_package(<dep> [NAMES xpuse-<dep>] REQUIRED CONFIG GLOBAL
   BYPASS_PROVIDER PATHS <search_paths> NO_DEFAULT_PATH)
 ```
 
-The optional `NAMES xpuse-<dep>` is for backward compatibility with xpro packages created before CPS support was added.
+The optional `NAMES xpuse-<dep>` is emitted only when the extracted package still contains a legacy `xpuse-<dep>-config.cmake` — packages released before the `xpuse-` prefix was dropped. The prefix was dropped when CPS support was added: the generated cmake-script config needed to be found as `<dep>` alongside `<dep>`'s CPS files, so current packages are found directly as `<dep>`.
 
 Where `<search_paths>` depends on the mode:
 - **CPS mode**: `${pth} ${pth}/share/cmake` (searches both CPS and cmake script files)
@@ -110,6 +109,7 @@ Packages that repackage binaries built elsewhere (declared via `xpPrebuiltCompon
 
 ## Related
 
+- [Download cache](download-cache.md)
 - [Dependency provider](dependency-provider.md)
 - [Extern package](extern-package.md)
 - [`cmake/xproinc.cmake`](../xproinc.cmake)

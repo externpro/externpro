@@ -5,7 +5,7 @@ externpro integrates with CMake's dependency provider mechanism so that `find_pa
 ## How it works
 
 - [`cmake/xproinc.cmake`](../xproinc.cmake) is injected via `CMAKE_PROJECT_TOP_LEVEL_INCLUDES` through externpro's cmake presets so it runs before your top-level `project()` call.
-- It sets a few key variables early (notably `CMAKE_INSTALL_PREFIX` and `XPRO_DIR`).
+- It sets a few key variables early (notably `CMAKE_INSTALL_PREFIX` and `XPD_DIR`).
 - It adds externpro's `cmake/` directory to `CMAKE_MODULE_PATH`.
 - It includes [`cmake/pros.cmake`](../pros.cmake), which defines the default externpro dependency variables (`xp_<project>`).
 - It installs a dependency provider via:
@@ -28,15 +28,12 @@ For `method == FIND_PACKAGE` it:
 find_package(${depName} BYPASS_PROVIDER ...)
 ```
 
-## Working directory layout (`XPRO_DIR`)
+## Working directories (`XPD_DIR` and `XPX_DIR`)
 
-`XPRO_DIR` defaults to `${CMAKE_BINARY_DIR}/_xpro`.
+Two locations are used by internals (e.g., `ipGetProPath()` / download+extract):
 
-It is used by internals (e.g., `ipGetProPath()` / download+extract) to store:
-
-- downloaded manifests
-- downloaded packages
-- extracted package contents (for `find_package(xpuse-<pkg>)`)
+- `XPD_DIR` — the shared, per-user download cache (manifests, package archives); defaults to `~/.cache/externpro` (`%LOCALAPPDATA%\externpro` on Windows). See [Download cache](download-cache.md).
+- `XPX_DIR` — extracted package contents (for `find_package(<pkg>)`); `${CMAKE_BINARY_DIR}/_xpx`, per-build.
 
 ## Common usage
 

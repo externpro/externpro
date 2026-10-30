@@ -109,6 +109,7 @@ If your repo default branch is not `xpro`, you will likely need to adjust the ca
 
 1. `xproinc.cmake` (automatically included via the externpro presets) currently:
     - defines `CMAKE_INSTALL_PREFIX` if not already defined
+    - defines `XPD_DIR` (download cache location) if not already defined — see [Download cache](download-cache.md)
     - appends `.externpro/cmake/` to `CMAKE_MODULE_PATH`
     - includes `pros.cmake` (default externpro dependency variables)
     - sets a dependency provider so `find_package()` calls can be satisfied by externpro

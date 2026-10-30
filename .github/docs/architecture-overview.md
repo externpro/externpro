@@ -12,13 +12,14 @@ CMakeLists.txt
         -> ipGetProPath()
           -> download manifest (GitHub Release)
           -> select correct artifact (platform/compiler)
-          -> download/extract .tar.xz into XPRO_DIR
-        -> find_package(xpuse-dep PATHS <extracted>/share/cmake NO_DEFAULT_PATH)
+          -> download .tar.xz into shared cache (XPD_DIR), extract into _xpx/
+        -> find_package(dep PATHS <extracted>/share/cmake NO_DEFAULT_PATH)
 ```
 
 Relevant docs:
 - [Dependency provider](../../cmake/docs/dependency-provider.md)
 - [Download and extract](../../cmake/docs/download-and-extract.md)
+- [Download cache](../../cmake/docs/download-cache.md)
 
 ## CI/release flow (producing packages)
 
