@@ -2710,7 +2710,7 @@ function(xpExternPackage)
       if(CMAKE_VERSION VERSION_GREATER_EQUAL 4.5 AND DEFINED xpInfoLicense)
         list(TRANSFORM xpInfoLicense REPLACE "^LICENSE$" "DEFAULT_LICENSE")
       endif()
-      if(CMAKE_VERSION MATCHES "^4\.5\.0-rc" AND DEFINED P_DEPS)
+      if(CMAKE_VERSION MATCHES "^4\.5\.0-rc[12]$" AND DEFINED P_DEPS)
         message(AUTHOR_WARNING "xpExternPackage: skipping install(SBOM) for ${P_REPO_NAME} due to private dependencies; see Kitware #28210")
       else()
         install(SBOM ${P_REPO_NAME} ${sbom_export}
