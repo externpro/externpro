@@ -1035,6 +1035,31 @@ function(xpFindPkg)
           BYPASS_PROVIDER PATHS ${find_paths} NO_DEFAULT_PATH
           )
         mark_as_advanced(${package}_DIR)
+        if(NOT use_cmake_script AND DEFINED ${package}_CONFIG
+            AND NOT ${package}_CONFIG MATCHES "\\.cps$")
+          # CPS was the intended route but a cmake-script config was found:
+          # every shipped .cps was rejected (e.g. a cps_version newer than
+          # this cmake supports); the fallback is silent unless we call it
+          # out -- CPS-imported package targets (default_components) won't
+          # exist under the script route
+          file(GLOB _rejCps ${pth}/share/cps/*.cps)
+          if(_rejCps)
+            set(_rejVers)
+            foreach(_f IN LISTS _rejCps)
+              file(READ ${_f} _rejJson)
+              string(JSON _v ERROR_VARIABLE _err GET "${_rejJson}" cps_version)
+              if(NOT _err AND _v)
+                list(APPEND _rejVers ${_v})
+              endif()
+            endforeach()
+            list(REMOVE_DUPLICATES _rejVers)
+            message(WARNING
+              "${package}: .cps file(s) unreadable by cmake ${CMAKE_VERSION}"
+              " (declared cps_version: ${_rejVers}); fell back to"
+              " ${${package}_CONFIG} -- package targets from"
+              " default_components will not exist")
+          endif()
+        endif()
         if(_noisy)
           set(__xp_${package}_shown_sig "${_sig}" CACHE INTERNAL
             "signature (pth|use_cmake_script) of last announced ${package} find"
