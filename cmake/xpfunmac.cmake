@@ -1035,13 +1035,14 @@ function(xpFindPkg)
           BYPASS_PROVIDER PATHS ${find_paths} NO_DEFAULT_PATH
           )
         mark_as_advanced(${package}_DIR)
-        if(NOT use_cmake_script AND DEFINED ${package}_CONFIG
+        if(_noisy AND NOT use_cmake_script AND DEFINED ${package}_CONFIG
             AND NOT ${package}_CONFIG MATCHES "\\.cps$")
           # CPS was the intended route but a cmake-script config was found:
           # every shipped .cps was rejected (e.g. a cps_version newer than
           # this cmake supports); the fallback is silent unless we call it
           # out -- CPS-imported package targets (default_components) won't
-          # exist under the script route
+          # exist under the script route. Warn once per signature, same as
+          # the find announcement.
           file(GLOB _rejCps ${pth}/share/cps/*.cps)
           if(_rejCps)
             set(_rejVers)
@@ -1054,10 +1055,13 @@ function(xpFindPkg)
             endforeach()
             list(REMOVE_DUPLICATES _rejVers)
             message(WARNING
-              "${package}: .cps file(s) unreadable by cmake ${CMAKE_VERSION}"
-              " (declared cps_version: ${_rejVers}); fell back to"
-              " ${${package}_CONFIG} -- package targets from"
-              " default_components will not exist")
+              "${package}: .cps file(s) unreadable by cmake"
+              " ${CMAKE_VERSION} (declared cps_version: ${_rejVers});"
+              " fell back to ${${package}_CONFIG} -- the cmake-script"
+              " import may differ from CPS, such as a missing"
+              " package-level default_components target; use a cmake"
+              " that supports cps_version ${_rejVers} or rebuild the"
+              " package with older tooling to restore the CPS route")
           endif()
         endif()
         if(_noisy)
