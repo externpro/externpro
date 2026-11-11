@@ -2351,6 +2351,13 @@ function(ipWriteCpsFile out_file)
   if(C_LICENSE)
     string(APPEND optJson ",\n  \"license\" : \"${C_LICENSE}\"")
   endif()
+  # cps_version declares the minimum schema covering the emitted constructs:
+  # "executable" components are a 0.15 feature -- older readers accept the
+  # file but silently drop them as "unknown type"; everything else is 0.14
+  set(_cpsVer 0.14.1)
+  if(C_COMPONENTS_JSON MATCHES "\"type\"[ ]*:[ ]*\"executable\"")
+    set(_cpsVer 0.15.0)
+  endif()
   file(WRITE ${out_file}
     "{\n"
     "  \"components\" :\n"
@@ -2358,7 +2365,7 @@ function(ipWriteCpsFile out_file)
     "${C_COMPONENTS_JSON}\n"
     "  },\n"
     "  \"cps_path\" : \"${C_CPS_PATH}\",\n"
-    "  \"cps_version\" : \"0.14.1\",\n"
+    "  \"cps_version\" : \"${_cpsVer}\",\n"
     "${_dcJson}"
     "  \"name\" : \"${C_NAME}\"${optJson}\n"
     "}\n"
