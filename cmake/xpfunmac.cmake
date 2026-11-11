@@ -885,6 +885,76 @@ macro(ipRestorePkgVars package)
     set(${var} "${_rv}")
   endforeach()
 endmacro()
+
+# parse a package's share/cps/*.cps "requires" into a list of qualified
+# targets (Dep::Comp) the CPS import will validate; cached per package in the
+# same IP_ global-property store as the found-state (content is fixed per
+# configure) so the discovery cost is paid once
+function(ipCpsRequiresTgts pth pkg out)
+  get_property(_cached GLOBAL PROPERTY IP_CPSREQ_${pkg} SET)
+  if(_cached)
+    get_property(_tgts GLOBAL PROPERTY IP_CPSREQ_${pkg})
+    set(${out} "${_tgts}" PARENT_SCOPE)
+    return()
+  endif()
+  set(_tgts)
+  file(GLOB _cpsFiles ${pth}/share/cps/*.cps)
+  foreach(_cps ${_cpsFiles})
+    file(READ ${_cps} _json)
+    string(JSON _nreq ERROR_VARIABLE _err LENGTH "${_json}" requires)
+    if(_err OR NOT _nreq)
+      continue()
+    endif()
+    math(EXPR _rlast "${_nreq} - 1")
+    foreach(_i RANGE ${_rlast})
+      string(JSON _dep MEMBER "${_json}" requires ${_i})
+      string(JSON _nc ERROR_VARIABLE _err LENGTH "${_json}"
+        requires ${_dep} components)
+      if(_err OR NOT _nc)
+        continue()
+      endif()
+      math(EXPR _clast "${_nc} - 1")
+      foreach(_j RANGE ${_clast})
+        string(JSON _comp GET "${_json}" requires ${_dep} components ${_j})
+        list(APPEND _tgts ${_dep}::${_comp})
+      endforeach()
+    endforeach()
+  endforeach()
+  list(REMOVE_DUPLICATES _tgts)
+  set_property(GLOBAL PROPERTY IP_CPSREQ_${pkg} "${_tgts}")
+  set(${out} "${_tgts}" PARENT_SCOPE)
+endfunction()
+# CPS "requires" deps are resolved by an internal find that validates
+# RequiredTargets via cmMakefile::FindImportedTarget, which only searches the
+# current directory's ImportedTargets map -- globally-visible imported targets
+# created in another directory are invisible. When a required dep's target was
+# previously created GLOBAL elsewhere, the dep's config script skips
+# re-creating it (if(NOT TARGET) sees the global target) and the required-
+# target validation fails. Detect that case and force the cmake-script route.
+function(ipCpsRequiresGlobalConflict pth pkg)
+  ipCpsRequiresTgts(${pth} ${pkg} _reqTgts)
+  if(NOT _reqTgts)
+    return()
+  endif()
+  # only useful when a cmake-script config exists to route to instead
+  file(GLOB _cfg ${pth}/share/cmake/*onfig.cmake)
+  if(NOT _cfg)
+    return()
+  endif()
+  # imported targets created in THIS directory are in the local map (the
+  # validation can see them); global targets created elsewhere are not
+  get_property(_dirImp DIRECTORY PROPERTY IMPORTED_TARGETS)
+  foreach(_tgt IN LISTS _reqTgts)
+    if(TARGET ${_tgt} AND NOT ${_tgt} IN_LIST _dirImp)
+      get_property(_ig TARGET ${_tgt} PROPERTY IMPORTED_GLOBAL)
+      if(_ig)
+        set(FIND_PACKAGE_CMAKE_SCRIPT ON PARENT_SCOPE)
+        return()
+      endif()
+    endif()
+  endforeach()
+endfunction()
+
 function(xpFindPkg)
   cmake_parse_arguments(FP "" "" PKGS ${ARGN})
   foreach(req_pkg ${FP_PKGS})
@@ -919,13 +989,12 @@ function(xpFindPkg)
             set(Boost_COMPILER ${boost_compiler_needed})
           endif()
         elseif(EXISTS ${pth}/share/cmake/${pkg}-deps.cmake)
-          # Force cmake script for googletest only when Threads::Threads is already valid (found previously)
-          # This avoids CPS validation scope issues when Threads was already processed
-          if(${package} STREQUAL "googletest" AND TARGET Threads::Threads)
-            set(FIND_PACKAGE_CMAKE_SCRIPT ON)
-          endif()
           include(${pth}/share/cmake/${pkg}-deps.cmake)
         endif()
+        # Force cmake script when a CPS-required dep target already exists
+        # globally but was created in another directory (CPS requires-
+        # validation can't see it)
+        ipCpsRequiresGlobalConflict(${pth} ${pkg})
         # Priority: Global OFF > Global ON > Package marker > Default CPS
         set(use_cmake_script ${FIND_PACKAGE_CMAKE_SCRIPT})
         # Package marker can override (unless global OFF)
