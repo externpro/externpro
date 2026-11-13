@@ -117,6 +117,34 @@ with open(sys.argv[1], "w") as f:
 PY
 }
 
+# Drop a cache variable from every configurePreset in <file> (arg1); removes
+# cacheVariables entirely when it empties. Rewrites the file only when
+# something changed. Prints CHANGED, UNCHANGED, or UNPARSEABLE.
+presets_drop_cachevar() {
+  python3 - "$1" "$2" <<'PY'
+import json, sys
+path, var = sys.argv[1], sys.argv[2]
+try:
+    doc = json.load(open(path))
+except Exception:
+    print("UNPARSEABLE")
+    sys.exit(0)
+changed = False
+for p in doc.get("configurePresets", []):
+    cv = p.get("cacheVariables")
+    if isinstance(cv, dict) and var in cv:
+        del cv[var]
+        if not cv:
+            del p["cacheVariables"]
+        changed = True
+print("CHANGED" if changed else "UNCHANGED")
+if changed:
+    with open(path, "w") as f:
+        json.dump(doc, f, indent=2)
+        f.write("\n")
+PY
+}
+
 template_canon=$(python3 -c \
   'import json,sys;print(json.dumps(json.load(open(sys.argv[1])),sort_keys=True,separators=(",",":")))' \
   "$TEMPLATE")
@@ -192,7 +220,20 @@ else
 fi
 
 # --- 4-5. CMakePresetsBase.json -> xpPresetsBase.json --------------------------
-# Project-owned real file: content carried verbatim, never auto-rewritten.
+# Project-owned real file: content carried verbatim, never auto-rewritten —
+# except for dropped cache variables, cleaned up here so they are not carried
+# into xpPresetsBase.json. Idempotent: no rewrite once the var is gone.
+for basef in CMakePresetsBase.json xpPresetsBase.json; do
+  if [ -f "$basef" ] && [ ! -L "$basef" ]; then
+    case "$(presets_drop_cachevar "$basef" CMAKE_EXPERIMENTAL_GENERATE_SBOM)" in
+      CHANGED)
+        git add "$basef" 2>/dev/null || true
+        report "$basef: removed CMAKE_EXPERIMENTAL_GENERATE_SBOM cache variable"
+        ;;
+      UNPARSEABLE) warn "$basef is not parseable JSON — cache variable cleanup skipped" ;;
+    esac
+  fi
+done
 if [ -f CMakePresetsBase.json ] && [ ! -L CMakePresetsBase.json ]; then
   if [ -e xpPresetsBase.json ]; then
     if git ls-files --error-unmatch CMakePresetsBase.json >/dev/null 2>&1; then
