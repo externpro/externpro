@@ -3,6 +3,7 @@ cd "$( dirname "$0" )"
 pushd .. > /dev/null
 source ./.externpro/funcs.sh
 BPROIMG=${1:-${BPROIMG_DEFAULT}}
+BPROPFX=${BPROPFX:-ghcr.io/externpro/buildpro}
 remote_url=$(git config --get remote.origin.url 2>/dev/null)
 if [[ -n "${remote_url}" && $(basename -s .git "${remote_url}") == buildpro ]]; then
   BPROTAG=`git describe --tags`
@@ -17,9 +18,9 @@ else
   fi
 fi
 dkr="$(findVer 'FROM' .externpro/local.dockerfile)"
-dkr=$(eval echo ${dkr}) # ghcr.io/externpro/buildpro/${BPROIMG}:${BPROTAG}
+dkr=$(eval echo ${dkr}) # ${BPROPFX}/${BPROIMG}:${BPROTAG}
 hst=$(echo "${dkr}" | cut -d/ -f1) # ghcr.io
-rel=$(echo "${dkr}" | cut -d/ -f4) # ${BPROIMG}:${BPROTAG}
+rel=$(basename ${dkr}) # ${BPROIMG}:${BPROTAG}
 rel=${rel//:/-} # parameter expansion substitution
 rel=${rel//./-}
 display_host=$(echo ${DISPLAY} | cut -d: -f1)
@@ -63,7 +64,8 @@ else
     xauth_env=
   fi
 fi
-env="BPROIMG=${BPROIMG}"
+env="BPROPFX=${BPROPFX}"
+env="${env}\nBPROIMG=${BPROIMG}"
 env="${env}\nBPROTAG=${BPROTAG}"
 env="${env}\nHNAME=${rel}"
 env="${env}\nUSERID=$(id -u ${USER})"

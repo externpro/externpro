@@ -1,6 +1,8 @@
+# set BPROPFX=buildpro to build FROM locally-built images (see public/ghimg.sh)
+ARG BPROPFX=ghcr.io/externpro/buildpro
 ARG BPROIMG=rocky9-gcc13
 ARG BPROTAG=latest
-FROM ghcr.io/externpro/buildpro/${BPROIMG}:${BPROTAG}
+FROM ${BPROPFX}/${BPROIMG}:${BPROTAG}
 LABEL maintainer="smanders"
 LABEL org.opencontainers.image.source=https://github.com/externpro/buildpro
 SHELL ["/bin/bash", "-c"]

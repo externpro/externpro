@@ -17,6 +17,7 @@ x-bld: &bld-alias
     - ~/.gitconfig:/home/${USER}/.gitconfig
     - ${XDG_CACHE_HOME:-${HOME}/.cache}/externpro:/home/${USER}/.cache/externpro
 x-all-build-args: &all-build-args-alias
+  BPROPFX: ${BPROPFX:-ghcr.io/externpro/buildpro}
   BPROIMG: ${BPROIMG}
   BPROTAG: ${BPROTAG}
   USERNAME: ${USER}
