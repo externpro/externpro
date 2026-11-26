@@ -42,6 +42,10 @@ jobs:
           # Check if xpsync branch exists and checkout if it does
           if git rev-parse --verify origin/xpsync >/dev/null 2>&1; then
             echo "xpsync branch exists, checking it out"
+            # refresh the ref — on push events actions/checkout pins
+            # refs/remotes/origin/xpsync to github.sha, which can be behind
+            # commits a hook job pushed to xpsync earlier in this same run
+            git fetch --no-tags origin "+refs/heads/xpsync:refs/remotes/origin/xpsync"
             git checkout -B xpsync origin/xpsync
             # Re-sync any non-externpro submodules that are out of sync with xpsync
             if [ -f .gitmodules ]; then
