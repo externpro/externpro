@@ -5,8 +5,70 @@ permissions:
   packages: write
 on:
   workflow_dispatch:
+  push:
+    branches: ["xpsync"]
+  schedule:
+    - cron: '37 5 * * *'
+concurrency:
+  group: xpsync
 jobs:
+  hook:
+    # runs the repo's .github/xpsync-hook.sh (if present) on every trigger —
+    # keeps the contract simple: hooks must be cheap and idempotent.
+    # Only scheduled runs are gated on hook work; push and dispatch proceed
+    # to the full sync regardless (see sync job's if).
+    permissions:
+      contents: write
+    outputs:
+      work: ${{ steps.gate.outputs.work }}
+    runs-on: ubuntu-latest
+    steps:
+      -
+        name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      -
+        name: Run xpsync-hook and gate sync
+        id: gate
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -B xpsync origin/xpsync 2>/dev/null || git checkout -B xpsync
+          if [ -f .github/xpsync-hook.sh ]; then
+            bash .github/xpsync-hook.sh
+          else
+            echo "no .github/xpsync-hook.sh found"
+          fi
+          BASE="origin/${{ github.event.repository.default_branch }}"
+          work=false
+          if [ "$(git rev-list --count "${BASE}..HEAD")" -gt 0 ]; then
+            work=true
+            # skip the churn if an open xpsync PR already carries these commits
+            while read -r head; do
+              [ -n "${head}" ] || continue
+              git fetch --depth 1 origin "${head}" 2>/dev/null || continue
+              if [ "$(git rev-list --count FETCH_HEAD..HEAD)" -eq 0 ]; then
+                echo "open PR branch ${head} already contains this work"
+                work=false
+                break
+              fi
+            done < <(gh pr list --state open --json headRefName \
+                       --jq '.[].headRefName | select(startswith("xpsync-"))')
+          fi
+          echo "work=${work}" >> "$GITHUB_OUTPUT"
+          if [ "${work}" = "true" ]; then
+            # github.token credentials — this push does not retrigger the
+            # on.push workflow (events from GITHUB_TOKEN don't run workflows)
+            git push origin "HEAD:xpsync"
+          fi
   sync:
+    needs: hook
+    if: ${{ always() && (github.event_name != 'schedule' || needs.hook.outputs.work == 'true') }}
     uses: externpro/externpro/.github/workflows/sync-externpro.yml@main
     secrets:
       automation_token: ${{ secrets.XPRO_TOKEN }}
